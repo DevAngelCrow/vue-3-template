@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+@import "primeicons/primeicons.css";
+
+@font-face {
+  font-family: "MuseoSans";
+  src: url("/src/core/assets/fonts/MuseoSans.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body{
+    font-family: 'MuseoSans', sans-serif;
+}
