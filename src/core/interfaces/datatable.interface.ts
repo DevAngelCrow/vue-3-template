@@ -1,19 +1,18 @@
-export interface TableItems<T>{
-    items: T
-}
-
 export interface TableHeaders{
     field: string;
-    key: string;
-    sortable: boolean
+    header: string;
+    sortable: boolean;
+    width?: number | 'auto';
+    alignHeaders?: 'start' | 'center' | 'end';
+    alignItems?: 'start' | 'center' | 'end';
 }
-
-export interface TablePerPage{
-    per_page: number
-}
-
 export interface TableProps<T> {
     headers: TableHeaders[];
-    items: TableItems<T>[];
-    per_page: TablePerPage
+    items: T[];
+    per_page: number;
+    loading?: boolean;
+    loadingIcon?: string;
+    rowHover?: boolean;
+    paginator?: boolean;
+    total_pages?: number;
 }
