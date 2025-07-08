@@ -1,15 +1,15 @@
 <template>
-  <div class="w-full h-full">
+  <div class="w-full h-full flex flex-col">
     <AppLoader v-if="storeLoader.loader" />
     <AppSideBar :show="sideBar.sideBar" />
-    <div class="w-full flex flex-col gap-0">
-      <section id="header-section" class="w-full h-[10%]">
+    <div class="w-full min-h-screen flex flex-col">
+      <section id="header-section" class="w-full h-[60px] flex-shrink-0 fixed top-0 left-0 z-50">
         <AppHeader />
       </section>
-      <section id="main-content-section" class="w-full">
+      <section id="main-content-section" class="w-full flex-grow pt-[60px]">
         <AppMainContent />
       </section>
-      <section id="footer-section" class="w-full h-[8%]">
+      <section id="footer-section" class="w-full h-[50px] flex-shrink-0">
         <AppFooter />
       </section>
     </div>

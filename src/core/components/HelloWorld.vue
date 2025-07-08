@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Button } from "primevue";
-defineProps<{ msg: string }>();
 
-const count = ref(0);
+import { Button } from "primevue";
+import AppPaginator from "./AppPaginator.vue";
+
+const prueba = (value: number) => { console.log()}
 </script>
 
 <template>
-  <div class="w-full">
-    <Button class="w-full">Button</Button>
+  <div class="w-full h-full flex justify-center items-center align-base-line">
+    <Button>Bills Team!</Button>
+    <AppPaginator @pageUpdate="prueba" />
   </div>
 </template>
 
