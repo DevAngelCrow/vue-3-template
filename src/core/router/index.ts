@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { jwtDecode } from "jwt-decode";
+//import { jwtDecode } from "jwt-decode";
 
 const routes = [
   {
@@ -9,9 +9,9 @@ const routes = [
     meta: { requiresAuth: false},
     children: [
       {
-        path: "/hello-world",
-        name: "hello_world",
-        component: () => import("../components/HelloWorld.vue")
+        path: "/test-view",
+        name: "test-view",
+        component: () => import("../components/AppTestComponents.vue")
       }
     ]
   },

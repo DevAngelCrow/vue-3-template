@@ -1,4 +1,4 @@
-export interface alert {
+export interface Alert {
     show?: boolean;
     type?: "success" | "success" | "info" | "warning" | "error";
     icon?: string;

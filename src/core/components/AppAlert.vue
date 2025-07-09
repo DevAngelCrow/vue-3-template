@@ -4,18 +4,18 @@
 <script setup>
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
-import { useMessageStore } from "../store/index";
+import { useAlertStore } from "../store/index";
 import { watch } from "vue";
 
 const toast = useToast();
-const alert = useMessageStore();
+const alert = useAlertStore();
 
 const showTopRight = () => {
+  console.log("showTopRight");
   toast.add({
     severity: alert.type,
     summary: alert?.title,
     detail: alert?.content,
-    group: "tr",
     life: alert.timeout,
   });
 };
@@ -25,6 +25,7 @@ watch(
   (newValue) => {
     if (newValue) {
       showTopRight();
+    } else {
       alert.close();
     }
   }

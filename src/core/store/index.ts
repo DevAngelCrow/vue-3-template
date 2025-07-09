@@ -1,2 +1,2 @@
-export * from "./useMessageStore";
+export * from "./useAlertStore";
 export * from "./useLoaderStore";

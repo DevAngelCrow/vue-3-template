@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import type { alert } from "../interfaces/alert.interface";
-export const useMessageStore = defineStore("message", {
-  state: (): alert => ({
+import type { Alert } from "../interfaces/alert.interface";
+export const useAlertStore = defineStore("message", {
+  state: (): Alert => ({
     show: false,
     type: undefined,
     icon: "",
@@ -12,7 +12,7 @@ export const useMessageStore = defineStore("message", {
     timeout: 3000,
   }),
   actions: {
-    showAlert(options: alert) {
+    showAlert(options: Alert) {
       this.show = true;
       this.type = options?.type ?? "error";
       this.icon = options?.icon ?? "";
