@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const eventoClick = () => {
   //aquí se debe colocar la url pertinente
   ///window.open("", "_blank");

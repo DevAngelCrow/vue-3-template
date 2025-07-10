@@ -1,12 +1,4 @@
 <template>
-  <!-- <ModalComponent
-    :show="show"
-    :width="'99%'"
-    :title="documentName"
-    :footer-buttons="false"
-    v-bind="$attrs"
-    styles-show-document
-  ></ModalComponent> -->
   <AppModal
     class="bg-[#282828] border-none h-full"
     :show="show"
@@ -15,7 +7,7 @@
     :footer-buttons="false"
     :styles-show-document="stylesShowDocument"
   >
-    <template #header>
+    <template #['header']>
       <div class="text-white flex justify-center w-full">
         <div class="absolute flex justify-center text-center w-full">
           <span class="">{{ documentName }}</span>
@@ -27,18 +19,18 @@
         </div>  
       </div>
     </template>
-    <template #default>
+    <template #['default']>
       <embed class="h-[77vh] w-full pa-none flex justify-center"
-        :src="fileBlob ? fileBlob : null"
+        :src="fileBlob"
         
       />
     </template>
   </AppModal>
 </template>
-<script setup>
+<script setup lang="ts">
 import AppModal from "./AppModal.vue";
 import { Button } from "primevue";
-import { ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 
 const props = defineProps({
   documentName: {
@@ -63,7 +55,13 @@ const props = defineProps({
   },
 });
 
-const fileBlob = ref(null);
+interface Message {
+  valid_types: string;
+  invalid_types: string;
+  flag?: boolean;
+}
+
+const fileBlob = ref<string | undefined>();
 const emit = defineEmits(['close-visor'])
 // defineOptions({ inheritAttrs: false })
 
@@ -78,7 +76,7 @@ const fileTypes = [
   "image/bmp",
 ];
 
-const conversion = (dataURI) => {
+const conversion = (dataURI: string) => {
   let byteString = atob(dataURI.split(",")[1]);
   let mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
   let ab = new ArrayBuffer(byteString.length);
@@ -90,11 +88,11 @@ const conversion = (dataURI) => {
   return blob;
 };
 
-const typesValidation = (types) => {
+const typesValidation = (types: string) => {
   const typesArray = types.replace(/\s/g, "").split(",");
   const valid = typesArray.filter((item) => fileTypes.includes(item));
   const invalid = typesArray.filter((item) => !fileTypes.includes(item));
-  const message = {
+  const message : Message = {
     valid_types: valid.join(","),
     invalid_types: invalid.join(","),
   };
@@ -123,4 +121,9 @@ watchEffect(() => {
     }
   }
 });
+
+const fileBlobComputed = computed(()=>{
+  
+})
+
 </script>

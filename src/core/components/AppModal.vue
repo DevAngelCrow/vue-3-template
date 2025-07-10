@@ -43,10 +43,10 @@
     </template>
   </Dialog>
 </template>
-<script setup>
+<script setup lang="ts">
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 const emits = defineEmits(["close-modal", "confirm-modal", "update:show"]);
 const props = defineProps({
   title: {

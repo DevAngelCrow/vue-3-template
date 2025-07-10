@@ -12,11 +12,9 @@
     }"
   />
 </template>
-<script setup>
+<script setup lang="ts">
 import { Drawer } from "primevue";
-import { ref, defineProps } from "vue";
 import { useLayoutStore } from "../store/useLayoutStore";
-import { merge } from "@primeuix/themes";
 
 const sideBarVisible = useLayoutStore();
 </script>
