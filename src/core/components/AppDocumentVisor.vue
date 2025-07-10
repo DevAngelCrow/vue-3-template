@@ -8,31 +8,36 @@
     styles-show-document
   ></ModalComponent> -->
   <AppModal
-    class="bg-[#282828] border-none"
+    class="bg-[#282828] border-none h-full"
     :show="show"
-    :width="'90%'"
+    :width="'99%'"
     :title="documentName"
     :footer-buttons="false"
     :styles-show-document="stylesShowDocument"
   >
     <template #header>
-      <div class="text-white">
-        <span>{{ documentName }}</span>
-        <span class=""><i class="pi pi-times"></i></span>
+      <div class="text-white flex justify-center w-full">
+        <div class="absolute flex justify-center text-center w-full">
+          <span class="">{{ documentName }}</span>
+        </div>
+        <div class="flex justify-end text-end w-full">
+          <Button class="bg-transparent border-none" @click="closeModal">
+            <i class="pi pi-times"></i>
+          </Button>
+        </div>  
       </div>
     </template>
     <template #default>
-      <embed
-        class=""
+      <embed class="h-[77vh] w-full pa-none flex justify-center"
         :src="fileBlob ? fileBlob : null"
-        width="100%"
-        style="height: 100vw"
+        
       />
     </template>
   </AppModal>
 </template>
 <script setup>
 import AppModal from "./AppModal.vue";
+import { Button } from "primevue";
 import { ref, watchEffect } from "vue";
 
 const props = defineProps({
@@ -59,7 +64,7 @@ const props = defineProps({
 });
 
 const fileBlob = ref(null);
-
+const emit = defineEmits(['close-visor'])
 // defineOptions({ inheritAttrs: false })
 
 const fileTypes = [
@@ -100,6 +105,10 @@ const typesValidation = (types) => {
   message.flag = true;
   return message;
 };
+
+const closeModal = () => {
+  emit("close-visor", false)
+}
 
 watchEffect(() => {
   const validation = typesValidation(props.validType);

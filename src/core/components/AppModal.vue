@@ -26,7 +26,9 @@
       </div>
     </template>
     <template #default>
-      <slot name="default"> </slot>
+      <div class="flex justify-center w-full h-full overflow-hidden">
+        <slot name="default"> </slot>
+      </div>
     </template>
     <template #footer>
       <slot name="footer">

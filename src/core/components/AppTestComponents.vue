@@ -29,6 +29,7 @@ onMounted(() => {
       :show="show"
       :file="documento"
       :validType="'application/pdf'"
+      @close-visor="(value: boolean) => show = value"
     />
     <!-- <AppModal
       :show="show"
