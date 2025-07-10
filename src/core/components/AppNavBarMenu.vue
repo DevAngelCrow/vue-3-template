@@ -1,0 +1,121 @@
+<template>
+  <div
+    class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none bg-transparent rounded-none"
+  >
+    <Menubar
+      class="rounded-none bg-primary-800 border-none h-full hidden md:flex"
+      breakpoint="767px"
+      :model="menu"
+    >
+      <template #item="{ item, props, hasSubmenu, root }">
+        <div
+          v-ripple
+          class="flex items-center text-white hover:text-primary-800 active:text-primary-800 focus:text-primary-800"
+          v-bind="props.action"
+        >
+          <i :class="`${item.icon}`"></i>
+          <span>{{ item.label }}</span>
+          <i
+            v-if="hasSubmenu"
+            :class="[
+              'pi pi-angle-down ml-auto',
+              { 'pi-angle-down': root, 'pi-angle-right': !root },
+            ]"
+          ></i>
+        </div>
+      </template>
+      <template #end>
+        <div
+          class="hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full"
+          @click="toggle"
+          aria-haspopup="true"
+          aria-controls="overlay_menu"
+        >
+          <Avatar
+            class="hover:scale-100 hover:px-1 hover:py-1 transform transition-all"
+            image="https://i.pravatar.cc/150"
+            shape="circle"
+            alt="prueba"
+            size="xlarge"
+          />
+          <MenuPrime
+            class="mt-2"
+            ref="popUp"
+            id="overlay_menu"
+            :popup="true"
+            :model="menuUser"
+          />
+        </div>
+      </template>
+    </Menubar>
+    <div
+      class="hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center rounded-full md:hidden"
+      @click="toggle"
+      aria-haspopup="true"
+      aria-controls="overlay_menu"
+    >
+      <Avatar
+        class="hover:scale-100 hover:px-1 hover:py-1 transform transition-all"
+        image="https://i.pravatar.cc/150"
+        shape="circle"
+        alt="prueba"
+        size="xlarge"
+      />
+      <MenuPrime
+        class="mt-2"
+        ref="popUp"
+        id="overlay_menu"
+        :popup="true"
+        :model="menuUser"
+      />
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+import { onMounted, type PropType } from "vue";
+import { ref } from "vue";
+import { Menubar, Avatar, Menu as MenuPrime } from "primevue";
+import type { Menu as MenuModel } from "../interfaces/menu.navbar.interface";
+const { menu } = defineProps({
+  menu: {
+    type: Array as PropType<MenuModel[]>,
+    default: () => [],
+  },
+});
+const emits = defineEmits(["menu-updated"]);
+const menuUser = ref<MenuModel[]>();
+const mappedMenu = ref<MenuModel[]>();
+const popUp = ref<InstanceType<typeof MenuPrime>>();
+
+const toggle = (event: MouseEvent | KeyboardEvent) => {
+  popUp.value?.toggle(event);
+};
+
+const mapperMenuUser = () => {
+  menuUser.value = menu.filter((item) => item.isUser);
+  mappedMenu.value = menu.filter((item) => !item.isUser);
+  emits("menu-updated", mappedMenu);
+  console.log("aca");
+};
+
+onMounted(() => {
+  mapperMenuUser();
+});
+</script>
+<style scoped>
+@reference "@/core/assets/style.css";
+
+:deep(.p-menubar-item-active > .p-menubar-item-content > .p-menubar-item-link) {
+  @apply text-primary-600 transform transition-all; /* por ejemplo, gray-200 */ /* por ejemplo, blue-800 */
+}
+
+:deep(
+  .p-menubar-item.p-focus > .p-menubar-item-content > .p-menubar-item-link
+) {
+  @apply text-primary-600 transform transition-all;
+}
+
+:deep(.p-menubar-submenu .p-menubar-item-link) {
+  @apply text-primary-600;
+}
+</style>

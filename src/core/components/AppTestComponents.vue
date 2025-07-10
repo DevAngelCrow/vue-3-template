@@ -4,6 +4,7 @@ import { onMounted, ref } from "vue";
 import AppDocumentVisor from "./AppDocumentVisor.vue";
 import AppModal from "./AppModal.vue";
 import AppDatePicker from "./AppDatePicker.vue";
+import AppNavBarMenu from "./AppNavBarMenu.vue";
 
 const show = ref<boolean>(false);
 
@@ -22,7 +23,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-full flex justify-center items-center align-base-line">
+  <div
+    class="w-full h-full flex justify-center items-center align-base-line bg-[url(https://picsum.photos/1200/800)]"
+  >
     <!-- <AppDocumentVisor
       :document-name="'prueba'"
       :show="show"
@@ -35,8 +38,9 @@ onMounted(() => {
       @close-modal="closeModal"
       @openModal="openModal"
     ></AppModal> -->
-    <AppDatePicker />
-    <Button @click="openModal(show)">Modal</Button>
+    <!-- <AppNavBarMenu :menu="items" /> -->
+    <!-- <AppDatePicker /> -->
+    <!-- <Button @click="openModal(show)">Modal</Button> -->
   </div>
 </template>
 

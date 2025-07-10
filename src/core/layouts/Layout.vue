@@ -3,13 +3,16 @@
     <AppLoader v-if="storeLoader.loader" />
     <AppSideBar :show="sideBar.sideBar" />
     <div class="w-full min-h-screen flex flex-col">
-      <section id="header-section" class="w-full h-[60px] flex-shrink-0 fixed top-0 left-0 z-50">
+      <section
+        id="header-section"
+        class="w-full h-[8%] flex-shrink-0 fixed top-0 left-0 z-50"
+      >
         <AppHeader />
       </section>
-      <section id="main-content-section" class="w-full flex-grow pt-[60px]">
+      <section id="main-content-section" class="w-full flex-grow pt-[8vh]">
         <AppMainContent />
       </section>
-      <section id="footer-section" class="w-full h-[50px] flex-shrink-0">
+      <section id="footer-section" class="w-full h-[6%] flex-shrink-0">
         <AppFooter />
       </section>
     </div>

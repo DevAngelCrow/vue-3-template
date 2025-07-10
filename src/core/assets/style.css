@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
+@theme {
+  --breakpoint-xs: 20rem;
+}
+
 
 @font-face {
   font-family: "MuseoSans";
@@ -13,3 +17,4 @@
 body{
     font-family: 'MuseoSans', sans-serif;
 }
+
