@@ -12,7 +12,6 @@
       <AppNavBarMenu
         class="flex justify-end align-baseline content-center"
         :menu="items"
-        @menu-updated="menuUpdated"
       />
     </div>
   </section>
@@ -91,8 +90,6 @@ const items = ref<Menu[]>([
   },
 ]);
 
-const menuUpdated = (mappedMenu: Menu[]) => {
-  items.value = mappedMenu;
-};
+
 </script>
 <style scoped></style>

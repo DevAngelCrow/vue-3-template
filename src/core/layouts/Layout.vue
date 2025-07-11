@@ -5,14 +5,14 @@
     <div class="w-full min-h-screen flex flex-col">
       <section
         id="header-section"
-        class="w-full h-[8%] flex-shrink-0 fixed top-0 left-0 z-50"
+        class="w-full h-[8%] min-h-[70px] flex-shrink-0 fixed top-0 left-0 z-50"
       >
         <AppHeader />
       </section>
       <section id="main-content-section" class="w-full flex-grow pt-[8vh]">
         <AppMainContent />
       </section>
-      <section id="footer-section" class="w-full h-[6%] flex-shrink-0">
+      <section id="footer-section" class="w-full h-[6%] min-h-[50px] flex-shrink-0">
         <AppFooter />
       </section>
     </div>

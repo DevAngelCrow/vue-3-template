@@ -5,11 +5,10 @@
     <Menubar
       class="rounded-none bg-primary-800 border-none h-full hidden md:flex"
       breakpoint="767px"
-      :model="menu"
+      :model="menuMapped"
     >
       <template #item="{ item, props, hasSubmenu, root }">
         <div
-          v-ripple
           class="flex items-center text-white hover:text-primary-800 active:text-primary-800 focus:text-primary-800"
           v-bind="props.action"
         >
@@ -82,9 +81,10 @@ const { menu } = defineProps({
     default: () => [],
   },
 });
+
 const emits = defineEmits(["menu-updated"]);
+const menuMapped = ref<MenuModel[]>()
 const menuUser = ref<MenuModel[]>();
-const mappedMenu = ref<MenuModel[]>();
 const popUp = ref<InstanceType<typeof MenuPrime>>();
 
 const toggle = (event: MouseEvent | KeyboardEvent) => {
@@ -92,10 +92,11 @@ const toggle = (event: MouseEvent | KeyboardEvent) => {
 };
 
 const mapperMenuUser = () => {
-  menuUser.value = menu.filter((item) => item.isUser);
-  mappedMenu.value = menu.filter((item) => !item.isUser);
-  emits("menu-updated", mappedMenu);
-  console.log("aca");
+  if(menu.length){
+    menuUser.value = menu.filter((item) => item.isUser);
+    menuMapped.value = menu.filter((item) => !item.isUser);
+  }
+  
 };
 
 onMounted(() => {
