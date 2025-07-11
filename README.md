@@ -10,7 +10,8 @@ basicos listos para utilizarse.
         ├── 📁 src 
         │    ├── 📁 core
         │    │    ├── 📁 assets  
-        │    │    ├── 📁 components 
+        │    │    ├── 📁 components
+        │    │    ├── 📁 composables 
         │    │    ├── 📁 config
         │    │    ├── 📁 directives
         │    │    ├── 📁 interfaces
@@ -42,7 +43,9 @@ basicos listos para utilizarse.
 
 * 📂 assets/: Contiene recursos de estilos, multimedia y archivos estaticos globales de la aplicacion.
 
-* 📂 components/: Contiene e incluye componentes Vue reutilizables, tales como Modales, DataTable, DatePicker etc. 
+* 📂 components/: Contiene funciones reactivas creadas con Composition API de Vue 3, estos encapsulan logica que puede ser reutilizadas por los componentes de Vue. 
+
+* 📂 composables/: Contiene e incluye componentes Vue reutilizables, tales como Modales, DataTable, DatePicker etc. 
 
 * 📂 config/: Define configuraciones globales.
 
