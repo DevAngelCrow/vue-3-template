@@ -16,7 +16,7 @@
     "clean": "rm -rf dist .vite cache node_modules && npm install",
     "prepare": "husky install",
     "check:node":"check-node-version --node '>=18.18.0'",
-    "initial:config": "cp env.example .env.local",
+    "initial:config": "cp .env.example .env.local",
     "pre-commit": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx lint-staged\\n' > .husky/pre-commit",
     "commitlint": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx --no -- commitlint --edit \"$1\"\\n' > .husky/commit-msg"
   },
