@@ -9,7 +9,12 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
-    ignores: ['node_modules', 'dist', 'eslint.config.ts'],
+    ignores: [
+      'node_modules',
+      'dist',
+      'eslint.config.ts',
+      'commitlint.config.ts',
+    ],
   },
   js.configs.recommended,
   {
