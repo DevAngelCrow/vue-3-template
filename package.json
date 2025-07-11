@@ -13,7 +13,14 @@
     "check:types": "vue-tsc --noEmit",
     "check": "npm run lint && npm run check:types && npm run format",
     "preview:build": "npm run build && npm run preview",
-    "clean": "rm -rf dist .vite cache node_modules && npm install"
+    "clean": "rm -rf dist .vite cache node_modules && npm install",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@primeuix/themes": "^1.2.1",
@@ -40,7 +47,10 @@
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.30.1",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vue": "^10.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "typescript": "~5.8.3",
     "vite": "^7.0.2",

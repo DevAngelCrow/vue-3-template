@@ -1,2 +1,2 @@
-<template>Forbidden</template>
+<template>Forbidden precommit de prueba</template>
 <script setup></script>

@@ -5,6 +5,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import globals from 'globals';
 import prettier from 'eslint-config-prettier';
+import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
@@ -28,10 +29,24 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint,
+      importPlugin,
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn'],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            ['builtin', 'external'],
+            'internal',
+            ['parent', 'sibling', 'index'],
+          ],
+          'newlines-between': 'always',
+        },
+      ],
+      'import/no-unresolved': 'error',
+      'import/no-duplicates': 'warn',
     },
   },
   {
@@ -54,11 +69,25 @@ export default [
     plugins: {
       vue,
       '@typescript-eslint': tseslint,
+      importPlugin,
     },
     rules: {
       'vue/multi-word-component-names': 'off',
       'vue/no-unused-vars': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn'],
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            ['builtin', 'external'],
+            'internal',
+            ['parent', 'sibling', 'index'],
+          ],
+          'newlines-between': 'always',
+        },
+      ],
+      'import/no-unresolved': 'error',
+      'import/no-duplicates': 'warn',
     },
   },
   prettier,
