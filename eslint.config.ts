@@ -9,7 +9,7 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
-    ignores: ['node_modules', 'dist'],
+    ignores: ['node_modules', 'dist', 'eslint.config.ts'],
   },
   js.configs.recommended,
   {
@@ -29,7 +29,7 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint,
-      importPlugin,
+      import: importPlugin,
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn'],
@@ -50,7 +50,7 @@ export default [
     },
   },
   {
-    files: ['**/*.vue'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.vue'],
     languageOptions: {
       parser: vueParser,
       parserOptions: {
@@ -61,7 +61,7 @@ export default [
         project: ['./tsconfig.app.json'],
       },
       globals: {
-        ...globals.browser, // ⬅️ Aquí también para archivos .vue
+        ...globals.browser,
         ...globals.es2021,
         ...globals.node,
       },
@@ -69,7 +69,7 @@ export default [
     plugins: {
       vue,
       '@typescript-eslint': tseslint,
-      importPlugin,
+      import: importPlugin,
     },
     rules: {
       'vue/multi-word-component-names': 'off',
