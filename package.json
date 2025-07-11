@@ -9,7 +9,11 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.vue",
     "lint:fix": "eslint . --ext .ts,.vue --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check:types": "vue-tsc --noEmit",
+    "check": "npm run lint && npm run check:types && npm run format",
+    "preview:build": "npm run build && npm run preview",
+    "clean": "rm -rf dist .vite cache node_modules && npm install"
   },
   "dependencies": {
     "@primeuix/themes": "^1.2.1",
