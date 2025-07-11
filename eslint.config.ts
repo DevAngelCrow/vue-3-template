@@ -9,32 +9,73 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
+    // Ignorar archivos y directorios globales que no deben ser lintados
     ignores: [
       'node_modules',
       'dist',
-      'eslint.config.ts',
-      'commitlint.config.ts',
+      'commitlint.config.ts', // Generalmente no se linta
+      'eslint.config.ts', // Generalmente no se linta a sí mismo
     ],
   },
-  js.configs.recommended,
+  js.configs.recommended, // Configuración recomendada para JavaScript
+
+  // --- Bloque de configuración para archivos específicos de Node.js (como vite.config.ts) ---
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['vite.config.ts'], // Aplica solo a vite.config.ts
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: ['./tsconfig.app.json'],
+        // Para vite.config.ts, seguimos apuntando explícitamente a tsconfig.node.json
+        // porque es un entorno distinto y es más preciso.
+        project: ['./tsconfig.node.json'],
+      },
+      globals: {
+        ...globals.node, // Solo globales de Node.js
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['warn'],
+      // Puedes añadir más reglas específicas para archivos de Node.js aquí
+    },
+  },
+
+  // --- Bloque de configuración para archivos TypeScript puros de tu aplicación (.ts, .tsx) ---
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    // Ignoramos vite.config.ts en este bloque para evitar conflictos con el bloque anterior
+    ignores: ['vite.config.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        // ¡CAMBIO CLAVE AQUÍ! Usamos projectService: true
+        projectService: true,
+        // Eliminamos 'project' ya que projectService lo manejará mejor con referencias
+        // project: ['./tsconfig.json'], // ¡QUITAR ESTO!
       },
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        ...globals.node,
+        // ...globals.node, // No siempre necesario para código frontend
       },
     },
     plugins: {
       '@typescript-eslint': tseslint,
       import: importPlugin,
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          projec: './tsconfig.json',
+          alwaysTryTypes: true,
+        },
+      },
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn'],
@@ -54,27 +95,42 @@ export default [
       'import/no-duplicates': 'warn',
     },
   },
+
+  // --- Bloque de configuración para archivos Vue y TypeScript (.vue) ---
   {
-    files: ['**/*.ts', '**/*.tsx', '**/*.vue'],
+    files: ['**/*.vue'],
+    // Ignoramos vite.config.ts aquí también
+    ignores: ['vite.config.ts'],
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: tsParser,
+        parser: tsParser, // Para analizar el script dentro de los SFC de Vue
         ecmaVersion: 'latest',
         sourceType: 'module',
         extraFileExtensions: ['.vue'],
-        project: ['./tsconfig.app.json'],
+        // ¡CAMBIO CLAVE AQUÍ! Usamos projectService: true
+        projectService: true,
+        // Eliminamos 'project'
+        // project: ['./tsconfig.json'], // ¡QUITAR ESTO!
       },
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        ...globals.node,
+        // ...globals.node, // No siempre necesario para código frontend
       },
     },
     plugins: {
       vue,
       '@typescript-eslint': tseslint,
       import: importPlugin,
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+          alwaysTryTypes: true,
+        },
+      },
     },
     rules: {
       'vue/multi-word-component-names': 'off',
@@ -95,5 +151,5 @@ export default [
       'import/no-duplicates': 'warn',
     },
   },
-  prettier,
+  prettier, // Asegura que Prettier se ejecute al final
 ];

@@ -4,7 +4,7 @@
     <router-view />
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import AppAlert from './core/components/AppAlert.vue';
 </script>
 <style scoped></style>

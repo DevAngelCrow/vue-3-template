@@ -22,8 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { CreateDateFromFormat, FormatDate } from '../utils/dates';
 import { computed } from 'vue';
+
+import { CreateDateFromFormat, FormatDate } from '../utils/dates';
 defineProps({
   icon: {
     type: String,

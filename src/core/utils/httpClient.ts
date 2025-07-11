@@ -1,18 +1,16 @@
-import axiosInstance from '../config/axios';
 import type {
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
   AxiosError,
 } from 'axios';
-
 import { AxiosHeaders } from 'axios';
 
+import axiosInstance from '../config/axios';
 import type {
   ErrorResponse,
   SuccessResponse,
 } from '../interfaces/httpClient.interface';
-
 import { useAlertStore } from '../store';
 const alert = useAlertStore();
 // Función para configurar los interceptores y envolver la instancia de Axios

@@ -40,6 +40,7 @@
 <script setup lang="ts" generic="T">
 import { Column, DataTable } from 'primevue';
 import { ref, computed } from 'vue';
+
 import AppPaginator from './AppPaginator.vue';
 import type {
   TableHeaders,

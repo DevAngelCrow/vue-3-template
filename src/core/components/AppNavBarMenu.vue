@@ -74,6 +74,7 @@
 import { onMounted, type PropType } from 'vue';
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
+
 import type { Menu as MenuModel } from '../interfaces/menu.navbar.interface';
 const { menu } = defineProps({
   menu: {

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+
 import type { Alert } from '../interfaces/alert.interface';
 export const useAlertStore = defineStore('message', {
   state: (): Alert => ({

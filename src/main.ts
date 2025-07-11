@@ -1,12 +1,13 @@
 import { createApp } from 'vue';
 import '../src/core/assets/style.css';
-import App from './App.vue';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
 import { createPinia } from 'pinia';
-import router from '../src/core/router/index';
 import ToastService from 'primevue/toastservice';
+
+import router from '../src/core/router/index';
+import App from './App.vue';
 
 const app = createApp(App);
 const pinia = createPinia();

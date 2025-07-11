@@ -28,9 +28,10 @@
   </AppModal>
 </template>
 <script setup lang="ts">
-import AppModal from './AppModal.vue';
 import { Button } from 'primevue';
 import { ref, watchEffect } from 'vue';
+
+import AppModal from './AppModal.vue';
 
 const props = defineProps({
   documentName: {

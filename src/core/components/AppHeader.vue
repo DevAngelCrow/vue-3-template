@@ -18,9 +18,10 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
+import { ref } from 'vue';
+
 import { useLayoutStore } from '../store/useLayoutStore';
 import AppNavBarMenu from './AppNavBarMenu.vue';
-import { ref } from 'vue';
 import type { Menu } from '../interfaces/menu.navbar.interface';
 
 const sideBar = useLayoutStore();

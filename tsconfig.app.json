@@ -22,10 +22,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*", "./dist/*"]
-    },
-    "allowSyntheticDefaultImports": true,
+    // "paths": {
+    //   "@/*": ["./src/*"]
+    // },
+    // "allowSyntheticDefaultImports": true,
     "composite": true,
     "declaration": true,
     "outDir": "./dist"
