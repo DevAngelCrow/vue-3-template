@@ -17,20 +17,20 @@
 </template>
 <script setup lang="ts">
 const inputModel = defineModel({
-  type: Number
-})
+  type: Number,
+});
 defineProps({
   min: {
     type: Number,
-    default: 0
+    default: 0,
   },
   max: {
     type: Number,
-    default: null
+    default: null,
   },
   placeholder: {
     type: String,
-    default: ''
-  }
-})
+    default: '',
+  },
+});
 </script>

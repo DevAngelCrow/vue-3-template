@@ -2,16 +2,15 @@
   <Toast position="top-right" />
 </template>
 <script setup lang="ts">
-import Toast from "primevue/toast";
-import { useToast } from "primevue/usetoast";
-import { useAlertStore } from "../store/index";
-import { watch } from "vue";
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import { useAlertStore } from '../store/index';
+import { watch } from 'vue';
 
 const toast = useToast();
 const alert = useAlertStore();
 
 const showTopRight = () => {
-  console.log("showTopRight");
   toast.add({
     severity: alert.type,
     summary: alert?.title,
@@ -28,6 +27,6 @@ watch(
     } else {
       alert.close();
     }
-  }
+  },
 );
 </script>

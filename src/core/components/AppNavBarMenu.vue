@@ -71,10 +71,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, type PropType } from "vue";
-import { ref } from "vue";
-import { Menubar, Avatar, Menu as MenuPrime } from "primevue";
-import type { Menu as MenuModel } from "../interfaces/menu.navbar.interface";
+import { onMounted, type PropType } from 'vue';
+import { ref } from 'vue';
+import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
+import type { Menu as MenuModel } from '../interfaces/menu.navbar.interface';
 const { menu } = defineProps({
   menu: {
     type: Array as PropType<MenuModel[]>,
@@ -82,8 +82,7 @@ const { menu } = defineProps({
   },
 });
 
-const emits = defineEmits(["menu-updated"]);
-const menuMapped = ref<MenuModel[]>()
+const menuMapped = ref<MenuModel[]>();
 const menuUser = ref<MenuModel[]>();
 const popUp = ref<InstanceType<typeof MenuPrime>>();
 
@@ -92,11 +91,10 @@ const toggle = (event: MouseEvent | KeyboardEvent) => {
 };
 
 const mapperMenuUser = () => {
-  if(menu.length){
+  if (menu.length) {
     menuUser.value = menu.filter((item) => item.isUser);
     menuMapped.value = menu.filter((item) => !item.isUser);
   }
-  
 };
 
 onMounted(() => {

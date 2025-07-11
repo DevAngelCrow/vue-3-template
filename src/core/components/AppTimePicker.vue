@@ -23,46 +23,49 @@
 
 <script setup lang="ts">
 import { CreateDateFromFormat, FormatDate } from '../utils/dates';
-import { computed } from "vue";
+import { computed } from 'vue';
 defineProps({
   icon: {
     type: String,
-    default: 'pi pi-clock'
+    default: 'pi pi-clock',
   },
   placeholder: {
     type: String,
-    default: 'hh:mm a'
+    default: 'hh:mm a',
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   readonly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   iconDisplay: {
     type: String,
-    default: ''
-  }
-})
+    default: '',
+  },
+});
 
-const timeValue = defineModel<string | string[] | null>({ type: [String, Array], default: null })
+const timeValue = defineModel<string | string[] | null>({
+  type: [String, Array],
+  default: null,
+});
 
 const temporal = computed<Date | null>({
   get: () => {
     if (typeof timeValue.value === 'string' && timeValue.value !== '') {
-      return CreateDateFromFormat(timeValue.value, 'hh:mm a')
+      return CreateDateFromFormat(timeValue.value, 'hh:mm a');
     } else {
-      return null
+      return null;
     }
   },
   set: (value: Date | null) => {
     if (!value) {
-      timeValue.value = ''
+      timeValue.value = '';
     } else {
-      timeValue.value = FormatDate(value.toISOString(), 'hh:mm a')
+      timeValue.value = FormatDate(value.toISOString(), 'hh:mm a');
     }
-  }
-})
+  },
+});
 </script>

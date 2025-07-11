@@ -5,6 +5,6 @@
   </div>
 </template>
 <script setup>
-import AppAlert from "./core/components/AppAlert.vue";
+import AppAlert from './core/components/AppAlert.vue';
 </script>
 <style scoped></style>

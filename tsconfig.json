@@ -10,6 +10,7 @@
     "paths": {
       "@/*": ["./src/*", "./dist/*"]
     },
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   }
 }

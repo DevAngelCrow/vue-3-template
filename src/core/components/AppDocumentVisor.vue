@@ -7,7 +7,7 @@
     :footer-buttons="false"
     :styles-show-document="stylesShowDocument"
   >
-    <template #['header']>
+    <template v-slot:header>
       <div class="text-white flex justify-center w-full">
         <div class="absolute flex justify-center text-center w-full">
           <span class="">{{ documentName }}</span>
@@ -16,30 +16,30 @@
           <Button class="bg-transparent border-none" @click="closeModal">
             <i class="pi pi-times"></i>
           </Button>
-        </div>  
+        </div>
       </div>
     </template>
-    <template #['default']>
-      <embed class="h-[77vh] w-full pa-none flex justify-center"
+    <template v-slot:default>
+      <embed
+        class="h-[77vh] w-full pa-none flex justify-center"
         :src="fileBlob"
-        
       />
     </template>
   </AppModal>
 </template>
 <script setup lang="ts">
-import AppModal from "./AppModal.vue";
-import { Button } from "primevue";
-import { computed, ref, watchEffect } from "vue";
+import AppModal from './AppModal.vue';
+import { Button } from 'primevue';
+import { ref, watchEffect } from 'vue';
 
 const props = defineProps({
   documentName: {
     type: String,
-    default: "",
+    default: '',
   },
   file: {
     type: String,
-    default: "",
+    default: '',
   },
   show: {
     type: Boolean,
@@ -47,7 +47,7 @@ const props = defineProps({
   },
   validType: {
     type: String,
-    default: "application/pdf",
+    default: 'application/pdf',
   },
   stylesShowDocument: {
     type: Boolean,
@@ -62,23 +62,23 @@ interface Message {
 }
 
 const fileBlob = ref<string | undefined>();
-const emit = defineEmits(['close-visor'])
+const emit = defineEmits(['close-visor']);
 // defineOptions({ inheritAttrs: false })
 
 const fileTypes = [
-  "application/pdf",
-  "text/plain",
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  "image/svg+xml",
-  "image/bmp",
+  'application/pdf',
+  'text/plain',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'image/bmp',
 ];
 
 const conversion = (dataURI: string) => {
-  let byteString = atob(dataURI.split(",")[1]);
-  let mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+  let byteString = atob(dataURI.split(',')[1]);
+  let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
   let ab = new ArrayBuffer(byteString.length);
   let ia = new Uint8Array(ab);
   for (let i = 0; i < byteString.length; i++) {
@@ -89,12 +89,12 @@ const conversion = (dataURI: string) => {
 };
 
 const typesValidation = (types: string) => {
-  const typesArray = types.replace(/\s/g, "").split(",");
+  const typesArray = types.replace(/\s/g, '').split(',');
   const valid = typesArray.filter((item) => fileTypes.includes(item));
   const invalid = typesArray.filter((item) => !fileTypes.includes(item));
-  const message : Message = {
-    valid_types: valid.join(","),
-    invalid_types: invalid.join(","),
+  const message: Message = {
+    valid_types: valid.join(','),
+    invalid_types: invalid.join(','),
   };
   if (invalid.length) {
     message.flag = false;
@@ -105,8 +105,8 @@ const typesValidation = (types: string) => {
 };
 
 const closeModal = () => {
-  emit("close-visor", false)
-}
+  emit('close-visor', false);
+};
 
 watchEffect(() => {
   const validation = typesValidation(props.validType);
@@ -121,9 +121,4 @@ watchEffect(() => {
     }
   }
 });
-
-const fileBlobComputed = computed(()=>{
-  
-})
-
 </script>

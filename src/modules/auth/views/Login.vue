@@ -1,7 +1,6 @@
 <template>
-<div>
+  <div>
     <h1>Este sera el login</h1>
-</div>
+  </div>
 </template>
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>

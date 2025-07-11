@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted } from 'vue';
 
 const bloquearTeclado = (event: Event) => {
   event.preventDefault();
@@ -18,13 +18,13 @@ const bloquearCursor = (event: Event) => {
 };
 
 onMounted(() => {
-  document.addEventListener("keydown", bloquearTeclado);
-  document.addEventListener("click", bloquearCursor);
+  document.addEventListener('keydown', bloquearTeclado);
+  document.addEventListener('click', bloquearCursor);
 });
 
 onUnmounted(() => {
-  document.removeEventListener("keydown", bloquearTeclado);
-  document.removeEventListener("click", bloquearCursor);
+  document.removeEventListener('keydown', bloquearTeclado);
+  document.removeEventListener('click', bloquearCursor);
 });
 </script>
 
@@ -51,7 +51,7 @@ onUnmounted(() => {
 }
 .loader:before,
 .loader:after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 2em;

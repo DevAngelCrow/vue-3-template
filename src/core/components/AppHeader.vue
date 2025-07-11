@@ -17,79 +17,77 @@
   </section>
 </template>
 <script setup lang="ts">
-import { Button } from "primevue";
-import { useLayoutStore } from "../store/useLayoutStore";
-import AppNavBarMenu from "./AppNavBarMenu.vue";
-import { ref } from "vue";
-import type { Menu } from "../interfaces/menu.navbar.interface";
+import { Button } from 'primevue';
+import { useLayoutStore } from '../store/useLayoutStore';
+import AppNavBarMenu from './AppNavBarMenu.vue';
+import { ref } from 'vue';
+import type { Menu } from '../interfaces/menu.navbar.interface';
 
 const sideBar = useLayoutStore();
 
 const items = ref<Menu[]>([
   {
-    label: "Projects",
+    label: 'Projects',
     isUser: true,
     items: [
       {
-        label: "User",
-        icon: "pi pi-user",
+        label: 'User',
+        icon: 'pi pi-user',
       },
       {
-        label: "Email",
-        icon: "pi pi-envelope",
+        label: 'Email',
+        icon: 'pi pi-envelope',
       },
       {
-        label: "Log out",
-        icon: "pi pi-sign-out",
+        label: 'Log out',
+        icon: 'pi pi-sign-out',
       },
     ],
   },
   {
-    label: "Home",
-    icon: "pi pi-home",
+    label: 'Home',
+    icon: 'pi pi-home',
   },
   {
-    label: "Features",
-    icon: "pi pi-star",
+    label: 'Features',
+    icon: 'pi pi-star',
   },
   {
-    label: "Projects",
-    icon: "pi pi-search",
+    label: 'Projects',
+    icon: 'pi pi-search',
     items: [
       {
-        label: "Components",
-        icon: "pi pi-bolt",
+        label: 'Components',
+        icon: 'pi pi-bolt',
       },
       {
-        label: "Blocks",
-        icon: "pi pi-server",
+        label: 'Blocks',
+        icon: 'pi pi-server',
       },
       {
-        label: "UI Kit",
-        icon: "pi pi-pencil",
+        label: 'UI Kit',
+        icon: 'pi pi-pencil',
       },
       {
-        label: "Templates",
-        icon: "pi pi-palette",
+        label: 'Templates',
+        icon: 'pi pi-palette',
         items: [
           {
-            label: "Apollo",
-            icon: "pi pi-palette",
+            label: 'Apollo',
+            icon: 'pi pi-palette',
           },
           {
-            label: "Ultima",
-            icon: "pi pi-palette",
+            label: 'Ultima',
+            icon: 'pi pi-palette',
           },
         ],
       },
     ],
   },
   {
-    label: "Contact",
-    icon: "pi pi-envelope",
+    label: 'Contact',
+    icon: 'pi pi-envelope',
   },
 ]);
-
-
 </script>
 <style scoped></style>
