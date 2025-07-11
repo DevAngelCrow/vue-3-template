@@ -1,42 +1,77 @@
-# Vue 3 + Typescript + Tailwind (4.0) + Vite + PrimeVue (4)
+# Vue 3 + Typescript + Tailwind (4.0) + Vite + PrimeVue (4) Template
 
 Esta plantilla cuenta con las tecnologias descritas para poder iniciar con un desarrollo rapido, asi como cuenta con componentes
 basicos listos para utilizarse.
+
+## Configuración del inicial de la plantilla
+### Requisitos
+- Node versión >= 18.8.0
+- npm versión >= 10.8.x
+
+### Instalación
+
+1 - Clonar el repositorio.
+```
+git clone https://github.com/DevAngelCrow/vue-3-template.git
+cd vue-3-template
+```
+2 - Configurar el .env
+```
+cp env.example .env.local
+```
+Configura las variables de entorno del archivo .env.local de acuerdo a tu necesidad.
+Inicialmente cuenta con dos variables de entorno que son las habituales
+VITE_VUE_APP_API_URL=""
+VITE_PORT=""
+
+3 - Procedemos a instalar dependencias, ejecutamos en consola dentro del directorio del repositorio el comando siguiente
+```
+npm install
+```
+
+4 - Procedemos a ejecutar el siguiente script para asentar las configuraciones iniciales:
+```
+npm run initial:config
+```
+5 - Ejecutamos el comando siguiente para iniciar la ejecución del proyecto en modo desarrollo
+```
+npm run dev
+```
 
 # Estructura general del directorio de carpetas y archivos del proyecto
 
 ```
 📦 mi-proyecto
-        ├── 📁 src
-        │    ├── 📁 core
-        │    │    ├── 📁 assets
-        │    │    ├── 📁 components
-        │    │    ├── 📁 composables
-        │    │    ├── 📁 config
-        │    │    ├── 📁 directives
-        │    │    ├── 📁 interfaces
-        │    │    ├── 📁 layouts
-        │    │    ├── 📁 router
-        │    │    ├── 📁 services
-        │    │    ├── 📁 store
-        │    │    └── 📁 utils
-        │    │
-        │    ├── 📦 modules
-        │    │    └── 📁 module
-        │    │
-        │    └── 📁 views
-        │         └── 📁 module
-        │
-        ├── 📄 .env.local
-        ├── 📄 .eslintrc.js
-        ├── 📄 .gitignore
-        ├── 📄 index.html
-        ├── 📄 package.json
-        ├── 📄 README.md
-        ├── 📄 tsconfig.app.json
-        ├── 📄 tsconfig.json
-        ├── 📄 tsconfig.node.json
-        └── 📄 vite.config.ts
+├── 📁 src
+│    ├── 📁 core
+│    │    ├── 📁 assets
+│    │    ├── 📁 components
+│    │    ├── 📁 composables
+│    │    ├── 📁 config
+│    │    ├── 📁 directives
+│    │    ├── 📁 interfaces
+│    │    ├── 📁 layouts
+│    │    ├── 📁 router
+│    │    ├── 📁 services
+│    │    ├── 📁 store
+│    │    └── 📁 utils
+│    │
+│    ├── 📦 modules
+│    │    └── 📁 module
+│    │
+│    └── 📁 views
+│         └── 📁 module
+│
+├── 📄 .env.local
+├── 📄 .eslintrc.js
+├── 📄 .gitignore
+├── 📄 index.html
+├── 📄 package.json
+├── 📄 README.md
+├── 📄 tsconfig.app.json
+├── 📄 tsconfig.json
+├── 📄 tsconfig.node.json
+└── 📄 vite.config.ts
 ```
 
 # Descripcion de carpetas y archivos de los directorios.
