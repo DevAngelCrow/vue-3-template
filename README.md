@@ -40,24 +40,24 @@ basicos listos para utilizarse.
 
 # Descripcion de carpetas y archivos del directorio "core"
 
-* assets/: Contiene recursos de estilos, multimedia y archivos estaticos globales de la aplicacion.
+* 📂 assets/: Contiene recursos de estilos, multimedia y archivos estaticos globales de la aplicacion.
 
-* components/: Contiene e incluye componentes Vue reutilizables, tales como Modales, DataTable, DatePicker etc. 
+* 📂 components/: Contiene e incluye componentes Vue reutilizables, tales como Modales, DataTable, DatePicker etc. 
 
-* config/: Define configuraciones globales.
+* 📂 config/: Define configuraciones globales.
 
-* directives/: Contiene directivas reutilizables para los componentes.
+* 📂 directives/: Contiene directivas reutilizables para los componentes.
 
-* interfaces/: Define interfaces a utilizar para la implementacion de tipados estrictos.
+* 📂 interfaces/: Define interfaces a utilizar para la implementacion de tipados estrictos.
 
-* layout/: Contiene el componente general del diseno general donde se visualiza todo el contenido de la aplicacion.
+* 📂 layout/: Contiene el componente general del diseno general donde se visualiza todo el contenido de la aplicacion.
 
-* router/: Define las rutas de la aplicacion con la tecnologia de Vue Router.
+* 📂 router/: Define las rutas de la aplicacion con la tecnologia de Vue Router.
 
-* services/: Contiene las funciones responsables para le ejecucion de peticiones http hacia API's internas o externas. 
+* 📂 services/: Contiene las funciones responsables para le ejecucion de peticiones http hacia API's internas o externas. 
 
-* store/: Implementa la gestión del estado global con Pinia.
+* 📂 store/: Implementa la gestión del estado global con Pinia.
 
-* utils/: Contiene e incluye funciones de uso general, validadores, etc. 
+* 📂 utils/: Contiene e incluye funciones de uso general, validadores, etc. 
 
 
