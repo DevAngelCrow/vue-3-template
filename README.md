@@ -39,7 +39,9 @@ basicos listos para utilizarse.
         └── 📄 vite.config.ts 
 ```
 
-# Descripcion de carpetas y archivos del directorio "core"
+# Descripcion de carpetas y archivos de los directorios.
+
+## Carpeta core
 
 * 📂 assets/: Contiene recursos de estilos, multimedia y archivos estaticos globales de la aplicacion.
 
@@ -63,4 +65,26 @@ basicos listos para utilizarse.
 
 * 📂 utils/: Contiene e incluye funciones de uso general, validadores, etc. 
 
+## Carpeta modules
 
+* 📂 modules/: Contiene cada modulo que cuenta con una estructura de componentes, composables, rutas y vistas que se integran a la aplicacion global (Ejemplo: Auth...).
+
+## Carpeta views
+
+* 📂 views/: Contiene las vistas generales de la aplicacion.
+
+* 📄 App.vue: Componente raíz que define la estructura base de la aplicación.
+
+* 📄 main.ts: Archivo principal que inicializa Vue, configura plugins y monta la aplicacion.
+
+* 📄 env.example: Archivo de ejemplo para definir variables de entorno necesarias para el proyecto.
+
+* 📄 .git.ignore: Archivo el cual contiene las extensiones que se omiten al momento de realizar un commit del repositorio local y externo.
+
+* 📄 index.html: Archivo que es el punto de entrada principal de la aplicacion en tiempo de desarrollo y sirve como plantilla para la generacion del HTML final durante la compilacion.
+
+* 📄 package.json: Archivo que define la configuracion principal del proyecto(nombre, version, scripts, dependencias y configuraciones especificas del ecosistema JS)
+
+* 📄 tsconfig.app.json, tsconfig.json, tsconfig.node.json: Archivos de configuracion de TypeScript el cual define las opciones del compilador global
+
+* vite.config.ts: Archivo que define cómo se comporta Vite durante el desarrollo, build y preview. Es donde puedes extender funcionalidades, configurar plugins, establecer alias de rutas, entre otros.
