@@ -14,7 +14,7 @@
     "check:types": "vue-tsc --noEmit",
     "check": "npm run lint && npm run check:types && npm run format",
     "preview:build": "npm run build && npm run preview",
-    "clean": "rm -rf dist .vite cache node_modules && npm install",
+    "clean": "rm -rf dist .vite cache node_modules package-lock.json && npm cache clean --force && npm install",
     "check:node":"check-node-version --node '>=18.18.0'",
     "initial:config": "cp .env.example .env.local && npm run pre-commit && npm run commitlint",
     "prepare": "husky install",
