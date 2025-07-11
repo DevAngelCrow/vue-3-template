@@ -31,6 +31,6 @@
     "outDir": "./dist"
   },
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.tsx", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
