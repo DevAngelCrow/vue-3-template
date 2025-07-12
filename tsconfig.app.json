@@ -3,7 +3,7 @@
     "target": "ES2023",
     "useDefineForClassFields": true,
     "module": "ESNEXT",
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
 
@@ -31,6 +31,6 @@
     "outDir": "./dist"
   },
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts", "src/types"],
   "exclude": ["node_modules", "dist"]
 }

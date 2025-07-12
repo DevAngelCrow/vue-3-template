@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import Button from 'primevue/button';
-import { onMounted} from 'vue';
+import { onMounted } from 'vue';
 // import AppDocumentVisor from './AppDocumentVisor.vue';
 // import AppModal from "./AppModal.vue";
 // import AppDatePicker from "./AppDatePicker.vue";
