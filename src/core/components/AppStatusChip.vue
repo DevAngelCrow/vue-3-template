@@ -3,28 +3,28 @@
 </template>
 
 <script setup lang="ts">
-import Chip from "primevue/chip"
-import { computed } from "vue"
+import Chip from 'primevue/chip';
+import { computed } from 'vue';
 
 const { statusName } = defineProps({
   statusName: {
     type: String,
-    required: true
+    required: true,
   },
   unstyled: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
 const color = computed(() => {
   switch (statusName) {
     case 'Activo':
-      return 'bg-green-600 text-white'
+      return 'bg-green-600 text-white';
     case 'Inactivo':
-      return 'bg-red-600 text-white'
+      return 'bg-red-600 text-white';
     default:
-      return 'bg-slate-300 text-white'
+      return 'bg-slate-300 text-white';
   }
-})
+});
 </script>

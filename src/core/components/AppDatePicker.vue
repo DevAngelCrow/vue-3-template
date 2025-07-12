@@ -26,18 +26,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import { DatePicker } from "primevue";
-import { CreateDateFromFormat, FormatDate, IsDateAfter } from "../utils/dates";
-import { computed, type PropType } from "vue";
+import { DatePicker } from 'primevue';
+import { computed, type PropType } from 'vue';
+
+import { CreateDateFromFormat, FormatDate, IsDateAfter } from '../utils/dates';
 
 const props = defineProps({
   icon: {
     type: String,
-    default: "pi pi-calendar",
+    default: 'pi pi-calendar',
   },
   selectionMode: {
     type: String,
-    default: "single",
+    default: 'single',
   },
   showOtherMonths: {
     type: Boolean,
@@ -73,11 +74,11 @@ const props = defineProps({
   // },
   placeholder: {
     type: String,
-    default: "DD/MM/AAAA",
+    default: 'DD/MM/AAAA',
   },
   iconDisplay: {
     type: String,
-    default: "",
+    default: '',
   },
   showTime: {
     type: Boolean,
@@ -91,32 +92,32 @@ const dateModel = defineModel<string | string[] | null>({
 });
 
 const validation = () => {
-  const validSelectionMode: string[] = ["single", "multiple", "range"];
+  const validSelectionMode: string[] = ['single', 'multiple', 'range'];
   if (!validSelectionMode.includes(props.selectionMode)) {
-    console.error("Modo de selección no válido: ", props.selectionMode);
+    //console.error("Modo de selección no válido: ", props.selectionMode);
   } else {
-    if (props.selectionMode === "single") {
+    if (props.selectionMode === 'single') {
       if (Array.isArray(dateModel.value)) {
-        console.error("El valor inicial debe ser un string: ", dateModel.value);
+        //console.error("El valor inicial debe ser un string: ", dateModel.value);
       }
     } else {
-      if (typeof dateModel.value === "string") {
-        console.error("El valor inicial debe ser un array: ", dateModel.value);
+      if (typeof dateModel.value === 'string') {
+        //console.error("El valor inicial debe ser un array: ", dateModel.value);
       }
       if (props.showTime) {
-        console.error(
-          "No se puede seleccionar hora en modos de selección múltiple: ",
-          props.showTime,
-          props.selectionMode
-        );
+        // console.error(
+        //   "No se puede seleccionar hora en modos de selección múltiple: ",
+        //   props.showTime,
+        //   props.selectionMode
+        // );
       }
       if (
-        props.selectionMode === "range" &&
+        props.selectionMode === 'range' &&
         Array.isArray(dateModel.value) &&
         dateModel.value.length === 2
       ) {
         if (IsDateAfter(dateModel.value[0], dateModel.value[1])) {
-          console.error("Rango de fechas inválido: ", dateModel.value);
+          //console.error("Rango de fechas inválido: ", dateModel.value);
         }
       }
     }

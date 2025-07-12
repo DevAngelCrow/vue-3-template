@@ -2,8 +2,8 @@
   <Paginator :rows :totalRecords @page="updatePage" />
 </template>
 <script setup lang="ts">
-import { Paginator, type PageState } from "primevue";
-import { ref } from "vue";
+import { Paginator, type PageState } from 'primevue';
+import { ref } from 'vue';
 
 const page = ref<number>(1);
 const { rows, totalRecords } = defineProps({
@@ -17,10 +17,10 @@ const { rows, totalRecords } = defineProps({
   },
 });
 
-const emit = defineEmits(["pageUpdate"]);
+const emit = defineEmits(['pageUpdate']);
 
 const updatePage = (value: PageState) => {
   page.value = value.page;
-  emit("pageUpdate", page.value);
+  emit('pageUpdate', page.value);
 };
 </script>

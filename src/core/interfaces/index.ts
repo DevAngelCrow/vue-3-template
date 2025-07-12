@@ -1,2 +1,2 @@
-export * from "./alert.interface";
-export * from "./datatable.interface";
+export * from './alert.interface';
+export * from './datatable.interface';

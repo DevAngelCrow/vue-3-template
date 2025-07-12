@@ -44,14 +44,14 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import Dialog from "primevue/dialog";
-import Button from "primevue/button";
-import { computed } from "vue";
-const emits = defineEmits(["close-modal", "confirm-modal", "update:show"]);
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import { computed } from 'vue';
+const emits = defineEmits(['close-modal', 'confirm-modal', 'update:show']);
 const props = defineProps({
   title: {
     type: String,
-    default: "",
+    default: '',
   },
   show: {
     type: Boolean,
@@ -59,15 +59,15 @@ const props = defineProps({
   },
   titleBtnCancel: {
     type: String,
-    default: "Cancel",
+    default: 'Cancel',
   },
   titleBtnConfirm: {
     type: String,
-    default: "Confirm",
+    default: 'Confirm',
   },
   width: {
     type: String,
-    default: "50rem",
+    default: '50rem',
   },
   footerButtons: {
     type: Boolean,
@@ -85,15 +85,15 @@ const props = defineProps({
 
 const showModal = computed({
   get: () => props.show,
-  set: (value) => emits("update:show", value),
+  set: (value) => emits('update:show', value),
 });
 
 const closeModal = () => {
-  emits("close-modal", false);
+  emits('close-modal', false);
 };
 
 const confirmModal = () => {
-  emits("confirm-modal");
+  emits('confirm-modal');
 };
 </script>
 <style scoped></style>

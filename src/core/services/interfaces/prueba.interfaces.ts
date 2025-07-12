@@ -1,3 +1,3 @@
 export interface pruebaInterface {
-    prueba: string,
+  prueba: string;
 }

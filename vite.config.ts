@@ -1,21 +1,21 @@
-import { defineConfig, loadEnv } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import tailwindcss from '@tailwindcss/vite'
-import { fileURLToPath, URL} from 'node:url';
-import vueDevTools from "vite-plugin-vue-devtools";
+import { defineConfig, loadEnv } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath, URL } from 'node:url';
+import vueDevTools from 'vite-plugin-vue-devtools';
 const env = loadEnv(<string>process.env.NODE_ENV, process.cwd());
-const port = parseInt(env.VITE_PORT) || 5173
+const port = parseInt(env.VITE_VUE_PORT) || 5173;
 // https://vite.dev/config/
 
 export default defineConfig({
   plugins: [vue(), vueDevTools(), tailwindcss()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
-  server:{
+  server: {
     host: true,
-    port: port
-  }
-})
+    port: port,
+  },
+});
