@@ -4,10 +4,11 @@
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
         v-if="showIcon"
+        id="append-icon"
       />
-      <InputNumber
+      <InputMask
         :class
-        type="text"
+        :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
         :invalid="invalid"
@@ -17,30 +18,18 @@
         :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
-        mode="currency"
-        :currency
-        :locale
-        :show-buttons
-        :min
-        :max
-        :button-layout
-        fluid
-      >
-        <template #incrementicon>
-          <span
-            :class="
-              buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
-            "
-          />
-        </template>
-        <template #decrementicon>
-          <span
-            :class="
-              buttonLayout === 'vertical' ? 'pi pi-chevron-down' : 'pi pi-minus'
-            "
-          />
-        </template>
-      </InputNumber>
+        :mask
+      />
+      <InputIcon
+        v-if="showIcon"
+        :class="
+          invalid
+            ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
+            : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
+        "
+        id="append-icon"
+        @click="clickSecondIcon"
+      />
       <Message
         class="absolute left-0 top-full mt-1 text-xs z-10"
         v-if="errorMessages.length"
@@ -57,23 +46,21 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
-import {
-  InputNumber,
-  InputIcon,
-  Message,
-  IconField,
-  FloatLabel,
-} from 'primevue';
+import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
 defineOptions({ inheritAttrs: false });
 
 const props = defineProps({
   modelValue: {
-    type: Number,
+    type: String,
   },
   class: {
     type: String,
     default: 'w-full',
+  },
+  type: {
+    type: String,
+    default: 'text',
   },
   placeholder: {
     type: String,
@@ -95,6 +82,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  // icon: {
+  //   type: String,
+  //   default: '',
+  // },
   showIcon: {
     type: Boolean,
     default: false,
@@ -128,45 +119,33 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  currency: {
-    type: String,
-    default: 'USD',
-  },
-  locale: {
-    type: String,
-    default: 'en-US',
-  },
-  showButtons: {
-    type: Boolean,
-    default: false,
-  },
-  buttonLayout: {
-    type: String,
-    default: 'vertical',
-  },
-  min: {
-    type: Number,
-  },
-  max: {
-    type: Number,
-  },
 });
 
 const emit = defineEmits(['update:modelValue', 'click-end-icon']);
 
 const errors = ref<string>();
 const invalid = ref<boolean>();
+const appendIconLocal = ref<string>(props.appendIcon);
+const typeInputLocal = ref<string>(props.type);
 const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
-const onUpdate = (value: number | undefined) => {
-  return emit('update:modelValue', value);
+const onUpdate = (value: string | undefined) => {
+  return emit('update:modelValue', value ?? '');
 };
 const messageErrorField = computed(() => {
   if (props.errorMessages.length) {
     errors.value = props.errorMessages;
   }
   return errors.value;
+});
+
+const passwordInputType = computed(() => {
+  if (props.type === 'password') {
+    appendIconLocal.value = 'pi pi-eye';
+    return 'hover:cursor-pointer';
+  }
+  return '';
 });
 
 const displayPlaceholder = computed(() => {
@@ -177,6 +156,20 @@ const displayPlaceholder = computed(() => {
     return props.placeholder;
   }
 });
+
+const clickSecondIcon = () => {
+  if (props.type === 'password' && appendIconLocal.value === 'pi pi-eye') {
+    appendIconLocal.value = 'pi pi-eye-slash';
+    typeInputLocal.value = 'text';
+  } else if (
+    appendIconLocal.value === 'pi pi-eye-slash' &&
+    props.type === 'password'
+  ) {
+    appendIconLocal.value = 'pi pi-eye';
+    typeInputLocal.value = 'password';
+  }
+  emit('click-end-icon');
+};
 
 onMounted(() => {
   if (!props.id) {

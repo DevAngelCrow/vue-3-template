@@ -17,14 +17,10 @@
         :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
-        mode="currency"
-        :currency
-        :locale
         :show-buttons
         :min
         :max
         :button-layout
-        fluid
       >
         <template #incrementicon>
           <span
@@ -160,7 +156,7 @@ const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: number | undefined) => {
-  return emit('update:modelValue', value);
+  return emit('update:modelValue', value ?? '');
 };
 const messageErrorField = computed(() => {
   if (props.errorMessages.length) {

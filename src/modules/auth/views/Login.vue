@@ -4,7 +4,7 @@
       class="absolute inset-0 blur-xs bg-radial-[at_50%_75%] from-primary-600 to-zinc-900 z-10"
     ></div>
     <Card
-      class="relative z-50 w-full xs:w-[90%] sm:w-[60%] md:w-[50%] lg:w-[40%] lg:max-w-[456px] h-[50%]"
+      class="relative z-50 w-[95%] xs:w-[90%] sm:w-[60%] md:w-[50%] lg:w-[40%] lg:max-w-[500px] h-[50%]"
       :pt="{
         body: { class: 'flex flex-col flex-grow' },
         content: {
@@ -18,43 +18,32 @@
         </div>
       </template>
       <template #content>
-        <form
-          class="flex flex-col justify-center items-center gap-10 w-full"
-          novalidate
-        >
+        <form class="flex flex-col justify-center items-center gap-10 w-full">
           <div
             class="flex gap-9 justify-center flex-col items-center w-full xs:w-[90%] md:w-[70%]"
           >
             <AppInputText
-              placeholder="Usuario"
+              placeholder="user@mail.com"
               v-model="user"
               show-icon
-              icon="pi pi-user"
+              prepend-inner-icon="pi pi-user"
               :error-messages="errors.user"
               v-bind="userAttrs"
+              label="Usuario"
+              class="w-full"
             />
             <AppInputText
-              placeholder="Contrasena"
+              placeholder="Contraseña"
               v-model="password"
               show-icon
               icon="pi pi-lock"
               :error-messages="errors.password"
               v-bind="passwordAttrs"
-              append-icon="pi pi-eye"
+              prepend-inner-icon="pi pi-lock"
+              autocomplete="curret-password"
+              type="password"
+              label="contraseña"
             />
-            <!-- <IconField class="w-full">
-              <InputIcon class="pi pi-lock" />
-              <InputText
-                class="w-full"
-                name="password"
-                type="text"
-                placeholder="Contraseña"
-                v-model="password"
-                v-bind="passwordAttrs"
-                :aria-errormessage="errors.password"
-              />
-              <InputIcon class="pi pi-eye" />
-            </IconField> -->
           </div>
           <div
             class="flex flex-col justify-start w-full xs:w-[90%] md:w-[70%] gap-3"
@@ -64,13 +53,12 @@
               <label>Recordar este dispositivo</label>
             </div>
             <div class="flex justify-center">
-              <Button @click="login(user, password)">Iniciar sesion</Button>
+              <Button @click="onSubMit">Iniciar sesion</Button>
             </div>
             <div class="flex justify-center">
-              <!-- <a class="underline" href="prueba.com"
+              <a class="underline" href="prueba.com"
                 >¿Olvidaste tu contraseña?</a
-              > -->
-              <!-- <pre>errors: {{ errors }}</pre> -->
+              >
             </div>
           </div>
         </form>
@@ -88,15 +76,19 @@ import AppInputText from '@/core/components/AppInputText.vue';
 
 import { useAuth } from '../composables/useAuth';
 
-const { errors, defineField } = useForm({
+const { errors, defineField, handleSubmit } = useForm({
   validationSchema: yup.object({
-    user: emailFormat(),
+    user: emailFormat(undefined, true, undefined),
     password: passwordValidation(),
   }),
 });
 
 const [user, userAttrs] = defineField('user');
 const [password, passwordAttrs] = defineField('password');
+
+const onSubMit = handleSubmit((values) => {
+  login(values.user, values.password);
+});
 
 const { login } = useAuth();
 </script>
