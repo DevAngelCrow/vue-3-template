@@ -1,247 +1,103 @@
 {
-  "hash": "e7a45db8",
-  "configHash": "885d0eef",
+  "hash": "aeb117cd",
+  "configHash": "67546474",
   "lockfileHash": "97f09340",
-  "browserHash": "6d34f4b9",
+  "browserHash": "541cf1bc",
   "optimized": {
     "vue": {
       "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
       "file": "vue.js",
-      "fileHash": "7c063413",
+      "fileHash": "5b89ba37",
       "needsInterop": false
     },
     "vitepress > @vue/devtools-api": {
       "src": "../../../../node_modules/@vue/devtools-api/dist/index.js",
       "file": "vitepress___@vue_devtools-api.js",
-      "fileHash": "366fb4f0",
+      "fileHash": "e8f810c5",
       "needsInterop": false
     },
     "vitepress > @vueuse/core": {
       "src": "../../../../node_modules/vitepress/node_modules/@vueuse/core/index.mjs",
       "file": "vitepress___@vueuse_core.js",
-      "fileHash": "944b0245",
+      "fileHash": "bf718595",
       "needsInterop": false
-    },
-    "primevue/toast": {
-      "src": "../../../../node_modules/primevue/toast/index.mjs",
-      "file": "primevue_toast.js",
-      "fileHash": "8c135a62",
-      "needsInterop": false
-    },
-    "primevue/usetoast": {
-      "src": "../../../../node_modules/primevue/usetoast/index.mjs",
-      "file": "primevue_usetoast.js",
-      "fileHash": "4d7e04fe",
-      "needsInterop": false
-    },
-    "primevue": {
-      "src": "../../../../node_modules/primevue/index.mjs",
-      "file": "primevue.js",
-      "fileHash": "e9edddec",
-      "needsInterop": false
-    },
-    "primevue/chip": {
-      "src": "../../../../node_modules/primevue/chip/index.mjs",
-      "file": "primevue_chip.js",
-      "fileHash": "cd9f3d3d",
-      "needsInterop": false
-    },
-    "primevue/dialog": {
-      "src": "../../../../node_modules/primevue/dialog/index.mjs",
-      "file": "primevue_dialog.js",
-      "fileHash": "52fef376",
-      "needsInterop": false
-    },
-    "primevue/button": {
-      "src": "../../../../node_modules/primevue/button/index.mjs",
-      "file": "primevue_button.js",
-      "fileHash": "137f4264",
-      "needsInterop": false
-    },
-    "pinia": {
-      "src": "../../../../node_modules/pinia/dist/pinia.mjs",
-      "file": "pinia.js",
-      "fileHash": "b403502e",
-      "needsInterop": false
-    },
-    "dayjs": {
-      "src": "../../../../node_modules/dayjs/dayjs.min.js",
-      "file": "dayjs.js",
-      "fileHash": "03f8360f",
-      "needsInterop": true
-    },
-    "dayjs/locale/es": {
-      "src": "../../../../node_modules/dayjs/locale/es.js",
-      "file": "dayjs_locale_es.js",
-      "fileHash": "05f3f774",
-      "needsInterop": true
-    },
-    "dayjs/plugin/customParseFormat": {
-      "src": "../../../../node_modules/dayjs/plugin/customParseFormat.js",
-      "file": "dayjs_plugin_customParseFormat.js",
-      "fileHash": "7846acd0",
-      "needsInterop": true
-    },
-    "dayjs/plugin/isSameOrAfter": {
-      "src": "../../../../node_modules/dayjs/plugin/isSameOrAfter.js",
-      "file": "dayjs_plugin_isSameOrAfter.js",
-      "fileHash": "4b68858b",
-      "needsInterop": true
-    },
-    "dayjs/plugin/isBetween": {
-      "src": "../../../../node_modules/dayjs/plugin/isBetween.js",
-      "file": "dayjs_plugin_isBetween.js",
-      "fileHash": "d00e424c",
-      "needsInterop": true
-    },
-    "dayjs/plugin/timezone": {
-      "src": "../../../../node_modules/dayjs/plugin/timezone.js",
-      "file": "dayjs_plugin_timezone.js",
-      "fileHash": "c004af7b",
-      "needsInterop": true
     },
     "primevue/config": {
       "src": "../../../../node_modules/primevue/config/index.mjs",
       "file": "primevue_config.js",
-      "fileHash": "44720856",
+      "fileHash": "ae59b4d8",
       "needsInterop": false
     },
     "@primeuix/themes/aura": {
       "src": "../../../../node_modules/@primeuix/themes/dist/aura/index.mjs",
       "file": "@primeuix_themes_aura.js",
-      "fileHash": "a82dad4d",
+      "fileHash": "cb83845c",
       "needsInterop": false
     },
     "@primeuix/themes": {
       "src": "../../../../node_modules/@primeuix/themes/dist/index.mjs",
       "file": "@primeuix_themes.js",
-      "fileHash": "0cd850a1",
+      "fileHash": "00c9c79e",
       "needsInterop": false
     },
     "primevue/toastservice": {
       "src": "../../../../node_modules/primevue/toastservice/index.mjs",
       "file": "primevue_toastservice.js",
-      "fileHash": "f966b0fc",
+      "fileHash": "ff03d69c",
       "needsInterop": false
     },
     "primevue/ripple": {
       "src": "../../../../node_modules/primevue/ripple/index.mjs",
       "file": "primevue_ripple.js",
-      "fileHash": "e0e7fbb6",
+      "fileHash": "ec5ba267",
       "needsInterop": false
     },
     "primevue/tooltip": {
       "src": "../../../../node_modules/primevue/tooltip/index.mjs",
       "file": "primevue_tooltip.js",
-      "fileHash": "86db3922",
+      "fileHash": "7a52e4aa",
       "needsInterop": false
     },
     "primevue/badgedirective": {
       "src": "../../../../node_modules/primevue/badgedirective/index.mjs",
       "file": "primevue_badgedirective.js",
-      "fileHash": "1ccbf8ea",
+      "fileHash": "a1c56074",
       "needsInterop": false
     },
     "primevue/animateonscroll": {
       "src": "../../../../node_modules/primevue/animateonscroll/index.mjs",
       "file": "primevue_animateonscroll.js",
-      "fileHash": "4633bc7f",
+      "fileHash": "ac4296c5",
       "needsInterop": false
     },
     "primevue/styleclass": {
       "src": "../../../../node_modules/primevue/styleclass/index.mjs",
       "file": "primevue_styleclass.js",
-      "fileHash": "a055eef0",
+      "fileHash": "075fd968",
       "needsInterop": false
     },
     "primevue/focustrap": {
       "src": "../../../../node_modules/primevue/focustrap/index.mjs",
       "file": "primevue_focustrap.js",
-      "fileHash": "7cedfd34",
+      "fileHash": "879d0f1a",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-EMFERMFV": {
-      "file": "chunk-EMFERMFV.js"
+    "chunk-F2G7XELA": {
+      "file": "chunk-F2G7XELA.js"
     },
-    "chunk-ECABJHFQ": {
-      "file": "chunk-ECABJHFQ.js"
+    "chunk-NVFM4NPM": {
+      "file": "chunk-NVFM4NPM.js"
     },
-    "chunk-LI3AORBE": {
-      "file": "chunk-LI3AORBE.js"
-    },
-    "chunk-R5DBTY2J": {
-      "file": "chunk-R5DBTY2J.js"
-    },
-    "chunk-RSC4UGQU": {
-      "file": "chunk-RSC4UGQU.js"
-    },
-    "chunk-UT53OZD6": {
-      "file": "chunk-UT53OZD6.js"
-    },
-    "chunk-VTP4MIG6": {
-      "file": "chunk-VTP4MIG6.js"
-    },
-    "chunk-V3ZVR5AM": {
-      "file": "chunk-V3ZVR5AM.js"
-    },
-    "chunk-QPB3YOBS": {
-      "file": "chunk-QPB3YOBS.js"
-    },
-    "chunk-GL3IJUSJ": {
-      "file": "chunk-GL3IJUSJ.js"
-    },
-    "chunk-UV5HDIHE": {
-      "file": "chunk-UV5HDIHE.js"
-    },
-    "chunk-4DEPM5BU": {
-      "file": "chunk-4DEPM5BU.js"
-    },
-    "chunk-6JIJTVZ4": {
-      "file": "chunk-6JIJTVZ4.js"
-    },
-    "chunk-Y74CQMCW": {
-      "file": "chunk-Y74CQMCW.js"
-    },
-    "chunk-NTBNCWEV": {
-      "file": "chunk-NTBNCWEV.js"
-    },
-    "chunk-6PCM3TIT": {
-      "file": "chunk-6PCM3TIT.js"
-    },
-    "chunk-BANYL3XH": {
-      "file": "chunk-BANYL3XH.js"
-    },
-    "chunk-X6MULJI2": {
-      "file": "chunk-X6MULJI2.js"
-    },
-    "chunk-XRQQEAJL": {
-      "file": "chunk-XRQQEAJL.js"
-    },
-    "chunk-KVFVPEWG": {
-      "file": "chunk-KVFVPEWG.js"
-    },
-    "chunk-FZ2IRYRZ": {
-      "file": "chunk-FZ2IRYRZ.js"
-    },
-    "chunk-Z4IG4IUB": {
-      "file": "chunk-Z4IG4IUB.js"
-    },
-    "chunk-PKF4FVKV": {
-      "file": "chunk-PKF4FVKV.js"
-    },
-    "chunk-VXRBNF3O": {
-      "file": "chunk-VXRBNF3O.js"
+    "chunk-3ABMZVWK": {
+      "file": "chunk-3ABMZVWK.js"
     },
     "chunk-DDXJJ377": {
       "file": "chunk-DDXJJ377.js"
     },
     "chunk-7BTXCNCE": {
       "file": "chunk-7BTXCNCE.js"
-    },
-    "chunk-BUSYA2B4": {
-      "file": "chunk-BUSYA2B4.js"
     }
   }
 }

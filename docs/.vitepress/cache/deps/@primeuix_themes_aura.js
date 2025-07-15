@@ -1,5 +1,3 @@
-import "./chunk-BUSYA2B4.js";
-
 // node_modules/@primeuix/themes/dist/aura/accordion/index.mjs
 var o = { transitionDuration: "{transition.duration}" };
 var r = { borderWidth: "0 0 1px 0", borderColor: "{content.border.color}" };

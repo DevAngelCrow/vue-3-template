@@ -2,4 +2,4 @@
 
 ## Componente AppAlert.vue
 
-<AppInputText variant="bg-red-500" />
+<AppInputText class="bg-red-500" />
