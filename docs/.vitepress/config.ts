@@ -1,8 +1,11 @@
 import { defineConfig } from 'vitepress';
 
+import { guideConfig } from '../guide/guide.config';
+
 export default defineConfig({
   title: 'Vue 3 Template',
   description: 'Plantilla base con Vue 3, Vite y TypeScript',
+  cleanUrls: true,
   themeConfig: {
     nav: [
       { text: 'Guía', link: '/guide/' },
@@ -12,17 +15,13 @@ export default defineConfig({
       },
     ],
     sidebar: {
-      'guide/': [
+      '/': [
         {
-          text: 'Guía',
-          items: [
-            { text: 'Introducción', link: '/guide/' },
-            { text: 'Estructura del Proyecto', link: '/guide/estructura' },
-            { text: 'Composición y Componentes', link: '/guide/componentes' },
-            { text: 'Buenas Prácticas', link: '/guide/practicas' },
-          ],
+          text: 'Introducción',
+          link: '/',
         },
       ],
+      ...guideConfig.sidebar,
     },
   },
 });

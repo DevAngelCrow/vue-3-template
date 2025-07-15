@@ -1,10 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "module": "esnext", 
+    "target": "es2023",           
+    "moduleResolution": "bundler",
     "composite": true,
     "declaration": true,
     "noEmit": false,
-    "outDir": "./dist-vitepress"
+    "outDir": "./dist-vitepress",
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*":["./docs/*"]
+    }
   },
-  "include": ["docs/.vitepress/config.ts"]
+  "include": ["docs/.vitepress/**/*","docs/.vitepress/config.ts", "docs/*/*.config.ts", "docs/.vitepress/theme/*.ts", "src/core/directives/index.ts"],
 }
