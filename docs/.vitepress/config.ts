@@ -12,7 +12,7 @@ export default defineConfig({
       },
     ],
     sidebar: {
-      '/guide/': [
+      'guide/': [
         {
           text: 'Guía',
           items: [

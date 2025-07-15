@@ -24,6 +24,8 @@ import { useLayoutStore } from '../store/useLayoutStore';
 import AppNavBarMenu from './AppNavBarMenu.vue';
 import type { Menu } from '../interfaces/menu.navbar.interface';
 
+defineOptions({ name: 'AppHeader' });
+
 const sideBar = useLayoutStore();
 
 const items = ref<Menu[]>([

@@ -8,6 +8,8 @@ import { watch } from 'vue';
 
 import { useAlertStore } from '../store/useAlertStore';
 
+defineOptions({ name: 'AppAlert' });
+
 const toast = useToast();
 const alert = useAlertStore();
 

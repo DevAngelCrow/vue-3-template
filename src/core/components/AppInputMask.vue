@@ -48,7 +48,7 @@
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
 import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
-defineOptions({ inheritAttrs: false });
+defineOptions({ inheritAttrs: false, name: 'AppInputMask' });
 
 const props = defineProps({
   modelValue: {

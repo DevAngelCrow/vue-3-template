@@ -61,7 +61,7 @@ import {
   FloatLabel,
 } from 'primevue';
 
-defineOptions({ inheritAttrs: false });
+defineOptions({ inheritAttrs: false, name: 'AppInputNumber' });
 
 const props = defineProps({
   modelValue: {

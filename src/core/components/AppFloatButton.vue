@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'AppFloatButton' });
 const eventoClick = () => {
   //aquí se debe colocar la url pertinente
   ///window.open("", "_blank");

@@ -76,6 +76,9 @@ import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
 import type { Menu as MenuModel } from '../interfaces/menu.navbar.interface';
+
+defineOptions({ name: 'AppNavBarMenu' });
+
 const { menu } = defineProps({
   menu: {
     type: Array as PropType<MenuModel[]>,
