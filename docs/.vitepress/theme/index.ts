@@ -1,11 +1,12 @@
 import DefaultTheme from 'vitepress/theme';
-import '../assets/style.css';
+import './style.css';
 import type { Theme } from 'vitepress';
 import PrimeVue from 'primevue/config';
-import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
+import Aura from '@primeuix/themes/aura';
 import ToastService from 'primevue/toastservice';
 
+//import "@primeuix/themes/aura/theme.css";
 import { registerDirectives } from '../../../src/core/directives/index';
 // import {
 //   globalFunctions,
@@ -60,7 +61,6 @@ const Noir = definePreset(Aura, {
     },
   },
 });
-
 export default {
   ...DefaultTheme,
   enhanceApp({ app }) {

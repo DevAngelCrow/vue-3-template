@@ -1,103 +1,247 @@
 {
-  "hash": "aeb117cd",
-  "configHash": "67546474",
-  "lockfileHash": "97f09340",
-  "browserHash": "541cf1bc",
+  "hash": "06c5d562",
+  "configHash": "8594117c",
+  "lockfileHash": "0e43de0c",
+  "browserHash": "e44229c0",
   "optimized": {
     "vue": {
       "src": "../../../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
       "file": "vue.js",
-      "fileHash": "5b89ba37",
+      "fileHash": "812f650f",
       "needsInterop": false
     },
     "vitepress > @vue/devtools-api": {
       "src": "../../../../node_modules/@vue/devtools-api/dist/index.js",
       "file": "vitepress___@vue_devtools-api.js",
-      "fileHash": "e8f810c5",
+      "fileHash": "bedba0b0",
       "needsInterop": false
     },
     "vitepress > @vueuse/core": {
       "src": "../../../../node_modules/vitepress/node_modules/@vueuse/core/index.mjs",
       "file": "vitepress___@vueuse_core.js",
-      "fileHash": "bf718595",
+      "fileHash": "6f014eb2",
       "needsInterop": false
     },
     "primevue/config": {
       "src": "../../../../node_modules/primevue/config/index.mjs",
       "file": "primevue_config.js",
-      "fileHash": "ae59b4d8",
-      "needsInterop": false
-    },
-    "@primeuix/themes/aura": {
-      "src": "../../../../node_modules/@primeuix/themes/dist/aura/index.mjs",
-      "file": "@primeuix_themes_aura.js",
-      "fileHash": "cb83845c",
+      "fileHash": "2074d374",
       "needsInterop": false
     },
     "@primeuix/themes": {
       "src": "../../../../node_modules/@primeuix/themes/dist/index.mjs",
       "file": "@primeuix_themes.js",
-      "fileHash": "00c9c79e",
+      "fileHash": "ddea08c5",
+      "needsInterop": false
+    },
+    "@primeuix/themes/aura": {
+      "src": "../../../../node_modules/@primeuix/themes/dist/aura/index.mjs",
+      "file": "@primeuix_themes_aura.js",
+      "fileHash": "32b9ee6f",
       "needsInterop": false
     },
     "primevue/toastservice": {
       "src": "../../../../node_modules/primevue/toastservice/index.mjs",
       "file": "primevue_toastservice.js",
-      "fileHash": "ff03d69c",
+      "fileHash": "2dbc1546",
       "needsInterop": false
     },
     "primevue/ripple": {
       "src": "../../../../node_modules/primevue/ripple/index.mjs",
       "file": "primevue_ripple.js",
-      "fileHash": "ec5ba267",
+      "fileHash": "eb1a13a2",
       "needsInterop": false
     },
     "primevue/tooltip": {
       "src": "../../../../node_modules/primevue/tooltip/index.mjs",
       "file": "primevue_tooltip.js",
-      "fileHash": "7a52e4aa",
+      "fileHash": "842162a4",
       "needsInterop": false
     },
     "primevue/badgedirective": {
       "src": "../../../../node_modules/primevue/badgedirective/index.mjs",
       "file": "primevue_badgedirective.js",
-      "fileHash": "a1c56074",
+      "fileHash": "07d53a08",
       "needsInterop": false
     },
     "primevue/animateonscroll": {
       "src": "../../../../node_modules/primevue/animateonscroll/index.mjs",
       "file": "primevue_animateonscroll.js",
-      "fileHash": "ac4296c5",
+      "fileHash": "37c39d98",
       "needsInterop": false
     },
     "primevue/styleclass": {
       "src": "../../../../node_modules/primevue/styleclass/index.mjs",
       "file": "primevue_styleclass.js",
-      "fileHash": "075fd968",
+      "fileHash": "76186cd6",
       "needsInterop": false
     },
     "primevue/focustrap": {
       "src": "../../../../node_modules/primevue/focustrap/index.mjs",
       "file": "primevue_focustrap.js",
-      "fileHash": "879d0f1a",
+      "fileHash": "b737765f",
       "needsInterop": false
+    },
+    "primevue": {
+      "src": "../../../../node_modules/primevue/index.mjs",
+      "file": "primevue.js",
+      "fileHash": "e252d07c",
+      "needsInterop": false
+    },
+    "primevue/chip": {
+      "src": "../../../../node_modules/primevue/chip/index.mjs",
+      "file": "primevue_chip.js",
+      "fileHash": "591076e2",
+      "needsInterop": false
+    },
+    "primevue/dialog": {
+      "src": "../../../../node_modules/primevue/dialog/index.mjs",
+      "file": "primevue_dialog.js",
+      "fileHash": "0fedcf6e",
+      "needsInterop": false
+    },
+    "primevue/button": {
+      "src": "../../../../node_modules/primevue/button/index.mjs",
+      "file": "primevue_button.js",
+      "fileHash": "11596528",
+      "needsInterop": false
+    },
+    "primevue/toast": {
+      "src": "../../../../node_modules/primevue/toast/index.mjs",
+      "file": "primevue_toast.js",
+      "fileHash": "0d224751",
+      "needsInterop": false
+    },
+    "primevue/usetoast": {
+      "src": "../../../../node_modules/primevue/usetoast/index.mjs",
+      "file": "primevue_usetoast.js",
+      "fileHash": "357348be",
+      "needsInterop": false
+    },
+    "pinia": {
+      "src": "../../../../node_modules/pinia/dist/pinia.mjs",
+      "file": "pinia.js",
+      "fileHash": "b06af0e4",
+      "needsInterop": false
+    },
+    "dayjs": {
+      "src": "../../../../node_modules/dayjs/dayjs.min.js",
+      "file": "dayjs.js",
+      "fileHash": "ffce4924",
+      "needsInterop": true
+    },
+    "dayjs/locale/es": {
+      "src": "../../../../node_modules/dayjs/locale/es.js",
+      "file": "dayjs_locale_es.js",
+      "fileHash": "13882039",
+      "needsInterop": true
+    },
+    "dayjs/plugin/customParseFormat": {
+      "src": "../../../../node_modules/dayjs/plugin/customParseFormat.js",
+      "file": "dayjs_plugin_customParseFormat.js",
+      "fileHash": "8423c92a",
+      "needsInterop": true
+    },
+    "dayjs/plugin/isSameOrAfter": {
+      "src": "../../../../node_modules/dayjs/plugin/isSameOrAfter.js",
+      "file": "dayjs_plugin_isSameOrAfter.js",
+      "fileHash": "197adc87",
+      "needsInterop": true
+    },
+    "dayjs/plugin/isBetween": {
+      "src": "../../../../node_modules/dayjs/plugin/isBetween.js",
+      "file": "dayjs_plugin_isBetween.js",
+      "fileHash": "073d294b",
+      "needsInterop": true
+    },
+    "dayjs/plugin/timezone": {
+      "src": "../../../../node_modules/dayjs/plugin/timezone.js",
+      "file": "dayjs_plugin_timezone.js",
+      "fileHash": "672ddd71",
+      "needsInterop": true
     }
   },
   "chunks": {
-    "chunk-F2G7XELA": {
-      "file": "chunk-F2G7XELA.js"
+    "chunk-EMFERMFV": {
+      "file": "chunk-EMFERMFV.js"
     },
-    "chunk-NVFM4NPM": {
-      "file": "chunk-NVFM4NPM.js"
+    "chunk-243637AH": {
+      "file": "chunk-243637AH.js"
     },
-    "chunk-3ABMZVWK": {
-      "file": "chunk-3ABMZVWK.js"
+    "chunk-BANYL3XH": {
+      "file": "chunk-BANYL3XH.js"
+    },
+    "chunk-X6MULJI2": {
+      "file": "chunk-X6MULJI2.js"
+    },
+    "chunk-XRQQEAJL": {
+      "file": "chunk-XRQQEAJL.js"
+    },
+    "chunk-RSC4UGQU": {
+      "file": "chunk-RSC4UGQU.js"
+    },
+    "chunk-QPB3YOBS": {
+      "file": "chunk-QPB3YOBS.js"
+    },
+    "chunk-GL3IJUSJ": {
+      "file": "chunk-GL3IJUSJ.js"
+    },
+    "chunk-E7VIMXTP": {
+      "file": "chunk-E7VIMXTP.js"
+    },
+    "chunk-R5DBTY2J": {
+      "file": "chunk-R5DBTY2J.js"
+    },
+    "chunk-V3ZVR5AM": {
+      "file": "chunk-V3ZVR5AM.js"
+    },
+    "chunk-UT53OZD6": {
+      "file": "chunk-UT53OZD6.js"
+    },
+    "chunk-UV5HDIHE": {
+      "file": "chunk-UV5HDIHE.js"
+    },
+    "chunk-ZPGYJL6J": {
+      "file": "chunk-ZPGYJL6J.js"
+    },
+    "chunk-4DEPM5BU": {
+      "file": "chunk-4DEPM5BU.js"
+    },
+    "chunk-6JIJTVZ4": {
+      "file": "chunk-6JIJTVZ4.js"
+    },
+    "chunk-Y74CQMCW": {
+      "file": "chunk-Y74CQMCW.js"
+    },
+    "chunk-NTBNCWEV": {
+      "file": "chunk-NTBNCWEV.js"
+    },
+    "chunk-6PCM3TIT": {
+      "file": "chunk-6PCM3TIT.js"
+    },
+    "chunk-KVFVPEWG": {
+      "file": "chunk-KVFVPEWG.js"
+    },
+    "chunk-FZ2IRYRZ": {
+      "file": "chunk-FZ2IRYRZ.js"
+    },
+    "chunk-Z4IG4IUB": {
+      "file": "chunk-Z4IG4IUB.js"
+    },
+    "chunk-PKF4FVKV": {
+      "file": "chunk-PKF4FVKV.js"
+    },
+    "chunk-VXRBNF3O": {
+      "file": "chunk-VXRBNF3O.js"
     },
     "chunk-DDXJJ377": {
       "file": "chunk-DDXJJ377.js"
     },
     "chunk-7BTXCNCE": {
       "file": "chunk-7BTXCNCE.js"
+    },
+    "chunk-BUSYA2B4": {
+      "file": "chunk-BUSYA2B4.js"
     }
   }
 }

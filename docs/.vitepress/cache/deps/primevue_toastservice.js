@@ -1,35 +1,11 @@
-import "./chunk-DDXJJ377.js";
 import {
-  s
-} from "./chunk-7BTXCNCE.js";
-
-// node_modules/primevue/toasteventbus/index.mjs
-var ToastEventBus = s();
-
-// node_modules/primevue/usetoast/index.mjs
-var PrimeVueToastSymbol = Symbol();
-
-// node_modules/primevue/toastservice/index.mjs
-var ToastService = {
-  install: function install(app) {
-    var ToastService2 = {
-      add: function add(message) {
-        ToastEventBus.emit("add", message);
-      },
-      remove: function remove(message) {
-        ToastEventBus.emit("remove", message);
-      },
-      removeGroup: function removeGroup(group) {
-        ToastEventBus.emit("remove-group", group);
-      },
-      removeAllGroups: function removeAllGroups() {
-        ToastEventBus.emit("remove-all-groups");
-      }
-    };
-    app.config.globalProperties.$toast = ToastService2;
-    app.provide(PrimeVueToastSymbol, ToastService2);
-  }
-};
+  ToastService
+} from "./chunk-6JIJTVZ4.js";
+import "./chunk-Y74CQMCW.js";
+import "./chunk-NTBNCWEV.js";
+import "./chunk-DDXJJ377.js";
+import "./chunk-7BTXCNCE.js";
+import "./chunk-BUSYA2B4.js";
 export {
   ToastService as default
 };

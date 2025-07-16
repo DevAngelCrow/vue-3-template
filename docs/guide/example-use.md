@@ -2,4 +2,4 @@
 
 ## Componente AppAlert.vue
 
-<AppInputText class="bg-red-500" />
+<app-input-text label="Botón Estilizado" icon="pi pi-check" />
