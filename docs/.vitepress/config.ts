@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress';
-// import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
+import tailwindcss from '@tailwindcss/postcss';
+import autoprefixer from 'autoprefixer';
 
 import { guideConfig } from '../guide/guide.config';
 
@@ -34,6 +35,11 @@ export default defineConfig({
     },
     server: {
       host: true,
+    },
+    css: {
+      postcss: {
+        plugins: [tailwindcss(), autoprefixer],
+      },
     },
   },
 });
