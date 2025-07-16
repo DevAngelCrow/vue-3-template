@@ -1,0 +1,11 @@
+---
+title: Mis Componentes Reutilizados
+description: Demostración de componentes Vue/PrimeVue del proyecto principal.
+---
+
+import PrimeVueProvider from "../../../components/PrimeVueProvider.vue"
+import {Button} from "primevue"
+
+<PrimeVueProvider client:load>
+    <Button class="bg-blue-500 hover:bg-green-500">Prueba</Button>
+</PrimeVueProvider>
