@@ -10,6 +10,7 @@ import mdx from '@astrojs/mdx';
 
 import { fileURLToPath, URL } from "node:url";
 
+import { contentGuide } from './src/content/docs/guides/content.guide';
 // https://astro.build/config
 export default defineConfig({
   integrations: [starlight({
@@ -18,15 +19,14 @@ export default defineConfig({
       customCss: ["./src/styles/global.css"],
       sidebar: [
           {
-              label: 'Guides',
-              items: [
+              label: 'Guía',
+              items: 
                   // Each item here is one entry in the navigation menu.
-                  { label: 'Example Guide', slug: 'guides/instalation-guide' },
-              ],
+              contentGuide,
           },
           {
-              label: 'Reference',
-              autogenerate: { directory: 'reference' },
+              label: 'Componentes',
+              autogenerate: { directory: 'components' },
           },
       ],
   }), vue(), mdx()],

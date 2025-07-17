@@ -1,5 +1,5 @@
 <template>
-  <FloatLabel variant="on" class="w-full max-w-[322px]">
+  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -18,7 +18,7 @@
         :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
-        :mask
+        :mask="primeMask"
       />
       <InputIcon
         v-if="showIcon"
@@ -78,14 +78,18 @@ const props = defineProps({
     type: String,
     default: 'simple',
   },
+  labelVariant: {
+    type: String,
+    default: 'on',
+  },
+  inputVariant: {
+    type: String,
+    default: null,
+  },
   errorMessages: {
     type: String,
     default: '',
   },
-  // icon: {
-  //   type: String,
-  //   default: '',
-  // },
   showIcon: {
     type: Boolean,
     default: false,
@@ -154,6 +158,15 @@ const displayPlaceholder = computed(() => {
   }
   if (!props.label.length) {
     return props.placeholder;
+  }
+});
+
+const primeMask = computed(() => {
+  if (isFocused.value) {
+    return props.mask;
+  }
+  if (!props.label.length) {
+    return '';
   }
 });
 

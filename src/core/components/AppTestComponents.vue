@@ -5,8 +5,8 @@ onMounted(() => {});
 </script>
 
 <template>
-  <app-input-text />
-  <AppInputText></AppInputText>
+  <AppInputMask label="Input mask" mask="00000000-0" />
+  <AppInputText label="Input text" placeholder="00000000-0" />
 </template>
 
 <style scoped>

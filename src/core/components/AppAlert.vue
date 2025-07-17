@@ -12,7 +12,6 @@ defineOptions({ name: 'AppAlert' });
 
 const toast = useToast();
 const alert = useAlertStore();
-
 const showTopRight = () => {
   toast.add({
     severity: alert.type,
