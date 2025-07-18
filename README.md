@@ -124,6 +124,8 @@ npm run dev
 
 - 📂 views/: Contiene las vistas generales de la aplicacion.
 
+## Archivos de directorio raiz.
+
 - 📄 App.vue: Componente raíz que define la estructura base de la aplicación.
 
 - 📄 main.ts: Archivo principal que inicializa Vue, configura plugins y monta la aplicacion.

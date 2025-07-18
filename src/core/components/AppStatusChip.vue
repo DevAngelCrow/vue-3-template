@@ -6,6 +6,8 @@
 import Chip from 'primevue/chip';
 import { computed } from 'vue';
 
+defineOptions({ name: 'AppStatusChip' });
+
 const { statusName } = defineProps({
   statusName: {
     type: String,

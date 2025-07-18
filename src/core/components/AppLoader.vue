@@ -7,6 +7,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
 
+defineOptions({ name: 'AppLoader' });
+
 const bloquearTeclado = (event: Event) => {
   event.preventDefault();
   event.stopPropagation();

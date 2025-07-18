@@ -25,6 +25,9 @@
 import { computed } from 'vue';
 
 import { CreateDateFromFormat, FormatDate } from '../utils/dates';
+
+defineOptions({ name: 'AppTimePicker' });
+
 defineProps({
   icon: {
     type: String,

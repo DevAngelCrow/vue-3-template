@@ -47,6 +47,8 @@ import type {
   TableProps,
 } from '../interfaces/datatable.interface';
 
+defineOptions({ name: 'AppDataTable' });
+
 const {
   headers = [],
   items = [],

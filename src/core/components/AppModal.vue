@@ -47,6 +47,9 @@
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import { computed } from 'vue';
+
+defineOptions({ name: 'AppModal' });
+
 const emits = defineEmits(['close-modal', 'confirm-modal', 'update:show']);
 const props = defineProps({
   title: {

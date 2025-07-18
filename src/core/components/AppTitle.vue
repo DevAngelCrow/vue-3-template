@@ -4,6 +4,8 @@
   </div>
 </template>
 <script setup>
+defineOptions({ name: 'AppTitle' });
+
 defineProps({
   title: {
     type: String,

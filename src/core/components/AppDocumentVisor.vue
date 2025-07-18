@@ -33,6 +33,8 @@ import { ref, watchEffect } from 'vue';
 
 import AppModal from './AppModal.vue';
 
+defineOptions({ name: 'AppDocumentVisor' });
+
 const props = defineProps({
   documentName: {
     type: String,

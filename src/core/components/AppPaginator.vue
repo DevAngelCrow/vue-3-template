@@ -5,6 +5,8 @@
 import { Paginator, type PageState } from 'primevue';
 import { ref } from 'vue';
 
+defineOptions({ name: 'AppPaginator' });
+
 const page = ref<number>(1);
 const { rows, totalRecords } = defineProps({
   rows: {

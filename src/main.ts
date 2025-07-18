@@ -8,6 +8,9 @@ import ToastService from 'primevue/toastservice';
 
 import router from '../src/core/router/index';
 import App from './App.vue';
+import { registerDirectives } from './core/directives';
+import { globalFunctions, GlobalFunctions } from './core/utils/globalFunctions';
+import { registerGlobalComponents } from './core/plugins/globalComponents';
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -59,6 +62,8 @@ const Noir = definePreset(Aura, {
   },
 });
 
+registerDirectives(app);
+
 app.use(PrimeVue, {
   theme: {
     preset: Noir,
@@ -68,4 +73,19 @@ app.use(PrimeVue, {
 app.use(pinia);
 app.use(router);
 app.use(ToastService);
+
+//funciones globales
+
+const entries = Object.entries(globalFunctions) as [
+  keyof GlobalFunctions,
+  GlobalFunctions[keyof GlobalFunctions],
+][];
+entries.forEach(([key, fn]) => {
+  (app.config.globalProperties as Record<string, unknown>)[`$${key}`] = fn;
+});
+
+//Registro de componentes globales
+
+registerGlobalComponents(app);
+
 app.mount('#app');
