@@ -1,5 +1,5 @@
 <template>
-  <FloatLabel variant="on" class="w-full max-w-[322px]">
+  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -18,6 +18,7 @@
         :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
+        :variant="inputVarian"
       />
       <InputIcon
         v-if="showIcon"
@@ -76,6 +77,14 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'simple',
+  },
+  labelVariant: {
+    type: String,
+    default: 'simple',
+  },
+  inputVarian: {
+    type: String,
+    default: 'large',
   },
   errorMessages: {
     type: String,

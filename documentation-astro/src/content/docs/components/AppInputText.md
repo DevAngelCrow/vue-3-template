@@ -1,6 +1,6 @@
 ---
-title: AppInputMask
-description: Descripción del componente AppFloatButton.
+title: AppInputText
+description: Descripción del componente AppInputText.
 ---
 
 El componente en referencia se encuentra ya configurado para poder reutilizarlo, de esta manera, estas serían las propiedades que corresponden a dicho componente:
@@ -23,24 +23,24 @@ El componente en referencia se encuentra ya configurado para poder reutilizarlo,
 | autocomplete     | String  | 'off'             | Atributo HTML para controlar el autocompletado del navegador.                                                  |
 | label            | String  | ''                | Etiqueta flotante descriptiva del input.                                                                       |
 | id               | String  | -                 | ID único para el campo, útil para accesibilidad o pruebas.                                                     |
-| mask             | String  | ''                | Máscara de entrada para formatear datos como fechas, teléfonos, etc.                                           |
 
 
-A continuacion se muestra un ejemplo de como utilizar el componente del input mask
+A continuacion se muestra un ejemplo de como utilizar el componente del input text
 
 ```
 <script setup lang="ts">
-import AppInputMask from "src/core/component/AppInputMask.vue"
+import AppInputText from "src/core/component/AppInputText.vue"
 import { ref } from 'vue';
-const modelMask = ref();
+const modelText = ref();
 </script>
 
 <template>
-  <AppInputMask id="basic" v-model="modelMask" label="Input mask" mask="99999999-9" placeholder="00000000-0"/>
+  <AppInputText id="basic" v-model="modelText" label="Input Text" placeholder="Nombre"/>
 </template>
 
 ```
 
-El componente útiliza v-bind=“attrs”, hereda las propiedades del componente base de PrimeVue 4, en ese sentido, para ampliar que otras propiedades puede integrar en la tabla, puede visitar la página oficial de PrimeVue https://primevue.org/inputmask
 
-![AppInputMask](../../../assets/AppInputMask.gif);
+El componente útiliza v-bind=“attrs”, hereda las propiedades del componente base de PrimeVue 4, en ese sentido, para ampliar que otras propiedades puede integrar en la tabla, puede visitar la página oficial de PrimeVue https://primevue.org/inputText
+
+![AppInputText](../../../assets/AppInputText.gif);

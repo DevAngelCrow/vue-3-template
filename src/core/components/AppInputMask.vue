@@ -19,6 +19,7 @@
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
         :mask="primeMask"
+        :variant="inputVariant"
       />
       <InputIcon
         v-if="showIcon"
@@ -84,7 +85,7 @@ const props = defineProps({
   },
   inputVariant: {
     type: String,
-    default: null,
+    default: 'large',
   },
   errorMessages: {
     type: String,
@@ -167,6 +168,9 @@ const primeMask = computed(() => {
   }
   if (!props.label.length) {
     return '';
+  }
+  if (props.modelValue?.length) {
+    return props.mask;
   }
 });
 

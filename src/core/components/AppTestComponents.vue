@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-
+import { onMounted, ref } from 'vue';
+const model = ref();
 onMounted(() => {});
 </script>
 
 <template>
-  <AppInputMask label="Input mask" mask="00000000-0" />
-  <AppInputText label="Input text" placeholder="00000000-0" />
+  <AppInputNumber
+    id="basic"
+    v-model="model"
+    label="Input number"
+    placeholder="0.00"
+  />
 </template>
 
 <style scoped>

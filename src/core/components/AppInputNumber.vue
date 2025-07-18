@@ -1,5 +1,5 @@
 <template>
-  <FloatLabel variant="on" class="w-full max-w-[322px]">
+  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -21,6 +21,7 @@
         :min
         :max
         :button-layout
+        :variant="inputVariant"
       >
         <template #incrementicon>
           <span
@@ -86,6 +87,14 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'simple',
+  },
+  labelVariant: {
+    type: String,
+    default: 'on',
+  },
+  inputVariant: {
+    type: String,
+    default: 'large',
   },
   errorMessages: {
     type: String,
