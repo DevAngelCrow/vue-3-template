@@ -78,9 +78,12 @@ npm run dev
 │    └── 📁 views
 │         └── 📁 module
 │
+├── 📄 .env.example
 ├── 📄 .env.local
-├── 📄 .eslintrc.js
+├── 📄 .eslint.config.ts
 ├── 📄 .gitignore
+├── 📄 .prettierrc.json
+├── 📄 .commitlint.config.ts
 ├── 📄 index.html
 ├── 📄 package.json
 ├── 📄 README.md
