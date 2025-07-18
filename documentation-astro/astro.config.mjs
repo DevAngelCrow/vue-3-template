@@ -26,6 +26,10 @@ export default defineConfig({
               label: 'Componentes',
               autogenerate: { directory: 'components' },
           },
+          {
+            label: "Script",
+            autogenerate: {directory: "scripts"}
+          }
       ],
   }), vue(), mdx()],
 
