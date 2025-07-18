@@ -14,15 +14,13 @@ import { contentGuide } from './src/content/docs/guides/content.guide';
 // https://astro.build/config
 export default defineConfig({
   integrations: [starlight({
-      title: 'My Docs',
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+      title: 'Inicio',
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/DevAngelCrow/vue-3-template.git' }],
       customCss: ["./src/styles/global.css"],
       sidebar: [
           {
               label: 'Guía',
-              items: 
-                  // Each item here is one entry in the navigation menu.
-              contentGuide,
+              items: contentGuide
           },
           {
               label: 'Componentes',

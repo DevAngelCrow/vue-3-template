@@ -1,5 +1,5 @@
 ---
-title: Estructura general del directorio de carpetas y archivos del proyecto.
+title: 3- Estructura general del directorio de carpetas y archivos del proyecto.
 description: Descripcion de la estructura del proyecto.
 ---
 

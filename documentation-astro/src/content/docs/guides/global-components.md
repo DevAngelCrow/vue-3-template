@@ -1,5 +1,5 @@
 ---
-title: Componentes globales.
+title: 4- Estructura de componentes globales.
 description: Descripcion componentes globales.
 ---
 

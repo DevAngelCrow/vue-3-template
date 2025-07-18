@@ -1,16 +1,37 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-const model = ref();
+import { Button } from 'primevue';
+const show = ref<boolean>(false);
+
+const openModal = (value: boolean) => {
+  show.value = !value;
+};
+
+const closeModal = (value: boolean) => {
+  show.value = value;
+};
+
+const confirmModal = () => {
+  //TODO
+  //aca debe hacer algo
+  closeModal(false);
+};
 onMounted(() => {});
 </script>
 
 <template>
-  <AppInputNumber
-    id="basic"
-    v-model="model"
-    label="Input number"
-    placeholder="0.00"
-  />
+  <Button @click="openModal(show)">Modal</Button>
+  <AppModal
+    :show="show"
+    @close-modal="closeModal"
+    @confirm-modal="confirmModal"
+    show-icon-close
+    title="AppModal"
+  >
+    <div>
+      <h1>Aca esta el body del modal</h1>
+    </div>
+  </AppModal>
 </template>
 
 <style scoped>

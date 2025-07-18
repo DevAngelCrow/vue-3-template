@@ -20,10 +20,6 @@ import { computed, defineEmits, onMounted } from 'vue';
 
 defineOptions({ name: 'AppFloatButton' });
 
-/*
-  multimedia_source,
-  icon,
-  className = undefined,*/
 const props = defineProps({
   multimedia_source: {
     type: String,

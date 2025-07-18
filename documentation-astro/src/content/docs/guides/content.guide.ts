@@ -1,5 +1,9 @@
 export const contentGuide = [
   {
+    label: 'Introducción',
+    link: '/guides/introduction',
+  },
+  {
     label: 'Instalación',
     link: '/guides/instalation-guide',
   },

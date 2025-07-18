@@ -1,5 +1,5 @@
 ---
-title: Guia de inicio de instalación.
+title: 2- Guia de inicio de instalación.
 description: Descripcion de la guia de instalacion.
 ---
 
