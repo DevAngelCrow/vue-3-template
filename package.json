@@ -19,7 +19,8 @@
     "initial:config": "[ -f .env.local ] || cp .env.example .env.local && npm run pre-commit && npm run commitlint && cd documentation-astro && npm install && cd ..",
     "prepare": "husky install",
     "pre-commit": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx lint-staged\\n' > .husky/pre-commit",
-    "commitlint": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx --no -- commitlint --edit \"$1\"\\n' > .husky/commit-msg"
+    "commitlint": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx --no -- commitlint --edit \"$1\"\\n' > .husky/commit-msg",
+    "dev:docs": "cd documentation-astro && npm run dev"
   },
   "lint-staged": {
     "*.{ts,vue}": [
