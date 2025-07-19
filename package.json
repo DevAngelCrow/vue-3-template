@@ -16,7 +16,7 @@
     "preview:build": "npm run build && npm run preview",
     "clean": "rm -rf dist .vite cache node_modules package-lock.json && npm cache clean --force && npm install",
     "check:node": "check-node-version --node '>=18.18.0'",
-    "dev:setup": "[ -f .env.local ] || cp .env.example .env.local && npm run pre-commit && npm run commitlint && cd documentation-astro && npm install && cd ..",
+    "dev:setup": "([ -f .env.local ] || cp .env.example .env.local) && npm run pre-commit && npm run commitlint && cd documentation-astro && npm install && cd ..",
     "prepare": "husky install",
     "pre-commit": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx lint-staged\\n' > .husky/pre-commit",
     "commitlint": "printf '#!/bin/sh\\n. \"$(dirname \"$0\")/_/husky.sh\"\\nnpx --no -- commitlint --edit \"$1\"\\n' > .husky/commit-msg",
