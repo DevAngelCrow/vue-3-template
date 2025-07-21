@@ -2,7 +2,7 @@
 @import 'tailwindcss-primeui';
 @import 'primeicons/primeicons.css';
 @theme {
-  --breakpoint-xs: 20rem;
+  --breakpoint-xs: 325px;
 }
 
 @font-face {
