@@ -1,6 +1,6 @@
 <template>
   <AppTitle title="Facturación Electrónica" />
-  <div class="w-full px-16 flex flex-col gap-6">
+  <div class="w-full md:px-16 flex flex-col gap-6">
     <Card class="w-full">
       <template #content>
         <div class="flex gap-5 flex-wrap">
@@ -16,8 +16,8 @@
       </template>
     </Card>
     <section id="card_section" class="flex flex-col gap-6 flex-wrap">
-      <div class="flex justify-between gap-5 flex-row flex-wrap grow">
-        <Card class="md:w-[400px] xs:w-full">
+      <div class="flex justify-between flex-row flex-wrap w-full xs:gap-5">
+        <Card class="md:w-[23%] xs:w-full grow">
           <template #title>
             <h1>Facturas emitidas</h1>
           </template>
@@ -36,7 +36,7 @@
             </div>
           </template>
         </Card>
-        <Card class="md:w-[400px] xs:w-full">
+        <Card class="md:w-[23%] xs:w-full grow">
           <template #title>
             <h1>Montos totales</h1>
           </template>
@@ -55,7 +55,7 @@
             </div>
           </template>
         </Card>
-        <Card class="md:w-[400px] xs:w-full">
+        <Card class="md:w-[23%] xs:w-full grow">
           <template #title>
             <h1>Estado de los documentos</h1>
           </template>
@@ -74,7 +74,7 @@
             </div>
           </template>
         </Card>
-        <Card class="md:w-[400px] xs:w-full">
+        <Card class="md:w-[23%] xs:w-full grow">
           <template #title>
             <h1>Clientes</h1>
           </template>
@@ -94,8 +94,8 @@
           </template>
         </Card>
       </div>
-      <div class="flex justify-between flex-row gap-3 flex-wrap">
-        <Card class="grow">
+      <div class="flex justify-between flex-row gap-5 flex-wrap">
+        <Card class="w-[49%] grow">
           <template #title>
             <h1>Tipos de documentos generados</h1>
           </template>
@@ -116,7 +116,7 @@
             </div>
           </template>
         </Card>
-        <Card class="grow">
+        <Card class="w-[49%] grow">
           <template #title>
             <h1>Ventas recientes</h1>
           </template>
@@ -134,7 +134,7 @@
             </div>
           </template>
         </Card>
-        <Card class="grow">
+        <Card class="w-full">
           <template #title>
             <h1>Estado de conexión con Ministerio de Hacienda</h1>
           </template>
