@@ -86,7 +86,7 @@ const { errors, defineField, handleSubmit } = useForm({
 const [user, userAttrs] = defineField('user');
 const [password, passwordAttrs] = defineField('password');
 
-const onSubMit = handleSubmit((values) => {
+const onSubMit = handleSubmit(values => {
   login(values.user, values.password);
 });
 
