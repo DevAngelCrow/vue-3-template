@@ -3,7 +3,7 @@
     class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none bg-transparent rounded-none"
   >
     <Menubar
-      class="rounded-none bg-primary-800 border-none h-full hidden md:flex"
+      class="rounded-none bg-primary-600 border-none h-full hidden md:flex"
       breakpoint="767px"
       :model="menuMapped"
     >
@@ -25,7 +25,7 @@
       </template>
       <template #end>
         <div
-          class="hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full"
+          class="hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full w-full h-full"
           @click="toggle"
           aria-haspopup="true"
           aria-controls="overlay_menu"
@@ -48,13 +48,13 @@
       </template>
     </Menubar>
     <div
-      class="hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center rounded-full md:hidden"
+      class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full md:hidden aspect-square"
       @click="toggle"
       aria-haspopup="true"
       aria-controls="overlay_menu"
     >
       <Avatar
-        class="hover:scale-100 hover:px-1 hover:py-1 transform transition-all"
+        class="hover:scale-110 hover:px-1 hover:py-1 transform transition-all"
         image="https://i.pravatar.cc/150"
         shape="circle"
         alt="prueba"
@@ -76,6 +76,9 @@ import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
 import type { Menu as MenuModel } from '../interfaces/menu.navbar.interface';
+
+defineOptions({ name: 'AppNavBarMenu' });
+
 const { menu } = defineProps({
   menu: {
     type: Array as PropType<MenuModel[]>,
@@ -93,8 +96,8 @@ const toggle = (event: MouseEvent | KeyboardEvent) => {
 
 const mapperMenuUser = () => {
   if (menu.length) {
-    menuUser.value = menu.filter((item) => item.isUser);
-    menuMapped.value = menu.filter((item) => !item.isUser);
+    menuUser.value = menu.filter(item => item.isUser);
+    menuMapped.value = menu.filter(item => !item.isUser);
   }
 };
 

@@ -17,5 +17,7 @@ import { Drawer } from 'primevue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
 
+defineOptions({ name: 'AppSideBar' });
+
 const sideBarVisible = useLayoutStore();
 </script>

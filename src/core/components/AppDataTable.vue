@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col overflow-hidden px-2 border-2 rounded-md">
+  <div class="flex flex-col overflow-hidden border-1 rounded-md">
     <DataTable
       :value="paginationCustom"
       :loading
@@ -8,12 +8,12 @@
       :rows="per_page"
     >
       <Column
-        :header-style="`width:${widthColumn(header)}; text-align: ${txtAlignHeaders(header)}; font-weight: bold`"
         :style="`width:${widthColumn(header)}; text-align: ${txtAlignItems(header)}`"
         v-for="header in headers"
         :key="header.field"
         :field="header.field"
         :sortable="header.sortable"
+        :pt="columHeader(header)"
       >
         <template #header>
           <slot :name="`header-${header.header}`" :header="header.header">
@@ -47,6 +47,25 @@ import type {
   TableProps,
 } from '../interfaces/datatable.interface';
 
+defineOptions({ name: 'AppDataTable' });
+const columHeader = computed(() => {
+  return (value: TableHeaders) => {
+    if (value.alignHeaders?.length) {
+      return {
+        ColumnHeaderContent: {
+          class: `${txtAlignHeaders(value)} font-bold`,
+          mergeProps: true,
+        },
+      };
+    }
+    return {
+      ColumnHeaderContent: {
+        class: `text-start justify-start font-bold`,
+        mergeProps: true,
+      },
+    };
+  };
+});
 const {
   headers = [],
   items = [],
@@ -80,9 +99,9 @@ const txtAlignItems = (value: TableHeaders) => {
 
 const txtAlignHeaders = (value: TableHeaders) => {
   if (!value.alignHeaders) {
-    return 'start';
+    return;
   }
-  return value.alignHeaders;
+  return `text-${value.alignHeaders} justify-${value.alignHeaders}`;
 };
 
 const updatePage = (value: number) => {

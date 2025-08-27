@@ -31,6 +31,8 @@ import { computed, type PropType } from 'vue';
 
 import { CreateDateFromFormat, FormatDate, IsDateAfter } from '../utils/dates';
 
+defineOptions({ name: 'AppDatePicker' });
+
 const props = defineProps({
   icon: {
     type: String,

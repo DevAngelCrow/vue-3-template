@@ -45,7 +45,7 @@ sudo chmod +x .husky/*
 5 - Procedemos a ejecutar el siguiente script para asentar las configuraciones iniciales:
 
 ```
-npm run initial:config
+npm run dev:setup
 ```
 
 6 - Ejecutamos el comando siguiente para iniciar la ejecución del proyecto en modo desarrollo
@@ -78,9 +78,12 @@ npm run dev
 │    └── 📁 views
 │         └── 📁 module
 │
+├── 📄 .env.example
 ├── 📄 .env.local
-├── 📄 .eslintrc.js
+├── 📄 .eslint.config.ts
 ├── 📄 .gitignore
+├── 📄 .prettierrc.json
+├── 📄 .commitlint.config.ts
 ├── 📄 index.html
 ├── 📄 package.json
 ├── 📄 README.md
@@ -123,6 +126,8 @@ npm run dev
 ## Carpeta views
 
 - 📂 views/: Contiene las vistas generales de la aplicacion.
+
+## Archivos de directorio raiz.
 
 - 📄 App.vue: Componente raíz que define la estructura base de la aplicación.
 

@@ -19,6 +19,11 @@ const routes = [
         name: 'test-view',
         component: () => import('../components/AppTestComponents.vue'),
       },
+      {
+        path: '/dashboard',
+        name: 'dashboard',
+        component: () => import('@/views/Dashboard.vue'),
+      },
     ],
   },
   {
