@@ -15,46 +15,59 @@ export const CustomTheme = definePreset(Aura, {
       900: '{stone.900}',
       950: '{stone.950}',
     },
-    surface: {
-      50: '{red.50}',
-      100: '{red.100}',
-      200: '{red.200}',
-      300: '{red.300}',
-      400: '{red.400}',
-      500: '{red.500}',
-      600: '{red.600}',
-      700: '{red.700}',
-      800: '{red.800}',
-      900: '{red.900}',
-      950: '{red.950}',
-    },
     colorScheme: {
       light: {
         primary: {
           color: '{stone.600}',
-          inverseColor: '#ffffff',
-          hoverColor: '{stone.500}',
-          activeColor: '{stone.800}',
+          inverseColor: '#FFFFFF',
+          hoverColor: '{stone.400}',
+          activeColor: '{stone.500}',
         },
         highlight: {
-          background: '{red.950}',
-          focusBackground: '{stone.700}',
-          color: '#ffffff',
-          focusColor: '#ffffff',
+          background: '{stone.600}',
+          focusBackground: '{stone.500}',
+          color: '#FFFFFF',
+          focusColor: '#FFFFFF',
+        },
+        text: {
+          color: '{stone.600}',
         },
       },
-      dark: {
-        primary: {
-          color: '{zinc.50}',
-          inverseColor: '{zinc.950}',
-          hoverColor: '{zinc.100}',
-          activeColor: '{zinc.200}',
-        },
-        highlight: {
-          background: 'rgba(250, 250, 250, .16)',
-          focusBackground: 'rgba(250, 250, 250, .24)',
-          color: 'rgba(255,255,255,.87)',
-          focusColor: 'rgba(255,255,255,.87)',
+    },
+    surface: {
+      50: '{sky.50}',
+      100: '{sky.100}',
+      200: '{sky.200}',
+      300: '{sky.300}',
+      400: '{sky.400}',
+      500: '{sky.500}',
+      600: '{sky.600}',
+      700: '{sky.700}',
+      800: '{sky.800}',
+      900: '{sky.900}',
+      950: '{sky.950}',
+    },
+  },
+  components: {
+    button: {
+      colorScheme: {
+        light: {
+          root: {
+            primary: {
+              background: '{sky.900}',
+              hoverBackground: '{sky.600}',
+              borderColor: '{sky.900}',
+              hoverBorderColor: '{sky.900}',
+              activeBackground: '{sky.950}',
+            },
+          },
+          outlined: {
+            primary: {
+              color: '{sky.900}',
+              hoverBackground: '{sky.50}',
+              borderColor: '{sky.900}',
+            },
+          },
         },
       },
     },

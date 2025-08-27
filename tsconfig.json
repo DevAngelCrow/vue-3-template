@@ -4,7 +4,6 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" },
-    {"path": "./tsconfig.vitepress.json"}
   ],
   "compilerOptions": {
     "baseUrl": ".",

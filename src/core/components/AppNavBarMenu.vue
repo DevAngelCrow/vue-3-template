@@ -3,7 +3,7 @@
     class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none bg-transparent rounded-none"
   >
     <Menubar
-      class="rounded-none bg-primary-800 border-none h-full hidden md:flex"
+      class="rounded-none bg-primary-600 border-none h-full hidden md:flex"
       breakpoint="767px"
       :model="menuMapped"
     >
@@ -96,8 +96,8 @@ const toggle = (event: MouseEvent | KeyboardEvent) => {
 
 const mapperMenuUser = () => {
   if (menu.length) {
-    menuUser.value = menu.filter((item) => item.isUser);
-    menuMapped.value = menu.filter((item) => !item.isUser);
+    menuUser.value = menu.filter(item => item.isUser);
+    menuMapped.value = menu.filter(item => !item.isUser);
   }
 };
 

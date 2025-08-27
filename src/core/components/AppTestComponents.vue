@@ -32,6 +32,7 @@ onMounted(() => {});
       <h1>Aca esta el body del modal</h1>
     </div>
   </AppModal>
+  <h1>Esto es un texto</h1>
 </template>
 
 <style scoped>
