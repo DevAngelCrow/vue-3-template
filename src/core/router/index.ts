@@ -9,6 +9,12 @@ const routes = [
     component: () => import('../../modules/auth/views/Login.vue'),
   },
   {
+    path: '/sign-up',
+    name: 'sign-up',
+    meta: { requiresAuth: false, title: 'Registro' },
+    component: () => import('../../modules/auth/views/SignUp.vue'),
+  },
+  {
     path: '/',
     name: 'layout',
     component: () => import('../layouts/Layout.vue'),

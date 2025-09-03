@@ -4,7 +4,7 @@
       class="absolute inset-0 blur-xs bg-radial-[at_50%_75%] from-primary-600 to-zinc-900 z-10"
     ></div>
     <Card
-      class="relative z-50 w-[95%] xs:w-[90%] sm:w-[60%] md:w-[50%] lg:w-[40%] lg:max-w-[500px] h-[50%]"
+      class="relative z-50 w-[95%] xs:w-[90%] sm:w-[60%] md:w-[50%] lg:w-[40%] lg:max-w-[500px] h-[50%] min-h-[360px]"
       :pt="{
         body: { class: 'flex flex-col flex-grow' },
         content: {
