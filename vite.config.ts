@@ -21,8 +21,8 @@ export default defineConfig({
       overlay: false,
     },
   },
-  logLevel: 'warn',
-  define: {
-    __VUE_PROD_DEVTOOLS__: false,
-  },
+  // logLevel: 'warn',
+  // define: {
+  //   __VUE_PROD_DEVTOOLS__: false,
+  // },
 });

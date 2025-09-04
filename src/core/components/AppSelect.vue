@@ -1,5 +1,8 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
+  <FloatLabel
+    :variant="labelVariant"
+    :class="['w-auto', 'min-w-[150px]', props.class]"
+  >
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -7,7 +10,8 @@
         id="append-icon"
       />
       <Select
-        :class
+        class="w-full"
+        :inputId="inputId"
         :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
@@ -15,7 +19,6 @@
         v-bind="$attrs"
         :autocomplete
         :placeholder="displayPlaceholder"
-        :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
         :variant="inputVarian"
@@ -58,11 +61,11 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   type: {
     type: String,
-    default: 'text',
+    default: 'select',
   },
   placeholder: {
     type: String,
@@ -191,7 +194,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;
