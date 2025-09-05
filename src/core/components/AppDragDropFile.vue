@@ -17,7 +17,7 @@
             severity="secondary"
           ></Button>
           <Button
-            @click="clearCallback()"
+            @click="onClearFiles(clearCallback)"
             icon="pi pi-times"
             rounded
             variant="outlined"
@@ -36,15 +36,14 @@
     </template>
     <template
       #content="{
-        files,
         uploadedFiles,
         removeUploadedFileCallback,
         removeFileCallback,
       }"
     >
-      <div class="flex flex-col gap-8 pt-4">
+      <div class="flex flex-col justify-center items-center gap-8 pt-4">
         <div v-if="files.length > 0">
-          <h5>Pendiente</h5>
+          <h5>Cargado</h5>
           <div class="flex flex-wrap gap-4">
             <template v-if="multiple">
               <div
@@ -66,7 +65,7 @@
                   >{{ file.name }}</span
                 >
                 <div>{{ formatSize(file.size) }}</div>
-                <Badge value="Pending" severity="warn" />
+                <Badge value="Cargado" severity="success" />
                 <Button
                   icon="pi pi-times"
                   @click="
@@ -84,14 +83,14 @@
               >
                 <img
                   role="presentation"
-                  :alt="files[0].name"
-                  :src="files[0].objectURL"
+                  :alt="headerFiles[0].name"
+                  :src="headerFiles[0].objectURL"
                   width="100"
                   height="50"
                 />
                 <span class="font-semibold">{{ files[0].name }}</span>
                 <div>{{ formatSize(files[0].size) }}</div>
-                <Badge value="Pending" severity="warn" />
+                <Badge value="Cargado" severity="success" />
                 <Button
                   icon="pi pi-times"
                   @click="
@@ -118,7 +117,7 @@
                 <img
                   role="presentation"
                   :alt="file.name"
-                  :src="file.objectURL"
+                  :src="(file as PrimeVueFile).objectURL"
                   width="100"
                   height="50"
                 />
@@ -146,7 +145,7 @@
         <i
           class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
         />
-        <p class="mt-6 mb-0">
+        <p class="mt-6 mb-0 text-center">
           {{
             multiple
               ? 'Arrastre y suelte archivos aquí para cargarlos.'
@@ -158,14 +157,15 @@
   </FileUpload>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { usePrimeVue } from 'primevue';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
-//import { useToast } from 'primevue/usetoast';
+import Button from 'primevue/button';
 import FileUpload from 'primevue/fileupload';
 import ProgressBar from 'primevue/progressbar';
-import Button from 'primevue/button';
 import Badge from 'primevue/badge';
+
+import type { PrimeVueFile } from '@/types/PrimeVueFile';
 const props = defineProps({
   multiple: {
     type: Boolean,
@@ -178,16 +178,16 @@ const props = defineProps({
 });
 
 const $primevue = usePrimeVue();
-//const toast = useToast();
 
 const totalSize = ref<number>(0);
 const totalSizePercent = ref<number>(0);
-const files = ref<File[]>([]);
+const files = ref<PrimeVueFile[]>([]);
 
-const onSelectedFiles = (event: FileUploadSelectEvent) => {
-  files.value = props.multiple ? event.files : [event.files[0]];
-  totalSize.value = files.value.reduce((acc, file) => acc + file.size, 0);
-  uploadEvent(() => {});
+const onClearFiles = (clearCallback: () => void) => {
+  clearCallback();
+  files.value = [];
+  totalSize.value = 0;
+  totalSizePercent.value = 0;
 };
 
 const uploadEvent = (callback: () => void) => {
@@ -196,23 +196,49 @@ const uploadEvent = (callback: () => void) => {
 };
 
 const onRemoveTemplatingFile = (
-  file: File,
-  removeFileCallback: () => void,
-  index: number,
+  file: PrimeVueFile,
+  removeFileCallback: (_index: number) => void,
+  _index: number,
 ) => {
-  console.log(file, 'file');
-  removeFileCallback();
-  totalSize.value -= files.value[index].size;
-  totalSizePercent.value = totalSize.value / 10000;
+  const fileIndexToRemove = files.value.findIndex(f => f === file);
+  if (fileIndexToRemove === -1) return;
+
+  totalSize.value -= file.size;
+
+  removeFileCallback(fileIndexToRemove);
+
+  files.value.splice(fileIndexToRemove, 1);
+
+  totalSizePercent.value =
+    totalSize.value > 0 ? (totalSize.value / 1000000) * 100 : 0;
 };
 
+const onSelectedFiles = (event: FileUploadSelectEvent) => {
+  const newFiles = (
+    props.multiple ? event.files : [event.files[0]]
+  ) as PrimeVueFile[];
+  if (props.multiple) {
+    files.value = [...files.value, ...newFiles];
+  } else {
+    files.value = newFiles;
+  }
+
+  totalSize.value = files.value.reduce((acc, file) => acc + file.size, 0);
+  totalSizePercent.value = (totalSize.value / 1000000) * 100;
+  uploadEvent(() => {});
+};
 const formatSize = (bytes: number): string => {
   const k = 1024;
   const dm = 3;
-  const sizes = $primevue.config.locale?.fileSizeTypes;
+  const defaultSizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const sizes = $primevue.config.locale?.fileSizeTypes || defaultSizes;
   if (bytes === 0) return `0 ${sizes[0]}`;
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
+
+const headerFiles = computed<PrimeVueFile[]>(() =>
+  files.value.map(f => f as PrimeVueFile),
+);
 </script>
 <style scoped></style>

@@ -1,9 +1,9 @@
-<!-- <template>
+<template>
   <div class="w-full h-screen bg-primary flex justify-center absolute">
     <div class="w-full bg-primary h-full flex justify-center mt-16">
       <section
         id="card_informacion_personal"
-        class="w-[95%] sm:w-[65%] md:w-[55%] bg-surface-200 h-[85%] rounded-xl flex flex-col align-top gap-10 px-3 sm:px-10 overflow-y-auto"
+        class="w-[95%] sm:w-[65%] md:w-[55%] bg-surface-200 h-[85%] rounded-xl flex flex-col align-top gap-10 px-3 py-3 sm:px-10 overflow-y-auto"
       >
         <div class="w-full mt-5 gap-5 flex flex-col">
           <AppTitle title="Registro" title-position="start" />
@@ -47,6 +47,12 @@
         <div class="flex gap-6 justify-between flex-wrap">
           <AppSelect
             class="grow"
+            id="gender"
+            v-model="gender"
+            label="Género*"
+          />
+          <AppSelect
+            class="grow"
             id="birthdate"
             v-model="birthDate"
             label="Fecha de nacimiento*"
@@ -66,31 +72,31 @@
   </div>
 </template>
 <script setup lang="ts">
-// import { useAuth } from '../composables/useAuth';
+import { useAuth } from '../composables/useAuth';
 
-// const {
-//   firstName,
-//   middleName,
-//   lastName,
-//   birthDate,
-//   gender,
-//   email,
-//   maritalStatus,
-//   imgFile,
-//   phoneNumber,
-//   status,
-//   nationalities,
-//   street,
-//   streetNumber,
-//   neighborhood,
-//   district,
-//   houseNumber,
-//   block,
-//   pathway,
-//   current,
-//   documentNumber,
-//   documentType,
-//   password,
-// } = useAuth();
+const {
+  firstName,
+  middleName,
+  lastName,
+  birthDate,
+  gender,
+  maritalStatus,
+  phoneNumber,
+  nationalities,
+  // email,
+  // imgFile,
+  // status,
+  // street,
+  // streetNumber,
+  // neighborhood,
+  // district,
+  // houseNumber,
+  // block,
+  // pathway,
+  // current,
+  // documentNumber,
+  // documentType,
+  // password,
+} = useAuth();
 </script>
-<style scoped></style> -->
+<style scoped></style>
