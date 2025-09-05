@@ -175,14 +175,25 @@ const props = defineProps({
     type: String,
     default: 'image/*',
   },
+  modelValue: {
+    type: Array as () => PrimeVueFile[],
+    default: () => [],
+  },
 });
+
+const emit = defineEmits<{
+  (_e: 'update:modelValue', _value: PrimeVueFile[]): void;
+}>();
 
 const $primevue = usePrimeVue();
 
 const totalSize = ref<number>(0);
 const totalSizePercent = ref<number>(0);
-const files = ref<PrimeVueFile[]>([]);
-
+//const files = ref<PrimeVueFile[]>([]);
+const files = computed<PrimeVueFile[]>({
+  get: () => props.modelValue,
+  set: val => emit('update:modelValue', val),
+});
 const onClearFiles = (clearCallback: () => void) => {
   clearCallback();
   files.value = [];
@@ -207,7 +218,10 @@ const onRemoveTemplatingFile = (
 
   removeFileCallback(fileIndexToRemove);
 
-  files.value.splice(fileIndexToRemove, 1);
+  const newFiles = [...files.value];
+  newFiles.splice(fileIndexToRemove, 1);
+
+  files.value = newFiles;
 
   totalSizePercent.value =
     totalSize.value > 0 ? (totalSize.value / 1000000) * 100 : 0;

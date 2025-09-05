@@ -1,40 +1,111 @@
 // composables/useAuth.ts
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useForm } from 'vee-validate';
+import * as yup from 'yup';
+
+import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 
 export function useAuth() {
-  //personal info
-  const firstName = ref<string>('');
-  const middleName = ref<string>('');
-  const lastName = ref<string>('');
-  const birthDate = ref<string>('');
-  const gender = ref<number>();
-  const maritalStatus = ref<number>();
-  const imgFile = ref<File | null>();
-  const phoneNumber = ref<string>();
-  const status = ref<number>();
-  const nationalities = ref<number[]>();
+  const { errors, defineField, handleSubmit } = useForm({
+    validationSchema: yup.object({
+      //personal info
+      firstName: yup
+        .string()
+        .required('El primer nombre es requerido')
+        .min(3, 'El nombre debe tener al menos 3 caracteres'),
+      middleName: yup
+        .string()
+        .min(3, 'El segundo nombre debe tener al menos 3 caracteres'),
+      lastName: yup
+        .string()
+        .required('El apellido es requerido')
+        .min(3, 'El apellido debe tener al menos 3 caracteres'),
+      birthDate: yup.date().required('La fecha de nacimiento es requerida'),
+      gender: yup.number().required('El género es requerido'),
+      maritalStatus: yup.number().required('El estado civil es requerido'),
+      phoneNumber: yup
+        .string()
+        .required('El número de teléfono es requerido')
+        .min(9)
+        .max(9),
+      status: yup.number().required('El campo de estado es requerido'),
+      nationalities: yup
+        .array()
+        .of(
+          yup
+            .number()
+            .required('El campo de nacionalidades es requerido')
+            .min(1, 'Debes agregar al menos una nacionalidad'),
+        ),
+      imgFile: yup
+        .mixed<File>()
+        .required('La imágen de del perfil es requerida')
+        .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
+          if (!value) return false;
+          return value.size <= 1000000;
+        })
+        .test('fileType', 'Formato no permitido', value => {
+          if (!value) return false;
+          return ['image/jpeg', 'image/png'].includes(value.type);
+        }),
+      //address info
+      street: yup
+        .string()
+        .required('El campo de nombre de calle es requerido')
+        .min(3),
+      streetNumber: yup
+        .string()
+        .required('El campo de número de calle es requerido')
+        .min(3),
+      neighborhood: yup
+        .string()
+        .required('El campo de colonia/reparto es requerido')
+        .min(5),
+      district: yup.number().required('El campo de distrito es requerido'),
+      houseNumber: yup
+        .string()
+        .required('El campo de numero de casa es requerido')
+        .min(1),
+      block: yup.string().required('El campo del block es requerido').min(1),
+      pathway: yup.string().required('El campo de pasaje es requerido').min(1),
+      current: yup.boolean(),
 
-  //address info
+      //personal document info
 
-  const street = ref<string>();
-  const streetNumber = ref<string>();
-  const neighborhood = ref<string>();
-  const district = ref<number>();
-  const houseNumber = ref<string>();
-  const block = ref<string>();
-  const pathway = ref<string>();
-  const current = ref<boolean>(false);
+      documentType: yup.number().required('El tipo del documento es requerido'),
+      documentNumber: yup
+        .string()
+        .required('El número del documento es requerido')
+        .min(1),
+      //user info
+      email: emailFormat(undefined, true, undefined),
+      password: passwordValidation(),
+    }),
+  });
 
-  //personal document info
-
-  const documentType = ref<number>();
-  const documentNumber = ref<string>();
-
-  //user info
-
-  const email = ref<string>('');
-  const password = ref<string>();
+  const [firstName, firstNameAttrs] = defineField('firstName');
+  const [middleName, middleNameAttrs] = defineField('middleName');
+  const [lastName, lastNameAttrs] = defineField('lastName');
+  const [birthDate, birthDateAttrs] = defineField('birthDate');
+  const [gender, genderAttrs] = defineField('gender');
+  const [maritalStatus, maritalStatusAttrs] = defineField('maritalStatus');
+  const [phoneNumber, phoneNumberAttrs] = defineField('phoneNumber');
+  const [status, statusAttrs] = defineField('status');
+  const [nationalities, nationalitiesAttrs] = defineField('nationalities');
+  const [imgFile, imgFileAttrs] = defineField('imgFile');
+  const [street, streetAttrs] = defineField('street');
+  const [streetNumber, streetNumberAttrs] = defineField('streetNumber');
+  const [neighborhood, neighborhoodAttrs] = defineField('neighborhood');
+  const [district, districtAttrs] = defineField('district');
+  const [houseNumber, houseNumberAttrs] = defineField('houseNumber');
+  const [block, blockAttrs] = defineField('block');
+  const [pathway, pathwayAttrs] = defineField('pathway');
+  const [current, currentAttrs] = defineField('current');
+  const [documentType, documentTypeAttrs] = defineField('documentType');
+  const [documentNumber, documentNumberAttrs] = defineField('documentNumber');
+  const [email, emailAttrs] = defineField('email');
+  const [password, passwordAttrs] = defineField('password');
 
   const router = useRouter();
   const route = useRoute();
@@ -149,6 +220,20 @@ export function useAuth() {
     return token ? `${tokenType} ${token}` : null;
   };
 
+  const signUp = (data: any) => {
+    console.log('registro', data);
+  };
+
+  const onSubMitFormRegister = handleSubmit(async values => {
+    try {
+      console.log(values, 'values');
+    } catch (error) {
+      console.log(error);
+    }
+    console.log(values, 'values');
+    await signUp(values);
+  });
+
   return {
     login,
     logout,
@@ -159,26 +244,50 @@ export function useAuth() {
     isLoading,
     error,
     firstName,
+    firstNameAttrs,
     middleName,
+    middleNameAttrs,
     lastName,
+    lastNameAttrs,
     birthDate,
+    birthDateAttrs,
     gender,
+    genderAttrs,
     email,
+    emailAttrs,
     maritalStatus,
+    maritalStatusAttrs,
     imgFile,
+    imgFileAttrs,
     phoneNumber,
+    phoneNumberAttrs,
     status,
+    statusAttrs,
     nationalities,
+    nationalitiesAttrs,
     street,
+    streetAttrs,
     streetNumber,
+    streetNumberAttrs,
     neighborhood,
+    neighborhoodAttrs,
     district,
+    districtAttrs,
     houseNumber,
+    houseNumberAttrs,
     block,
+    blockAttrs,
     pathway,
+    pathwayAttrs,
     current,
+    currentAttrs,
     documentType,
+    documentTypeAttrs,
     documentNumber,
+    documentNumberAttrs,
     password,
+    passwordAttrs,
+    onSubMitFormRegister,
+    errors,
   };
 }

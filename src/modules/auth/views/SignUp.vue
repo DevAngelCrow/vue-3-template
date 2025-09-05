@@ -1,102 +1,29 @@
 <template>
-  <div class="w-full h-screen bg-primary flex justify-center absolute">
-    <div class="w-full bg-primary h-full flex justify-center mt-16">
-      <section
-        id="card_informacion_personal"
-        class="w-[95%] sm:w-[65%] md:w-[55%] bg-surface-200 h-[85%] rounded-xl flex flex-col align-top gap-10 px-3 py-3 sm:px-10 overflow-y-auto"
-      >
-        <div class="w-full mt-5 gap-5 flex flex-col">
-          <AppTitle title="Registro" title-position="start" />
-          <span class="text-xl">Información personal:</span>
-        </div>
-        <div class="flex gap-6 flex-wrap flex-row justify-between">
-          <AppInputText
-            class="grow"
-            id="first_name"
-            v-model="firstName"
-            label="Nombre*"
-          />
-          <AppInputText
-            class="grow"
-            id="middle_name"
-            v-model="middleName"
-            label="Segundo nombre"
-          />
-          <AppInputText
-            class="grow"
-            id="phone_number"
-            v-model="phoneNumber"
-            label="Teléfono*"
-          />
-        </div>
-        <div class="flex gap-6 flex-wrap flex-row justify-between">
-          <AppInputText
-            class="grow w-full lg:w-auto"
-            id="last_name"
-            v-model="lastName"
-            label="Apellidos*"
-          />
-
-          <AppSelect
-            class="grow"
-            id="marital_status"
-            v-model="maritalStatus"
-            label="Estado civil*"
-          />
-        </div>
-        <div class="flex gap-6 justify-between flex-wrap">
-          <AppSelect
-            class="grow"
-            id="gender"
-            v-model="gender"
-            label="Género*"
-          />
-          <AppSelect
-            class="grow"
-            id="birthdate"
-            v-model="birthDate"
-            label="Fecha de nacimiento*"
-          />
-          <AppSelect
-            class="grow"
-            input-id="nationalities"
-            v-model="nationalities"
-            label="Nacionalidades*"
-          />
-        </div>
-        <div>
-          <AppDragDropFile />
-        </div>
-      </section>
+  <div class="w-full min-h-screen bg-primary flex justify-center">
+    <div class="w-full bg-primary flex justify-center mt-16">
+      <AppVerticalStepper
+        :components="components"
+        :steps="components.length"
+        ref="stepperRef"
+      />
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { useAuth } from '../composables/useAuth';
+import { reactive, markRaw } from 'vue';
 
-const {
-  firstName,
-  middleName,
-  lastName,
-  birthDate,
-  gender,
-  maritalStatus,
-  phoneNumber,
-  nationalities,
-  // email,
-  // imgFile,
-  // status,
-  // street,
-  // streetNumber,
-  // neighborhood,
-  // district,
-  // houseNumber,
-  // block,
-  // pathway,
-  // current,
-  // documentNumber,
-  // documentType,
-  // password,
-} = useAuth();
+import type { StepperVerticalInterface } from '@/core/interfaces/stepperVertical.interface';
+
+import CardPersonalInfo from '../components/CardPersonalInfo.vue';
+import CardDocumentsInfo from '../components/CardDocumentsInfo.vue';
+import CardUserInfo from '../components/CardUserInfo.vue';
+import CardAddressInfo from '../components/CardAddressInfo.vue';
+
+const components = reactive<StepperVerticalInterface[]>([
+  { component: markRaw(CardPersonalInfo), header: 'Información personal' },
+  { component: markRaw(CardAddressInfo), header: 'Dirección' },
+  { component: markRaw(CardDocumentsInfo), header: 'Documentos' },
+  { component: markRaw(CardUserInfo), header: 'Información de usuario' },
+]);
 </script>
 <style scoped></style>
