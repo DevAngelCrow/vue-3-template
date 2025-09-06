@@ -11,7 +11,12 @@
           <div
             class="flex flex-col h-auto w-full max-w-full flex-wrap justify-center items-center py-5 gap-6"
           >
-            <component :is="components[index].component" />
+            <component
+              :is="components[index].component"
+              v-bind="attrs"
+              v-on="attrs"
+              :ref="el => setComponentRefs(el, index)"
+            />
             <div class="flex flex-row gap-6 flex-wrap justify-center">
               <Button
                 v-if="step !== 1"
@@ -37,8 +42,16 @@
 <script setup lang="ts">
 import { Stepper, StepItem, Step, StepPanel, Button } from 'primevue';
 import { type PropType } from 'vue';
+import { useAttrs, ref } from 'vue';
 
 import type { StepperVerticalInterface } from '../interfaces/stepperVertical.interface';
+
+defineOptions({ inheritAttrs: false });
+
+defineEmits(); // No declares eventos específicos para permitir todos
+
+const attrs = useAttrs();
+
 const props = defineProps({
   steps: {
     type: Number,
@@ -50,14 +63,14 @@ const props = defineProps({
   },
 });
 
-// const componentRefs = ref();
-// const setComponentRefs = (element: any, index: number) => {
-//   if (element) {
-//     if (componentRefs.value) {
-//       componentRefs.value[index] = element;
-//     }
-//   }
-// };
+const componentRefs = ref();
+const setComponentRefs = (element: any, index: number) => {
+  if (element) {
+    if (componentRefs.value) {
+      componentRefs.value[index] = element;
+    }
+  }
+};
 
 const customActivateCallBack = (
   callback: Function,
@@ -77,8 +90,8 @@ const customActivateCallBack = (
   }
 };
 
-// defineExpose({
-//   componentRefs,
-// });
+defineExpose({
+  componentRefs,
+});
 </script>
 <style scoped></style>

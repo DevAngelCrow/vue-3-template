@@ -21,7 +21,7 @@
       />
     </div>
     <div class="flex justify-center items-center w-full">
-      <Button class="w-[140px]" @click="onSubMitFormRegister">Registrar</Button>
+      <Button class="w-[140px]" @click="registerData">Registrar</Button>
     </div>
   </section>
 </template>
@@ -30,7 +30,13 @@ import { Button } from 'primevue';
 
 import { useAuth } from '../composables/useAuth';
 
-const { email, password, onSubMitFormRegister } = useAuth();
+const { email, password } = useAuth();
+
+const emits = defineEmits(['register']);
+
+const registerData = () => {
+  emits('register');
+};
 
 defineExpose({
   email,
