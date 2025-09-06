@@ -9,8 +9,9 @@
         v-if="showIcon"
         id="append-icon"
       />
-      <InputText
+      <Select
         class="w-full"
+        :inputId="inputId"
         :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
@@ -18,10 +19,11 @@
         v-bind="$attrs"
         :autocomplete
         :placeholder="displayPlaceholder"
-        :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
         :variant="inputVarian"
+        :options
+        :optionLabel
       />
       <InputIcon
         v-if="showIcon"
@@ -49,7 +51,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
-import { InputText, InputIcon, Message, IconField, FloatLabel } from 'primevue';
+import { Select, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
@@ -63,7 +65,7 @@ const props = defineProps({
   },
   type: {
     type: String,
-    default: 'text',
+    default: 'select',
   },
   placeholder: {
     type: String,
@@ -93,10 +95,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  // icon: {
-  //   type: String,
-  //   default: '',
-  // },
   showIcon: {
     type: Boolean,
     default: false,
@@ -125,6 +123,16 @@ const props = defineProps({
   },
   id: {
     type: String,
+  },
+  options: {
+    //Opciones que apareceran en el desplegable del select
+    type: Array,
+    default: () => [],
+  },
+  optionLabel: {
+    //Campo que aparecera si se envia un arreglo de objetos
+    type: String,
+    default: '',
   },
 });
 

@@ -1,24 +1,29 @@
 <template>
   <div
-    class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none bg-transparent rounded-none"
+    class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none rounded-none"
   >
     <Menubar
-      class="rounded-none bg-primary-800 border-none h-full hidden md:flex"
+      class="rounded-none bg-primary border-none h-full hidden md:flex"
       breakpoint="767px"
       :model="menuMapped"
     >
       <template #item="{ item, props, hasSubmenu, root }">
         <div
-          class="flex items-center text-white hover:text-primary-800 active:text-primary-800 focus:text-primary-800"
+          class="flex items-center text-white hover:text-primary-950 group"
           v-bind="props.action"
         >
-          <i :class="`${item.icon}`"></i>
-          <span>{{ item.label }}</span>
+          <i :class="`${item.icon} group-hover:text-primary-700`"></i>
+          <span class="group-hover:text-primary-700">
+            {{ item.label }}
+          </span>
           <i
             v-if="hasSubmenu"
             :class="[
               'pi pi-angle-down ml-auto',
               { 'pi-angle-down': root, 'pi-angle-right': !root },
+              'group-focus:text-primary-700',
+              'group-active:text-primary-700',
+              'group-hover:text-primary-700',
             ]"
           ></i>
         </div>
@@ -96,8 +101,8 @@ const toggle = (event: MouseEvent | KeyboardEvent) => {
 
 const mapperMenuUser = () => {
   if (menu.length) {
-    menuUser.value = menu.filter((item) => item.isUser);
-    menuMapped.value = menu.filter((item) => !item.isUser);
+    menuUser.value = menu.filter(item => item.isUser);
+    menuMapped.value = menu.filter(item => !item.isUser);
   }
 };
 
@@ -109,16 +114,16 @@ onMounted(() => {
 @reference "@/core/assets/style.css";
 
 :deep(.p-menubar-item-active > .p-menubar-item-content > .p-menubar-item-link) {
-  @apply text-primary-600 transform transition-all; /* por ejemplo, gray-200 */ /* por ejemplo, blue-800 */
+  @apply text-primary transform transition-all;
 }
 
 :deep(
   .p-menubar-item.p-focus > .p-menubar-item-content > .p-menubar-item-link
 ) {
-  @apply text-primary-600 transform transition-all;
+  @apply text-primary transform transition-all;
 }
 
 :deep(.p-menubar-submenu .p-menubar-item-link) {
-  @apply text-primary-600;
+  @apply text-primary;
 }
 </style>

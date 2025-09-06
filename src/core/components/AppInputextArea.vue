@@ -1,16 +1,13 @@
 <template>
-  <FloatLabel
-    :variant="labelVariant"
-    :class="['w-auto', 'min-w-[150px]', props.class]"
-  >
+  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
         v-if="showIcon"
         id="append-icon"
       />
-      <InputText
-        class="w-full"
+      <Textarea
+        :class
         :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
@@ -49,7 +46,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
-import { InputText, InputIcon, Message, IconField, FloatLabel } from 'primevue';
+import { Textarea, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
@@ -59,7 +56,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full max-w-[322px]',
+    default: 'w-full',
   },
   type: {
     type: String,
@@ -186,7 +183,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  newValue => {
+  (newValue) => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

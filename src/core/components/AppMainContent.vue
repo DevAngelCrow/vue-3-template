@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col items-center justify-center w-full h-full bg-white">
+  <div
+    class="flex flex-col justify-start w-full h-full bg-primary-50 overflow-auto"
+  >
     <router-view />
   </div>
 </template>

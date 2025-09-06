@@ -45,7 +45,7 @@ sudo chmod +x .husky/*
 5 - Procedemos a ejecutar el siguiente script para asentar las configuraciones iniciales:
 
 ```
-npm run initial:config
+npm run dev:setup
 ```
 
 6 - Ejecutamos el comando siguiente para iniciar la ejecución del proyecto en modo desarrollo
