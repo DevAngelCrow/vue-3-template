@@ -1,6 +1,6 @@
 <template>
   <div class="w-full px-0 sm:px-10 bg-primary-950">
-    <Stepper :value="1">
+    <Stepper :value="1" :linear>
       <StepItem v-for="(step, index) in steps" :key="index" :value="step">
         <Step>
           <span class="text-white hover:text-gray-300">{{
@@ -15,7 +15,7 @@
               :is="components[index].component"
               v-bind="attrs"
               v-on="attrs"
-              :ref="el => setComponentRefs(el, index)"
+              ref="componentRefs"
             />
             <div class="flex flex-row gap-6 flex-wrap justify-center">
               <Button
@@ -48,11 +48,11 @@ import type { StepperVerticalInterface } from '../interfaces/stepperVertical.int
 
 defineOptions({ inheritAttrs: false });
 
-defineEmits(); // No declares eventos específicos para permitir todos
+const emits = defineEmits(['next', 'back']);
 
 const attrs = useAttrs();
 
-const props = defineProps({
+defineProps({
   steps: {
     type: Number,
     default: 1,
@@ -61,32 +61,35 @@ const props = defineProps({
     type: Array as PropType<StepperVerticalInterface[]>,
     required: true,
   },
+  linear: {
+    type: Boolean,
+    default: true,
+  },
 });
 
-const componentRefs = ref();
-const setComponentRefs = (element: any, index: number) => {
-  if (element) {
-    if (componentRefs.value) {
-      componentRefs.value[index] = element;
-    }
-  }
-};
+const componentRefs = ref<any[]>([]);
 
 const customActivateCallBack = (
   callback: Function,
   step: number,
   direction: boolean,
 ) => {
-  if (step === 1 && props.components.length > 0 && direction) {
-    callback(2);
-    return;
-  }
   if (direction) {
-    callback(step + 1);
-    return;
+    //   if (step === 1 && props.components.length > 0) {
+    //   emits('next', callback);
+    //   return;
+    // }
+    if (direction) {
+      emits('next', callback, step);
+      //callback(step + 1);
+      return;
+    }
   } else {
-    callback(step - 1);
-    return;
+    if (!direction) {
+      emits('back', callback, step);
+      //  callback(step - 1);
+      return;
+    }
   }
 };
 

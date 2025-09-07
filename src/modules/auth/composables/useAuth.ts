@@ -7,7 +7,7 @@ import * as yup from 'yup';
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 
 export function useAuth() {
-  const { errors, defineField, handleSubmit } = useForm({
+  const { errors, defineField, handleSubmit, validateField } = useForm({
     validationSchema: yup.object({
       //personal info
       firstName: yup
@@ -220,20 +220,6 @@ export function useAuth() {
     return token ? `${tokenType} ${token}` : null;
   };
 
-  const signUp = (data: any) => {
-    console.log('registro', data);
-  };
-
-  const onSubMitFormRegister = handleSubmit(async values => {
-    try {
-      console.log(values, 'values');
-    } catch (error) {
-      console.log(error);
-    }
-    console.log(values, 'values');
-    await signUp(values);
-  });
-
   return {
     login,
     logout,
@@ -287,7 +273,9 @@ export function useAuth() {
     documentNumberAttrs,
     password,
     passwordAttrs,
-    onSubMitFormRegister,
     errors,
+    handleSubmit,
+    defineField,
+    validateField,
   };
 }
