@@ -1,5 +1,8 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
+  <FloatLabel
+    :variant="labelVariant"
+    :class="['w-auto', 'min-w-[150px]', props.class]"
+  >
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -7,20 +10,20 @@
         id="append-icon"
       />
       <AutoComplete
-        :class
+        class="w-full"
         :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
         :invalid="invalid"
         v-bind="$attrs"
-        :autocomplete
         :placeholder="displayPlaceholder"
         :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
         :variant="inputVarian"
-        :options
         :optionLabel
+        :multiple
+        @complete="complete"
       />
       <InputIcon
         v-if="showIcon"
@@ -55,16 +58,17 @@ import {
   IconField,
   FloatLabel,
 } from 'primevue';
+import type { AutoCompleteCompleteEvent } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: [Array, String, Object],
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   type: {
     type: String,
@@ -127,7 +131,7 @@ const props = defineProps({
   id: {
     type: String,
   },
-  options: {
+  suggestion: {
     //Opciones que apareceran en el desplegable del select
     type: Array,
     default: () => [],
@@ -137,9 +141,13 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  multiple: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const emit = defineEmits(['update:modelValue', 'click-end-icon', 'complete']);
 
 const errors = ref<string>();
 const invalid = ref<boolean>();
@@ -189,6 +197,10 @@ const clickSecondIcon = () => {
   emit('click-end-icon');
 };
 
+const complete = (event: AutoCompleteCompleteEvent) => {
+  emit('complete', event);
+};
+
 onMounted(() => {
   if (!props.id) {
     inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
@@ -197,7 +209,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

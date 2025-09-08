@@ -67,7 +67,7 @@ defineProps({
   },
 });
 
-const componentRefs = ref<any[]>([]);
+const componentRefs = ref<unknown[]>([]);
 
 const customActivateCallBack = (
   callback: Function,

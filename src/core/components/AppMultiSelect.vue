@@ -9,8 +9,9 @@
         v-if="showIcon"
         id="append-icon"
       />
-      <InputMask
+      <MultiSelect
         class="w-full"
+        :inputId="inputId"
         :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
@@ -18,11 +19,11 @@
         v-bind="$attrs"
         :autocomplete
         :placeholder="displayPlaceholder"
-        :id="inputId"
         @focus="() => (isFocused = true)"
         @blur="() => (isFocused = false)"
-        :mask="primeMask"
-        :variant="inputVariant"
+        :variant="inputVarian"
+        :options
+        :optionLabel
       />
       <InputIcon
         v-if="showIcon"
@@ -50,13 +51,19 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
-import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
+import {
+  MultiSelect,
+  InputIcon,
+  Message,
+  IconField,
+  FloatLabel,
+} from 'primevue';
 
-defineOptions({ inheritAttrs: false, name: 'AppInputMask' });
+defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: Array,
   },
   class: {
     type: String,
@@ -64,7 +71,7 @@ const props = defineProps({
   },
   type: {
     type: String,
-    default: 'text',
+    default: 'select',
   },
   placeholder: {
     type: String,
@@ -86,7 +93,7 @@ const props = defineProps({
     type: String,
     default: 'simple',
   },
-  inputVariant: {
+  inputVarian: {
     type: String,
     default: 'large',
   },
@@ -123,7 +130,13 @@ const props = defineProps({
   id: {
     type: String,
   },
-  mask: {
+  options: {
+    //Opciones que apareceran en el desplegable del select
+    type: Array,
+    default: () => [],
+  },
+  optionLabel: {
+    //Campo que aparecera si se envia un arreglo de objetos
     type: String,
     default: '',
   },
@@ -157,23 +170,11 @@ const passwordInputType = computed(() => {
 });
 
 const displayPlaceholder = computed(() => {
-  if (isFocused.value) {
+  if (isFocused.value && props.label) {
     return props.placeholder;
   }
   if (!props.label.length) {
     return props.placeholder;
-  }
-});
-
-const primeMask = computed(() => {
-  if (isFocused.value) {
-    return props.mask;
-  }
-  if (!props.label.length) {
-    return '';
-  }
-  if (props.modelValue?.length) {
-    return props.mask;
   }
 });
 

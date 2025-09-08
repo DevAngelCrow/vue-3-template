@@ -5,8 +5,12 @@ import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
+import { PrimeVueFile } from '@/types/PrimeVueFile';
 
-export function useAuth() {
+import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
+import { DistrictsModelAutocomplete } from '../interfaces/districtsArray.interface';
+
+function createForm() {
   const { errors, defineField, handleSubmit, validateField } = useForm({
     validationSchema: yup.object({
       //personal info
@@ -29,25 +33,23 @@ export function useAuth() {
         .required('El número de teléfono es requerido')
         .min(9)
         .max(9),
-      status: yup.number().required('El campo de estado es requerido'),
+      status: yup.number() /*.required('El campo de estado es requerido')*/,
       nationalities: yup
-        .array()
-        .of(
-          yup
-            .number()
-            .required('El campo de nacionalidades es requerido')
-            .min(1, 'Debes agregar al menos una nacionalidad'),
-        ),
+        .array<NationalitiesArray>()
+        .required('El campo de nacionalidades es requerido')
+        .min(1, 'Debes agregar al menos una nacionalidad'),
       imgFile: yup
-        .mixed<File>()
+        .mixed<PrimeVueFile[]>()
         .required('La imágen de del perfil es requerida')
         .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
           if (!value) return false;
-          return value.size <= 1000000;
+          return value[0].size <= 1000000;
         })
         .test('fileType', 'Formato no permitido', value => {
           if (!value) return false;
-          return ['image/jpeg', 'image/png'].includes(value.type);
+          return ['image/jpeg', 'image/png', 'image/jpg'].includes(
+            value[0].type,
+          );
         }),
       //address info
       street: yup
@@ -62,7 +64,9 @@ export function useAuth() {
         .string()
         .required('El campo de colonia/reparto es requerido')
         .min(5),
-      district: yup.number().required('El campo de distrito es requerido'),
+      district: yup
+        .mixed<DistrictsModelAutocomplete>()
+        .required('El campo de distrito es requerido'),
       houseNumber: yup
         .string()
         .required('El campo de numero de casa es requerido')
@@ -84,28 +88,63 @@ export function useAuth() {
     }),
   });
 
-  const [firstName, firstNameAttrs] = defineField('firstName');
-  const [middleName, middleNameAttrs] = defineField('middleName');
-  const [lastName, lastNameAttrs] = defineField('lastName');
-  const [birthDate, birthDateAttrs] = defineField('birthDate');
-  const [gender, genderAttrs] = defineField('gender');
-  const [maritalStatus, maritalStatusAttrs] = defineField('maritalStatus');
-  const [phoneNumber, phoneNumberAttrs] = defineField('phoneNumber');
-  const [status, statusAttrs] = defineField('status');
-  const [nationalities, nationalitiesAttrs] = defineField('nationalities');
-  const [imgFile, imgFileAttrs] = defineField('imgFile');
-  const [street, streetAttrs] = defineField('street');
-  const [streetNumber, streetNumberAttrs] = defineField('streetNumber');
-  const [neighborhood, neighborhoodAttrs] = defineField('neighborhood');
-  const [district, districtAttrs] = defineField('district');
-  const [houseNumber, houseNumberAttrs] = defineField('houseNumber');
-  const [block, blockAttrs] = defineField('block');
-  const [pathway, pathwayAttrs] = defineField('pathway');
-  const [current, currentAttrs] = defineField('current');
-  const [documentType, documentTypeAttrs] = defineField('documentType');
-  const [documentNumber, documentNumberAttrs] = defineField('documentNumber');
-  const [email, emailAttrs] = defineField('email');
-  const [password, passwordAttrs] = defineField('password');
+  return {
+    errors,
+    handleSubmit,
+    validateField,
+    firstName: defineField('firstName')[0],
+    firstNameAttrs: defineField('firstName')[1],
+    middleName: defineField('middleName')[0],
+    middleNameAttrs: defineField('middleName')[1],
+    lastName: defineField('lastName')[0],
+    lastNameAttrs: defineField('lastName')[1],
+    birthDate: defineField('birthDate')[0],
+    birthDateAttrs: defineField('birthDate')[1],
+    gender: defineField('gender')[0],
+    genderAttrs: defineField('gender')[1],
+    maritalStatus: defineField('maritalStatus')[0],
+    maritalStatusAttrs: defineField('maritalStatus')[1],
+    phoneNumber: defineField('phoneNumber')[0],
+    phoneNumberAttrs: defineField('phoneNumber')[1],
+    status: defineField('status')[0],
+    statusAttrs: defineField('status')[1],
+    nationalities: defineField('nationalities')[0],
+    nationalitiesAttrs: defineField('nationalities')[1],
+    imgFile: defineField('imgFile')[0],
+    imgFileAttrs: defineField('imgFile')[1],
+    street: defineField('street')[0],
+    streetAttrs: defineField('street')[1],
+    streetNumber: defineField('streetNumber')[0],
+    streetNumberAttrs: defineField('streetNumber')[1],
+    neighborhood: defineField('neighborhood')[0],
+    neighborhoodAttrs: defineField('neighborhood')[1],
+    district: defineField('district')[0],
+    districtAttrs: defineField('district')[1],
+    houseNumber: defineField('houseNumber')[0],
+    houseNumberAttrs: defineField('houseNumber')[1],
+    block: defineField('block')[0],
+    blockAttrs: defineField('block')[1],
+    pathway: defineField('pathway')[0],
+    pathwayAttrs: defineField('pathway')[1],
+    current: defineField('current')[0],
+    currentAttrs: defineField('current')[1],
+    documentType: defineField('documentType')[0],
+    documentTypeAttrs: defineField('documentType')[1],
+    documentNumber: defineField('documentNumber')[0],
+    documentNumberAttrs: defineField('documentNumber')[1],
+    email: defineField('email')[0],
+    emailAttrs: defineField('email')[1],
+    password: defineField('password')[0],
+    passwordAttrs: defineField('password')[1],
+  };
+}
+
+let form: ReturnType<typeof createForm> | null = null;
+
+export function useAuth() {
+  if (!form) {
+    form = createForm();
+  }
 
   const router = useRouter();
   const route = useRoute();
@@ -229,53 +268,6 @@ export function useAuth() {
     getAuthHeader,
     isLoading,
     error,
-    firstName,
-    firstNameAttrs,
-    middleName,
-    middleNameAttrs,
-    lastName,
-    lastNameAttrs,
-    birthDate,
-    birthDateAttrs,
-    gender,
-    genderAttrs,
-    email,
-    emailAttrs,
-    maritalStatus,
-    maritalStatusAttrs,
-    imgFile,
-    imgFileAttrs,
-    phoneNumber,
-    phoneNumberAttrs,
-    status,
-    statusAttrs,
-    nationalities,
-    nationalitiesAttrs,
-    street,
-    streetAttrs,
-    streetNumber,
-    streetNumberAttrs,
-    neighborhood,
-    neighborhoodAttrs,
-    district,
-    districtAttrs,
-    houseNumber,
-    houseNumberAttrs,
-    block,
-    blockAttrs,
-    pathway,
-    pathwayAttrs,
-    current,
-    currentAttrs,
-    documentType,
-    documentTypeAttrs,
-    documentNumber,
-    documentNumberAttrs,
-    password,
-    passwordAttrs,
-    errors,
-    handleSubmit,
-    defineField,
-    validateField,
+    ...form,
   };
 }

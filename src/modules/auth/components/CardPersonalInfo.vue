@@ -9,7 +9,7 @@
     </div>
     <div class="flex gap-6 flex-wrap flex-row justify-between">
       <AppInputText
-        class="grow"
+        class="flex-1"
         id="first_name"
         v-model="firstName"
         label="Nombre*"
@@ -17,20 +17,22 @@
         v-bind="firstNameAttrs"
       />
       <AppInputText
-        class="grow"
+        class="flex-1"
         id="middle_name"
         v-model="middleName"
         label="Segundo nombre"
         :error-messages="errors.middleName"
         v-bind="middleNameAttrs"
       />
-      <AppInputText
-        class="grow"
+      <AppInputMask
+        class="flex-1"
         id="phone_number"
         v-model="phoneNumber"
         label="Teléfono*"
         :error-messages="errors.phoneNumber"
         v-bind="phoneNumberAttrs"
+        mask="9999-9999"
+        placeholder="2222-2222"
       />
     </div>
     <div class="flex gap-6 flex-wrap flex-row justify-between">
@@ -50,32 +52,44 @@
         :error-messages="errors.maritalStatus"
         label="Estado civil*"
         v-bind="maritalStatusAttrs"
+        :options="maritalStatusItems"
+        option-label="name"
+        option-value="id"
       />
     </div>
-    <div class="flex gap-6 justify-between flex-wrap">
+    <div class="flex gap-6 justify-between flex-wrap items-start">
       <AppSelect
-        class="grow"
+        class="flex-1"
         id="gender"
         v-model="gender"
         label="Género*"
         :error-messages="errors.gender"
         v-bind="genderAttrs"
+        option-label="name"
+        option-value="id"
+        :options="gendersItems"
       />
-      <AppSelect
-        class="grow"
+      <AppDatePicker
+        class="flex-1"
         id="birthdate"
         v-model="birthDate"
         label="Fecha de nacimiento*"
         :error-messages="errors.birthDate"
         v-bind="birthDateAttrs"
+        placeholder="DD/MM/AAAA"
       />
-      <AppSelect
-        class="grow"
+      <AppAutocomplete
+        class="flex-1 min-w-[170px]"
         input-id="nationalities"
         v-model="nationalities"
         label="Nacionalidades*"
         :error-messages="errors.nationalities"
         v-bind="nationalitiesAttrs"
+        option-label="name"
+        :suggestions="countriesFiltered"
+        dropdown
+        multiple
+        @complete="findAutocomplete"
       />
     </div>
     <div>
@@ -88,7 +102,15 @@
   </section>
 </template>
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { AutoCompleteCompleteEvent } from 'primevue';
+
+import authServices from '@/core/services/auth.services';
+import { Gender } from '@/core/services/interfaces/auth/gender.interface';
+import { Country } from '@/core/services/interfaces/auth/country.interface';
+
 import { useAuth } from '../composables/useAuth';
+
 const {
   firstName,
   firstNameAttrs,
@@ -111,16 +133,77 @@ const {
   errors,
 } = useAuth();
 
+const maritalStatusItems = ref<{
+  items: {
+    id: number;
+    name: string;
+    description: string;
+  }[];
+}>();
+const gendersItems = ref<Gender[]>([]);
+const countriesItems = ref<Country[]>([]);
+const countriesFiltered = ref<Country[]>([]);
+
+const getMaritalStatus = async () => {
+  const response = await authServices.getMaritalStatus();
+  console.log(response.data, 'marital');
+  maritalStatusItems.value = response.data;
+};
+
+const getGenders = async () => {
+  const response = await authServices.getGenders();
+  gendersItems.value = response.data.items;
+  console.log(response, 'gender');
+};
+const getCountries = async () => {
+  const response = await authServices.getCountriesNationalities();
+
+  countriesItems.value = response.data.items;
+  console.log(response, 'countries');
+};
+
+const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
+  console.log(event, 'evento');
+  let query = event?.query;
+  let _filteredItems = [];
+
+  for (let i = 0; i < countriesItems.value.length; i++) {
+    let item = countriesItems.value[i];
+
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
+    }
+  }
+
+  countriesFiltered.value = _filteredItems;
+};
+
+onMounted(async () => {
+  await getMaritalStatus();
+  await getGenders();
+  await getCountries();
+});
+
 defineExpose({
   firstName,
+  firstNameAttrs,
   middleName,
+  middleNameAttrs,
   lastName,
+  lastNameAttrs,
   birthDate,
+  birthDateAttrs,
   gender,
+  genderAttrs,
   maritalStatus,
+  maritalStatusAttrs,
   phoneNumber,
+  phoneNumberAttrs,
   nationalities,
+  nationalitiesAttrs,
   imgFile,
+  imgFileAttrs,
+  errors,
 });
 </script>
 <style scoped></style>

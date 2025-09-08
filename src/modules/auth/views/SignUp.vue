@@ -21,7 +21,7 @@ import CardPersonalInfo from '../components/CardPersonalInfo.vue';
 import CardDocumentsInfo from '../components/CardDocumentsInfo.vue';
 import CardUserInfo from '../components/CardUserInfo.vue';
 import CardAddressInfo from '../components/CardAddressInfo.vue';
-//import { useAuth } from '../composables/useAuth';
+import { useAuth } from '../composables/useAuth';
 
 const components = reactive<StepperVerticalInterface[]>([
   {
@@ -46,34 +46,65 @@ const components = reactive<StepperVerticalInterface[]>([
   },
 ]);
 
-// const personalInfoFieldNames = [
-//   'firstName', 'middleName', 'lastName', 'birthDate', 'gender',
-//   'maritalStatus', 'phoneNumber', 'status', 'nationalities', 'imgFile'
-// ];
+const personalInfoFieldNames = [
+  'firstName',
+  'middleName',
+  'lastName',
+  'birthDate',
+  'gender',
+  'maritalStatus',
+  'phoneNumber',
+  'status',
+  'nationalities',
+  'imgFile',
+];
 
-// const addressInfoFieldNames = [
-//   'street', 'streetNumber', 'neighborhood', 'district', 'houseNumber',
-//   'block', 'pathway', 'current'
-// ];
+const addressInfoFieldNames = [
+  'street',
+  'streetNumber',
+  'neighborhood',
+  'district',
+  'houseNumber',
+  'block',
+  'pathway',
+  'current',
+];
 
-// const documentInfoFieldNames = ['documentType', 'documentNumber'];
+const documentInfoFieldNames = ['documentType', 'documentNumber'];
 
-// const userInfoFieldNames = ['email', 'password'];
+const userInfoFieldNames = ['email', 'password'];
 
-//const { handleSubmit } = useAuth();
+const { validateField } = useAuth();
 const stepperRef = ref();
 
 const getAllFormData = () => {
   console.log(stepperRef.value.componentRefs[3].email, 'refs');
 };
 
-const next = (callback: Function, step: number) => {
-  if (step === 1 && components.length > 0) {
-    //callback(2)
-    return;
+const next = async (callback: Function, step: number) => {
+  let fieldsToValidate: string[] = [];
+  if (step === 1) {
+    fieldsToValidate = personalInfoFieldNames;
+  } else if (step === 2) {
+    fieldsToValidate = addressInfoFieldNames;
+  } else if (step === 3) {
+    fieldsToValidate = documentInfoFieldNames;
+  } else if (step === 4) {
+    fieldsToValidate = userInfoFieldNames;
   }
-  //callback(step + 1);
-  return;
+
+  if (fieldsToValidate.length > 0) {
+    const validationResults = await Promise.all(
+      fieldsToValidate.map(field => validateField(field)),
+    );
+    const allValid = validationResults.every(result => result.valid);
+
+    if (allValid) {
+      callback(step + 1);
+    }
+  } else {
+    callback(step + 1);
+  }
 };
 const back = (callback: Function, step: number) => {
   callback(step - 1);

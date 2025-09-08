@@ -12,24 +12,57 @@
         id="document_type"
         label="Tipo de documento*"
         v-model="documentType"
+        v-bind="documentTypeAttrs"
+        :error-messages="errors.documentType"
+        :options="documentTypesItems"
+        option-value="id"
+        option-label="name"
       />
       <AppInputText
         class="grow"
         id="document"
         label="Número de documento*"
         v-model="documentNumber"
+        v-bind="documentNumberAttrs"
+        :error-messages="errors.documentNumber"
       />
     </div>
   </section>
 </template>
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
+
+import authServices from '@/core/services/auth.services';
+import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
+
 import { useAuth } from '../composables/useAuth';
 
-const { documentType, documentNumber } = useAuth();
+const {
+  documentType,
+  documentTypeAttrs,
+  documentNumber,
+  documentNumberAttrs,
+  errors,
+} = useAuth();
+
+const documentTypesItems = ref<DocumentType[]>([]);
+
+const getDocumentTypes = async () => {
+  const response = await authServices.getDocumentTypes();
+
+  documentTypesItems.value = response.data.items;
+};
+
+onMounted(async () => {
+  await getDocumentTypes();
+});
 
 defineExpose({
   documentType,
+  documentTypeAttrs,
   documentNumber,
+  documentNumberAttrs,
+  errors,
 });
 </script>
 <style scoped>

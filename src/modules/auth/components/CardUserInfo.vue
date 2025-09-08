@@ -12,12 +12,16 @@
         id="email"
         label="Correo electrónico*"
         v-model="email"
+        v-bind="emailAttrs"
+        :error-messages="errors.email"
       />
       <AppInputText
         class="grow"
         id="password"
         label="Contraseña*"
         v-model="password"
+        v-bind="passwordAttrs"
+        :error-messages="errors.password"
       />
     </div>
     <div class="flex justify-center items-center w-full">
@@ -30,7 +34,7 @@ import { Button } from 'primevue';
 
 import { useAuth } from '../composables/useAuth';
 
-const { email, password } = useAuth();
+const { email, emailAttrs, password, passwordAttrs, errors } = useAuth();
 
 const emits = defineEmits(['register']);
 
@@ -40,7 +44,10 @@ const registerData = () => {
 
 defineExpose({
   email,
+  emailAttrs,
   password,
+  passwordAttrs,
+  errors,
 });
 </script>
 <style scoped></style>
