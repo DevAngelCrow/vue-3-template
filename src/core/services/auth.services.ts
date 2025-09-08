@@ -8,6 +8,7 @@ import { Gender } from './interfaces/auth/gender.interface';
 //import { GetAllDocumentTypeResponse } from "./interfaces/auth/getAllDocumentTypeResponse.interface";
 //import { GetAllGenderResponse } from "./interfaces/auth/getAllGendersResponse.interface";
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
+//import { PostSignUp } from './interfaces/auth/postSignUp.interface';
 //import { GetAllNationalitiesResponse } from "./interfaces/auth/getAllNationalitiesResponse.interface";
 
 const getMaritalStatus = async (): Promise<
@@ -52,10 +53,16 @@ const getDocumentTypes = async (): Promise<
   return response.data;
 };
 
+const signUp = async (data: FormData) => {
+  const response = await httpClient.post('auth/sign-up', data);
+  return response;
+};
+
 export default {
   getMaritalStatus,
   getGenders,
   getCountriesNationalities,
   getDistricts,
   getDocumentTypes,
+  signUp,
 };

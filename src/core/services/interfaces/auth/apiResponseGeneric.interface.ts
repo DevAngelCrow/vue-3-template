@@ -4,7 +4,7 @@ export interface ApiResponseGeneric<T> {
   data: {
     items: T[];
     pagination: Pagination;
-    message: string;
-    statusCode: number;
   };
+  message: string;
+  statusCode: number;
 }

@@ -8,7 +8,7 @@
     </div>
     <div class="flex gap-6 flex-wrap flex-row justify-between">
       <AppSelect
-        class="grow min-w-[200px]"
+        class="flex-1"
         id="document_type"
         label="Tipo de documento*"
         v-model="documentType"
@@ -19,7 +19,7 @@
         option-label="name"
       />
       <AppInputText
-        class="grow"
+        class="flex-1"
         id="document"
         label="Número de documento*"
         v-model="documentNumber"
@@ -34,6 +34,7 @@ import { onMounted, ref } from 'vue';
 
 import authServices from '@/core/services/auth.services';
 import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
+import { useLoaderStore } from '@/core/store';
 
 import { useAuth } from '../composables/useAuth';
 
@@ -45,12 +46,22 @@ const {
   errors,
 } = useAuth();
 
+const { startLoading, finishLoading } = useLoaderStore();
+
 const documentTypesItems = ref<DocumentType[]>([]);
 
 const getDocumentTypes = async () => {
-  const response = await authServices.getDocumentTypes();
-
-  documentTypesItems.value = response.data.items;
+  try {
+    startLoading();
+    const response = await authServices.getDocumentTypes();
+    if (response.statusCode === 200) {
+      documentTypesItems.value = response.data.items;
+    }
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 };
 
 onMounted(async () => {

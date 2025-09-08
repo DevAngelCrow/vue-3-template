@@ -85,6 +85,7 @@ function createForm() {
       //user info
       email: emailFormat(undefined, true, undefined),
       password: passwordValidation(),
+      userName: yup.string().required('El nombre del usuario es requerido'),
     }),
   });
 
@@ -136,6 +137,8 @@ function createForm() {
     emailAttrs: defineField('email')[1],
     password: defineField('password')[0],
     passwordAttrs: defineField('password')[1],
+    userName: defineField('userName')[0],
+    userNameAttrs: defineField('userName')[1],
   };
 }
 

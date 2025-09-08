@@ -37,16 +37,24 @@
     </div>
     <div class="flex gap-6 flex-wrap flex-row justify-between">
       <AppInputText
-        class="grow w-full lg:w-auto"
+        class="flex-1"
         id="last_name"
         v-model="lastName"
         :error-messages="errors.lastName"
         label="Apellidos*"
         v-bind="lastNameAttrs"
       />
-
+      <AppInputText
+        class="flex-1"
+        id="email"
+        v-model="email"
+        :error-messages="errors.email"
+        label="Email*"
+        placeholder="juan@mail.com"
+        v-bind="emailAttrs"
+      />
       <AppSelect
-        class="grow"
+        class="flex-1"
         id="marital_status"
         v-model="maritalStatus"
         :error-messages="errors.maritalStatus"
@@ -105,6 +113,7 @@
 import { onMounted, ref } from 'vue';
 import { AutoCompleteCompleteEvent } from 'primevue';
 
+import { useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import { Gender } from '@/core/services/interfaces/auth/gender.interface';
 import { Country } from '@/core/services/interfaces/auth/country.interface';
@@ -112,6 +121,8 @@ import { Country } from '@/core/services/interfaces/auth/country.interface';
 import { useAuth } from '../composables/useAuth';
 
 const {
+  email,
+  emailAttrs,
   firstName,
   firstNameAttrs,
   middleName,
@@ -133,6 +144,8 @@ const {
   errors,
 } = useAuth();
 
+const { startLoading, finishLoading } = useLoaderStore();
+
 const maritalStatusItems = ref<{
   items: {
     id: number;
@@ -145,25 +158,48 @@ const countriesItems = ref<Country[]>([]);
 const countriesFiltered = ref<Country[]>([]);
 
 const getMaritalStatus = async () => {
-  const response = await authServices.getMaritalStatus();
-  console.log(response.data, 'marital');
-  maritalStatusItems.value = response.data;
+  try {
+    startLoading();
+    const response = await authServices.getMaritalStatus();
+    console.log(response);
+    if (response.statusCode === 200) {
+      maritalStatusItems.value = response.data;
+    }
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 };
 
 const getGenders = async () => {
-  const response = await authServices.getGenders();
-  gendersItems.value = response.data.items;
-  console.log(response, 'gender');
+  try {
+    startLoading();
+    const response = await authServices.getGenders();
+    if (response.statusCode === 200) {
+      gendersItems.value = response.data.items;
+    }
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 };
 const getCountries = async () => {
-  const response = await authServices.getCountriesNationalities();
-
-  countriesItems.value = response.data.items;
-  console.log(response, 'countries');
+  try {
+    startLoading();
+    const response = await authServices.getCountriesNationalities();
+    if (response.statusCode === 200) {
+      countriesItems.value = response.data.items;
+    }
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 };
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-  console.log(event, 'evento');
   let query = event?.query;
   let _filteredItems = [];
 
@@ -174,7 +210,6 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
       _filteredItems.push(item);
     }
   }
-
   countriesFiltered.value = _filteredItems;
 };
 

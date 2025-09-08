@@ -24,6 +24,7 @@
         :optionLabel
         :multiple
         @complete="complete"
+        autocomplete
       />
       <InputIcon
         v-if="showIcon"

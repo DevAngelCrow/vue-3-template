@@ -44,7 +44,7 @@
       <div class="flex gap-6 flex-wrap flex-col justify-between grow">
         <AppAutocomplete
           v-model="district"
-          class="grow"
+          class="flex-1"
           label="Distrito*"
           id="district"
           v-bind="districtAttrs"
@@ -56,7 +56,7 @@
         />
         <AppInputText
           v-model="houseNumber"
-          class="grow"
+          class="flex-1"
           label="No. de casa*"
           id="house_number"
           v-bind="houseNumberAttrs"
@@ -64,7 +64,7 @@
         />
         <AppInputText
           v-model="block"
-          class="grow"
+          class="flex-1"
           label="Block*"
           id="block"
           v-bind="blockAttrs"
@@ -93,6 +93,7 @@ import { onMounted, ref } from 'vue';
 
 import authServices from '@/core/services/auth.services';
 import { District } from '@/core/services/interfaces/auth/district.interface';
+import { useLoaderStore } from '@/core/store';
 
 import { useAuth } from '../composables/useAuth';
 
@@ -116,16 +117,26 @@ const {
   errors,
 } = useAuth();
 
+const { startLoading, finishLoading } = useLoaderStore();
+
 const districtItems = ref<District[]>([]);
 const districtsFiltered = ref<District[]>([]);
 
 const getDistricts = async () => {
-  const response = await authServices.getDistricts();
-  districtItems.value = response.data.items;
+  try {
+    startLoading();
+    const response = await authServices.getDistricts();
+    if (response.statusCode === 200) {
+      districtItems.value = response.data.items;
+    }
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 };
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-  console.log(event, 'evento');
   let query = event?.query;
   let _filteredItems = [];
 
