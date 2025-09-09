@@ -19,7 +19,10 @@ registerDirectives(app);
 app.use(PrimeVue, {
   theme: {
     preset: CustomTheme,
-    options: { cssLayer: { name: 'primevue', order: 'theme, base, primevue' } },
+    options: {
+      darkModeSelector: 'none',
+      cssLayer: { name: 'primevue', order: 'theme, base, primevue' },
+    },
   },
 });
 app.use(pinia);

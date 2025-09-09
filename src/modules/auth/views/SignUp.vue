@@ -149,8 +149,7 @@ const onSubmitStepPersonalInfo = handleSubmit(async values => {
     form.append('id_type_document', values.documentType);
     form.append('document_number', values.documentNumber);
     form.append('active', '1');
-    form.append('description', 'hijos de perra');
-    console.log([...form.entries()]);
+    form.append('description', '_');
     await authServices.signUp(form);
   } catch (error: unknown) {
     console.error(error);

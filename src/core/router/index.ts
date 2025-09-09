@@ -38,6 +38,12 @@ const routes = [
     meta: { requiresAuth: false, title: 'Acceso denegado' },
     component: () => import('../../views/Forbidden.vue'),
   },
+  {
+    path: '/verify-email',
+    name: 'verify-email',
+    meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },
+    component: () => import('../../modules/auth/views/VerifyEmail.vue'),
+  },
 ];
 
 const router = createRouter({

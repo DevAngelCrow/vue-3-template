@@ -1,3 +1,5 @@
+import { LocationQueryValue } from 'vue-router';
+
 import { httpClient } from '../utils/httpClient';
 import { ApiResponseGeneric } from './interfaces/auth/apiResponseGeneric.interface';
 import { Country } from './interfaces/auth/country.interface';
@@ -58,6 +60,23 @@ const signUp = async (data: FormData) => {
   return response;
 };
 
+const verifyEmail = async (
+  url: LocationQueryValue[] | undefined | LocationQueryValue,
+) => {
+  let urlFormatedString = url?.toString();
+  let response;
+  if (url === null || url === undefined) {
+    urlFormatedString = '';
+  }
+  if (Array.isArray(url)) {
+    urlFormatedString = url.find(value => value !== null) || '';
+  }
+  if (urlFormatedString) {
+    response = await httpClient.get(urlFormatedString);
+  }
+  return response;
+};
+
 export default {
   getMaritalStatus,
   getGenders,
@@ -65,4 +84,5 @@ export default {
   getDistricts,
   getDocumentTypes,
   signUp,
+  verifyEmail,
 };
