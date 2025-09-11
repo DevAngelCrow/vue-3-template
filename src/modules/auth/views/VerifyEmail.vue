@@ -9,12 +9,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 import { useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 
 const { query } = useRoute();
+const router = useRouter();
 const useLoader = useLoaderStore();
 const { isLoading } = storeToRefs(useLoader);
 
@@ -27,6 +29,7 @@ const verifyEmail = async () => {
       const response = await authServices.verifyEmail(query.url);
       if (response?.status === 200) {
         stateVerified.value = true;
+        router.push({name: 'login'});
       } else {
         stateVerified.value = false;
       }

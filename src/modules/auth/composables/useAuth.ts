@@ -190,14 +190,14 @@ export function useAuth() {
 
       const data = await response.json();
 
-      if (data.access_token) {
+      if (data.data.access_token) {
         localStorage.setItem('auth_token', data.access_token);
 
-        if (data.user) {
+        if (data.data.user) {
           localStorage.setItem('user', JSON.stringify(data.user));
         }
 
-        if (data.token_type) {
+        if (data.data.token_type) {
           localStorage.setItem('token_type', data.token_type);
         }
         const redirectTo = (route.query.redirect as string) || '/';
