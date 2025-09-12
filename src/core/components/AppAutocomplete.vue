@@ -1,7 +1,7 @@
 <template>
-  <FloatLabel
+  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+    <FloatLabel
     :variant="labelVariant"
-    :class="['w-auto', 'min-w-[150px]', props.class]"
   >
     <IconField class="w-full group">
       <InputIcon
@@ -36,19 +36,20 @@
         id="append-icon"
         @click="clickSecondIcon"
       />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
+    </IconField>
+    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+      label
+    }}</label>
+  </FloatLabel>
+  <Message
+        class="left-0 top-full mt-0 text-xs z-10"
         v-if="errorMessages.length"
         :severity
         :size
         :variant
         >{{ messageErrorField }}</Message
       >
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';

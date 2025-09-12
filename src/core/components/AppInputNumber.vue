@@ -1,56 +1,31 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
-    <IconField class="w-full group">
-      <InputIcon
-        :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
-        v-if="showIcon"
-      />
-      <InputNumber
-        :class
-        type="text"
-        :model-value="modelValue"
-        @update:model-value="onUpdate"
-        :invalid="invalid"
-        v-bind="$attrs"
-        :autocomplete
-        :placeholder="displayPlaceholder"
-        :id="inputId"
-        @focus="() => (isFocused = true)"
-        @blur="() => (isFocused = false)"
-        :show-buttons
-        :min
-        :max
-        :button-layout
-        :variant="inputVariant"
-      >
-        <template #incrementicon>
-          <span
-            :class="
-              buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
-            "
-          />
-        </template>
-        <template #decrementicon>
-          <span
-            :class="
-              buttonLayout === 'vertical' ? 'pi pi-chevron-down' : 'pi pi-minus'
-            "
-          />
-        </template>
-      </InputNumber>
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
-        v-if="errorMessages.length"
-        :severity
-        :size
-        :variant
-        >{{ messageErrorField }}</Message
-      >
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  <div class="w-full max-w-[322px] relative">
+    <FloatLabel :variant="labelVariant">
+      <IconField class="w-full group">
+        <InputIcon :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon" v-if="showIcon" />
+        <InputNumber :class type="text" :model-value="modelValue" @update:model-value="onUpdate" :invalid="invalid"
+          v-bind="$attrs" :autocomplete :placeholder="displayPlaceholder" :id="inputId"
+          @focus="() => (isFocused = true)" @blur="() => (isFocused = false)" :show-buttons :min :max :button-layout
+          :variant="inputVariant">
+          <template #incrementicon>
+            <span :class="buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
+              " />
+          </template>
+          <template #decrementicon>
+            <span :class="buttonLayout === 'vertical' ? 'pi pi-chevron-down' : 'pi pi-minus'
+              " />
+          </template>
+        </InputNumber>
+
+      </IconField>
+      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+        label
+        }}</label>
+    </FloatLabel>
+    <Message class="left-0 top-full mt-0 text-xs z-10" v-if="errorMessages.length" :severity :size :variant>{{
+      messageErrorField }}</Message>
+  </div>
+
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';

@@ -1,5 +1,6 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
+  <div class="w-full max-w-[322px] relative"> 
+    <FloatLabel :variant="labelVariant">
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -30,19 +31,20 @@
         id="append-icon"
         @click="clickSecondIcon"
       />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
+    </IconField>
+    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+      label
+    }}</label>
+  </FloatLabel>
+  <Message
+        class="left-0 top-full mt-0 text-xs z-10"
         v-if="errorMessages.length"
         :severity
         :size
         :variant
         >{{ messageErrorField }}</Message
       >
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';

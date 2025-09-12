@@ -1,7 +1,8 @@
 <template>
-  <FloatLabel
+  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+    <FloatLabel
     :variant="labelVariant"
-    :class="['w-auto', 'min-w-[150px]', props.class]"
+    
   >
     <IconField class="w-full group">
       <InputIcon
@@ -32,6 +33,7 @@
         :show-time
         @focus="isFocused = true"
         @blur="isFocused = false"
+        :invalid="invalid"
       />
       <InputIcon
         v-if="showIcon"
@@ -43,8 +45,14 @@
         id="append-icon"
         @click="clickSecondIcon"
       />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
+      
+    </IconField>
+    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+      label
+    }}</label>
+  </FloatLabel>
+  <Message
+        class="left-0 top-full mt-0 text-xs z-10"
         v-if="errorMessages.length"
         :severity
         :size
@@ -52,11 +60,8 @@
       >
         {{ messageErrorField }}
       </Message>
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  </div>
+  
 </template>
 <script setup lang="ts">
 import {
