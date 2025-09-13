@@ -167,6 +167,10 @@ const IsDateBetween = (
   }
 };
 
+const getToday = (formatOutput: string = 'YYYY-MM-DDTHH:mm:ss'): string => {
+  return dayjs().format(formatOutput);
+};
+
 export {
   FormatDate,
   FormatDateToISO,
@@ -175,4 +179,5 @@ export {
   IsDateSame,
   IsDateSameOrAfter,
   IsDateBetween,
+  getToday,
 };

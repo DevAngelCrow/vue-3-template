@@ -20,7 +20,7 @@ onMounted(() => {});
 </script>
 
 <template>
-  <Button @click="openModal(show)">Modal</Button>
+  <Button class="mt-10" @click="openModal(show)">Modal</Button>
   <AppModal
     :show="show"
     @close-modal="closeModal"

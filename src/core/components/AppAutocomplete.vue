@@ -1,50 +1,55 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
-    <IconField class="w-full group">
-      <InputIcon
-        :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
-        v-if="showIcon"
-        id="append-icon"
-      />
-      <AutoComplete
-        :class
-        :type="typeInputLocal"
-        :model-value="modelValue"
-        @update:model-value="onUpdate"
-        :invalid="invalid"
-        v-bind="$attrs"
-        :autocomplete
-        :placeholder="displayPlaceholder"
-        :id="inputId"
-        @focus="() => (isFocused = true)"
-        @blur="() => (isFocused = false)"
-        :variant="inputVarian"
-        :options
-        :optionLabel
-      />
-      <InputIcon
-        v-if="showIcon"
-        :class="
-          invalid
-            ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
-            : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
-        "
-        id="append-icon"
-        @click="clickSecondIcon"
-      />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
-        v-if="errorMessages.length"
-        :severity
-        :size
-        :variant
-        >{{ messageErrorField }}</Message
-      >
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+    <FloatLabel :variant="labelVariant">
+      <IconField class="w-full group">
+        <InputIcon
+          :class="
+            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
+          "
+          v-if="showIcon"
+          id="append-icon"
+        />
+        <AutoComplete
+          class="w-full"
+          :type="typeInputLocal"
+          :model-value="modelValue"
+          @update:model-value="onUpdate"
+          :invalid="invalid"
+          v-bind="$attrs"
+          :placeholder="displayPlaceholder"
+          :id="inputId"
+          @focus="() => (isFocused = true)"
+          @blur="() => (isFocused = false)"
+          :variant="inputVarian"
+          :optionLabel
+          :multiple
+          @complete="complete"
+          autocomplete
+        />
+        <InputIcon
+          v-if="showIcon"
+          :class="
+            invalid
+              ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
+              : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
+          "
+          id="append-icon"
+          @click="clickSecondIcon"
+        />
+      </IconField>
+      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+        label
+      }}</label>
+    </FloatLabel>
+    <Message
+      class="left-0 top-full mt-0 text-xs z-10"
+      v-if="errorMessages.length"
+      :severity
+      :size
+      :variant
+      >{{ messageErrorField }}</Message
+    >
+  </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
@@ -55,16 +60,17 @@ import {
   IconField,
   FloatLabel,
 } from 'primevue';
+import type { AutoCompleteCompleteEvent } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: [Array, String, Object],
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   type: {
     type: String,
@@ -88,7 +94,7 @@ const props = defineProps({
   },
   labelVariant: {
     type: String,
-    default: 'simple',
+    default: 'on',
   },
   inputVarian: {
     type: String,
@@ -127,7 +133,7 @@ const props = defineProps({
   id: {
     type: String,
   },
-  options: {
+  suggestion: {
     //Opciones que apareceran en el desplegable del select
     type: Array,
     default: () => [],
@@ -137,9 +143,13 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  multiple: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const emit = defineEmits(['update:modelValue', 'click-end-icon', 'complete']);
 
 const errors = ref<string>();
 const invalid = ref<boolean>();
@@ -189,6 +199,10 @@ const clickSecondIcon = () => {
   emit('click-end-icon');
 };
 
+const complete = (event: AutoCompleteCompleteEvent) => {
+  emit('complete', event);
+};
+
 onMounted(() => {
   if (!props.id) {
     inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
@@ -197,7 +211,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

@@ -15,5 +15,5 @@
 
 body {
   font-family: 'MuseoSans', sans-serif;
-  @apply text-primary-600
+  @apply text-primary
 }

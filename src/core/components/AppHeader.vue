@@ -1,5 +1,5 @@
 <template>
-  <section class="w-full h-full bg-primary-600">
+  <section class="w-full h-full bg-primary">
     <div
       class="w-full h-full bg-transparent flex justify-start items-center align-baseline"
     >

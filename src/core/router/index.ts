@@ -9,6 +9,12 @@ const routes = [
     component: () => import('../../modules/auth/views/Login.vue'),
   },
   {
+    path: '/sign-up',
+    name: 'sign-up',
+    meta: { requiresAuth: false, title: 'Registro' },
+    component: () => import('../../modules/auth/views/SignUp.vue'),
+  },
+  {
     path: '/',
     name: 'layout',
     component: () => import('../layouts/Layout.vue'),
@@ -31,6 +37,12 @@ const routes = [
     name: 'forbidden',
     meta: { requiresAuth: false, title: 'Acceso denegado' },
     component: () => import('../../views/Forbidden.vue'),
+  },
+  {
+    path: '/verify-email',
+    name: 'verify-email',
+    meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },
+    component: () => import('../../modules/auth/views/VerifyEmail.vue'),
   },
 ];
 

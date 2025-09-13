@@ -1,5 +1,8 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
+  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+    <FloatLabel
+    :variant="labelVariant"
+  >
     <IconField class="w-full group">
       <InputIcon
         :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
@@ -7,7 +10,7 @@
         id="append-icon"
       />
       <InputText
-        :class
+        class="w-full"
         :type="typeInputLocal"
         :model-value="modelValue"
         @update:model-value="onUpdate"
@@ -30,19 +33,21 @@
         id="append-icon"
         @click="clickSecondIcon"
       />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
+    </IconField>
+    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+      label
+    }}</label>
+  </FloatLabel>
+  <Message
+        class="left-0 top-full mt-0 text-xs z-10"
         v-if="errorMessages.length"
         :severity
         :size
         :variant
         >{{ messageErrorField }}</Message
       >
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  </div>
+  
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
@@ -56,7 +61,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   type: {
     type: String,
@@ -80,7 +85,7 @@ const props = defineProps({
   },
   labelVariant: {
     type: String,
-    default: 'simple',
+    default: 'on',
   },
   inputVarian: {
     type: String,
@@ -183,7 +188,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

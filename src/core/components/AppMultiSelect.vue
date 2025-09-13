@@ -1,70 +1,51 @@
 <template>
-  <div class="w-full max-w-[322px] relative">
+  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
-        <InputIcon
-          :class="
-            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
-          "
-          v-if="showIcon"
-          id="append-icon"
-        />
-        <Textarea
-          :class
-          :type="typeInputLocal"
-          :model-value="modelValue"
-          @update:model-value="onUpdate"
-          :invalid="invalid"
-          v-bind="$attrs"
-          :autocomplete
-          :placeholder="displayPlaceholder"
-          :id="inputId"
-          @focus="() => (isFocused = true)"
-          @blur="() => (isFocused = false)"
-          :variant="inputVarian"
-        />
-        <InputIcon
-          v-if="showIcon"
-          :class="
-            invalid
-              ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
-              : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
-          "
-          id="append-icon"
-          @click="clickSecondIcon"
-        />
+        <InputIcon :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon" v-if="showIcon"
+          id="append-icon" />
+        <MultiSelect class="w-full" :inputId="inputId" :type="typeInputLocal" :model-value="modelValue"
+          @update:model-value="onUpdate" :invalid="invalid" v-bind="$attrs" :autocomplete
+          :placeholder="displayPlaceholder" @focus="() => (isFocused = true)" @blur="() => (isFocused = false)"
+          :variant="inputVarian" :options :optionLabel />
+        <InputIcon v-if="showIcon" :class="invalid
+            ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
+            : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
+          " id="append-icon" @click="clickSecondIcon" />
+
       </IconField>
       <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
         label
-      }}</label>
+        }}</label>
     </FloatLabel>
-    <Message
-      class="left-0 top-full mt-0 text-xs z-10"
-      v-if="errorMessages.length"
-      :severity
-      :size
-      :variant
-      >{{ messageErrorField }}</Message
-    >
+    <Message class="left-0 top-full mt-0 text-xs z-10" v-if="errorMessages.length" :severity :size :variant>{{
+      messageErrorField }}</Message>
   </div>
+
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
-import { Textarea, InputIcon, Message, IconField, FloatLabel } from 'primevue';
+import {
+  MultiSelect,
+  InputIcon,
+  Message,
+  IconField,
+  FloatLabel,
+} from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: Array,
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   type: {
     type: String,
-    default: 'text',
+    default: 'select',
   },
   placeholder: {
     type: String,
@@ -84,7 +65,7 @@ const props = defineProps({
   },
   labelVariant: {
     type: String,
-    default: 'on',
+    default: 'simple',
   },
   inputVarian: {
     type: String,
@@ -94,10 +75,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  // icon: {
-  //   type: String,
-  //   default: '',
-  // },
   showIcon: {
     type: Boolean,
     default: false,
@@ -126,6 +103,16 @@ const props = defineProps({
   },
   id: {
     type: String,
+  },
+  options: {
+    //Opciones que apareceran en el desplegable del select
+    type: Array,
+    default: () => [],
+  },
+  optionLabel: {
+    //Campo que aparecera si se envia un arreglo de objetos
+    type: String,
+    default: '',
   },
 });
 
