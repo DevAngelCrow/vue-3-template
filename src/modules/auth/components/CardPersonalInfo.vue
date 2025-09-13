@@ -15,7 +15,6 @@
         label="Nombre*"
         :error-messages="errors.firstName"
         v-bind="firstNameAttrs"
-        labelVariant="on"
       />
       <AppInputText
         class="flex-1"
