@@ -40,18 +40,20 @@ function createForm() {
         .min(1, 'Debes agregar al menos una nacionalidad'),
       imgFile: yup
         .mixed<PrimeVueFile[]>()
-        .required('La imágen de del perfil es requerida')
+        .test('required', 'La imágen del perfil es requerida', value => Array.isArray(value) && value.length > 0)
+        .required('La imágen del perfil es requerida')
         .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
-          if (!value) return false;
-          return value[0].size <= 1000000;
+          if (!value || value.length === 0) return true; 
+          return value.every(file => file.size <= 1000000);
         })
         .test('fileType', 'Formato no permitido', value => {
-          if (!value) return false;
-          return ['image/jpeg', 'image/png', 'image/jpg'].includes(
-            value[0].type,
+          if (!value || value.length === 0) return true; 
+          return value.every(file =>
+            ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
           );
         }),
       //address info
+      
       street: yup
         .string()
         .required('El campo de nombre de calle es requerido')
@@ -184,7 +186,7 @@ export function useAuth() {
 
         throw new Error(
           errorData.message ||
-            `Error ${response.status}: ${response.statusText}`,
+          `Error ${response.status}: ${response.statusText}`,
         );
       }
 

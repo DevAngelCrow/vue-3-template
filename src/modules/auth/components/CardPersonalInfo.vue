@@ -1,7 +1,7 @@
 <template>
   <section
     id="card_informacion_personal"
-    class="w-[95%] min-h-[750px] sm:w-[65%] md:w-[55%] bg-surface-200 h-[85%] rounded-xl flex flex-col align-top gap-10 px-3 py-3 sm:px-10 overflow-y-auto"
+    class="w-[95%] min-h-[750px] sm:w-[65%] md:w-[55%] bg-surface-200 h-[85%] rounded-xl flex flex-col align-top gap-5 px-3 py-3 sm:px-10 overflow-y-auto"
   >
     <div class="w-full mt-5 gap-5 flex flex-col">
       <AppTitle title="Registro" title-position="start" />
@@ -105,6 +105,7 @@
         accept="image/*"
         v-model="imgFile"
         v-bind="imgFileAttrs"
+        :error-messages="errors.imgFile"
       />
     </div>
   </section>

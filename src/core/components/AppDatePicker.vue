@@ -1,62 +1,64 @@
 <template>
-  <FloatLabel
-    :variant="labelVariant"
-    :class="['w-auto', 'min-w-[150px]', props.class]"
-  >
-    <IconField class="w-full group">
-      <InputIcon
-        :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
-        v-if="showIcon"
-        id="append-icon"
-      />
-      <DatePicker
-        class="w-full"
-        v-model="temporal"
-        :selection-mode
-        date-format="dd/mm/yy"
-        :show-other-months
-        show-icon
-        :icon
-        :icon-display
-        :number-of-months="1"
-        :min-date
-        :max-date
-        :disabled-dates
-        :disabled-days
-        hour-format="12"
-        :disabled
-        :readonly
-        :placeholder="displayPlaceholder"
-        :manual-input="false"
-        fluid
-        :show-time
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-      />
-      <InputIcon
-        v-if="showIcon"
-        :class="
-          invalid
-            ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
-            : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
-        "
-        id="append-icon"
-        @click="clickSecondIcon"
-      />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
-        v-if="errorMessages.length"
-        :severity
-        :size
-        :variant
-      >
-        {{ messageErrorField }}
-      </Message>
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+    <FloatLabel :variant="labelVariant">
+      <IconField class="w-full group">
+        <InputIcon
+          :class="
+            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
+          "
+          v-if="showIcon"
+          id="append-icon"
+        />
+        <DatePicker
+          class="w-full"
+          v-model="temporal"
+          :selection-mode
+          date-format="dd/mm/yy"
+          :show-other-months
+          show-icon
+          :icon
+          :icon-display
+          :number-of-months="1"
+          :min-date
+          :max-date
+          :disabled-dates
+          :disabled-days
+          hour-format="12"
+          :disabled
+          :readonly
+          :placeholder="displayPlaceholder"
+          :manual-input="false"
+          fluid
+          :show-time
+          @focus="isFocused = true"
+          @blur="isFocused = false"
+          :invalid="invalid"
+        />
+        <InputIcon
+          v-if="showIcon"
+          :class="
+            invalid
+              ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
+              : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
+          "
+          id="append-icon"
+          @click="clickSecondIcon"
+        />
+      </IconField>
+      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+        label
+      }}</label>
+    </FloatLabel>
+    <Message
+      class="left-0 top-full mt-0 text-xs z-10"
+      v-if="errorMessages.length"
+      :severity
+      :size
+      :variant
+    >
+      {{ messageErrorField }}
+    </Message>
+  </div>
 </template>
 <script setup lang="ts">
 import {
@@ -131,7 +133,7 @@ const props = defineProps({
   },
   labelVariant: {
     type: String,
-    default: 'simple',
+    default: 'on',
   },
   prependInnerIcon: {
     //Inicio dentro y al principio del input
