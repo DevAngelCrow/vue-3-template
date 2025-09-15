@@ -58,7 +58,7 @@ defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
 const props = defineProps({
   modelValue: {
-    type: [String, Number],
+    type: [String, Number, Object],
   },
   class: {
     type: String,

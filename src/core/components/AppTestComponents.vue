@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Button } from 'primevue';
 const show = ref<boolean>(false);
 
@@ -17,6 +17,11 @@ const confirmModal = () => {
   closeModal(false);
 };
 onMounted(() => {});
+const fecha = ref();
+
+watch(fecha, newVale => {
+  console.log(newVale);
+});
 </script>
 
 <template>
@@ -33,6 +38,9 @@ onMounted(() => {});
     </div>
   </AppModal>
   <h1>Esto es un texto</h1>
+
+  <span>Probando appdatepicker</span>
+  <AppDatePicker v-model="fecha" />
 </template>
 
 <style scoped>

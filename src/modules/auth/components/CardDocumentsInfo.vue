@@ -15,22 +15,23 @@
         v-bind="documentTypeAttrs"
         :error-messages="errors.documentType"
         :options="documentTypesItems"
-        option-value="id"
         option-label="name"
       />
-      <AppInputText
+      <AppInputMask
         class="flex-1"
         id="document"
         label="Número de documento*"
         v-model="documentNumber"
         v-bind="documentNumberAttrs"
         :error-messages="errors.documentNumber"
+        :mask="documentType?.mask"
+        :placeholder="documentType?.mask"
       />
     </div>
   </section>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import authServices from '@/core/services/auth.services';
 import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
@@ -66,6 +67,10 @@ const getDocumentTypes = async () => {
 
 onMounted(async () => {
   await getDocumentTypes();
+});
+
+watch(documentType, newValue => {
+  console.log(newValue, 'new Value');
 });
 
 defineExpose({

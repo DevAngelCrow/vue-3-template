@@ -16,6 +16,7 @@
         :error-messages="errors.userName"
         show-icon
         prepend-inner-icon="pi pi-user"
+        @update:modelValue="validationInputAlphanumeric(userName, 'userName')"
       />
       <AppInputText
         class="flex-1"
@@ -29,6 +30,7 @@
         prepend-inner-icon="pi pi-lock"
         autocomplete="current-password"
         type="password"
+        @update:modelValue="validationInputPassword(password, 'password')"
       />
     </form>
     <div class="flex justify-center items-center w-full">
@@ -41,7 +43,15 @@ import { Button } from 'primevue';
 
 import { useAuth } from '../composables/useAuth';
 
-const { userName, userNameAttrs, password, passwordAttrs, errors } = useAuth();
+const {
+  userName,
+  userNameAttrs,
+  password,
+  passwordAttrs,
+  errors,
+  validationInputAlphanumeric,
+  validationInputPassword,
+} = useAuth();
 
 const emits = defineEmits(['register']);
 

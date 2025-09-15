@@ -1,88 +1,104 @@
 <template>
   <section
     id="card_direccion_personal"
-    class="w-[95%] min-h-[400px] sm:w-[65%] md:w-[55%] lg:w-[55%] bg-surface-200 h-[65%] md:h-[65%] lg:h-[45%] rounded-xl flex flex-col align-top gap-10 lg:gap-12 px-3 py-3 sm:px-10 overflow-y-auto"
+    class="w-[95%] min-h-[400px] sm:w-[65%] md:w-[55%] lg:w-[55%] bg-surface-200 h-[65%] md:h-[65%] lg:h-[45%] rounded-xl flex flex-col align-top gap-5 px-3 py-3 sm:px-10 overflow-y-auto"
   >
     <div class="w-full mt-5 gap-5 flex flex-col">
       <span class="text-xl">Información dirección:</span>
     </div>
-    <div class="flex gap-6 w-full flex-col sm:flex-col md:flex-row lg:flex-row">
-      <div class="flex gap-6 flex-wrap flex-col justify-between grow">
-        <AppInputText
-          v-model="street"
-          class="grow"
-          label="Calle*"
-          id="street"
-          v-bind="streetAttrs"
-          :error-messages="errors.street"
+    <div class="flex gap-6 flex-wrap flex-row justify-between">
+      <AppInputText
+        v-model="street"
+        class="flex-1"
+        label="Calle*"
+        id="street"
+        v-bind="streetAttrs"
+        :error-messages="errors.street"
+        @update:modelValue="validationInputAlphanumeric(street, 'street')"
+      />
+      <AppAutocomplete
+        v-model="district"
+        class="flex-1"
+        label="Distrito*"
+        id="district"
+        v-bind="districtAttrs"
+        :error-messages="errors.district"
+        option-label="name"
+        :suggestions="districtsFiltered"
+        dropdown
+        @complete="findAutocomplete"
+      />
+    </div>
+    <div class="flex gap-6 flex-wrap flex-row justify-between">
+      <AppInputText
+        v-model="streetNumber"
+        class="flex-1"
+        label="No. de calle*"
+        id="street_number"
+        v-bind="streetNumberAttrs"
+        :error-messages="errors.streetNumber"
+        @update:modelValue="
+          validationInputAlphanumeric(streetNumber, 'streetNumber')
+        "
+      />
+      <AppInputText
+        v-model="houseNumber"
+        class="flex-1"
+        label="No. de casa*"
+        id="house_number"
+        v-bind="houseNumberAttrs"
+        :error-messages="errors.houseNumber"
+        @update:modelValue="
+          validationInputAlphanumeric(houseNumber, 'houseNumber')
+        "
+      />
+    </div>
+    <div class="flex gap-6 flex-wrap flex-row justify-between">
+      <AppInputText
+        v-model="neighborhood"
+        class="flex-1"
+        label="Colonia/Reparto*"
+        id="neighborhood"
+        v-bind="neighborhoodAttrs"
+        :error-messages="errors.neighborhood"
+        @update:modelValue="
+          validationInputAlphanumeric(neighborhood, 'neighborhood')
+        "
+      />
+      <AppInputText
+        v-model="block"
+        class="flex-1"
+        label="Block*"
+        id="block"
+        v-bind="blockAttrs"
+        :error-messages="errors.block"
+        @update:modelValue="
+          validationInputAlphanumeric(streetNumber, 'streetNumber')
+        "
+      />
+    </div>
+    <div class="flex gap-6 flex-wrap flex-row justify-between">
+      <AppInputText
+        v-model="pathway"
+        class="flex-1"
+        label="Pasaje"
+        id="pathway"
+        v-bind="pathwayAttrs"
+        :error-messages="errors.pathway"
+        @update:modelValue="validationInputAlphanumeric(pathway, 'pathway')"
+      />
+      <div class="flex items-center gap-2 flex-1">
+        <Checkbox
+          v-model="current"
+          id="current"
+          binary
+          name="Actual"
+          value="Actual"
+          input-id="actual"
+          v-bind="currentAttrs"
+          :error-messages="errors.current"
         />
-        <AppInputText
-          v-model="streetNumber"
-          class="grow"
-          label="No. de calle*"
-          id="street_number"
-          v-bind="streetNumberAttrs"
-          :error-messages="errors.streetNumber"
-        />
-        <AppInputText
-          v-model="neighborhood"
-          class="grow"
-          label="Colonia/Reparto*"
-          id="neighborhood"
-          v-bind="neighborhoodAttrs"
-          :error-messages="errors.neighborhood"
-        />
-        <AppInputText
-          v-model="pathway"
-          class="grow"
-          label="Pasaje"
-          id="pathway"
-          v-bind="pathwayAttrs"
-          :error-messages="errors.pathway"
-        />
-      </div>
-      <div class="flex gap-6 flex-wrap flex-col justify-between grow">
-        <AppAutocomplete
-          v-model="district"
-          class="flex-1"
-          label="Distrito*"
-          id="district"
-          v-bind="districtAttrs"
-          :error-messages="errors.district"
-          option-label="name"
-          :suggestions="districtsFiltered"
-          dropdown
-          @complete="findAutocomplete"
-        />
-        <AppInputText
-          v-model="houseNumber"
-          class="flex-1"
-          label="No. de casa*"
-          id="house_number"
-          v-bind="houseNumberAttrs"
-          :error-messages="errors.houseNumber"
-        />
-        <AppInputText
-          v-model="block"
-          class="flex-1"
-          label="Block*"
-          id="block"
-          v-bind="blockAttrs"
-          :error-messages="errors.block"
-        />
-        <div class="flex items-center gap-2">
-          <Checkbox
-            v-model="current"
-            id="current"
-            binary
-            name="Actual"
-            value="Actual"
-            input-id="actual"
-            v-bind="currentAttrs"
-            :error-messages="errors.current"
-          />
-          <label for="actual">Actual</label>
-        </div>
+        <label for="actual">Actual</label>
       </div>
     </div>
   </section>
@@ -115,6 +131,7 @@ const {
   current,
   currentAttrs,
   errors,
+  validationInputAlphanumeric,
 } = useAuth();
 
 const { startLoading, finishLoading } = useLoaderStore();

@@ -1,100 +1,130 @@
 // composables/useAuth.ts
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 import { PrimeVueFile } from '@/types/PrimeVueFile';
+import { CreateDateFromFormat } from '@/core/utils/dates';
+import { useAlertStore } from '@/core/store';
+import authServices from '@/core/services/auth.services';
+import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
 import { DistrictsModelAutocomplete } from '../interfaces/districtsArray.interface';
+import { DocumentTypeObject } from '../interfaces/documentType.interface';
 
 function createForm() {
-  const { errors, defineField, handleSubmit, validateField } = useForm({
-    validationSchema: yup.object({
-      //personal info
-      firstName: yup
-        .string()
-        .required('El primer nombre es requerido')
-        .min(3, 'El nombre debe tener al menos 3 caracteres'),
-      middleName: yup
-        .string()
-        .min(3, 'El segundo nombre debe tener al menos 3 caracteres'),
-      lastName: yup
-        .string()
-        .required('El apellido es requerido')
-        .min(3, 'El apellido debe tener al menos 3 caracteres'),
-      birthDate: yup.date().required('La fecha de nacimiento es requerida'),
-      gender: yup.number().required('El género es requerido'),
-      maritalStatus: yup.number().required('El estado civil es requerido'),
-      phoneNumber: yup
-        .string()
-        .required('El número de teléfono es requerido')
-        .min(9)
-        .max(9),
-      status: yup.number() /*.required('El campo de estado es requerido')*/,
-      nationalities: yup
-        .array<NationalitiesArray>()
-        .required('El campo de nacionalidades es requerido')
-        .min(1, 'Debes agregar al menos una nacionalidad'),
-      imgFile: yup
-        .mixed<PrimeVueFile[]>()
-        .test('required', 'La imágen del perfil es requerida', value => Array.isArray(value) && value.length > 0)
-        .required('La imágen del perfil es requerida')
-        .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
-          if (!value || value.length === 0) return true; 
-          return value.every(file => file.size <= 1000000);
-        })
-        .test('fileType', 'Formato no permitido', value => {
-          if (!value || value.length === 0) return true; 
-          return value.every(file =>
-            ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
-          );
-        }),
-      //address info
-      
-      street: yup
-        .string()
-        .required('El campo de nombre de calle es requerido')
-        .min(3),
-      streetNumber: yup
-        .string()
-        .required('El campo de número de calle es requerido')
-        .min(3),
-      neighborhood: yup
-        .string()
-        .required('El campo de colonia/reparto es requerido')
-        .min(5),
-      district: yup
-        .mixed<DistrictsModelAutocomplete>()
-        .required('El campo de distrito es requerido'),
-      houseNumber: yup
-        .string()
-        .required('El campo de numero de casa es requerido')
-        .min(1),
-      block: yup.string().required('El campo del block es requerido').min(1),
-      pathway: yup.string().required('El campo de pasaje es requerido').min(1),
-      current: yup.boolean(),
+  const { errors, defineField, handleSubmit, validateField, setFieldValue } =
+    useForm({
+      validationSchema: yup.object({
+        //personal info
+        firstName: yup
+          .string()
+          .required('El primer nombre es requerido')
+          .min(3, 'El nombre debe tener al menos 3 caracteres')
+          .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
+          .transform(
+            value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
+          ),
+        middleName: yup
+          .string()
+          .min(3, 'El segundo nombre debe tener al menos 3 caracteres'),
+        lastName: yup
+          .string()
+          .required('El apellido es requerido')
+          .min(3, 'El apellido debe tener al menos 3 caracteres'),
+        birthDate: yup
+          .string()
+          .required('La fecha de nacimiento es requerida')
+          .test('is-date', 'Formato inválido, usa DD/MM/YYYY', value => {
+            if (!value) return false;
+            const parsed = CreateDateFromFormat(value, 'DD/MM/YYYY');
+            if (parsed instanceof Date) {
+              return true;
+            }
+            return false;
+          }),
+        gender: yup.number().required('El género es requerido'),
+        maritalStatus: yup.number().required('El estado civil es requerido'),
+        phoneNumber: yup
+          .string()
+          .required('El número de teléfono es requerido')
+          .min(9)
+          .max(9),
+        status: yup.number() /*.required('El campo de estado es requerido')*/,
+        nationalities: yup
+          .array<NationalitiesArray>()
+          .required('El campo de nacionalidades es requerido')
+          .min(1, 'Debes agregar al menos una nacionalidad'),
+        imgFile: yup
+          .mixed<PrimeVueFile[]>()
+          .test(
+            'required',
+            'La imágen del perfil es requerida',
+            value => Array.isArray(value) && value.length > 0,
+          )
+          .required('La imágen del perfil es requerida')
+          .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
+            if (!value || value.length === 0) return true;
+            return value.every(file => file.size <= 1000000);
+          })
+          .test('fileType', 'Formato no permitido', value => {
+            if (!value || value.length === 0) return true;
+            return value.every(file =>
+              ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
+            );
+          }),
+        //address info
 
-      //personal document info
+        street: yup
+          .string()
+          .required('El campo de nombre de calle es requerido')
+          .min(3),
+        streetNumber: yup
+          .string()
+          .required('El campo de número de calle es requerido')
+          .min(1),
+        neighborhood: yup
+          .string()
+          .required('El campo de colonia/reparto es requerido')
+          .min(3),
+        district: yup
+          .mixed<DistrictsModelAutocomplete>()
+          .required('El campo de distrito es requerido'),
+        houseNumber: yup
+          .string()
+          .required('El campo de numero de casa es requerido')
+          .min(1),
+        block: yup.string().required('El campo del block es requerido').min(1),
+        pathway: yup
+          .string()
+          .required('El campo de pasaje es requerido')
+          .min(1),
+        current: yup.boolean(),
 
-      documentType: yup.number().required('El tipo del documento es requerido'),
-      documentNumber: yup
-        .string()
-        .required('El número del documento es requerido')
-        .min(1),
-      //user info
-      email: emailFormat(undefined, true, undefined),
-      password: passwordValidation(),
-      userName: yup.string().required('El nombre del usuario es requerido'),
-    }),
-  });
+        //personal document info
+
+        documentType: yup
+          .object<DocumentTypeObject>()
+          .required('El tipo del documento es requerido'),
+        documentNumber: yup
+          .string()
+          .required('El número del documento es requerido')
+          .min(1),
+        //user info
+        email: emailFormat(undefined, true, undefined),
+        password: passwordValidation(),
+        userName: yup.string().required('El nombre del usuario es requerido'),
+      }),
+    });
 
   return {
     errors,
     handleSubmit,
     validateField,
+    setFieldValue,
     firstName: defineField('firstName')[0],
     firstNameAttrs: defineField('firstName')[1],
     middleName: defineField('middleName')[0],
@@ -151,6 +181,7 @@ export function useAuth() {
     form = createForm();
   }
 
+  const alert = useAlertStore();
   const router = useRouter();
   const route = useRoute();
   const isLoading = ref(false);
@@ -186,21 +217,21 @@ export function useAuth() {
 
         throw new Error(
           errorData.message ||
-          `Error ${response.status}: ${response.statusText}`,
+            `Error ${response.status}: ${response.statusText}`,
         );
       }
 
       const data = await response.json();
-
+      console.log(data);
       if (data.data.access_token) {
-        localStorage.setItem('auth_token', data.access_token);
+        localStorage.setItem('auth_token', data.data.access_token);
 
         if (data.data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('user', JSON.stringify(data.data.user));
         }
 
         if (data.data.token_type) {
-          localStorage.setItem('token_type', data.token_type);
+          localStorage.setItem('token_type', data.data.token_type);
         }
         const redirectTo = (route.query.redirect as string) || '/';
         router.push(redirectTo);
@@ -264,6 +295,64 @@ export function useAuth() {
     return token ? `${tokenType} ${token}` : null;
   };
 
+  const registerUser = async (data: FormData) => {
+    try {
+      const response = await authServices.signUp(data);
+      console.log(response, 'response');
+      if (response.status === 201) {
+        const email = data.get('email');
+        if (typeof email === 'string') {
+          router.push({
+            name: 'pending-verification-email',
+            state: { email },
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert.showAlert({
+        type: 'error',
+        title: `Error en el registro del usuario`,
+        content: 'Ocurrio un error al momento del registro del usuario',
+      });
+    }
+  };
+
+  const validationInputAlphanumeric = (
+    value: string,
+    input: string,
+    regex: RegExp = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ@.0-9 ]/g,
+  ) => {
+    const sanitizedValue = sanitizedValueInput(value, regex);
+    nextTick(() => {
+      form?.setFieldValue(input, sanitizedValue);
+    });
+  };
+
+  const validationInputEmail = (
+    value: string,
+    input: string,
+    regex: RegExp = /[^a-zA-Z0-9._%+\-@]/g,
+  ) => {
+    const sanitizedValue = sanitizedValueInput(value, regex);
+    // const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(sanitizedValue);
+
+    nextTick(() => {
+      form?.setFieldValue(input, sanitizedValue);
+    });
+  };
+
+  const validationInputPassword = (
+    value: string,
+    input: string,
+    regex: RegExp = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ@.0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/,
+  ) => {
+    let sanitizedValue: string | undefined = sanitizedValueInput(value, regex);
+    nextTick(() => {
+      form?.setFieldValue(input, sanitizedValue);
+    });
+  };
+
   return {
     login,
     logout,
@@ -274,5 +363,9 @@ export function useAuth() {
     isLoading,
     error,
     ...form,
+    registerUser,
+    validationInputAlphanumeric,
+    validationInputEmail,
+    validationInputPassword,
   };
 }
