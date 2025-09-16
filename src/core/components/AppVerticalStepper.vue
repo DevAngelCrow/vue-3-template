@@ -74,22 +74,20 @@ const customActivateCallBack = (
   step: number,
   direction: boolean,
 ) => {
-  if (direction) {
-    //   if (step === 1 && props.components.length > 0) {
-    //   emits('next', callback);
-    //   return;
-    // }
+  try {
     if (direction) {
-      emits('next', callback, step);
-      //callback(step + 1);
-      return;
+      if (direction) {
+        emits('next', callback, step);
+        return;
+      }
+    } else {
+      if (!direction) {
+        emits('back', callback, step);
+        return;
+      }
     }
-  } else {
-    if (!direction) {
-      emits('back', callback, step);
-      //  callback(step - 1);
-      return;
-    }
+  } catch (error) {
+    console.error(error);
   }
 };
 

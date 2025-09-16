@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Button } from 'primevue';
+
+import { TableHeaders } from '../interfaces';
 const show = ref<boolean>(false);
 
 const openModal = (value: boolean) => {
@@ -17,6 +19,60 @@ const confirmModal = () => {
   closeModal(false);
 };
 onMounted(() => {});
+const fecha = ref();
+
+watch(fecha, newVale => {
+  console.log(newVale);
+});
+
+const headers = ref<TableHeaders[]>([
+  {
+    field: 'vinculador_uno',
+    header: 'cabecera_Uno',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+  {
+    field: 'vinculador_dos',
+    header: 'cabecera_Dos',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+  {
+    field: 'vinculador_tres',
+    header: 'cabecera_Tres',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+  {
+    field: 'acciones',
+    header: 'Acciones',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+]);
+
+const items = ref([
+  {
+    vinculador_uno: 'item_cabecera_uno_pagina_1',
+    vinculador_dos: 'item_cabecera_dos_pagina_1',
+    vinculador_tres: 'item_cabecera_tres_pagina_1',
+  },
+  {
+    vinculador_uno: 'item_cabecera_uno_pagina_2',
+    vinculador_dos: 'item_cabecera_dos_pagina_2',
+    vinculador_tres: 'item_cabecera_tres_pagina_2',
+  },
+  {
+    vinculador_uno: 'item_cabecera_uno_pagina_3',
+    vinculador_dos: 'item_cabecera_dos_pagina_3',
+    vinculador_tres: 'item_cabecera_tres_pagina_3',
+  },
+]);
 </script>
 
 <template>
@@ -33,6 +89,23 @@ onMounted(() => {});
     </div>
   </AppModal>
   <h1>Esto es un texto</h1>
+
+  <span>Probando appdatepicker</span>
+  <AppDatePicker v-model="fecha" />
+
+  <AppDataTable
+    :headers="headers"
+    :items="items"
+    :paginator="true"
+    :per_page="10"
+    :total_pages="1"
+  >
+    <template #body-acciones="{ data }">
+      <i class="pi pi-pencil"></i>
+      <i class="pi pi-trash"></i>
+      <i class="pi pi-times-circle"></i>
+    </template>
+  </AppDataTable>
 </template>
 
 <style scoped>

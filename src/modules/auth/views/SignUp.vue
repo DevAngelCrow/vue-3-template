@@ -17,7 +17,6 @@ import { reactive, markRaw, ref } from 'vue';
 
 import type { StepperVerticalInterface } from '@/core/interfaces/stepperVertical.interface';
 import { getToday } from '@/core/utils/dates';
-import authServices from '@/core/services/auth.services';
 import { useLoaderStore } from '@/core/store';
 
 import CardPersonalInfo from '../components/CardPersonalInfo.vue';
@@ -85,36 +84,44 @@ const documentInfoFieldNames = ['documentType', 'documentNumber'];
 
 const userInfoFieldNames = ['userName', 'password'];
 
-const { validateField, handleSubmit } = useAuth();
+const { validateField, handleSubmit, registerUser } = useAuth();
 const stepperRef = ref();
 
 const next = async (callback: Function, step: number) => {
-  let fieldsToValidate: string[] = [];
-  if (step === 1) {
-    fieldsToValidate = personalInfoFieldNames;
-  } else if (step === 2) {
-    fieldsToValidate = addressInfoFieldNames;
-  } else if (step === 3) {
-    fieldsToValidate = documentInfoFieldNames;
-  } else if (step === 4) {
-    fieldsToValidate = userInfoFieldNames;
-  }
+  try {
+    let fieldsToValidate: string[] = [];
+    if (step === 1) {
+      fieldsToValidate = personalInfoFieldNames;
+    } else if (step === 2) {
+      fieldsToValidate = addressInfoFieldNames;
+    } else if (step === 3) {
+      fieldsToValidate = documentInfoFieldNames;
+    } else if (step === 4) {
+      fieldsToValidate = userInfoFieldNames;
+    }
 
-  if (fieldsToValidate.length > 0) {
-    const validationResults = await Promise.all(
-      fieldsToValidate.map(field => validateField(field)),
-    );
-    const allValid = validationResults.every(result => result.valid);
+    if (fieldsToValidate.length > 0) {
+      const validationResults = await Promise.all(
+        fieldsToValidate.map(field => validateField(field)),
+      );
+      const allValid = validationResults.every(result => result.valid);
 
-    if (allValid) {
+      if (allValid) {
+        callback(step + 1);
+      }
+    } else {
       callback(step + 1);
     }
-  } else {
-    callback(step + 1);
+  } catch (error) {
+    console.error(error, 'Error en la validación');
   }
 };
 const back = (callback: Function, step: number) => {
-  callback(step - 1);
+  try {
+    callback(step - 1);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const onSubmitStepPersonalInfo = handleSubmit(async values => {
@@ -146,11 +153,11 @@ const onSubmitStepPersonalInfo = handleSubmit(async values => {
     form.append('block', values.block);
     form.append('pathway', values.pathway);
     form.append('current', values.current ? '1' : '0');
-    form.append('id_type_document', values.documentType);
+    form.append('id_type_document', values.documentType.id);
     form.append('document_number', values.documentNumber);
     form.append('active', '1');
     form.append('description', '_');
-    await authServices.signUp(form);
+    await registerUser(form);
   } catch (error: unknown) {
     console.error(error);
   } finally {

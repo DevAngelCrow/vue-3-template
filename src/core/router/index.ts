@@ -44,6 +44,13 @@ const routes = [
     meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },
     component: () => import('../../modules/auth/views/VerifyEmail.vue'),
   },
+  {
+    path: '/pending-verification-email',
+    name: 'pending-verification-email',
+    meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },
+    component: () =>
+      import('../../modules/auth/views/PendingVerificationEmail.vue'),
+  },
 ];
 
 const router = createRouter({

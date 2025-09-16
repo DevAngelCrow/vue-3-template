@@ -15,6 +15,7 @@
         label="Nombre*"
         :error-messages="errors.firstName"
         v-bind="firstNameAttrs"
+        @update:modelValue="validationInputAlphanumeric(firstName, 'firstName')"
       />
       <AppInputText
         class="flex-1"
@@ -23,6 +24,9 @@
         label="Segundo nombre"
         :error-messages="errors.middleName"
         v-bind="middleNameAttrs"
+        @update:modelValue="
+          validationInputAlphanumeric(middleName, 'middleName')
+        "
       />
       <AppInputMask
         class="flex-1"
@@ -43,6 +47,7 @@
         :error-messages="errors.lastName"
         label="Apellidos*"
         v-bind="lastNameAttrs"
+        @update:modelValue="validationInputAlphanumeric(lastName, 'lastName')"
       />
       <AppInputText
         class="flex-1"
@@ -52,6 +57,7 @@
         label="Email*"
         placeholder="juan@mail.com"
         v-bind="emailAttrs"
+        @update:modelValue="validationInputEmail(email, 'email')"
       />
       <AppSelect
         class="flex-1"
@@ -85,6 +91,7 @@
         :error-messages="errors.birthDate"
         v-bind="birthDateAttrs"
         placeholder="DD/MM/AAAA"
+        :max-date="maxDate"
       />
       <AppAutocomplete
         class="flex-1 min-w-[170px]"
@@ -111,13 +118,15 @@
   </section>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { AutoCompleteCompleteEvent } from 'primevue';
+import dayjs from 'dayjs';
 
 import { useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import { Gender } from '@/core/services/interfaces/auth/gender.interface';
 import { Country } from '@/core/services/interfaces/auth/country.interface';
+//import { sanitizeAlphaNumeric } from '@/core/utils/inputTextValidations';
 
 import { useAuth } from '../composables/useAuth';
 
@@ -143,6 +152,8 @@ const {
   imgFile,
   imgFileAttrs,
   errors,
+  validationInputAlphanumeric,
+  validationInputEmail,
 } = useAuth();
 
 const { startLoading, finishLoading } = useLoaderStore();
@@ -218,6 +229,12 @@ onMounted(async () => {
   await getMaritalStatus();
   await getGenders();
   await getCountries();
+});
+
+const maxDate = computed(() => {
+  const date = dayjs();
+  const limitDate = date.subtract(18, 'years');
+  return limitDate.toDate();
 });
 
 defineExpose({

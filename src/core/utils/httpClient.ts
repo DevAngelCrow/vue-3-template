@@ -17,7 +17,7 @@ const alert = useAlertStore();
 const setupHttpClient = (api: AxiosInstance) => {
   // Configurar interceptores de petición
   api.interceptors.request.use(
-    (config) => {
+    config => {
       const token = localStorage.getItem('token');
       if (token) {
         if (!config.headers) {
@@ -51,7 +51,6 @@ const setupHttpClient = (api: AxiosInstance) => {
           localStorage.removeItem('token');
           // Aquí se utilizará el router push
         }
-        console.log(error.response);
 
         alert.showAlert({
           type: 'error',
@@ -66,6 +65,12 @@ const setupHttpClient = (api: AxiosInstance) => {
             'No se recibió respuesta del servidor. Verifica tu conexión a internet.',
         };
         console.error('Error de red:', errorData);
+        alert.showAlert({
+          type: 'error',
+          title: `Error de conexión`,
+          content:
+            'No se recibió respuesta del servidor. Verifica tu conexión a internet.',
+        });
         return Promise.reject(errorData);
       } else {
         const errorData: ErrorResponse = {
