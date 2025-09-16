@@ -13,19 +13,48 @@
         <Button
             label="Buscar"
             icon-pos="right"
-            class="flex sm:w-auto w-full px-7"
+            class="flex sm:w-auto w-full px-7 text-sm"
             >
         </Button>
         <Button
             label="Limpiar"
             icon-pos="right"
-            class="flex sm:w-auto w-full px-7">
+            class="flex sm:w-auto w-full px-7 text-sm">
         </Button>
 
         <Button
+          @click="openModalCreate(showModal)"
           icon="pi pi-plus"
-          class="w-10 h-10 rounded-full p-0">
+          class="flex w-10 h-10 rounded-full p-0 sm:ml-auto sm:mr-0 mx-auto">
         </Button>
+
+        <AppModal
+          :show="showModal"
+          show-icon-close
+          title="Agregar País"
+          @close-modal="closeModalCreate"
+          @confirm-modal="confirmModal"
+          width="350px"
+        >
+          <div class="flex flex-col gap-6 py-5 w-[230px]">
+            <AppInputText 
+              v-model="newCountryName"
+              class="lg:w-full grow sm:max-w-[500px]"
+              label="Ingrese el nombre del país"
+            />
+            <AppInputText 
+              v-model="newCountryAbreviation"
+              class="lg:w-full grow sm:max-w-[500px]"
+              label="Ingrese la abreviación del país"
+            />
+
+            <AppInputText 
+              v-model="newCountryCode"
+              class="lg:w-full grow sm:max-w-[500px]"
+              label="Ingrese el código del país"
+            />
+          </div>
+        </AppModal>
 
         <AppDataTable
           :items="items"
@@ -34,7 +63,12 @@
           :per_page="1"
           :total_pages="1"
           class="w-full"
-        />
+        >
+
+
+        
+        </AppDataTable>
+        
      </div>
 
 </template>
@@ -44,7 +78,21 @@ import { TableHeaders } from '@/core/interfaces';
 import { ref } from 'vue';
 import { Button } from 'primevue';
 import AppTitle from '@/core/components/AppTitle.vue';
+import AppModal from '@/core/components/AppModal.vue';
+const showModal = ref<boolean>(false);
 
+const openModalCreate = (value: boolean) => {
+  showModal.value = !value;
+};
+
+const closeModalCreate = (value: boolean) => {
+  showModal.value = value;
+};
+
+const confirmModal = () => {
+
+  closeModalCreate(false);
+};
 
 const headers = ref<TableHeaders[]>([
   {
@@ -97,6 +145,14 @@ const items = ref([
     vinculador_dos: 'El Salvador',
     vinculador_tres: 'ESA',
     vinculador_cuatro: '503',
+    vinculador_cinco: 'Activo',
+    vinculador_seis: 'Editar | Eliminar',
+  },
+  {
+    vinculador_uno: '2',
+    vinculador_dos: 'Guatemala',
+    vinculador_tres: 'GTM',
+    vinculador_cuatro: '502',
     vinculador_cinco: 'Activo',
     vinculador_seis: 'Editar | Eliminar',
   },
