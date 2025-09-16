@@ -1,3 +1,5 @@
+import { LocationQueryValue } from 'vue-router';
+
 import { httpClient } from '../utils/httpClient';
 import { ApiResponseGeneric } from './interfaces/apiResponseGeneric.interface';
 import { Country } from './interfaces/auth/country.interface';
@@ -8,6 +10,7 @@ import { Gender } from './interfaces/auth/gender.interface';
 //import { GetAllDocumentTypeResponse } from "./interfaces/auth/getAllDocumentTypeResponse.interface";
 //import { GetAllGenderResponse } from "./interfaces/auth/getAllGendersResponse.interface";
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
+//import { PostSignUp } from './interfaces/auth/postSignUp.interface';
 //import { GetAllNationalitiesResponse } from "./interfaces/auth/getAllNationalitiesResponse.interface";
 
 const getMaritalStatus = async (): Promise<
@@ -52,10 +55,34 @@ const getDocumentTypes = async (): Promise<
   return response.data;
 };
 
+const signUp = async (data: FormData) => {
+  const response = await httpClient.post('auth/sign-up', data);
+  return response;
+};
+
+const verifyEmail = async (
+  url: LocationQueryValue[] | undefined | LocationQueryValue,
+) => {
+  let urlFormatedString = url?.toString();
+  let response;
+  if (url === null || url === undefined) {
+    urlFormatedString = '';
+  }
+  if (Array.isArray(url)) {
+    urlFormatedString = url.find(value => value !== null) || '';
+  }
+  if (urlFormatedString) {
+    response = await httpClient.get(urlFormatedString);
+  }
+  return response;
+};
+
 export default {
   getMaritalStatus,
   getGenders,
   getCountriesNationalities,
   getDistricts,
   getDocumentTypes,
+  signUp,
+  verifyEmail,
 };

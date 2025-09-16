@@ -6,26 +6,35 @@
     <div class="w-full mt-5 gap-5 flex flex-col">
       <span class="text-xl">Información de usuario:</span>
     </div>
-    <div class="flex gap-6 flex-wrap flex-row justify-between">
+    <form class="flex gap-6 flex-wrap flex-row justify-between">
       <AppInputText
-        class="grow min-w-[200px]"
-        id="email"
-        label="Correo electrónico*"
-        v-model="email"
-        v-bind="emailAttrs"
-        :error-messages="errors.email"
+        class="flex-1"
+        id="user_name"
+        label="Nombre usuario*"
+        v-model="userName"
+        v-bind="userNameAttrs"
+        :error-messages="errors.userName"
+        show-icon
+        prepend-inner-icon="pi pi-user"
+        @update:modelValue="validationInputAlphanumeric(userName, 'userName')"
       />
       <AppInputText
-        class="grow"
+        class="flex-1"
         id="password"
         label="Contraseña*"
         v-model="password"
         v-bind="passwordAttrs"
         :error-messages="errors.password"
+        icon="pi pi-lock"
+        show-icon
+        prepend-inner-icon="pi pi-lock"
+        autocomplete="current-password"
+        type="password"
+        @update:modelValue="validationInputPassword(password, 'password')"
       />
-    </div>
+    </form>
     <div class="flex justify-center items-center w-full">
-      <Button class="w-[140px]" @click="registerData">Registrar</Button>
+      <Button class="w-[140px]" @click="signUpUser">Registrar</Button>
     </div>
   </section>
 </template>
@@ -34,17 +43,25 @@ import { Button } from 'primevue';
 
 import { useAuth } from '../composables/useAuth';
 
-const { email, emailAttrs, password, passwordAttrs, errors } = useAuth();
+const {
+  userName,
+  userNameAttrs,
+  password,
+  passwordAttrs,
+  errors,
+  validationInputAlphanumeric,
+  validationInputPassword,
+} = useAuth();
 
 const emits = defineEmits(['register']);
 
-const registerData = () => {
+const signUpUser = () => {
   emits('register');
 };
 
 defineExpose({
-  email,
-  emailAttrs,
+  userName,
+  userNameAttrs,
   password,
   passwordAttrs,
   errors,

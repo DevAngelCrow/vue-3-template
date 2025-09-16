@@ -21,7 +21,7 @@
           </slot>
         </template>
         <template #body="slotProps">
-          <slot :name="`body-${header.field}`">
+          <slot :name="`body-${header.field}`" :data="slotProps.data">
             {{ slotProps.data[header.field] ?? '-' }}
           </slot>
         </template>

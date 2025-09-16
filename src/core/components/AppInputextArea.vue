@@ -1,48 +1,52 @@
 <template>
-  <FloatLabel :variant="labelVariant" class="w-full max-w-[322px]">
-    <IconField class="w-full group">
-      <InputIcon
-        :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
-        v-if="showIcon"
-        id="append-icon"
-      />
-      <Textarea
-        :class
-        :type="typeInputLocal"
-        :model-value="modelValue"
-        @update:model-value="onUpdate"
-        :invalid="invalid"
-        v-bind="$attrs"
-        :autocomplete
-        :placeholder="displayPlaceholder"
-        :id="inputId"
-        @focus="() => (isFocused = true)"
-        @blur="() => (isFocused = false)"
-        :variant="inputVarian"
-      />
-      <InputIcon
-        v-if="showIcon"
-        :class="
-          invalid
-            ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
-            : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
-        "
-        id="append-icon"
-        @click="clickSecondIcon"
-      />
-      <Message
-        class="absolute left-0 top-full mt-1 text-xs z-10"
-        v-if="errorMessages.length"
-        :severity
-        :size
-        :variant
-        >{{ messageErrorField }}</Message
-      >
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
+  <div class="w-full max-w-[322px] relative">
+    <FloatLabel :variant="labelVariant">
+      <IconField class="w-full group">
+        <InputIcon
+          :class="
+            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
+          "
+          v-if="showIcon"
+          id="append-icon"
+        />
+        <Textarea
+          :class
+          :type="typeInputLocal"
+          :model-value="modelValue"
+          @update:model-value="onUpdate"
+          :invalid="invalid"
+          v-bind="$attrs"
+          :autocomplete
+          :placeholder="displayPlaceholder"
+          :id="inputId"
+          @focus="() => (isFocused = true)"
+          @blur="() => (isFocused = false)"
+          :variant="inputVarian"
+        />
+        <InputIcon
+          v-if="showIcon"
+          :class="
+            invalid
+              ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
+              : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
+          "
+          id="append-icon"
+          @click="clickSecondIcon"
+        />
+      </IconField>
+      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+        label
+      }}</label>
+    </FloatLabel>
+    <Message
+      class="left-0 top-full mt-0 text-xs z-10"
+      v-if="errorMessages.length"
+      :severity
+      :size
+      :variant
+      >{{ messageErrorField }}</Message
+    >
+  </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
@@ -80,7 +84,7 @@ const props = defineProps({
   },
   labelVariant: {
     type: String,
-    default: 'simple',
+    default: 'on',
   },
   inputVarian: {
     type: String,
@@ -183,7 +187,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

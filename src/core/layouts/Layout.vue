@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-full flex flex-col">
-    <AppLoader v-if="storeLoader.loader" />
+    <!-- <AppLoader v-if="showLoader" /> -->
     <AppSideBar :show="sideBar.sideBar" />
     <div class="w-full min-h-screen flex flex-col">
       <section
@@ -21,15 +21,19 @@
     </div>
   </div>
 </template>
-<script setup>
-import AppLoader from '../components/AppLoader.vue';
+<script setup lang="ts">
+//import { computed } from 'vue';
+
+//import AppLoader from '../components/AppLoader.vue';
 import AppHeader from '../components/AppHeader.vue';
 import AppMainContent from '../components/AppMainContent.vue';
 import AppFooter from '../components/AppFooter.vue';
 import AppSideBar from '../components/AppSideBar.vue';
-import { useLoaderStore } from '../store/useLoaderStore';
+//import { useLoaderStore } from '../store/useLoaderStore';
 import { useLayoutStore } from '../store/useLayoutStore';
 
-const storeLoader = useLoaderStore();
+//const storeLoader = useLoaderStore();
 const sideBar = useLayoutStore();
+
+//const showLoader = computed(() => storeLoader.isLoading);
 </script>

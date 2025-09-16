@@ -34,7 +34,7 @@
             class="flex gap-9 justify-center flex-col items-center w-full xs:w-[90%] md:w-[70%]"
           >
             <AppInputText
-              placeholder="nombre_usuario"
+              placeholder="Correo o nombre de usuario"
               v-model="user"
               show-icon
               prepend-inner-icon="pi pi-user"
