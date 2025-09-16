@@ -51,6 +51,11 @@ const routes = [
     component: () =>
       import('../../modules/auth/views/PendingVerificationEmail.vue'),
   },
+  {
+    path: '/routes-administration',
+    name: 'routes-administration',
+    component: () => import('../../modules/admin/views/Routes.vue'),
+  },
 ];
 
 const router = createRouter({
