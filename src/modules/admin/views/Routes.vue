@@ -1,5 +1,5 @@
 <template>
-  <div class="py-5 px-5">
+  <div class="py-5 px-5 h-screen max-h-screen">
     <section id="content" class="w-full flex flex-row flex-wrap gap-5">
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
@@ -69,10 +69,13 @@ import { Button } from 'primevue';
 import { onMounted, ref } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
-import adminServices from '@/core/services/index.services';
 import { useLoaderStore } from '@/core/store';
 
+import { useAdmin } from '../composables/useAdmin';
+import { RoutesResponse } from '../interfaces/routes.response.interface';
+
 const { startLoading, finishLoading } = useLoaderStore();
+const { getRoutes } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
   {
@@ -125,7 +128,7 @@ const headers = ref<TableHeaders[]>([
     alignItems: 'center',
   },
   {
-    field: 'id_parent',
+    field: 'parent.name',
     header: 'Ruta padre',
     sortable: false,
     alignHeaders: 'center',
@@ -147,14 +150,12 @@ const headers = ref<TableHeaders[]>([
   },
 ]);
 
-const items = ref<any>([]);
+const items = ref<RoutesResponse[] | undefined>([]);
 
 onMounted(async () => {
   try {
     startLoading();
-    const response = await adminServices.getAllRoutes();
-    items.value = response.data.items;
-    console.log(response);
+    items.value = await getRoutes();
   } catch (error) {
     console.log(error);
   } finally {
