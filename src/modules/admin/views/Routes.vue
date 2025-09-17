@@ -1,19 +1,31 @@
 <template>
   <div class="py-5 px-5">
-    <section id="titulo" class="mb-5">
-      <AppTitle title="Rutas" />
-    </section>
     <section id="content" class="w-full flex flex-row flex-wrap gap-5">
-      <div class="w-full flex gap-3 flex-wrap">
-        <AppInputText label="Buscar" />
-        <Button>Buscar</Button>
-        <Button outlined>Limpiar</Button>
-        <Button class="ml-auto flex rounded-full"
-          ><i
-            class="pi pi-plus flex justify-center items-center text-center"
-            style="font-size: 1.1rem; font-weight: bold"
-          ></i
-        ></Button>
+      <div class="w-full flex flex-row gap-3 flex-wrap">
+        <AppTitle
+          title="Rutas"
+          class="w-full md:w-auto flex justify-center items-center"
+        />
+        <div
+          id="inputs"
+          class="flex rounded-xl border-2 border-primary py-2 px-2 gap-3 flex-wrap grow lg:grow-0"
+        >
+          <AppInputText
+            label="Buscar"
+            class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
+          />
+          <Button class="flex-shrink-0 grow rounded-xl">Buscar</Button>
+          <Button class="flex-shrink-0 grow rounded-xl" outlined
+            >Limpiar</Button
+          >
+          <Button class="flex-shrink-0 grow rounded-xl"
+            ><i
+              class="pi pi-plus flex justify-center items-center text-center"
+              style="font-size: 1.1rem; font-weight: bold"
+            ></i
+            ><span>Agregar</span></Button
+          >
+        </div>
       </div>
       <AppDataTable
         class="w-full"
