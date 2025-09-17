@@ -8,17 +8,17 @@
         />
         <div
           id="inputs"
-          class="flex rounded-xl border-2 border-primary py-2 px-2 gap-3 flex-wrap grow lg:grow-0"
+          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
         >
           <AppInputText
             label="Buscar"
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
           />
-          <Button class="flex-shrink-0 grow rounded-xl">Buscar</Button>
-          <Button class="flex-shrink-0 grow rounded-xl" outlined
+          <Button class="flex-shrink-0 grow rounded-md">Buscar</Button>
+          <Button class="flex-shrink-0 grow rounded-md" outlined
             >Limpiar</Button
           >
-          <Button class="flex-shrink-0 grow rounded-xl"
+          <Button class="flex-shrink-0 grow rounded-md"
             ><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"
