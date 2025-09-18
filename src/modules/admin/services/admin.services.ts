@@ -5,7 +5,7 @@ import { RoutesResponse } from '../interfaces/routes.response.interface';
 
 const getAllRoutes = async (): Promise<ApiResponseGeneric<RoutesResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<RoutesResponse>>(
-    'security/routes?page=1&per_page=10',
+    'security/routes/parents/list?page=1&per_page=10',
   );
   return response.data;
 };

@@ -49,23 +49,25 @@
               icon="pi pi-trash"
               @click=""
             ></Button>
-            <Button
-              class="rounded-full"
-              variant="text"
-              icon="pi pi-times-circle"
-              @click=""
-            ></Button>
           </div>
         </template>
         <template #body-icon="{ data }">
           <i :class="data.icon"></i>
+        </template>
+        <template #body-active="{ data }">
+          <Chip :class="data ? 'bg-green-600' : 'bg-red-600'">{{
+            data ? 'Activo' : 'Inactivo'
+          }}</Chip>
+        </template>
+        <template #body-show="{ data }">
+          <i :class="data ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
         </template>
       </AppDataTable>
     </section>
   </div>
 </template>
 <script setup lang="ts">
-import { Button } from 'primevue';
+import { Button, Chip } from 'primevue';
 import { onMounted, ref } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -128,7 +130,7 @@ const headers = ref<TableHeaders[]>([
     alignItems: 'center',
   },
   {
-    field: 'parent.name',
+    field: 'parent_route.name',
     header: 'Ruta padre',
     sortable: false,
     alignHeaders: 'center',

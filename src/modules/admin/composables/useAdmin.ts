@@ -1,6 +1,14 @@
 import adminServices from '@/core/services/index.services';
+// import { useForm } from 'vee-validate';
+// import * as yup from "yup";
 
 export function useAdmin() {
+  // const { errors, defineField, handleSubmit, validateField } = useForm({
+  //   validationSchema: yup.object({
+
+  //   })
+  // });
+
   const getRoutes = async () => {
     try {
       const response = await adminServices.getAllRoutes();
