@@ -78,28 +78,72 @@
     >
       <section
         id="body_modal"
-        class="flex justify-center items-center flex-wrap flex-row gap-5"
+        class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5"
       >
-        <AppInputText class="grow w-full" id="name" label="Nombre*" />
-        <AppInputText class="grow w-full" id="uri" label="Uri*" />
+        <AppInputText
+          class="grow w-full"
+          id="name"
+          label="Nombre*"
+          v-model="name"
+          :error-messages="errors.name"
+          v-bind="nameAttrs"
+        />
+        <AppInputText
+          class="grow w-full"
+          id="uri"
+          label="Uri*"
+          v-model="uri"
+          :error-messages="errors.uri"
+          v-bind="uriAttrs"
+        />
         <AppInputText
           class="grow w-full"
           id="description"
           label="Descripción*"
+          v-model="description"
+          :error-messages="errors.description"
+          v-bind="descriptionAttrs"
         />
-        <AppInputText class="grow w-[50%]" id="order" label="Orden*" />
-        <AppInputText class="grow w-[50%]" id="icon" label="Ícono (nombre)*" />
-        <div class="w-full">
+        <div class="w-full flex gap-5">
+          <AppInputText
+            class="grow w-[50%]"
+            id="order"
+            label="Orden*"
+            v-model="order"
+            :error-messages="errors.order"
+            v-bind="orderAttrs"
+          />
+          <AppInputText
+            class="grow w-[50%]"
+            id="icon"
+            label="Ícono (nombre)*"
+            v-model="icon"
+            :error-messages="errors.icon"
+            v-bind="iconAttrs"
+          />
+        </div>
+        <div class="w-full flex">
           <AppCheckBox id="child_route" class="w-[50%]" />
           <AppCheckBox id="show" class="w-[50%]" />
         </div>
-        <AppSelect class="grow w-full" id="patern_route" label="Ruta padre" />
+        <AppAutocomplete
+          class="w-full !max-w-full"
+          id="patern_route"
+          label="Ruta padre"
+          v-model="parent_route"
+          v-bind="parent_routeAttrs"
+          :error-messages="errors.parent_route"
+          option-label="name"
+          :suggestions="routesFiltered"
+          dropdown
+          @complete="findAutocomplete"
+        />
       </section>
     </AppModal>
   </div>
 </template>
 <script setup lang="ts">
-import { Button, Chip } from 'primevue';
+import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
 import { onMounted, ref } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -109,7 +153,22 @@ import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes.response.interface';
 
 const { startLoading, finishLoading } = useLoaderStore();
-const { getRoutes } = useAdmin();
+const {
+  getRoutes,
+  errors,
+  name,
+  nameAttrs,
+  uri,
+  uriAttrs,
+  description,
+  descriptionAttrs,
+  order,
+  orderAttrs,
+  icon,
+  iconAttrs,
+  /*child_route, child_routeAttrs, show, showAttrs,*/ parent_route,
+  parent_routeAttrs,
+} = useAdmin();
 
 const headers = ref<TableHeaders[]>([
   {
@@ -188,6 +247,8 @@ const items = ref<RoutesResponse[] | undefined>([]);
 const title = ref<string>('');
 
 const showModal = ref<boolean>(false);
+const routesItems = ref<any[]>([]);
+const routesFiltered = ref<any[]>([]);
 
 const handledModal = (flag: boolean, action: string) => {
   if (!flag && action === 'agregar') {
@@ -197,6 +258,21 @@ const handledModal = (flag: boolean, action: string) => {
   }
   showModal.value = false;
   title.value = '';
+};
+
+const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
+  let query = event?.query;
+  let _filteredItems = [];
+
+  for (let i = 0; i < routesItems.value.length; i++) {
+    let item = routesItems.value[i];
+
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
+    }
+  }
+
+  routesFiltered.value = _filteredItems;
 };
 
 onMounted(async () => {
