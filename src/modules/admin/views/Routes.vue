@@ -18,7 +18,9 @@
           <Button class="flex-shrink-0 grow rounded-md" outlined
             >Limpiar</Button
           >
-          <Button class="flex-shrink-0 grow rounded-md"
+          <Button
+            class="flex-shrink-0 grow rounded-md"
+            @click="handledModal(showModal, 'agregar')"
             ><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"
@@ -62,6 +64,36 @@
         </template>
       </AppDataTable>
     </section>
+    <AppModal
+      :title="title"
+      :show="showModal"
+      :title-btn-cancel="'Cancelar'"
+      :title-btn-confirm="'Guardar'"
+      footer-buttons
+      show-icon-close
+      width="35rem"
+      @close-modal="handledModal(showModal, '')"
+    >
+      <section
+        id="body_modal"
+        class="flex justify-center items-center flex-wrap flex-row gap-5"
+      >
+        <AppInputText class="grow w-full" id="name" label="Nombre*" />
+        <AppInputText class="grow w-full" id="uri" label="Uri*" />
+        <AppInputText
+          class="grow w-full"
+          id="description"
+          label="Descripción*"
+        />
+        <AppInputText class="grow w-[50%]" id="order" label="Orden*" />
+        <AppInputText class="grow w-[50%]" id="icon" label="Ícono (nombre)*" />
+        <div class="w-full">
+          <AppCheckBox id="child_route" class="w-[50%]" />
+          <AppCheckBox id="show" class="w-[50%]" />
+        </div>
+        <AppSelect class="grow w-full" id="patern_route" label="Ruta padre" />
+      </section>
+    </AppModal>
   </div>
 </template>
 <script setup lang="ts">
@@ -151,6 +183,19 @@ const headers = ref<TableHeaders[]>([
 ]);
 
 const items = ref<RoutesResponse[] | undefined>([]);
+const title = ref<string>('');
+
+const showModal = ref<boolean>(false);
+
+const handledModal = (flag: boolean, action: string) => {
+  if (!flag && action === 'agregar') {
+    title.value = 'Agregar ruta';
+    showModal.value = !flag;
+    return;
+  }
+  showModal.value = false;
+  title.value = '';
+};
 
 onMounted(async () => {
   try {
