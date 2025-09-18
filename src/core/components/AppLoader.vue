@@ -1,7 +1,7 @@
 <template>
   <div
     class="loader-container fade-in"
-    style="background: rgba(0, 0, 0, 0.3); z-index: 2000"
+    style="background: rgba(0, 0, 0, 0.3); z-index: 9999"
   >
     <div class="Loader"></div>
   </div>
@@ -79,21 +79,6 @@ body {
     visibility 0.4s ease-in-out;
 }
 
-/* Estados para mostrar/ocultar el loader */
-.loader-container.fade-in {
-  animation: fadeIn 0.4s ease-in-out forwards;
-}
-
-.loader-container.fade-out {
-  animation: fadeOut 0.4s ease-in-out forwards;
-}
-
-.loader-container.hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
-/* Loader convertido a CSS puro */
 .Loader {
   position: relative;
   display: flex;
