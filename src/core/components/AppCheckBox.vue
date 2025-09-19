@@ -1,19 +1,35 @@
 <template>
-  <Checkbox v-bind="$attrs" @update:model-value="onUpdate" />
-  <Message>
-    {{ messageErrorField }}
-  </Message>
+  <div class="flex gap-2 items-center">
+    <Checkbox v-bind="$attrs" @update:model-value="onUpdate" />
+    <label :for="id">{{ label }}</label>
+  </div>
+  <Message
+    class="left-0 top-full mt-0 text-xs z-10"
+    v-if="errorMessages.length"
+    severity="error"
+    size="small"
+    variant="simple"
+    >{{ messageErrorField }}</Message
+  >
 </template>
 <script setup lang="ts">
-import { Checkbox } from 'primevue';
+import { Checkbox, Message } from 'primevue';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
+  id: {
+    type: String,
+    default: '',
+  },
   modelValue: {
     type: Boolean,
     default: false,
   },
   errorMessages: {
+    type: String,
+    default: '',
+  },
+  label: {
     type: String,
     default: '',
   },

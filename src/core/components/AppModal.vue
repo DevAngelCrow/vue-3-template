@@ -1,5 +1,6 @@
 <template>
   <Dialog
+    class="!min-w-[180px]"
     v-model:visible="showModal"
     modal
     :header="title"
