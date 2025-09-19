@@ -221,7 +221,7 @@ const headers = ref<TableHeaders[]>([
     alignItems: 'center',
   },
   {
-    field: 'parent_route.name',
+    field: 'parent_route.uri',
     header: 'Ruta padre',
     sortable: false,
     alignHeaders: 'center',
