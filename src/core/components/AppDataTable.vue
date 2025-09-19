@@ -22,7 +22,7 @@
         </template>
         <template #body="slotProps">
           <slot :name="`body-${header.field}`" :data="slotProps.data">
-            {{ slotProps.data[header.field] ?? '-' }}
+            {{ getNestedValue(slotProps.data, header.field) ?? '-' }}
           </slot>
         </template>
       </Column>
@@ -48,6 +48,42 @@ import type {
 } from '../interfaces/datatable.interface';
 
 defineOptions({ name: 'AppDataTable' });
+const {
+  headers = [],
+  items = [],
+  per_page = 1,
+  total_pages = 0,
+  loading = false,
+  loadingIcon = 'pi pi-spin pi-spinner',
+  rowHover = true,
+  paginator = false,
+} = defineProps<TableProps<T>>();
+
+const page = ref<number>(0);
+const emit = defineEmits(['pageUpdate']);
+
+const paginationCustom = computed(() => {
+  const startIndex = page.value * per_page;
+  const endIndex = startIndex + per_page;
+  return items.slice(startIndex, endIndex);
+});
+
+const getNestedValue = <T extends Record<string, any>>(
+  object: T,
+  path: string,
+): unknown => {
+  return path.split('.').reduce<unknown>((currentObject, propertyKey) => {
+    if (
+      currentObject &&
+      typeof currentObject === 'object' &&
+      propertyKey in currentObject
+    ) {
+      return (currentObject as Record<string, any>)[propertyKey];
+    }
+    return null;
+  }, object);
+};
+
 const columHeader = computed(() => {
   return (value: TableHeaders) => {
     if (value.alignHeaders?.length) {
@@ -66,19 +102,6 @@ const columHeader = computed(() => {
     };
   };
 });
-const {
-  headers = [],
-  items = [],
-  per_page = 1,
-  total_pages = 0,
-  loading = false,
-  loadingIcon = 'pi pi-spin pi-spinner',
-  rowHover = true,
-  paginator = false,
-} = defineProps<TableProps<T>>();
-
-const page = ref<number>(0);
-const emit = defineEmits(['pageUpdate']);
 
 const widthColumn = (value: TableHeaders) => {
   if (typeof value.width === 'number') {
@@ -108,11 +131,5 @@ const updatePage = (value: number) => {
   page.value = value;
   emit('pageUpdate', value);
 };
-
-const paginationCustom = computed(() => {
-  const startIndex = page.value * per_page;
-  const endIndex = startIndex + per_page;
-  return items.slice(startIndex, endIndex);
-});
 </script>
 <style scoped></style>

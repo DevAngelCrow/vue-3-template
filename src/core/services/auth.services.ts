@@ -60,9 +60,7 @@ const signUp = async (data: FormData) => {
   return response;
 };
 
-const verifyEmail = async (
-  url: LocationQueryValue[] | undefined | LocationQueryValue,
-) => {
+const verifyEmail = async (url: LocationQueryValue[] | undefined) => {
   let urlFormatedString = url?.toString();
   let response;
   if (url === null || url === undefined) {

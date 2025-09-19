@@ -1,5 +1,5 @@
 <template>
-  <div :class="`flex flex-col items-${titlePosition} justify-center w-full`">
+  <div :class="['flex', 'flex-col', 'justify-center']">
     <h1 :class="`text-2xl lg:text-4xl font-semibold text-primary`">
       {{ title }}
     </h1>
@@ -12,10 +12,6 @@ defineProps({
   title: {
     type: String,
     required: true,
-  },
-  titlePosition: {
-    type: String,
-    default: 'center',
   },
 });
 </script>
