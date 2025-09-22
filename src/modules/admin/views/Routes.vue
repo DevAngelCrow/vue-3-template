@@ -75,13 +75,14 @@
       show-icon-close
       width="35rem"
       @close-modal="handledModal(showModal, '')"
+      @confirm-modal="onSubMit"
     >
       <section
         id="body_modal"
         class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5"
       >
         <AppInputText
-          class="grow w-full"
+          class="w-full min-w-0"
           id="name"
           label="Nombre*"
           v-model="name"
@@ -89,7 +90,7 @@
           v-bind="nameAttrs"
         />
         <AppInputText
-          class="grow w-full"
+          class="w-full min-w-0"
           id="uri"
           label="Uri*"
           v-model="uri"
@@ -97,16 +98,16 @@
           v-bind="uriAttrs"
         />
         <AppInputText
-          class="grow w-full"
+          class="w-full min-w-0"
           id="description"
           label="Descripción*"
           v-model="description"
           :error-messages="errors.description"
           v-bind="descriptionAttrs"
         />
-        <div class="w-full flex gap-5">
+        <div class="w-full flex flex-wrap gap-5">
           <AppInputText
-            class="grow w-[50%]"
+            class="grow w-[50%] min-w-auto"
             id="order"
             label="Orden*"
             v-model="order"
@@ -114,7 +115,7 @@
             v-bind="orderAttrs"
           />
           <AppInputText
-            class="grow w-[50%]"
+            class="grow w-[50%] min-w-auto"
             id="icon"
             label="Ícono (nombre)*"
             v-model="icon"
@@ -122,12 +123,26 @@
             v-bind="iconAttrs"
           />
         </div>
-        <div class="w-full flex">
-          <AppCheckBox id="child_route" class="w-[50%]" />
-          <AppCheckBox id="show" class="w-[50%]" />
-        </div>
+        <CheckboxGroup class="w-full flex flex-wrap justify-start">
+          <div class="w-[50%]">
+            <AppCheckBox
+              id="child_route"
+              label="Ruta padre"
+              v-model="child_route"
+              v-bind="child_routeAttrs"
+            />
+          </div>
+          <div class="w-[50%]">
+            <AppCheckBox
+              id="show"
+              label="Mostrar"
+              v-model="show"
+              v-bind="showAttrs"
+            />
+          </div>
+        </CheckboxGroup>
         <AppAutocomplete
-          class="w-full !max-w-full"
+          class="w-full !max-w-full min-w-auto"
           id="patern_route"
           label="Ruta padre"
           v-model="parent_route"
@@ -143,7 +158,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
+import {
+  AutoCompleteCompleteEvent,
+  Button,
+  Chip,
+  CheckboxGroup,
+} from 'primevue';
 import { onMounted, ref } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -151,10 +171,12 @@ import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes.response.interface';
+import { RouteForm } from '../interfaces/route-form.interface';
 
 const { startLoading, finishLoading } = useLoaderStore();
 const {
   getRoutes,
+  addRoute,
   errors,
   name,
   nameAttrs,
@@ -166,8 +188,13 @@ const {
   orderAttrs,
   icon,
   iconAttrs,
-  /*child_route, child_routeAttrs, show, showAttrs,*/ parent_route,
+  child_route,
+  child_routeAttrs,
+  show,
+  showAttrs,
+  parent_route,
   parent_routeAttrs,
+  handleSubmit,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -274,6 +301,20 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
 
   routesFiltered.value = _filteredItems;
 };
+
+const onSubMit = handleSubmit(async values => {
+  const form: RouteForm = {
+    name: values.name,
+    description: values.description,
+    child_route: values.child_route,
+    icon: values.icon,
+    order: values.order,
+    show: values.show,
+    uri: values.uri,
+    parent_route: values.parent_route,
+  };
+  await addRoute(form);
+});
 
 onMounted(async () => {
   try {

@@ -22,18 +22,23 @@
   </div>
 </template>
 <script setup lang="ts">
-//import { computed } from 'vue';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-//import AppLoader from '../components/AppLoader.vue';
 import AppHeader from '../components/AppHeader.vue';
 import AppMainContent from '../components/AppMainContent.vue';
 import AppFooter from '../components/AppFooter.vue';
 import AppSideBar from '../components/AppSideBar.vue';
-//import { useLoaderStore } from '../store/useLoaderStore';
 import { useLayoutStore } from '../store/useLayoutStore';
+import { useAuthStore } from '../store/useAuthStore';
 
-//const storeLoader = useLoaderStore();
 const sideBar = useLayoutStore();
+const useAuth = useAuthStore();
+const router = useRouter();
 
-//const showLoader = computed(() => storeLoader.isLoading);
+onMounted(() => {
+  if (!useAuth.user && !useAuth.token) {
+    router.push({ name: 'login' });
+  }
+});
 </script>
