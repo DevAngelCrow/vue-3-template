@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('authStore', {
       localStorage.setItem('user', JSON.stringify(payload));
     },
     setToken(payload: Token) {
-      this.token = payload;
+      this.token = payload.access_token;
       localStorage.setItem('access_token', payload.access_token);
     },
     setTokenType(payload: string) {

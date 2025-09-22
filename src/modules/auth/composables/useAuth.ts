@@ -226,7 +226,7 @@ export function useAuth() {
 
       const data = await response.json();
       if (data.data.access_token) {
-        setToken(data.data.access_token);
+        setToken(data.data);
 
         if (data.data.user) {
           setUserInfo(data.data.user);
