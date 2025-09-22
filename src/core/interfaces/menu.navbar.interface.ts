@@ -1,4 +1,4 @@
-export interface Menu {
+export interface MenuNavBar {
   label: string;
   icon?: string;
   items?: SubMenu[];

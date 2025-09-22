@@ -3,6 +3,7 @@ import { nextTick, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
+import axios from 'axios';
 
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 import { PrimeVueFile } from '@/types/PrimeVueFile';
@@ -181,7 +182,7 @@ export function useAuth() {
   if (!form) {
     form = createForm();
   }
-
+  const { setMenu } = useAuthStore();
   const alert = useAlertStore();
   const router = useRouter();
   const route = useRoute();
@@ -193,62 +194,45 @@ export function useAuth() {
 
   const { setToken, setUserInfo, setTokenType } = useAuthStore();
 
-  const login = async (user: string, password: string) => {
+  const login = async (user_name: string, password: string) => {
     isLoading.value = true;
     error.value = null;
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          user_name: user,
-          password: password,
-        }),
-      });
+      const response = await authServices.login({ user_name, password });
 
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: 'Error en el servidor' }));
+      if (response.statusCode === 200) {
+        if (response.data.access_token) {
+          setToken(response.data);
 
-        if (response.status === 401) {
-          throw new Error(errorData.message || 'Credenciales incorrectas');
+          if (response.data.user) {
+            setUserInfo(response.data.user);
+          }
+
+          if (response.data.token_type) {
+            setTokenType(response.data.token_type);
+          }
+
+          const menu = await authServices.getMenu();
+          if (menu.statusCode === 200) {
+            setMenu(menu.data);
+          }
+
+          const redirectTo = (route.query.redirect as string) || '/';
+          router.push(redirectTo);
         }
-
-        throw new Error(
-          errorData.message ||
-            `Error ${response.status}: ${response.statusText}`,
-        );
       }
-
-      const data = await response.json();
-      if (data.data.access_token) {
-        setToken(data.data);
-
-        if (data.data.user) {
-          setUserInfo(data.data.user);
-        }
-
-        if (data.data.token_type) {
-          setTokenType(data.data.token_type);
-        }
-        const redirectTo = (route.query.redirect as string) || '/';
-        router.push(redirectTo);
-      } else {
-        throw new Error('No se recibió el token de autenticación');
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        error.value = e.response?.data?.message || e.message;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      } else if (typeof e === 'object' && e !== null && 'message' in e) {
+        error.value = (e as { message: string }).message;
       }
-    } catch (err) {
-      console.error('Error en el login:', err);
-      error.value =
-        err instanceof Error ? err.message : 'Error desconocido en el login';
     } finally {
       isLoading.value = false;
     }
   };
-
   const logout = async () => {
     isLoggingOut.value = true;
     try {

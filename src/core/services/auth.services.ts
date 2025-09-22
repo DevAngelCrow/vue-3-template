@@ -10,6 +10,10 @@ import { Gender } from './interfaces/auth/gender.interface';
 //import { GetAllDocumentTypeResponse } from "./interfaces/auth/getAllDocumentTypeResponse.interface";
 //import { GetAllGenderResponse } from "./interfaces/auth/getAllGendersResponse.interface";
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
+import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
+import { Menu } from '../interfaces/userState.store.interface';
+import { Login } from './interfaces/auth/login.interface';
+import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
 // import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
 
 // import { Menu } from './interfaces/auth/menu.interface';
@@ -63,6 +67,11 @@ const signUp = async (data: FormData) => {
   return response;
 };
 
+const login = async (data: Login): Promise<ApiResponseLogin> => {
+  const response = await httpClient.post<ApiResponseLogin>('auth/login', data);
+  return response.data;
+};
+
 const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
   let urlFormatedString = url?.toString();
   let response;
@@ -78,9 +87,11 @@ const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
   return response;
 };
 
-// const getMenu = async (id_user: number) : Promise<ApiResponseMenu<Menu>> => {
-//   const response = await httpClient.get<ApiResponseMenu<Menu>>();
-// }
+const getMenu = async (): Promise<ApiResponseMenu<Menu[]>> => {
+  const response =
+    await httpClient.get<ApiResponseMenu<Menu[]>>('security/menu/');
+  return response.data;
+};
 
 export default {
   getMaritalStatus,
@@ -90,4 +101,6 @@ export default {
   getDocumentTypes,
   signUp,
   verifyEmail,
+  getMenu,
+  login,
 };

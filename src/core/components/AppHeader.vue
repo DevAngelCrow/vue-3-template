@@ -22,75 +22,39 @@ import { ref } from 'vue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
 import AppNavBarMenu from './AppNavBarMenu.vue';
-import type { Menu } from '../interfaces/menu.navbar.interface';
+import { useAuthStore } from '../store/useAuthStore';
+import { Menu } from '../interfaces/userState.store.interface';
+import { MenuNavBar } from '../interfaces/menu.navbar.interface';
 
 defineOptions({ name: 'AppHeader' });
 
 const sideBar = useLayoutStore();
+const { menuInfo } = useAuthStore();
 
-const items = ref<Menu[]>([
-  {
-    label: 'Projects',
-    isUser: true,
-    items: [
-      {
-        label: 'User',
-        icon: 'pi pi-user',
-      },
-      {
-        label: 'Email',
-        icon: 'pi pi-envelope',
-      },
-      {
-        label: 'Log out',
-        icon: 'pi pi-sign-out',
-      },
-    ],
-  },
-  {
-    label: 'Home',
-    icon: 'pi pi-home',
-  },
-  {
-    label: 'Features',
-    icon: 'pi pi-star',
-  },
-  {
-    label: 'Projects',
-    icon: 'pi pi-search',
-    items: [
-      {
-        label: 'Components',
-        icon: 'pi pi-bolt',
-      },
-      {
-        label: 'Blocks',
-        icon: 'pi pi-server',
-      },
-      {
-        label: 'UI Kit',
-        icon: 'pi pi-pencil',
-      },
-      {
-        label: 'Templates',
-        icon: 'pi pi-palette',
-        items: [
-          {
-            label: 'Apollo',
-            icon: 'pi pi-palette',
-          },
-          {
-            label: 'Ultima',
-            icon: 'pi pi-palette',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Contact',
-    icon: 'pi pi-envelope',
-  },
-]);
+const menuState: Menu[] = Array.isArray(menuInfo) ? menuInfo : [];
+console.log(menuState, 'menuState');
+
+const menuMapped = menuState
+  .filter(item => item.show)
+  .map(m => {
+    if (Array.isArray(m.children)) {
+      return {
+        label: m.title,
+        icon: m.icon,
+        items: m.children.map(c => ({
+          label: c.title,
+          icon: c.icon,
+        })),
+      };
+    } else {
+      return {
+        label: m.title,
+        icon: m.icon,
+      };
+    }
+  });
+
+console.log(menuMapped, 'menuMapped');
+const items = ref<MenuNavBar[]>(menuMapped);
 </script>
 <style scoped></style>

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
 import {
   UserStateStore,
@@ -10,7 +11,7 @@ interface State {
   user: UserStateStore | null | string;
   token: Token | null | string;
   token_type: string | null;
-  menu: Menu | string | null;
+  menu: Menu[] | string | null;
 }
 
 export const useAuthStore = defineStore('authStore', {
@@ -47,7 +48,7 @@ export const useAuthStore = defineStore('authStore', {
       }
       return null;
     },
-    menuInfo(): Menu | null | string {
+    menuInfo(): Menu[] | null | string {
       if (this.menu) {
         return this.menu;
       }
@@ -67,15 +68,37 @@ export const useAuthStore = defineStore('authStore', {
       this.token_type = payload;
       localStorage.setItem('token_type', payload);
     },
-    setMenu(payload: Menu) {
+    setMenu(payload: Menu[]) {
       this.menu = payload;
       localStorage.setItem('menu', JSON.stringify(payload));
+    },
+    isTokenExpired(): boolean {
+      if (!this.token) return true;
+      try {
+        const decoded = jwtDecode<JwtPayload>(this.token as string);
+
+        if (!decoded.exp) return true;
+
+        const now = Math.floor(Date.now() / 1000);
+
+        return decoded.exp < now;
+      } catch (error) {
+        console.error('Erorro al decodificar el token: ', error);
+        return true;
+      }
+    },
+    validSession(): boolean {
+      if (!this.user || !this.token || this.isTokenExpired()) return false;
+      return true;
     },
     closeSession() {
       this.user = null;
       this.token = null;
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
+      localStorage.removeItem('menu');
+      localStorage.removeItem('token_type');
+      console.log('Se ejecuto el closeSession');
     },
   },
 });
