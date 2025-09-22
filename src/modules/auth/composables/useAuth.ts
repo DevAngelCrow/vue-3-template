@@ -10,6 +10,7 @@ import { CreateDateFromFormat } from '@/core/utils/dates';
 import { useAlertStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { useAuthStore } from '@/core/store/useAuthStore';
 
 import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
 import { DistrictsModelAutocomplete } from '../interfaces/districtsArray.interface';
@@ -190,6 +191,8 @@ export function useAuth() {
   const API_URL =
     import.meta.env.VITE_VUE_APP_API_URL || 'http://127.0.0.1:8000';
 
+  const { setToken, setUserInfo, setTokenType } = useAuthStore();
+
   const login = async (user: string, password: string) => {
     isLoading.value = true;
     error.value = null;
@@ -222,16 +225,15 @@ export function useAuth() {
       }
 
       const data = await response.json();
-      console.log(data);
       if (data.data.access_token) {
-        localStorage.setItem('auth_token', data.data.access_token);
+        setToken(data.data);
 
         if (data.data.user) {
-          localStorage.setItem('user', JSON.stringify(data.data.user));
+          setUserInfo(data.data.user);
         }
 
         if (data.data.token_type) {
-          localStorage.setItem('token_type', data.data.token_type);
+          setTokenType(data.data.token_type);
         }
         const redirectTo = (route.query.redirect as string) || '/';
         router.push(redirectTo);

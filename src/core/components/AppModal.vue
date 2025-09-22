@@ -1,5 +1,6 @@
 <template>
   <Dialog
+    class="!min-w-[180px]"
     v-model:visible="showModal"
     modal
     :header="title"
@@ -10,7 +11,9 @@
     :stylesShowDocument="stylesShowDocument"
   >
     <template #header>
-      <div class="w-full text-center text-primary font-bold text-lg">
+      <div
+        class="w-full text-center text-primary font-bold text-lg md:text-3xl"
+      >
         <slot name="header">
           <h3>{{ title }}</h3>
         </slot>
@@ -88,7 +91,7 @@ const props = defineProps({
 
 const showModal = computed({
   get: () => props.show,
-  set: (value) => emits('update:show', value),
+  set: value => emits('update:show', value),
 });
 
 const closeModal = () => {
