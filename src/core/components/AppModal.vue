@@ -12,7 +12,7 @@
   >
     <template #header>
       <div
-        class="w-full text-center text-primary font-bold text-lg md:text-3xl"
+        class="w-full text-center text-primary font-bold text-2xl md:text-3xl"
       >
         <slot name="header">
           <h3>{{ title }}</h3>

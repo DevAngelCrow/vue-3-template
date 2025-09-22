@@ -271,6 +271,7 @@ const headers = ref<TableHeaders[]>([
 ]);
 
 const items = ref<RoutesResponse[] | undefined>([]);
+console.log('Routes items:',items);
 const title = ref<string>('');
 
 const showModal = ref<boolean>(false);

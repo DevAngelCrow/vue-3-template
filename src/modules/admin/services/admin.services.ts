@@ -1,5 +1,5 @@
 import { httpClient } from '@/core/utils/httpClient';
-import { ApiResponseGeneric } from '@/core/services/interfaces/auth/apiResponseGeneric.interface';
+import { ApiResponseGeneric } from '@/core/services/interfaces/apiResponseGeneric.interface';
 
 import { RoutesResponse } from '../interfaces/routes.response.interface';
 
