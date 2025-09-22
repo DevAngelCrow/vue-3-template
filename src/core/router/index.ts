@@ -30,6 +30,11 @@ const routes = [
         name: 'dashboard',
         component: () => import('@/views/Dashboard.vue'),
       },
+      {
+        path: '/routes-administration',
+        name: 'routes-administration',
+        component: () => import('../../modules/admin/views/Routes.vue'),
+      },
     ],
   },
   {
@@ -50,11 +55,6 @@ const routes = [
     meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },
     component: () =>
       import('../../modules/auth/views/PendingVerificationEmail.vue'),
-  },
-  {
-    path: '/routes-administration',
-    name: 'routes-administration',
-    component: () => import('../../modules/admin/views/Routes.vue'),
   },
 ];
 

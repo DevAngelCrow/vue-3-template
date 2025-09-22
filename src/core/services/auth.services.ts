@@ -10,6 +10,9 @@ import { Gender } from './interfaces/auth/gender.interface';
 //import { GetAllDocumentTypeResponse } from "./interfaces/auth/getAllDocumentTypeResponse.interface";
 //import { GetAllGenderResponse } from "./interfaces/auth/getAllGendersResponse.interface";
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
+// import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
+
+// import { Menu } from './interfaces/auth/menu.interface';
 //import { PostSignUp } from './interfaces/auth/postSignUp.interface';
 //import { GetAllNationalitiesResponse } from "./interfaces/auth/getAllNationalitiesResponse.interface";
 
@@ -25,7 +28,7 @@ const getMaritalStatus = async (): Promise<
 
 const getGenders = async (): Promise<ApiResponseGeneric<Gender>> => {
   const response = await httpClient.get<ApiResponseGeneric<Gender>>(
-    'profile/genders?page=1&per_page=10',
+    'catalogs/genders?page=1&per_page=10',
   );
   return response.data;
 };
@@ -34,14 +37,14 @@ const getCountriesNationalities = async (): Promise<
   ApiResponseGeneric<Country>
 > => {
   const response = await httpClient.get<ApiResponseGeneric<Country>>(
-    'profile/countries?page=1&per_page=10',
+    'catalogs/countries?page=1&per_page=10',
   );
   return response.data;
 };
 
 const getDistricts = async (): Promise<ApiResponseGeneric<District>> => {
   const response = await httpClient.get<ApiResponseGeneric<District>>(
-    'profile/districts?page=1&per_page=10',
+    'catalogs/districts?page=1&per_page=10',
   );
   return response.data;
 };
@@ -60,7 +63,7 @@ const signUp = async (data: FormData) => {
   return response;
 };
 
-const verifyEmail = async (url: LocationQueryValue[] | undefined) => {
+const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
   let urlFormatedString = url?.toString();
   let response;
   if (url === null || url === undefined) {
@@ -74,6 +77,10 @@ const verifyEmail = async (url: LocationQueryValue[] | undefined) => {
   }
   return response;
 };
+
+// const getMenu = async (id_user: number) : Promise<ApiResponseMenu<Menu>> => {
+//   const response = await httpClient.get<ApiResponseMenu<Menu>>();
+// }
 
 export default {
   getMaritalStatus,
