@@ -9,6 +9,12 @@
     :close-on-escape="false"
     :closable="false"
     :stylesShowDocument="stylesShowDocument"
+    :pt="{
+      content: {
+        class: 'scrollbar-hide',
+      },
+    }"
+    :pt-options="{ mergeProps: true }"
   >
     <template #header>
       <div
@@ -102,4 +108,8 @@ const confirmModal = () => {
   emits('confirm-modal');
 };
 </script>
-<style scoped></style>
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+</style>

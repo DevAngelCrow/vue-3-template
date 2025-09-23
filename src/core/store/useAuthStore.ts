@@ -14,20 +14,41 @@ interface State {
   menu: Menu[];
 }
 
+const getFromLocalStorage = (key: string) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : null;
+  } catch (e) {
+    console.error(
+      `Error al parsear el item para la llave ${key} en el localStorage`,
+      e,
+    );
+    return null;
+  }
+};
+
+const setToLocalStorage = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.error(`Error al settear el item para la llave ${key}`, e);
+  }
+};
+
+const removeAllFromLocalStorage = (keys: string[]) => {
+  keys.forEach(key => localStorage.removeItem(key));
+};
+
 export const useAuthStore = defineStore('authStore', {
   state: (): State => ({
-    user: localStorage.getItem('user')
-      ? JSON.parse(localStorage.getItem('user') as string)
-      : null,
+    user: getFromLocalStorage('user'),
     token: localStorage.getItem('access_token')
       ? localStorage.getItem('access_token')
       : null,
     token_type: localStorage.getItem('token_type')
       ? localStorage.getItem('token_type')
       : null,
-    menu: localStorage.getItem('menu')
-      ? JSON.parse(localStorage.getItem('menu') as string)
-      : null,
+    menu: getFromLocalStorage('menu') || [],
   }),
   getters: {
     userInfo(): UserStateStore | null | string {
@@ -55,7 +76,7 @@ export const useAuthStore = defineStore('authStore', {
   actions: {
     setUserInfo(payload: UserStateStore) {
       this.user = payload;
-      localStorage.setItem('user', JSON.stringify(payload));
+      setToLocalStorage('user', payload);
     },
     setToken(payload: Token) {
       this.token = payload.access_token;
@@ -67,7 +88,7 @@ export const useAuthStore = defineStore('authStore', {
     },
     setMenu(payload: Menu[]) {
       this.menu = payload;
-      localStorage.setItem('menu', JSON.stringify(payload));
+      setToLocalStorage('menu', payload);
     },
     isTokenExpired(): boolean {
       if (!this.token) return true;
@@ -91,11 +112,9 @@ export const useAuthStore = defineStore('authStore', {
     closeSession() {
       this.user = null;
       this.token = null;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('menu');
-      localStorage.removeItem('token_type');
-      console.log('Se ejecuto el closeSession');
+      this.token_type = null;
+      this.menu = [];
+      removeAllFromLocalStorage(['access_token', 'user', 'menu', 'token_type']);
     },
   },
 });

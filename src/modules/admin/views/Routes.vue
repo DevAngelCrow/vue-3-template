@@ -1,5 +1,5 @@
 <template>
-  <div class="py-5 px-5 h-screen max-h-screen">
+  <div class="py-5 px-5 h-full max-h-full">
     <section id="content" class="w-full flex flex-row flex-wrap gap-5">
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
@@ -123,13 +123,14 @@
             v-bind="iconAttrs"
           />
         </div>
-        <CheckboxGroup class="w-full flex flex-wrap justify-start">
+        <div class="w-full flex flex-wrap justify-start">
           <div class="w-[50%]">
             <AppCheckBox
               id="child_route"
               label="Ruta padre"
               v-model="child_route"
               v-bind="child_routeAttrs"
+              binary
             />
           </div>
           <div class="w-[50%]">
@@ -138,11 +139,16 @@
               label="Mostrar"
               v-model="show"
               v-bind="showAttrs"
+              binary
             />
           </div>
-        </CheckboxGroup>
+        </div>
         <AppAutocomplete
-          class="w-full !max-w-full min-w-auto"
+          :class="
+            child_route
+              ? ' w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300'
+              : ' w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0'
+          "
           id="patern_route"
           label="Ruta padre"
           v-model="parent_route"
@@ -158,12 +164,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
-  AutoCompleteCompleteEvent,
-  Button,
-  Chip,
-  CheckboxGroup,
-} from 'primevue';
+import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
 import { onMounted, ref } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -195,6 +196,7 @@ const {
   parent_route,
   parent_routeAttrs,
   handleSubmit,
+  parentRoutes,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -274,7 +276,6 @@ const items = ref<RoutesResponse[] | undefined>([]);
 const title = ref<string>('');
 
 const showModal = ref<boolean>(false);
-const routesItems = ref<any[]>([]);
 const routesFiltered = ref<any[]>([]);
 
 const handledModal = (flag: boolean, action: string) => {
@@ -291,8 +292,8 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
 
-  for (let i = 0; i < routesItems.value.length; i++) {
-    let item = routesItems.value[i];
+  for (let i = 0; i < parentRoutes.value.length; i++) {
+    let item = parentRoutes.value[i];
 
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);

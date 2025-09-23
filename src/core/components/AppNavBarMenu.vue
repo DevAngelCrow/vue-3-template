@@ -8,25 +8,30 @@
       :model="menuMapped"
     >
       <template #item="{ item, props, hasSubmenu, root }">
-        <div
+        <router-link
+          v-if="item.url"
+          v-slot="{ href, navigate }"
+          :to="root && item.items?.length ? '' : item.url"
+          custom
           class="flex items-center text-white hover:text-primary-950 group"
-          v-bind="props.action"
         >
-          <i :class="`${item.icon} group-hover:text-primary-700`"></i>
-          <span class="group-hover:text-primary-700">
-            {{ item.label }}
-          </span>
-          <i
-            v-if="hasSubmenu"
-            :class="[
-              'pi pi-angle-down ml-auto',
-              { 'pi-angle-down': root, 'pi-angle-right': !root },
-              'group-focus:text-primary-700',
-              'group-active:text-primary-700',
-              'group-hover:text-primary-700',
-            ]"
-          ></i>
-        </div>
+          <a ripple :href="href" v-bind="props.action" @click="navigate">
+            <i :class="`${item.icon} group-hover:text-primary-700`"></i>
+            <span class="group-hover:text-primary-700">
+              {{ item.label }}
+            </span>
+            <i
+              v-if="hasSubmenu"
+              :class="[
+                'pi pi-angle-down ml-auto',
+                { 'pi-angle-down': root, 'pi-angle-right': !root },
+                'group-focus:text-primary-700',
+                'group-active:text-primary-700',
+                'group-hover:text-primary-700',
+              ]"
+            ></i>
+          </a>
+        </router-link>
       </template>
       <template #end>
         <div
@@ -80,7 +85,7 @@ import { onMounted, type PropType } from 'vue';
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
-import type { Menu as MenuModel } from '../interfaces/menu.navbar.interface';
+import type { MenuNavBar as MenuModel } from '../interfaces/menu.navbar.interface';
 
 defineOptions({ name: 'AppNavBarMenu' });
 

@@ -1,5 +1,6 @@
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
+import { ref } from 'vue';
 
 import adminServices from '@/core/services/index.services';
 
@@ -25,6 +26,8 @@ export function useAdmin() {
     }),
   });
 
+  const parentRoutes = ref<{ name: string; id: number; uri: string }[]>([]);
+
   const [name, nameAttrs] = defineField('name');
   const [uri, uriAttrs] = defineField('uri');
   const [description, descriptionAttrs] = defineField('description');
@@ -38,6 +41,7 @@ export function useAdmin() {
     try {
       const response = await adminServices.getAllRoutes();
       console.log(response);
+      parentRoutes.value = response.data.items.filter(item => item.id_parent);
       if (response.statusCode === 200) {
         return response.data.items;
       }
@@ -73,5 +77,6 @@ export function useAdmin() {
     errors,
     handleSubmit,
     validateField,
+    parentRoutes,
   };
 }

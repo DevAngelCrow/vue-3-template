@@ -3,10 +3,12 @@ export interface MenuNavBar {
   icon?: string;
   items?: SubMenu[];
   isUser?: boolean;
+  url: string;
 }
 
 export interface SubMenu {
   label: string;
   icon?: string;
   items?: SubMenu[];
+  url: string;
 }

@@ -32,8 +32,7 @@ const sideBar = useLayoutStore();
 const { menuInfo } = useAuthStore();
 
 const menuState: Menu[] = menuInfo;
-console.log(menuState, 'menuState');
-
+console.log(menuState, 'menu-state');
 const menuMapped = menuState
   .filter(
     item =>
@@ -41,15 +40,25 @@ const menuMapped = menuState
       (item.show && item.children.length === 0 && item.parent === null),
   )
   .map(m => {
-    return {
+    const menuItem: MenuNavBar = {
       label: m.title,
       icon: m.icon,
-      items: m.children.map(c => ({
+      url: m.uri,
+    };
+    if (m.title === 'Usuario') {
+      menuItem.isUser = true;
+    }
+    if (m.children && m.children.length > 0) {
+      menuItem.items = m.children.map(c => ({
         label: c.title,
         icon: c.icon,
-      })),
-    };
+        url: c.uri,
+      }));
+    }
+    return menuItem;
   });
+
+console.log(menuMapped, 'menumapped');
 const items = ref<MenuNavBar[]>(menuMapped);
 </script>
 <style scoped></style>
