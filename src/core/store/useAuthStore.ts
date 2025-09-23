@@ -11,7 +11,7 @@ interface State {
   user: UserStateStore | null | string;
   token: Token | null | string;
   token_type: string | null;
-  menu: Menu[] | string | null;
+  menu: Menu[];
 }
 
 export const useAuthStore = defineStore('authStore', {
@@ -48,11 +48,8 @@ export const useAuthStore = defineStore('authStore', {
       }
       return null;
     },
-    menuInfo(): Menu[] | null | string {
-      if (this.menu) {
-        return this.menu;
-      }
-      return null;
+    menuInfo(): Menu[] {
+      return this.menu;
     },
   },
   actions: {

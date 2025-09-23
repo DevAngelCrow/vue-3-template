@@ -18,8 +18,8 @@ export interface Menu {
   uri: string;
   show: boolean;
   order: number;
-  parent: Menu;
-  children: Menu;
+  parent: Menu[];
+  children: Menu[];
   requiredAuth: boolean;
   title: string;
   active: boolean;

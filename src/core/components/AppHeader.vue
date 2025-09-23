@@ -31,30 +31,25 @@ defineOptions({ name: 'AppHeader' });
 const sideBar = useLayoutStore();
 const { menuInfo } = useAuthStore();
 
-const menuState: Menu[] = Array.isArray(menuInfo) ? menuInfo : [];
+const menuState: Menu[] = menuInfo;
 console.log(menuState, 'menuState');
 
 const menuMapped = menuState
-  .filter(item => item.show)
+  .filter(
+    item =>
+      (item.show && item.children.length > 0) ||
+      (item.show && item.children.length === 0 && item.parent === null),
+  )
   .map(m => {
-    if (Array.isArray(m.children)) {
-      return {
-        label: m.title,
-        icon: m.icon,
-        items: m.children.map(c => ({
-          label: c.title,
-          icon: c.icon,
-        })),
-      };
-    } else {
-      return {
-        label: m.title,
-        icon: m.icon,
-      };
-    }
+    return {
+      label: m.title,
+      icon: m.icon,
+      items: m.children.map(c => ({
+        label: c.title,
+        icon: c.icon,
+      })),
+    };
   });
-
-console.log(menuMapped, 'menuMapped');
 const items = ref<MenuNavBar[]>(menuMapped);
 </script>
 <style scoped></style>
