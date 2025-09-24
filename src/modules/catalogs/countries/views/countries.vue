@@ -1,5 +1,5 @@
 <template>
-  <div class="py-5 px-5 h-screen max-h-screen">
+  <div class="py-5 px-5 h-full">
     <section id="content" class="w-full flex flex-row flex-wrap gap-5">
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle

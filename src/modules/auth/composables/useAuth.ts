@@ -77,8 +77,6 @@ function createForm() {
               ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
             );
           }),
-        //address info
-
         street: yup
           .string()
           .required('El campo de nombre de calle es requerido')
@@ -181,7 +179,7 @@ export function useAuth() {
   if (!form) {
     form = createForm();
   }
-
+  const { setMenu } = useAuthStore();
   const alert = useAlertStore();
   const router = useRouter();
   const route = useRoute();
@@ -225,6 +223,7 @@ export function useAuth() {
       }
 
       const data = await response.json();
+
       if (data.data.access_token) {
         setToken(data.data);
 
@@ -235,6 +234,13 @@ export function useAuth() {
         if (data.data.token_type) {
           setTokenType(data.data.token_type);
         }
+
+        const menu = await authServices.getMenu();
+
+        if (menu.statusCode === 200) {
+          setMenu(menu.data);
+        }
+
         const redirectTo = (route.query.redirect as string) || '/';
         router.push(redirectTo);
       } else {
@@ -248,7 +254,6 @@ export function useAuth() {
       isLoading.value = false;
     }
   };
-
   const logout = async () => {
     isLoggingOut.value = true;
     try {
@@ -300,7 +305,6 @@ export function useAuth() {
   const registerUser = async (data: FormData) => {
     try {
       const response = await authServices.signUp(data);
-      console.log(response, 'response');
       if (response.status === 201) {
         const email = data.get('email');
         if (typeof email === 'string') {

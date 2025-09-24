@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-//import { jwtDecode } from "jwt-decode";
+
+import { useAuthStore } from '../store/useAuthStore';
 
 const routes = [
   {
@@ -18,16 +19,18 @@ const routes = [
     path: '/',
     name: 'layout',
     component: () => import('../layouts/Layout.vue'),
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
     children: [
       {
         path: '/test-view',
         name: 'test-view',
+        meta: { requiresAuth: true },
         component: () => import('../components/AppTestComponents.vue'),
       },
       {
         path: '/dashboard',
         name: 'dashboard',
+        meta: { requiresAuth: true },
         component: () => import('@/views/Dashboard.vue'),
       },
       {
@@ -39,6 +42,7 @@ const routes = [
       {
         path: '/routes-administration',
         name: 'routes-administration',
+        meta: { requiresAuth: true },
         component: () => import('../../modules/admin/views/Routes.vue'),
       },
     ],
@@ -70,6 +74,17 @@ const router = createRouter({
   scrollBehavior(/*to, from, savedPosition*/) {
     return { top: 0 };
   },
+});
+
+router.beforeEach((to, _from, next) => {
+  const auth = useAuthStore();
+
+  if (to.meta.requiresAuth && !auth.validSession()) {
+    console.log('ingreso');
+    auth.closeSession();
+    return next({ name: 'login' });
+  }
+  next();
 });
 
 export default router;

@@ -11,10 +11,6 @@ export interface Token {
 }
 
 export interface Menu {
-  menu: MenuItem;
-}
-
-interface MenuItem {
   id: number;
   name: string;
   description: string;
@@ -22,5 +18,9 @@ interface MenuItem {
   uri: string;
   show: boolean;
   order: number;
-  parent: MenuItem;
+  parent: Menu[];
+  children: Menu[];
+  requiredAuth: boolean;
+  title: string;
+  active: boolean;
 }

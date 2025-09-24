@@ -12,13 +12,16 @@ import type {
   SuccessResponse,
 } from '../interfaces/httpClient.interface';
 import { useAlertStore } from '../store';
+import { useAuthStore } from '../store/useAuthStore';
+
+const useAuth = useAuthStore();
 const alert = useAlertStore();
 // Función para configurar los interceptores y envolver la instancia de Axios
 const setupHttpClient = (api: AxiosInstance) => {
   // Configurar interceptores de petición
   api.interceptors.request.use(
     config => {
-      const token = localStorage.getItem('token');
+      const token = useAuth.token || localStorage.getItem('token');
       if (token) {
         if (!config.headers) {
           config.headers = AxiosHeaders.from({});
@@ -84,8 +87,11 @@ const setupHttpClient = (api: AxiosInstance) => {
   );
 
   return {
-    get: <T>(url: string, config?: AxiosRequestConfig) =>
-      api.get<T>(url, config) as Promise<SuccessResponse<T>>,
+    get: <T>(
+      url: string,
+      params?: AxiosRequestConfig['params'],
+      config?: AxiosRequestConfig,
+    ) => api.get<T>(url, { ...config, params }) as Promise<SuccessResponse<T>>,
     post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
       api.post<T>(url, data, config) as Promise<SuccessResponse<T>>,
     put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
