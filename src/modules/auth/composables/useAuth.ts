@@ -77,8 +77,6 @@ function createForm() {
               ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
             );
           }),
-        //address info
-
         street: yup
           .string()
           .required('El campo de nombre de calle es requerido')

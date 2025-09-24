@@ -87,8 +87,11 @@ const setupHttpClient = (api: AxiosInstance) => {
   );
 
   return {
-    get: <T>(url: string, config?: AxiosRequestConfig) =>
-      api.get<T>(url, config) as Promise<SuccessResponse<T>>,
+    get: <T>(
+      url: string,
+      params?: AxiosRequestConfig['params'],
+      config?: AxiosRequestConfig,
+    ) => api.get<T>(url, { ...config, params }) as Promise<SuccessResponse<T>>,
     post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
       api.post<T>(url, data, config) as Promise<SuccessResponse<T>>,
     put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>

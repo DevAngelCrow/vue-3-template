@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import adminServices from '@/core/services/index.services';
 
 import { RouteForm } from '../interfaces/route-form.interface';
+import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
 
 export function useAdmin() {
   const { errors, defineField, handleSubmit, validateField } = useForm({
@@ -22,11 +23,17 @@ export function useAdmin() {
       icon: yup.string().min(2),
       child_route: yup.boolean(),
       show: yup.boolean(),
-      parent_route: yup.number(),
+      parent_route: yup.mixed<RouteParentAutocomplete>().when('child_route', {
+        is: true,
+        then: schema => schema.required('El campo de ruta padre es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
     }),
   });
 
-  const parentRoutes = ref<{ name: string; id: number; uri: string }[]>([]);
+  const parentRoutes = ref<
+    { title: string; id: number; uri: string; name: string }[]
+  >([]);
 
   const [name, nameAttrs] = defineField('name');
   const [uri, uriAttrs] = defineField('uri');
@@ -39,9 +46,27 @@ export function useAdmin() {
 
   const getRoutes = async () => {
     try {
-      const response = await adminServices.getAllRoutes();
-      console.log(response);
-      parentRoutes.value = response.data.items.filter(item => item.id_parent);
+      let filter = {
+        page: 1,
+        per_page: 10,
+      };
+      const response = await adminServices.getAllRoutes(filter);
+      const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
+      if (secondResponse.statusCode === 200) {
+        console.log(secondResponse, 'lista para autocomplete');
+        parentRoutes.value = secondResponse.data
+          .filter(
+            item =>
+              item.parent_route === null || item.parent_route === undefined,
+          )
+          .map(item => ({
+            title: item.title, // O 'title' si la propiedad es 'title'
+            id: item.id,
+            uri: item.uri,
+            name: item.name,
+          }));
+        console.log(parentRoutes.value, 'parentRoutes arreglados');
+      }
       if (response.statusCode === 200) {
         return response.data.items;
       }

@@ -154,7 +154,7 @@
           v-model="parent_route"
           v-bind="parent_routeAttrs"
           :error-messages="errors.parent_route"
-          option-label="name"
+          option-label="title"
           :suggestions="routesFiltered"
           dropdown
           @complete="findAutocomplete"
@@ -291,15 +291,14 @@ const handledModal = (flag: boolean, action: string) => {
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
-
+  console.log(parentRoutes.value, 'parent routes');
   for (let i = 0; i < parentRoutes.value.length; i++) {
     let item = parentRoutes.value[i];
 
-    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+    if (item?.title?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);
     }
   }
-
   routesFiltered.value = _filteredItems;
 };
 
