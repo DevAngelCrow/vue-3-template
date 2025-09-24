@@ -39,8 +39,8 @@
           v-if="footerButtons"
           class="w-full flex justify-center columns-2 gap-8"
         >
-          <Button outlined @click="closeModal">{{ titleBtnCancel }}</Button>
-          <Button @click="confirmModal">{{ titleBtnConfirm }}</Button>
+          <Button v-if="showBtnCancelFooter" outlined @click="closeModal">{{ titleBtnCancel }}</Button>
+          <Button v-if="showBtnConfirmFooter" @click="confirmModal">{{ titleBtnConfirm }}</Button>
         </div>
       </slot>
     </template>
@@ -86,6 +86,14 @@ const props = defineProps({
   stylesShowDocument: {
     type: Boolean,
     default: false,
+  },
+  showBtnCancelFooter: {
+    type: Boolean,
+    default: true,
+  },
+  showBtnConfirmFooter: {
+    type: Boolean,
+    default: true,
   },
 });
 

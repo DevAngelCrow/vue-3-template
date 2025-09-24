@@ -4,6 +4,7 @@ import { CreateCountry } from "../interfaces/country.create.interface";
 import catalogServices from "../Services/catalog.services";
 import { useForm } from "vee-validate";
 import * as yup from 'yup';
+import { UpdateCountry } from "../interfaces/country.update.interface";
 
 
 export function useCountries() {
@@ -38,10 +39,36 @@ export function useCountries() {
         }
     };
 
-    const { handleSubmit, validateField, defineField } = useForm({
+    const updateCountry = async (data: UpdateCountry) => {
+      try {
+        const response = await catalogServices.updateCountries(data);
+        console.log(response, 'response');
+        if(response.status === 200) {
+          const updatedCountry = response.data;
+          return updatedCountry;
+        }
+        
+      } catch (error) {
+        console.error(error);
+        alert.showAlert({
+            type: 'error',
+            title: 'Error en la actualización de país',
+            content: 'Ocurrió un error al momento de actualizar el país'
+        });
+      }
+    }
+
+    const { handleSubmit, validateField, defineField, errors, resetForm } = useForm({
+      validateOnMount: false,
+      initialValues: {
+        name: '',
+        abbreviation: '',
+        code: ''
+      
+      },
         validationSchema: yup.object({
             // Validación para los campos del formulario
-            nombre: yup
+            name: yup
               .string()
               .required('El nombre es obligatorio')
               .min(3, 'El nombre debe tener al menos 3 caracteres')
@@ -49,31 +76,33 @@ export function useCountries() {
               .transform(
                 value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
               ),
-            abreviación: yup
-            .string().required('La abreviación es obligatoria')
+            abbreviation: yup
+            .string()
+            .required('La abreviación es obligatoria')
             .min(2, 'La abreviación debe tener al menos 2 caracteres')
             .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
             .transform(
                 value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
             ),
             code: yup
-            .string().required('El código es obligatorio')
+            .string()
             .required('El código es obligatorio')
-            .min(2, 'El código debe tener al menos 2 caracteres')
-            .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
+            .min(3, 'El código debe tener al menos 3 caracteres')
+            .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ0-9 ]*$/, 'Solo se permiten letras, números y espacios')
             .transform(
-              value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
+              value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ0-9 ]/g, '') || '',
             )
         }),
     });
   // Definir los campos del formulario
-    const [name, nameAttrs] = defineField('nombre');
-    const [abbreviation, abbreviationAttrs] = defineField('abreviación');
-    const [code, codeAttrs] = defineField('código');
+    const [name, nameAttrs] = defineField('name');
+    const [abbreviation, abbreviationAttrs] = defineField('abbreviation');
+    const [code, codeAttrs] = defineField('code');
 
     return {
         getCountries,
         createCountry,
+        updateCountry,
         handleSubmit,
         validateField,
         // Agregar los campos del formulario
@@ -83,6 +112,9 @@ export function useCountries() {
         abbreviationAttrs,
         code,
         codeAttrs,
+        errors,
+        resetForm
+        
     }
     
 

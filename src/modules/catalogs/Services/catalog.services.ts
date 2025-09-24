@@ -3,6 +3,7 @@ import { httpClient } from "@/core/utils/httpClient";
 
 import { CountryResponse } from "../interfaces/country.response.interface"
 import { CreateCountry } from "../interfaces/country.create.interface";
+import { UpdateCountry } from "../interfaces/country.update.interface";
 
 const getAllCountries = async (): Promise<ApiResponseGeneric<CountryResponse>>=> {
 
@@ -17,8 +18,14 @@ const createCountries = async (data: CreateCountry) => {
     return response;
 }
 
+const updateCountries = async (data: UpdateCountry) => {
+    const response = await httpClient.put(`catalogs/countries/${data.id}`, data);
+    return response;
+}
+
 
 export default {
     getAllCountries,
-    createCountries
+    createCountries,
+    updateCountries
 }

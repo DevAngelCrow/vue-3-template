@@ -37,13 +37,16 @@
         :per_page="10"
         :total_pages="1"
       >
-        <template #body-acciones>
+        <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
+            <Button unstyled class="!outline-none">
+              <i class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2" @click="openModal('details', data)"></i>
+            </Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
-              @click=""
+              @click="openModal('edit', data)"
             ></Button>
             <Button
               class="rounded-full"
@@ -59,22 +62,20 @@
             data ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
-        <template #body-show="{ data }">
-          <i :class="data ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-        </template>
+        
       </AppDataTable>
     </section>
       <AppModal
           :show="showModal"
           show-icon-close
-          :title="isMode ? 'Editar País' : 'Agregar País'"
-          :title-btn-confirm="'Guardar'"
-          :title-btn-cancel="'Cancelar'"
+          :title="isDetailsMode ? 'Detalle País' : (isMode ? 'Editar País' : 'Agregar País')"
+          :show-btn-confirm-footer="isDetailsMode ? false : true"
+          :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
+          :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
+          :show-buttons="!isDetailsMode"
           @close-modal="closeModalCreate"
           @confirm-modal="confirmModal"
           width="350px"
-          @next="next"
-          @back="back"
         >
           <div class="flex flex-col gap-6 py-5 w-[250px]">
             <AppInputText 
@@ -82,12 +83,16 @@
               class="lg:w-full grow sm:max-w-[500px]"
               label="Ingrese el nombre del país"
               v-bind="nameAttrs"
+              :error-messages="errors.name"
+              :disabled="isDetailsMode"
             />
             <AppInputText 
               v-model="abbreviation"
               class="lg:w-full grow sm:max-w-[500px]"
               label="Ingrese la abreviación del país"
               v-bind="abbreviationAttrs"
+              :error-messages="errors.abbreviation"
+              :disabled="isDetailsMode"
             />
 
             <AppInputText 
@@ -95,6 +100,8 @@
               class="lg:w-full grow sm:max-w-[500px]"
               label="Ingrese el código del país"
               v-bind="codeAttrs"
+              :error-messages="errors.code"
+              :disabled="isDetailsMode"
             />
           </div>
       </AppModal>
@@ -113,82 +120,95 @@ import { useLoaderStore } from '@/core/store';
 
 import { useCountries } from '../../composables/useCountries';
 import { CountryResponse } from '../../interfaces/country.response.interface';
+import { CreateCountry } from '../../interfaces/country.create.interface';
 const showModal = ref<boolean>(false);
 const isMode = ref<boolean>(false);
-const tempCountry = ref({
-  nombre: '',
-  abreviación: '',
-  código: '',
-});
+const isDetailsMode = ref<boolean>(false);
+const editingCountryId = ref<number | null>(null);
+
 
 /** Zona de Variables */
 const { startLoading, finishLoading } = useLoaderStore();
 const items = ref<CountryResponse[] | undefined>([]);
-const openModal = (type: 'create' | 'edit', country?: any) => {
+const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
+  // Resetear todos los estados
+  isMode.value = false;
+  isDetailsMode.value = false;
+  editingCountryId.value = null;
+  
   if (type === 'create') {
-    isMode.value = false;
-    tempCountry.value = { nombre: '', abreviación: '', código: '' };
-    showModal.value = true;
-  } else {
+    console.log('type', type);
+    // Limpiar los campos del formulario
+    resetForm();
+  } else if (type === 'edit') {
     isMode.value = true;
     // Rellena con los datos del país a editar
-    tempCountry.value = {
-      nombre: country.vinculador_dos,
-      abreviación: country.vinculador_tres,
-      código: country.vinculador_cuatro,
-    };
-    showModal.value = true;
+    editingCountryId.value = country.id;
+    name.value = country.name || '';
+    abbreviation.value = country.abbreviation || '';
+    code.value = country.code || '';
+  } else if (type === 'details') {
+    console.log('entro a detalle:', country);
+    isDetailsMode.value = true;
+    // Rellena con los datos del país a ver
+    name.value = country.name || '';
+    abbreviation.value = country.abbreviation || '';
+    code.value = country.code || '';
   }
+  
+  showModal.value = true;
 };
+
+/** Zona de Composables */
+const {
+  getCountries,
+  createCountry,
+  handleSubmit,
+  name,
+  nameAttrs,
+  abbreviation,
+  abbreviationAttrs,
+  code,
+  codeAttrs,
+  errors,
+  resetForm,
+  updateCountry,
+
+} = useCountries();
+
 const closeModalCreate = (value: boolean) => {
   showModal.value = value;
+  if (!value) {
+    // Resetear estados cuando se cierra el modal
+    isMode.value = false;
+    isDetailsMode.value = false;
+  }
 };
-const confirmModal = () => handleSubmit(async values => {
+const confirmModal = handleSubmit(async values => {
    try {
+    console.log('values:', values);
     startLoading();
-    const form = {
-      name: values.nombre,
-      abbreviation: values.abreviación,
-      code: values.código,
+
+    if(isMode.value && editingCountryId.value !== null) {
+      // Modo edición
+
+    }
+    const form: CreateCountry= {
+      name: values.name,
+      abbreviation: values.abbreviation,
+      code: values.code,
       active: true,
     };
     await createCountry(form);
     items.value = await getCountries();
+    closeModalCreate(false);
     
    } catch (error: unknown) {
     console.error(error);
   } finally {
     finishLoading();
   }
-  closeModalCreate(false);
 });
-
-const next = async (callback: Function, step: number) => {
-  try {
-    let fieldsToValidate: string[] = [];
-    if (fieldsToValidate.length > 0) {
-      const validationResults = await Promise.all(
-        fieldsToValidate.map(field => validateField(field)),
-      );
-      const allValid = validationResults.every(result => result.valid);
-
-      if (allValid) {
-        callback(step + 1);
-      }
-    } else {
-      callback(step + 1);
-    }
-  } catch (error) {
-    console.error(error, 'Error en la validación');
-  }
-};
-const back = (callback: Function, step: number) => {
-  try {
-    callback(step - 1);
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 /** Zona de Headers de la tabla */
 const headers = ref<TableHeaders[]>([
@@ -254,21 +274,6 @@ const headers = ref<TableHeaders[]>([
 //     vinculador_seis: 'Editar | Eliminar',
 //   },
 // ]);
-
-/** Zona de Composables */
-const {
-  getCountries,
-  createCountry,
-  handleSubmit,
-  validateField,
-  name,
-  nameAttrs,
-  abbreviation,
-  abbreviationAttrs,
-  code,
-  codeAttrs
-
-} = useCountries();
 
 /** Zona de Métodos */
 onMounted(async () => {
