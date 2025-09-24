@@ -67,7 +67,7 @@
       </AppDataTable>
     </section>
     <AppModal
-      :title="title"
+      :title="titleModal"
       :show="showModal"
       :title-btn-cancel="'Cancelar'"
       :title-btn-confirm="'Guardar'"
@@ -88,6 +88,14 @@
           v-model="name"
           :error-messages="errors.name"
           v-bind="nameAttrs"
+        />
+        <AppInputText
+          class="w-full min-w-0"
+          id="title"
+          label="Título*"
+          v-model="title"
+          :error-messages="errors.title"
+          v-bind="titleAttrs"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -144,11 +152,7 @@
           </div>
         </div>
         <AppAutocomplete
-          :class="
-            child_route
-              ? ' w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300'
-              : ' w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0'
-          "
+          :class="showParentRoute"
           id="patern_route"
           label="Ruta padre"
           v-model="parent_route"
@@ -165,7 +169,7 @@
 </template>
 <script setup lang="ts">
 import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
-import { onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useLoaderStore } from '@/core/store';
@@ -181,6 +185,8 @@ const {
   errors,
   name,
   nameAttrs,
+  title,
+  titleAttrs,
   uri,
   uriAttrs,
   description,
@@ -197,6 +203,7 @@ const {
   parent_routeAttrs,
   handleSubmit,
   parentRoutes,
+  resetField,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -273,14 +280,14 @@ const headers = ref<TableHeaders[]>([
 ]);
 
 const items = ref<RoutesResponse[] | undefined>([]);
-const title = ref<string>('');
+const titleModal = ref<string>('');
 
 const showModal = ref<boolean>(false);
 const routesFiltered = ref<any[]>([]);
 
 const handledModal = (flag: boolean, action: string) => {
   if (!flag && action === 'agregar') {
-    title.value = 'Agregar ruta';
+    titleModal.value = 'Agregar ruta';
     showModal.value = !flag;
     return;
   }
@@ -303,18 +310,57 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
 };
 
 const onSubMit = handleSubmit(async values => {
-  const form: RouteForm = {
-    name: values.name,
-    description: values.description,
-    child_route: values.child_route,
-    icon: values.icon,
-    order: values.order,
-    show: values.show,
-    uri: values.uri,
-    parent_route: values.parent_route,
-  };
-  await addRoute(form);
+  try {
+    startLoading();
+    const form: RouteForm = {
+      name: values.name,
+      description: values.description,
+      child_route: values.child_route,
+      icon: values.icon,
+      order: values.order,
+      show: values.show,
+      uri: values.uri,
+      parent_route: values.parent_route,
+      title: values.title,
+    };
+    await addRoute(form);
+    handledModal(showModal.value, 'agregar');
+  } catch (error) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 });
+
+const showParentRoute = computed(() => {
+  try {
+    console.log('computada');
+    if (child_route.value) {
+      return 'w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300';
+    }
+    return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0';
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+watch(
+  child_route,
+  (newValue, oldValue) => {
+    if (oldValue === true && newValue === false) {
+      try {
+        nextTick(() => {
+          resetField('parent_route', { errors: undefined, value: null });
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  },
+  {
+    immediate: false,
+  },
+);
 
 onMounted(async () => {
   try {

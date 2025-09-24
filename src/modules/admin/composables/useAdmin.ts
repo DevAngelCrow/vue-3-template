@@ -8,25 +8,40 @@ import { RouteForm } from '../interfaces/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
 
 export function useAdmin() {
-  const { errors, defineField, handleSubmit, validateField } = useForm({
+  const {
+    errors,
+    defineField,
+    handleSubmit,
+    validateField,
+    resetForm,
+    resetField,
+    setFieldError,
+  } = useForm({
     validationSchema: yup.object({
       name: yup
         .string()
         .required('El nombre de la ruta es requerido')
         .min(4, 'El nombre debe tener al menos 3 caracteres'),
+      title: yup
+        .string()
+        .required('El título de la ruta es requerido')
+        .min(3, 'El título debe tener al menos 3 caracteres'),
       uri: yup
         .string()
         .required('El campo uri es requerido')
         .min(4, 'El campo uri debe tener al menos 3 caracteres'),
       description: yup.string(),
-      order: yup.number(),
+      order: yup
+        .number()
+        .typeError('El campo debe ser de tipo entero')
+        .required('El campo es requerido'),
       icon: yup.string().min(2),
       child_route: yup.boolean(),
       show: yup.boolean(),
       parent_route: yup.mixed<RouteParentAutocomplete>().when('child_route', {
         is: true,
         then: schema => schema.required('El campo de ruta padre es requerido'),
-        otherwise: schema => schema.notRequired(),
+        otherwise: schema => schema.nullable().notRequired(),
       }),
     }),
   });
@@ -36,6 +51,7 @@ export function useAdmin() {
   >([]);
 
   const [name, nameAttrs] = defineField('name');
+  const [title, titleAttrs] = defineField('title');
   const [uri, uriAttrs] = defineField('uri');
   const [description, descriptionAttrs] = defineField('description');
   const [order, orderAttrs] = defineField('order');
@@ -77,7 +93,15 @@ export function useAdmin() {
   };
 
   const addRoute = async (form: RouteForm) => {
-    console.log(form);
+    try {
+      const response = await adminServices.addRoute(form);
+
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return {
@@ -85,6 +109,8 @@ export function useAdmin() {
     addRoute,
     name,
     nameAttrs,
+    title,
+    titleAttrs,
     uri,
     uriAttrs,
     description,
@@ -103,5 +129,8 @@ export function useAdmin() {
     handleSubmit,
     validateField,
     parentRoutes,
+    resetForm,
+    resetField,
+    setFieldError,
   };
 }

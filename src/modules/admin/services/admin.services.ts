@@ -4,6 +4,7 @@ import { paginateParams } from '@/core/services/interfaces/params.paginate.inter
 
 import { RoutesResponse } from '../interfaces/routes.response.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
+import { RouteForm } from '../interfaces/route-form.interface';
 
 const getAllRoutes = async (
   params: paginateParams,
@@ -23,7 +24,13 @@ const getAllRoutesWithOutPaginate = async () => {
   return response.data;
 };
 
+const addRoute = async (data: RouteForm) => {
+  const response = await httpClient.post('security/routes', data);
+  return response;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
+  addRoute,
 };
