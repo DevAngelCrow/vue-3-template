@@ -52,7 +52,7 @@
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
-              @click=""
+              @click=" openModalEstado('changeStatus', data)"
             ></Button>
           </div>
         </template>
@@ -105,6 +105,24 @@
             />
           </div>
       </AppModal>
+
+      <AppModal
+        :show="showModalCambioStatus"
+        show-icon-close
+        title="Cambiar estado"
+        :show-btn-confirm-footer="true"
+        :title-btn-confirm="'Confirmar'"
+        :title-btn-cancel="'Cancelar'"
+        :show-buttons="true"
+        @close-modal="CloseModalEstado"
+        @confirm-modal="confirmModalEstado"
+        width="450px">
+
+        <div class="flex flex-col gap-6 py-5 w-full">
+          
+          <p class="text-center">¿Está seguro que desea cambiar el estado del país?</p>
+        </div>
+      </AppModal>
   </div>
 </template>
 
@@ -121,10 +139,12 @@ import { useLoaderStore } from '@/core/store';
 import { useCountries } from '../../composables/useCountries';
 import { CountryResponse } from '../../interfaces/country.response.interface';
 import { CreateCountry } from '../../interfaces/country.create.interface';
+import { UpdateCountry } from '../../interfaces/country.update.interface';
 const showModal = ref<boolean>(false);
 const isMode = ref<boolean>(false);
 const isDetailsMode = ref<boolean>(false);
 const editingCountryId = ref<number | null>(null);
+const showModalCambioStatus = ref<boolean>(false);
 
 
 /** Zona de Variables */
@@ -159,6 +179,14 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   showModal.value = true;
 };
 
+const openModalEstado = (type: 'changeStatus', country?: any) => {
+  if (type === 'changeStatus') {
+    // Aquí puedes agregar lógica adicional si es necesario
+    console.log('Abriendo modal para cambiar estado del país:', country);
+  }
+  showModalCambioStatus.value = true;
+};
+
 /** Zona de Composables */
 const {
   getCountries,
@@ -182,32 +210,53 @@ const closeModalCreate = (value: boolean) => {
     // Resetear estados cuando se cierra el modal
     isMode.value = false;
     isDetailsMode.value = false;
+    editingCountryId.value = null;
   }
+};
+
+const CloseModalEstado = (value: boolean) => {
+  showModalCambioStatus.value = value;
 };
 const confirmModal = handleSubmit(async values => {
    try {
     console.log('values:', values);
+    console.log('isMode:', isMode.value);
+    console.log('editingCountryId:', editingCountryId.value);
     startLoading();
 
     if(isMode.value && editingCountryId.value !== null) {
       // Modo edición
+      const updateForm: UpdateCountry= {
+        id: editingCountryId.value,
+        name: values.name,
+        abbreviation: values.abbreviation,
+        code: values.code,
+        active: true,
+      };
+      
+      console.log('Actualizando país', updateForm)
+      await updateCountry(updateForm);
 
+    }else {
+      // Modo creación
+      const form: CreateCountry= {
+        name: values.name,
+        abbreviation: values.abbreviation,
+        code: values.code,
+        active: true,
+      };
+      console.log('Creando país', form);
+      await createCountry(form);
     }
-    const form: CreateCountry= {
-      name: values.name,
-      abbreviation: values.abbreviation,
-      code: values.code,
-      active: true,
-    };
-    await createCountry(form);
-    items.value = await getCountries();
-    closeModalCreate(false);
-    
-   } catch (error: unknown) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
+      // Refrescar la lista de países después de crear uno nuevo
+      items.value = await getCountries();
+      closeModalCreate(false);
+      
+     } catch (error: unknown) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
 });
 
 /** Zona de Headers de la tabla */
