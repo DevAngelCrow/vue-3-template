@@ -32,7 +32,6 @@ const sideBar = useLayoutStore();
 const { menuInfo } = useAuthStore();
 
 const menuState: Menu[] = menuInfo;
-console.log(menuState, 'menu-state');
 const menuMapped = menuState
   .filter(
     item =>

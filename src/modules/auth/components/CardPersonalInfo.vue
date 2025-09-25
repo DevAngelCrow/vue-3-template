@@ -173,7 +173,6 @@ const getMaritalStatus = async () => {
   try {
     startLoading();
     const response = await authServices.getMaritalStatus();
-    console.log(response);
     if (response.statusCode === 200) {
       maritalStatusItems.value = response.data;
     }

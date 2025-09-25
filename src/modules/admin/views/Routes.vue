@@ -34,8 +34,15 @@
         :headers="headers"
         :items="items"
         :paginator="true"
-        :per_page="10"
-        :total_pages="1"
+        :per_page="per_page"
+        :total_items="total_items"
+        :page="page"
+        @page-update="
+          (value: number) => {
+            page = value + 1;
+            getRoutes();
+          }
+        "
       >
         <template #body-acciones>
           <div class="flex gap-0 justify-center">
@@ -175,7 +182,6 @@ import { TableHeaders } from '@/core/interfaces';
 import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
 import { RouteForm } from '../interfaces/route-form.interface';
 
 const { startLoading, finishLoading } = useLoaderStore();
@@ -204,6 +210,10 @@ const {
   handleSubmit,
   parentRoutes,
   resetField,
+  page,
+  total_items,
+  per_page,
+  items,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -279,7 +289,6 @@ const headers = ref<TableHeaders[]>([
   },
 ]);
 
-const items = ref<RoutesResponse[] | undefined>([]);
 const titleModal = ref<string>('');
 
 const showModal = ref<boolean>(false);
@@ -298,7 +307,6 @@ const handledModal = (flag: boolean, action: string) => {
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
-  console.log(parentRoutes.value, 'parent routes');
   for (let i = 0; i < parentRoutes.value.length; i++) {
     let item = parentRoutes.value[i];
 
@@ -334,13 +342,12 @@ const onSubMit = handleSubmit(async values => {
 
 const showParentRoute = computed(() => {
   try {
-    console.log('computada');
     if (child_route.value) {
       return 'w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300';
     }
     return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0';
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 });
 
@@ -353,7 +360,7 @@ watch(
           resetField('parent_route', { errors: undefined, value: null });
         });
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
   },
@@ -364,12 +371,9 @@ watch(
 
 onMounted(async () => {
   try {
-    startLoading();
-    items.value = await getRoutes();
+    await getRoutes();
   } catch (error) {
-    console.log(error);
-  } finally {
-    finishLoading();
+    console.error(error);
   }
 });
 </script>

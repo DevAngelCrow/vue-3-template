@@ -10,6 +10,8 @@ export interface TableProps<T> {
   headers: TableHeaders[];
   items: T[];
   per_page: number;
+  total_items: number;
+  page: number;
   loading?: boolean;
   loadingIcon?: string;
   rowHover?: boolean;

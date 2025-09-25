@@ -74,7 +74,6 @@ router.beforeEach((to, _from, next) => {
   const auth = useAuthStore();
 
   if (to.meta.requiresAuth && !auth.validSession()) {
-    console.log('ingreso');
     auth.closeSession();
     return next({ name: 'login' });
   }

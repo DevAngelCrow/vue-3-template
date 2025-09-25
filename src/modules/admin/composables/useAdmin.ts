@@ -3,9 +3,11 @@ import * as yup from 'yup';
 import { ref } from 'vue';
 
 import adminServices from '@/core/services/index.services';
+import { useLoaderStore } from '@/core/store';
 
 import { RouteForm } from '../interfaces/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
+import { RoutesResponse } from '../interfaces/routes.response.interface';
 
 export function useAdmin() {
   const {
@@ -50,6 +52,13 @@ export function useAdmin() {
     { title: string; id: number; uri: string; name: string }[]
   >([]);
 
+  const page = ref<number>(1);
+  const per_page = ref<number>(10);
+  const total_items = ref<number>(0);
+  const items = ref<RoutesResponse[] | undefined>([]);
+
+  const { startLoading, finishLoading } = useLoaderStore();
+
   const [name, nameAttrs] = defineField('name');
   const [title, titleAttrs] = defineField('title');
   const [uri, uriAttrs] = defineField('uri');
@@ -62,33 +71,37 @@ export function useAdmin() {
 
   const getRoutes = async () => {
     try {
+      startLoading();
       let filter = {
-        page: 1,
-        per_page: 10,
+        page: page.value,
+        per_page: per_page.value,
       };
       const response = await adminServices.getAllRoutes(filter);
       const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
       if (secondResponse.statusCode === 200) {
-        console.log(secondResponse, 'lista para autocomplete');
         parentRoutes.value = secondResponse.data
           .filter(
             item =>
               item.parent_route === null || item.parent_route === undefined,
           )
           .map(item => ({
-            title: item.title, // O 'title' si la propiedad es 'title'
+            title: item.title,
             id: item.id,
             uri: item.uri,
             name: item.name,
           }));
-        console.log(parentRoutes.value, 'parentRoutes arreglados');
       }
       if (response.statusCode === 200) {
-        return response.data.items;
+        page.value = response.data.pagination.currentPage;
+        per_page.value = response.data.pagination.perPage;
+        total_items.value = response.data.pagination.totalItems;
+        items.value = response.data.items;
       }
       return [];
     } catch (error) {
       console.error('Error al obtener el listado de rutas', error);
+    } finally {
+      finishLoading();
     }
   };
 
@@ -97,6 +110,7 @@ export function useAdmin() {
       const response = await adminServices.addRoute(form);
 
       if (response.status === 200) {
+        getRoutes();
         return response.data;
       }
     } catch (error) {
@@ -132,5 +146,9 @@ export function useAdmin() {
     resetForm,
     resetField,
     setFieldError,
+    page,
+    per_page,
+    total_items,
+    items,
   };
 }

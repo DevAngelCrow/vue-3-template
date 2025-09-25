@@ -31,7 +31,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import authServices from '@/core/services/auth.services';
 import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
@@ -67,10 +67,6 @@ const getDocumentTypes = async () => {
 
 onMounted(async () => {
   await getDocumentTypes();
-});
-
-watch(documentType, newValue => {
-  console.log(newValue, 'new Value');
 });
 
 defineExpose({
