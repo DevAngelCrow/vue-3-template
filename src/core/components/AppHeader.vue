@@ -57,7 +57,6 @@ const menuMapped = menuState
     return menuItem;
   });
 
-console.log(menuMapped, 'menumapped');
 const items = ref<MenuNavBar[]>(menuMapped);
 </script>
 <style scoped></style>

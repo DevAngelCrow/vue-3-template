@@ -1,9 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
 
-import { useAuthStore } from '../store/useAuthStore';
-
-const { token } = useAuthStore();
-console.log(token, 'axios token');
 const API_BASE_URL = import.meta.env.VITE_VUE_APP_API_URL
   ? `${import.meta.env.VITE_VUE_APP_API_URL}/api`
   : 'http://localhost:8000/api';
