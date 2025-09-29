@@ -1,5 +1,6 @@
 import { httpClient } from '@/core/utils/httpClient';
 import { ApiResponseGeneric } from '@/core/services/interfaces/auth/apiResponseGeneric.interface';
+import { ApiPostResponse } from '@/core/services/apiPostResponse.interface';
 import { paginateParams } from '@/core/services/interfaces/params.paginate.interface';
 
 import { RoutesResponse } from '../interfaces/routes.response.interface';
@@ -25,7 +26,10 @@ const getAllRoutesWithOutPaginate = async () => {
 };
 
 const addRoute = async (data: RouteForm) => {
-  const response = await httpClient.post('security/routes', data);
+  const response = await httpClient.post<ApiPostResponse>(
+    'security/routes',
+    data,
+  );
   return response;
 };
 

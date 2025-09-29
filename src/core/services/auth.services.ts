@@ -14,6 +14,7 @@ import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
 import { Menu } from '../interfaces/userState.store.interface';
 import { Login } from './interfaces/auth/login.interface';
 import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
+import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
 // import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
 
 // import { Menu } from './interfaces/auth/menu.interface';
@@ -72,6 +73,11 @@ const login = async (data: Login): Promise<ApiResponseLogin> => {
   return response.data;
 };
 
+const logout = async () => {
+  const response = await httpClient.post<ApiResponseLogout>('auth/logout');
+  return response.data;
+};
+
 const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
   let urlFormatedString = url?.toString();
   let response;
@@ -103,4 +109,5 @@ export default {
   verifyEmail,
   getMenu,
   login,
+  logout,
 };

@@ -111,6 +111,7 @@
           v-model="uri"
           :error-messages="errors.uri"
           v-bind="uriAttrs"
+          @update:modelValue="validateInputUri(uri, 'uri')"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -214,6 +215,8 @@ const {
   total_items,
   per_page,
   items,
+  resetForm,
+  validateInputUri,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -302,6 +305,7 @@ const handledModal = (flag: boolean, action: string) => {
   }
   showModal.value = false;
   title.value = '';
+  resetForm();
 };
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {

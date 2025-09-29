@@ -1,9 +1,10 @@
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 
 import adminServices from '@/core/services/index.services';
-import { useLoaderStore } from '@/core/store';
+import { useAlertStore, useLoaderStore } from '@/core/store';
+import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 import { RouteForm } from '../interfaces/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
@@ -18,6 +19,7 @@ export function useAdmin() {
     resetForm,
     resetField,
     setFieldError,
+    setFieldValue,
   } = useForm({
     validationSchema: yup.object({
       name: yup
@@ -31,7 +33,17 @@ export function useAdmin() {
       uri: yup
         .string()
         .required('El campo uri es requerido')
-        .min(4, 'El campo uri debe tener al menos 3 caracteres'),
+        .min(4, 'El campo uri debe tener al menos 3 caracteres')
+        .test(
+          'valid_uri',
+          'El nombre de la uri no es del formato valido',
+          value => {
+            if (routeValidRegex.test(value)) {
+              return true;
+            }
+            return false;
+          },
+        ),
       description: yup.string(),
       order: yup
         .number()
@@ -58,6 +70,7 @@ export function useAdmin() {
   const items = ref<RoutesResponse[] | undefined>([]);
 
   const { startLoading, finishLoading } = useLoaderStore();
+  const alert = useAlertStore();
 
   const [name, nameAttrs] = defineField('name');
   const [title, titleAttrs] = defineField('title');
@@ -69,6 +82,9 @@ export function useAdmin() {
   const [show, showAttrs] = defineField('show');
   const [parent_route, parent_routeAttrs] = defineField('parent_route');
 
+  const invalidRouteRegex = /[^A-Za-z0-9\-/]/g;
+  const routeValidRegex =
+    /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
   const getRoutes = async () => {
     try {
       startLoading();
@@ -108,14 +124,33 @@ export function useAdmin() {
   const addRoute = async (form: RouteForm) => {
     try {
       const response = await adminServices.addRoute(form);
-
-      if (response.status === 200) {
+      if (response.status === 201) {
         getRoutes();
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
         return response.data;
       }
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const validateInputUri = (
+    value: string,
+    input: string,
+    regex: RegExp = invalidRouteRegex,
+  ) => {
+    const sanitizedValue = sanitizedValueInput(value, regex);
+
+    if (!routeValidRegex.test(sanitizedValue)) {
+      console.error('Ruta invalida', sanitizedValue);
+    }
+    nextTick(() => {
+      setFieldValue(input, sanitizedValue);
+    });
   };
 
   return {
@@ -150,5 +185,6 @@ export function useAdmin() {
     per_page,
     total_items,
     items,
+    validateInputUri,
   };
 }
