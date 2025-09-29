@@ -6,7 +6,6 @@ import {
   Token,
   Menu,
 } from '../interfaces/userState.store.interface';
-import authServices from '../services/auth.services';
 
 interface State {
   user: UserStateStore | null | string;
@@ -110,25 +109,12 @@ export const useAuthStore = defineStore('authStore', {
       if (!this.user || !this.token || this.isTokenExpired()) return false;
       return true;
     },
-    async closeSession() {
-      try {
-        const response = await authServices.logout();
-
-        if (response.data.statusCode === 200) {
-          this.user = null;
-          this.token = null;
-          this.token_type = null;
-          this.menu = [];
-          removeAllFromLocalStorage([
-            'access_token',
-            'user',
-            'menu',
-            'token_type',
-          ]);
-        }
-      } catch (error: unknown) {
-        console.error(error);
-      }
+    closeSession() {
+      this.user = null;
+      this.token = null;
+      this.token_type = null;
+      this.menu = [];
+      removeAllFromLocalStorage(['access_token', 'user', 'menu', 'token_type']);
     },
   },
 });

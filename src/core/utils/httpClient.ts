@@ -11,18 +11,16 @@ import type {
   ErrorResponse,
   SuccessResponse,
 } from '../interfaces/httpClient.interface';
-// import { useAlertStore } from '../store';
-// import { useAuthStore } from '../store/useAuthStore';
+import { useAlertStore } from '../store';
+import { useAuthStore } from '../store/useAuthStore';
 
-// const useAuth = useAuthStore();
-// const alert = useAlertStore();
+const useAuth = useAuthStore();
+const alert = useAlertStore();
 // Función para configurar los interceptores y envolver la instancia de Axios
 const setupHttpClient = (api: AxiosInstance) => {
   // Configurar interceptores de petición
   api.interceptors.request.use(
-    async config => {
-      const { useAuthStore } = await import('../store/useAuthStore');
-      const useAuth = useAuthStore();
+    config => {
       const token = useAuth.token || localStorage.getItem('token');
       if (token) {
         if (!config.headers) {
@@ -42,12 +40,7 @@ const setupHttpClient = (api: AxiosInstance) => {
     (response: AxiosResponse) => {
       return response;
     },
-    async (error: AxiosError<ErrorResponse>) => {
-      const { useAlertStore } = await import('../store/useAlertStore');
-      //const {useAuthStore} = await import('../store/useAuthStore');
-
-      const alert = useAlertStore();
-      //const useAuth = useAuthStore();
+    (error: AxiosError<ErrorResponse>) => {
       if (error.response) {
         const responseData = error.response.data || {};
         const errorData: ErrorResponse = {
