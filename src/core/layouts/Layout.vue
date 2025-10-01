@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-full flex flex-col">
     <!-- <AppLoader v-if="showLoader" /> -->
-    <AppSideBar :show="sideBar.sideBar" />
+    <AppSideBar :show="sideBar.sideBar" :menu="useAuth.menu" />
     <div class="w-full min-h-screen flex flex-col">
       <header
         id="header-section"

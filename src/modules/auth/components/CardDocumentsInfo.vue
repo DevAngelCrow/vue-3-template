@@ -1,7 +1,7 @@
 <template>
   <section
     id="card_documentos_personales"
-    class="card_height min-h-[200px] w-[95%] sm:w-[65%] md:w-[55%] lg:w-[55%] bg-surface-200 h-[25%] sm:h-[35%] md:h-[30%] rounded-xl flex flex-col align-top gap-10 lg:gap-12 px-3 py-3 sm:px-10 overflow-y-auto"
+    class="card_height min-h-[200px] w-[95%] sm:w-[65%] md:w-[55%] lg:w-[55%] bg-surface-200 h-[25%] sm:h-[35%] md:h-[30%] rounded-xl flex flex-col align-top gap-10 lg:gap-12 px-3 py-3 sm:px-10 overflow-y-auto border border-primary-950"
   >
     <div class="w-full mt-5 gap-5 flex flex-col">
       <span class="text-xl">Documentos:</span>
