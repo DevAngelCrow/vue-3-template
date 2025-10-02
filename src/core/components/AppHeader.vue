@@ -18,45 +18,49 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { ref } from 'vue';
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import { useLayoutStore } from '../store/useLayoutStore';
 import AppNavBarMenu from './AppNavBarMenu.vue';
 import { useAuthStore } from '../store/useAuthStore';
-import { Menu } from '../interfaces/userState.store.interface';
 import { MenuNavBar } from '../interfaces/menu.navbar.interface';
 
 defineOptions({ name: 'AppHeader' });
 
 const sideBar = useLayoutStore();
-const { menuInfo } = useAuthStore();
+const { menuInfo } = storeToRefs(useAuthStore());
 
-const menuState: Menu[] = menuInfo;
-const menuMapped = menuState
-  .filter(
-    item =>
-      (item.show && item.children.length > 0) ||
-      (item.show && item.children.length === 0 && item.parent === null),
-  )
-  .map(m => {
-    const menuItem: MenuNavBar = {
-      label: m.title,
-      icon: m.icon,
-      url: m.uri,
-    };
-    if (m.title === 'Usuario') {
-      menuItem.isUser = true;
-    }
-    if (m.children && m.children.length > 0) {
-      menuItem.items = m.children.map(c => ({
-        label: c.title,
-        icon: c.icon,
-        url: c.uri,
-      }));
-    }
-    return menuItem;
-  });
+const items = computed<MenuNavBar[]>(() => {
+  console.log('🔄 Recalculando menú, total items:', menuInfo.value.length);
 
-const items = ref<MenuNavBar[]>(menuMapped);
+  return menuInfo.value
+    .filter(
+      item =>
+        (item.show && item.children.length > 0) ||
+        (item.show && item.children.length === 0 && item.parent === null),
+    )
+    .map(m => {
+      const menuItem: MenuNavBar = {
+        label: m.title,
+        icon: m.icon,
+        url: m.uri,
+      };
+
+      if (m.title === 'Usuario') {
+        menuItem.isUser = true;
+      }
+
+      if (m.children && m.children.length > 0) {
+        menuItem.items = m.children.map(c => ({
+          label: c.title,
+          icon: c.icon,
+          url: c.uri,
+        }));
+      }
+
+      return menuItem;
+    });
+});
 </script>
 <style scoped></style>
