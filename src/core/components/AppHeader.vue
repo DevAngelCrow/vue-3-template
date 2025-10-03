@@ -4,7 +4,8 @@
       class="w-full h-full bg-transparent flex justify-start items-center align-baseline"
     >
       <Button
-        class="bg-transparent border-none flex md:hidden"
+        v-if="menuSideBar?.length"
+        class="bg-transparent border-none flex"
         @click="sideBar.showSideBar(!sideBar.sideBar)"
       >
         <i class="pi pi-bars"></i>
@@ -12,13 +13,14 @@
       <AppNavBarMenu
         class="flex justify-end align-baseline content-center"
         :menu="items"
+        @update:menu-sidebar="toggleMenu"
       />
     </div>
   </section>
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useLayoutStore } from '../store/useLayoutStore';
@@ -27,13 +29,18 @@ import { useAuthStore } from '../store/useAuthStore';
 import { MenuNavBar } from '../interfaces/menu.navbar.interface';
 
 defineOptions({ name: 'AppHeader' });
+const emit = defineEmits(['update:menu-sidebar']);
 
 const sideBar = useLayoutStore();
 const { menuInfo } = storeToRefs(useAuthStore());
+const menuSideBar = ref([]);
 
+const toggleMenu = value => {
+  console.log(value, 'esto es lo que viene de appnavbarmenu al header');
+  menuSideBar.value = value;
+  emit('update:menu-sidebar', menuSideBar.value);
+};
 const items = computed<MenuNavBar[]>(() => {
-  console.log('🔄 Recalculando menú, total items:', menuInfo.value.length);
-
   return menuInfo.value
     .filter(
       item =>

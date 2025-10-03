@@ -3,6 +3,7 @@
     class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none rounded-none"
   >
     <Menubar
+      v-if="isMenuVisible"
       class="rounded-none bg-primary border-none h-full hidden md:flex"
       breakpoint="767px"
       :model="menuMapped"
@@ -95,6 +96,7 @@ import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
 import type { MenuNavBar as MenuModel } from '../interfaces/menu.navbar.interface';
 import { useAuthStore } from '../store/useAuthStore';
+import { Menu } from '../interfaces/userState.store.interface';
 
 defineOptions({ name: 'AppNavBarMenu' });
 
@@ -105,28 +107,35 @@ const { menu } = defineProps({
   },
 });
 
+const emit = defineEmits(['update:menu-sidebar']);
+
+const useAuth = useAuthStore();
+
 const menuMapped = ref<MenuModel[]>();
-const menuAppsideBar = ref<MenuModel[]>();
+const menuAppsideBar = ref<Menu[]>();
 const menuUser = ref<MenuModel[]>();
 const popUp = ref<InstanceType<typeof MenuPrime>>();
 const menuBar = ref<Ref>();
 let observer: ResizeObserver | undefined;
 
+const isMenuVisible = ref<boolean>(true);
 const usagePercent = ref(0);
 const usagePercentMenu = ref(0);
 const hasWrap = ref(false);
 const wrapIndex = ref<number | null>(null);
-
-const useAuth = useAuthStore();
+const menuCopy = ref<MenuModel[]>([]);
+const widthNavBarMenu = ref<number>(0);
+const breakHistoryNavBarMenu = ref<any[]>([]);
 
 const toggle = (event: MouseEvent | KeyboardEvent) => {
   popUp.value?.toggle(event);
 };
 
 const mapperMenuUser = () => {
-  if (menu.length) {
-    menuUser.value = menu.filter(item => item.isUser);
-    menuMapped.value = menu.filter(item => !item.isUser);
+  menuCopy.value = structuredClone(menu);
+  if (menuCopy.value.length) {
+    menuUser.value = menuCopy.value.filter(item => item.isUser);
+    menuMapped.value = menuCopy.value.filter(item => !item.isUser);
   }
 };
 
@@ -165,6 +174,7 @@ const getUsagePercent = () => {
 };
 
 const checkUsage = () => {
+  isMenuVisible.value = false;
   const root = menuBar.value?.$el?.querySelector?.(
     '.p-menubar-root-list',
   ) as HTMLElement;
@@ -182,6 +192,11 @@ const checkUsage = () => {
       if (children[i].offsetTop !== firstTop) {
         wrapped = true;
         indexWrap = i; // aquí guardamos el índice del primer salto
+        widthNavBarMenu.value = window.innerWidth;
+        breakHistoryNavBarMenu.value.push({
+          index_wrap: indexWrap,
+          widthNavBar: widthNavBarMenu.value,
+        });
         break;
       }
     }
@@ -193,28 +208,35 @@ const checkUsage = () => {
   console.log(
     `Ocupado(header): ${percent.toFixed(2)}% | Wrap: ${wrapped} | Primer salto en índice: ${indexWrap}`,
   );
+  isMenuVisible.value = true;
 };
 
-watch(wrapIndex, val => {
-  if (val !== null) {
-    menuAppsideBar.value = menuMapped.value?.slice(val) || [];
-    console.log('Ítems para el AppSideBar:', menuAppsideBar.value);
-    //  useAuth.setMenuSideBar(menuAppsideBar.value);
-    console.log(
-      'El menú ha hecho wrap. Actualizando menú del sidebar.',
-      menuMapped.value?.slice(0, val - 1),
-    );
-    useAuth.setMenu(menuMapped.value?.slice(0, val - 1));
-    menuMapped.value = useAuth.menuInfo;
-  } else {
-    console.log('El menú no ha hecho wrap.');
+watch(wrapIndex, (new_val, old_val) => {
+  console.log(new_val, old_val);
+  if (new_val !== null) {
+    menuAppsideBar.value =
+      useAuth.menuInfo.slice(new_val, useAuth.menuInfo.length) || [];
+
+    emit('update:menu-sidebar', menuAppsideBar.value);
+    menuMapped.value = menuMapped.value?.slice(0, new_val - 1);
+  }
+});
+
+watch(widthNavBarMenu, new_val => {
+  const validate = breakHistoryNavBarMenu.value.filter(item => {
+    if (item?.widthNavBar == new_val || item?.widthNavBar == new_val + 1) {
+      return item;
+    }
+  });
+  if (validate.length) {
+    menuMapped.value = menuCopy.value?.slice(0, validate[0].index_wrap);
   }
 });
 
 onMounted(async () => {
-  mapperMenuUser();
+  widthNavBarMenu.value = window.innerWidth;
   await nextTick();
-
+  mapperMenuUser();
   const root = menuBar.value?.$el.querySelector(
     '.p-menubar-root-list',
   ) as HTMLElement;
@@ -224,11 +246,20 @@ onMounted(async () => {
     observer.observe(root);
     if (header) observer.observe(header);
   }
+  const handleResize = () => {
+    widthNavBarMenu.value = window.innerWidth;
+  };
+  window.addEventListener('resize', handleResize);
 
+  setTimeout(checkUsage, 0);
+
+  // Guarda la función para poder removerla después
+  (onMounted as any).handleResize = handleResize;
   setTimeout(checkUsage, 0);
 });
 onBeforeUnmount(() => {
   if (observer) observer.disconnect();
+  window.removeEventListener('resize', (onMounted as any).handleResize);
 });
 </script>
 <style scoped>

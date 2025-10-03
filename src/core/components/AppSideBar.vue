@@ -50,7 +50,7 @@
 </template>
 <script setup lang="ts">
 import { Button, Drawer } from 'primevue';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
 import { Menu } from '../interfaces/userState.store.interface';
@@ -61,8 +61,7 @@ defineOptions({ name: 'AppSideBar' });
 const sideBarVisible = useLayoutStore();
 const mappedMenu = ref<Menu[]>([]);
 
-const { menu = [] } = defineProps<{
-  show: boolean;
+const props = defineProps<{
   menu: Menu[];
 }>();
 
@@ -75,7 +74,14 @@ const transformMenu = (menu: Menu[]) => {
 };
 
 onMounted(() => {
-  mappedMenu.value = transformMenu(menu);
-  console.log(mappedMenu.value);
+  mappedMenu.value = transformMenu(props.menu);
 });
+
+watch(
+  () => props.menu,
+  new_value => {
+    console.log(new_value, 'holaadljfklasdfasjk');
+    mappedMenu.value = transformMenu(new_value);
+  },
+);
 </script>
