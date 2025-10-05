@@ -224,7 +224,7 @@ watch(wrapIndex, (new_val, old_val) => {
 
 watch(widthNavBarMenu, new_val => {
   const validate = breakHistoryNavBarMenu.value.filter(item => {
-    if (item?.widthNavBar == new_val || item?.widthNavBar == new_val + 1) {
+    if (item?.widthNavBar >= new_val - 1 && item?.widthNavBar <= new_val + 1) {
       return item;
     }
   });

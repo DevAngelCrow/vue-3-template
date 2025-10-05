@@ -67,20 +67,25 @@ const props = defineProps<{
 
 const transformMenu = (menu: Menu[]) => {
   return menu.filter(item => {
-    if (item.children && item.children.length > 0) {
+    //console.log(item, 'item')
+    if (
+      (item.children && item.children.length > 0) ||
+      (!item.children.length && item.parent === null)
+    ) {
       return item;
     }
   });
 };
 
 onMounted(() => {
+  //console.log(props.menu, 'asi llega antes de la transformacions')
   mappedMenu.value = transformMenu(props.menu);
+  //console.log(mappedMenu.value, 'asi esta transformado el menu')
 });
 
 watch(
   () => props.menu,
   new_value => {
-    console.log(new_value, 'holaadljfklasdfasjk');
     mappedMenu.value = transformMenu(new_value);
   },
 );
