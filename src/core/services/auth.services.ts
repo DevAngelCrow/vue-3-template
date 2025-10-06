@@ -1,7 +1,7 @@
 import { LocationQueryValue } from 'vue-router';
 
 import { httpClient } from '../utils/httpClient';
-import { ApiResponseGeneric } from './interfaces/auth/apiResponseGeneric.interface';
+import { ApiResponseGeneric } from './interfaces/apiResponseGeneric.interface';
 import { Country } from './interfaces/auth/country.interface';
 import { District } from './interfaces/auth/district.interface';
 import { DocumentType } from './interfaces/auth/documentType.interface';

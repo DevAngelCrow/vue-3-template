@@ -34,6 +34,12 @@ const routes = [
         component: () => import('@/views/Dashboard.vue'),
       },
       {
+        path: '/countries',
+        name: 'countries',
+        component: () =>
+          import('../../modules/catalogs/countries/views/countries.vue'),
+      },
+      {
         path: '/routes-administration',
         name: 'routes-administration',
         meta: { requiresAuth: true },
