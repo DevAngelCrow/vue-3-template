@@ -178,7 +178,7 @@ export function useAdmin() {
     getRoutes();
   };
 
-  const viewRoute = (value: Event) => {
+  const viewRoute = (value: RoutesResponse) => {
     name.value = value?.name;
     title.value = value?.title;
     uri.value = value?.uri;
@@ -190,7 +190,7 @@ export function useAdmin() {
     show.value = value?.show;
   };
 
-  const setEditRoute = (value: Event) => {
+  const setEditRoute = (value: RoutesResponse) => {
     name.value = value?.name;
     title.value = value?.title;
     uri.value = value?.uri;

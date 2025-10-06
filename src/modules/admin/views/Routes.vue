@@ -89,13 +89,14 @@
     <AppModal
       :title="titleModal"
       :show="showModal"
-      :title-btn-cancel="'Cancelar'"
+      :title-btn-cancel="onlyReadFlag ? 'Cerrar' : 'Cancelar'"
       :title-btn-confirm="'Guardar'"
       footer-buttons
       show-icon-close
       width="35rem"
-      @close-modal="handledModal(showModal, '')"
+      @close-modal="handledModal(showModal, 'cerrar')"
       @confirm-modal="onSubMit"
+      :showBtnConfirmFooter="!onlyReadFlag"
     >
       <section
         id="body_modal"
@@ -206,6 +207,7 @@ import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RouteForm } from '../interfaces/route-form.interface';
+import { RoutesResponse } from '../interfaces/routes.response.interface';
 
 const { startLoading, finishLoading } = useLoaderStore();
 const {
@@ -325,20 +327,24 @@ const showModal = ref<boolean>(false);
 const routesFiltered = ref<any[]>([]);
 const onlyReadFlag = ref<boolean>(false);
 
-const handledModal = (flag: boolean, action: string, data?: Event) => {
+const handledModal = (
+  flag: boolean,
+  action: 'agregar' | 'ver' | 'editar' | 'cerrar',
+  data?: RoutesResponse,
+) => {
   if (!flag && action === 'agregar') {
     titleModal.value = 'Agregar ruta';
     showModal.value = !flag;
     return;
   }
-  if (!flag && action === 'ver') {
+  if (!flag && action === 'ver' && data) {
     titleModal.value = 'Ver ruta';
     showModal.value = !flag;
     onlyReadFlag.value = true;
     viewRoute(data);
     return;
   }
-  if (!flag && action === 'editar') {
+  if (!flag && action === 'editar' && data) {
     titleModal.value = 'Editar ruta';
     showModal.value = !flag;
     setEditRoute(data);
