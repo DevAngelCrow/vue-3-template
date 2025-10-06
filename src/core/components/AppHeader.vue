@@ -26,7 +26,7 @@ import { storeToRefs } from 'pinia';
 import { useLayoutStore } from '../store/useLayoutStore';
 import AppNavBarMenu from './AppNavBarMenu.vue';
 import { useAuthStore } from '../store/useAuthStore';
-import { MenuNavBar } from '../interfaces/menu.navbar.interface';
+import { MenuBar } from '../interfaces/menu.bar.dinamic.interface';
 
 defineOptions({ name: 'AppHeader' });
 const emit = defineEmits(['update:menu-sidebar']);
@@ -36,11 +36,10 @@ const { menuInfo } = storeToRefs(useAuthStore());
 const menuSideBar = ref([]);
 
 const toggleMenu = value => {
-  console.log(value, 'esto es lo que viene de appnavbarmenu al header');
   menuSideBar.value = value;
   emit('update:menu-sidebar', menuSideBar.value);
 };
-const items = computed<MenuNavBar[]>(() => {
+const items = computed<MenuBar[]>(() => {
   return menuInfo.value
     .filter(
       item =>
@@ -48,18 +47,20 @@ const items = computed<MenuNavBar[]>(() => {
         (item.show && item.children.length === 0 && item.parent === null),
     )
     .map(m => {
-      const menuItem: MenuNavBar = {
+      const menuItem: MenuBar = {
+        ...m,
         label: m.title,
         icon: m.icon,
-        url: m.uri,
+        uri: m.uri,
+        isUser: false,
       };
-
       if (m.title === 'Usuario') {
         menuItem.isUser = true;
       }
 
       if (m.children && m.children.length > 0) {
         menuItem.items = m.children.map(c => ({
+          ...c,
           label: c.title,
           icon: c.icon,
           url: c.uri,

@@ -1,9 +1,6 @@
 <template>
-  <div
-    class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none rounded-none"
-  >
+  <div class="w-full xs:mr-2 md:w-full h-full border-none rounded-none">
     <Menubar
-      v-if="isMenuVisible"
       class="rounded-none bg-primary border-none h-full hidden md:flex"
       breakpoint="767px"
       :model="menuMapped"
@@ -11,9 +8,9 @@
     >
       <template #item="{ item, props, hasSubmenu, root }">
         <router-link
-          v-if="item.url"
+          v-if="item.uri"
           v-slot="{ href, navigate }"
-          :to="root && item.items?.length ? '' : item.url"
+          :to="root && item.items?.length ? '' : item.uri"
           custom
           class="flex items-center text-white hover:text-primary-950 group"
         >
@@ -35,7 +32,7 @@
           </a>
         </router-link>
       </template>
-      <template #end>
+      <!-- <template #end>
         <div
           class="app-navbar-end hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full w-auto h-fauto"
           @click="toggle"
@@ -57,10 +54,10 @@
             :model="menuUser"
           />
         </div>
-      </template>
+      </template> -->
     </Menubar>
     <div
-      class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full md:hidden aspect-square"
+      class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full aspect-square"
       @click="toggle"
       aria-haspopup="true"
       aria-controls="overlay_menu"
@@ -94,8 +91,7 @@ import {
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
-import type { MenuNavBar as MenuModel } from '../interfaces/menu.navbar.interface';
-import { useAuthStore } from '../store/useAuthStore';
+import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
 import { Menu } from '../interfaces/userState.store.interface';
 
 defineOptions({ name: 'AppNavBarMenu' });
@@ -109,157 +105,90 @@ const { menu } = defineProps({
 
 const emit = defineEmits(['update:menu-sidebar']);
 
-const useAuth = useAuthStore();
-
 const menuMapped = ref<MenuModel[]>();
 const menuAppsideBar = ref<Menu[]>();
 const menuUser = ref<MenuModel[]>();
 const popUp = ref<InstanceType<typeof MenuPrime>>();
 const menuBar = ref<Ref>();
-let observer: ResizeObserver | undefined;
 
 const isMenuVisible = ref<boolean>(true);
-const usagePercent = ref(0);
-const usagePercentMenu = ref(0);
-const hasWrap = ref(false);
-const wrapIndex = ref<number | null>(null);
+
 const menuCopy = ref<MenuModel[]>([]);
 const widthNavBarMenu = ref<number>(0);
-const breakHistoryNavBarMenu = ref<any[]>([]);
 
 const toggle = (event: MouseEvent | KeyboardEvent) => {
   popUp.value?.toggle(event);
 };
 
 const mapperMenuUser = () => {
-  menuCopy.value = structuredClone(menu);
+  const cleanMenu = JSON.parse(JSON.stringify(menu));
+  menuCopy.value = structuredClone(cleanMenu);
   if (menuCopy.value.length) {
     menuUser.value = menuCopy.value.filter(item => item.isUser);
     menuMapped.value = menuCopy.value.filter(item => !item.isUser);
   }
 };
 
-const getNaturalContentWidth = (root: HTMLElement) => {
-  const children = Array.from(root.children) as HTMLElement[];
-  let total = 0;
-  children.forEach(el => {
-    const style = getComputedStyle(el);
-    const margin =
-      parseFloat(style.marginLeft || '0') +
-      parseFloat(style.marginRight || '0');
-    total += el.scrollWidth + margin;
-  });
-  return total;
-};
+const checkWrapMenu = () => {
+  menuMapped.value = menuCopy.value.filter(item => !item.isUser);
 
-const getUsagePercent = () => {
-  const root = menuBar.value?.$el.querySelector(
-    '.p-menubar-root-list',
-  ) as HTMLElement;
-  if (!root) return 0;
-
-  const header = document.getElementById('app-header') as HTMLElement | null;
-  const referenceWidth =
-    header && header.clientWidth ? header.clientWidth : root.clientWidth;
-
-  const naturalContentWidth = getNaturalContentWidth(root);
-
-  const percentRef = (naturalContentWidth / referenceWidth) * 100;
-
-  usagePercentMenu.value = (naturalContentWidth / root.clientWidth) * 100;
-
-  usagePercent.value = percentRef;
-
-  return percentRef;
-};
-
-const checkUsage = () => {
-  isMenuVisible.value = false;
-  const root = menuBar.value?.$el?.querySelector?.(
-    '.p-menubar-root-list',
-  ) as HTMLElement;
-  if (!root) return;
-
-  const percent = getUsagePercent();
-
-  const children = Array.from(root.children) as HTMLElement[];
-  let wrapped = false;
-  let indexWrap: number | null = null;
-
-  if (children.length > 0) {
-    const firstTop = children[0].offsetTop;
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].offsetTop !== firstTop) {
-        wrapped = true;
-        indexWrap = i; // aquí guardamos el índice del primer salto
-        widthNavBarMenu.value = window.innerWidth;
-        breakHistoryNavBarMenu.value.push({
-          index_wrap: indexWrap,
-          widthNavBar: widthNavBarMenu.value,
-        });
-        break;
-      }
-    }
-  }
-
-  hasWrap.value = wrapped;
-  wrapIndex.value = indexWrap;
-
-  console.log(
-    `Ocupado(header): ${percent.toFixed(2)}% | Wrap: ${wrapped} | Primer salto en índice: ${indexWrap}`,
-  );
   isMenuVisible.value = true;
+  nextTick(() => {
+    // Ahora que el menú está completo, verificamos si hay desbordamiento (wrap)
+    window.requestAnimationFrame(() => {
+      const root = menuBar.value?.$el?.querySelector?.(
+        '.p-menubar-root-list',
+      ) as HTMLElement;
+      if (!root) return;
+
+      const children = Array.from(root.children) as HTMLElement[];
+      let wrapIndex: number | null = null;
+
+      if (children.length > 0) {
+        const firstTop = children[0].offsetTop;
+        for (let i = 0; i < children.length; i++) {
+          if (children[i].offsetTop > firstTop) {
+            wrapIndex = i; // Encontramos el primer elemento que saltó de línea
+            break;
+          }
+        }
+      }
+
+      if (wrapIndex !== null) {
+        // Si hay desbordamiento, cortamos el menú visible y emitimos el resto
+        menuAppsideBar.value = menuCopy.value.slice(wrapIndex);
+        menuMapped.value = menuCopy.value.slice(0, wrapIndex);
+      } else {
+        // Si no hay desbordamiento, nos aseguramos de que el sidebar esté vacío
+        menuAppsideBar.value = [];
+        menuMapped.value = menuCopy.value.filter(item => !item.isUser);
+      }
+      console.log(wrapIndex, 'HAY UN WRAPINDEX');
+      emit('update:menu-sidebar', menuAppsideBar.value);
+    });
+  });
 };
 
-watch(wrapIndex, (new_val, old_val) => {
-  console.log(new_val, old_val);
-  if (new_val !== null) {
-    menuAppsideBar.value =
-      useAuth.menuInfo.slice(new_val, useAuth.menuInfo.length) || [];
-
-    emit('update:menu-sidebar', menuAppsideBar.value);
-    menuMapped.value = menuMapped.value?.slice(0, new_val - 1);
-  }
+watch(widthNavBarMenu, () => {
+  checkWrapMenu();
 });
 
-watch(widthNavBarMenu, new_val => {
-  const validate = breakHistoryNavBarMenu.value.filter(item => {
-    if (item?.widthNavBar >= new_val - 1 && item?.widthNavBar <= new_val + 1) {
-      return item;
-    }
-  });
-  if (validate.length) {
-    menuMapped.value = menuCopy.value?.slice(0, validate[0].index_wrap);
-  }
-});
+const handleResize = () => {
+  widthNavBarMenu.value = window.innerWidth;
+};
 
 onMounted(async () => {
-  widthNavBarMenu.value = window.innerWidth;
-  await nextTick();
-  mapperMenuUser();
-  const root = menuBar.value?.$el.querySelector(
-    '.p-menubar-root-list',
-  ) as HTMLElement;
-  const header = document.getElementById('app-header') as HTMLElement | null;
-  if (root) {
-    observer = new ResizeObserver(() => checkUsage());
-    observer.observe(root);
-    if (header) observer.observe(header);
-  }
-  const handleResize = () => {
-    widthNavBarMenu.value = window.innerWidth;
-  };
+  await mapperMenuUser();
+
   window.addEventListener('resize', handleResize);
 
-  setTimeout(checkUsage, 0);
+  // Disparamos una comprobación inicial
 
-  // Guarda la función para poder removerla después
-  (onMounted as any).handleResize = handleResize;
-  setTimeout(checkUsage, 0);
+  widthNavBarMenu.value = window.innerWidth;
 });
+
 onBeforeUnmount(() => {
-  if (observer) observer.disconnect();
-  window.removeEventListener('resize', (onMounted as any).handleResize);
+  window.removeEventListener('resize', handleResize);
 });
 </script>
 <style scoped>
