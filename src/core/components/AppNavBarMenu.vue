@@ -81,10 +81,10 @@
 </template>
 <script setup lang="ts">
 import {
+  ComponentPublicInstance,
   nextTick,
   onBeforeUnmount,
   onMounted,
-  Ref,
   watch,
   type PropType,
 } from 'vue';
@@ -92,7 +92,6 @@ import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
 import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
-import { Menu } from '../interfaces/userState.store.interface';
 
 defineOptions({ name: 'AppNavBarMenu' });
 
@@ -106,12 +105,10 @@ const { menu } = defineProps({
 const emit = defineEmits(['update:menu-sidebar']);
 
 const menuMapped = ref<MenuModel[]>();
-const menuAppsideBar = ref<Menu[]>();
+const menuAppsideBar = ref<MenuModel[]>();
 const menuUser = ref<MenuModel[]>();
 const popUp = ref<InstanceType<typeof MenuPrime>>();
-const menuBar = ref<Ref>();
-
-const isMenuVisible = ref<boolean>(true);
+const menuBar = ref<ComponentPublicInstance>();
 
 const menuCopy = ref<MenuModel[]>([]);
 const widthNavBarMenu = ref<number>(0);
@@ -132,7 +129,7 @@ const mapperMenuUser = () => {
 const checkWrapMenu = () => {
   menuMapped.value = menuCopy.value.filter(item => !item.isUser);
 
-  isMenuVisible.value = true;
+  //isMenuVisible.value = true;
   nextTick(() => {
     // Ahora que el menú está completo, verificamos si hay desbordamiento (wrap)
     window.requestAnimationFrame(() => {
@@ -169,8 +166,16 @@ const checkWrapMenu = () => {
   });
 };
 
-watch(widthNavBarMenu, () => {
-  checkWrapMenu();
+watch(widthNavBarMenu, new_value => {
+  console.log(new_value, 'width');
+  if (new_value <= 769) {
+    console.log('ingreso en este bloque');
+    menuAppsideBar.value = [...menuCopy.value];
+    emit('update:menu-sidebar', menuAppsideBar.value);
+  } else {
+    console.log('ingreso en el else');
+    checkWrapMenu();
+  }
 });
 
 const handleResize = () => {

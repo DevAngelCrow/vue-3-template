@@ -33,9 +33,9 @@ const emit = defineEmits(['update:menu-sidebar']);
 
 const sideBar = useLayoutStore();
 const { menuInfo } = storeToRefs(useAuthStore());
-const menuSideBar = ref([]);
+const menuSideBar = ref<MenuBar[]>();
 
-const toggleMenu = value => {
+const toggleMenu = (value: MenuBar[]) => {
   menuSideBar.value = value;
   emit('update:menu-sidebar', menuSideBar.value);
 };
