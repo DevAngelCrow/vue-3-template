@@ -8,8 +8,8 @@ export interface MenuBar {
   description: string;
   show: boolean;
   order: number;
-  parent?: MenuBar[];
-  children?: MenuBar[];
+  parent: MenuBar[];
+  children: MenuBar[];
   requiredAuth: boolean;
   title: string;
   active: boolean;

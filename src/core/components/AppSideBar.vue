@@ -53,19 +53,19 @@ import { Button, Drawer } from 'primevue';
 import { onMounted, ref, watch } from 'vue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
-import { Menu } from '../interfaces/userState.store.interface';
 import AppMenuItemSideBar from './AppMenuItemSideBar.vue';
+import { MenuBar } from '../interfaces/menu.bar.dinamic.interface';
 
 defineOptions({ name: 'AppSideBar' });
 
 const sideBarVisible = useLayoutStore();
-const mappedMenu = ref<Menu[]>([]);
+const mappedMenu = ref<MenuBar[]>([]);
 
 const props = defineProps<{
-  menu: Menu[];
+  menu: MenuBar[];
 }>();
 
-const transformMenu = (menu: Menu[]) => {
+const transformMenu = (menu: MenuBar[]) => {
   return menu.filter(item => {
     //console.log(item, 'item')
     if (

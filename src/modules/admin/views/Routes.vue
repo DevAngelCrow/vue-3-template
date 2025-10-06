@@ -13,9 +13,16 @@
           <AppInputText
             label="Buscar"
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
+            v-model="filter_name"
+            @update:modelValue="validateAlphaInput(filter_name)"
           />
-          <Button class="flex-shrink-0 grow rounded-md">Buscar</Button>
-          <Button class="flex-shrink-0 grow rounded-md" outlined
+          <Button class="flex-shrink-0 grow rounded-md" @click="getRoutes"
+            >Buscar</Button
+          >
+          <Button
+            class="flex-shrink-0 grow rounded-md"
+            outlined
+            @click="cleanSearch"
             >Limpiar</Button
           >
           <Button
@@ -44,13 +51,19 @@
           }
         "
       >
-        <template #body-acciones>
+        <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
+              icon="pi pi-eye"
+              @click="handledModal(showModal, 'ver', data)"
+            ></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
               icon="pi pi-pencil"
-              @click=""
+              @click="handledModal(showModal, 'editar', data)"
             ></Button>
             <Button
               class="rounded-full"
@@ -95,6 +108,7 @@
           v-model="name"
           :error-messages="errors.name"
           v-bind="nameAttrs"
+          :readonly="onlyReadFlag"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -103,6 +117,7 @@
           v-model="title"
           :error-messages="errors.title"
           v-bind="titleAttrs"
+          :readonly="onlyReadFlag"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -112,6 +127,7 @@
           :error-messages="errors.uri"
           v-bind="uriAttrs"
           @update:modelValue="validateInputUri(uri, 'uri')"
+          :readonly="onlyReadFlag"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -120,6 +136,7 @@
           v-model="description"
           :error-messages="errors.description"
           v-bind="descriptionAttrs"
+          :readonly="onlyReadFlag"
         />
         <div class="w-full flex flex-wrap gap-5">
           <AppInputText
@@ -129,6 +146,7 @@
             v-model="order"
             :error-messages="errors.order"
             v-bind="orderAttrs"
+            :readonly="onlyReadFlag"
           />
           <AppInputText
             class="grow w-[50%] min-w-auto"
@@ -137,6 +155,7 @@
             v-model="icon"
             :error-messages="errors.icon"
             v-bind="iconAttrs"
+            :readonly="onlyReadFlag"
           />
         </div>
         <div class="w-full flex flex-wrap justify-start">
@@ -147,6 +166,7 @@
               v-model="child_route"
               v-bind="child_routeAttrs"
               binary
+              :readonly="onlyReadFlag"
             />
           </div>
           <div class="w-[50%]">
@@ -156,6 +176,7 @@
               v-model="show"
               v-bind="showAttrs"
               binary
+              :readonly="onlyReadFlag"
             />
           </div>
         </div>
@@ -170,6 +191,7 @@
           :suggestions="routesFiltered"
           dropdown
           @complete="findAutocomplete"
+          :readonly="onlyReadFlag"
         />
       </section>
     </AppModal>
@@ -215,8 +237,13 @@ const {
   total_items,
   per_page,
   items,
+  filter_name,
   resetForm,
   validateInputUri,
+  validateAlphaInput,
+  cleanSearch,
+  viewRoute,
+  setEditRoute,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -296,14 +323,29 @@ const titleModal = ref<string>('');
 
 const showModal = ref<boolean>(false);
 const routesFiltered = ref<any[]>([]);
+const onlyReadFlag = ref<boolean>(false);
 
-const handledModal = (flag: boolean, action: string) => {
+const handledModal = (flag: boolean, action: string, data?: Event) => {
   if (!flag && action === 'agregar') {
     titleModal.value = 'Agregar ruta';
     showModal.value = !flag;
     return;
   }
+  if (!flag && action === 'ver') {
+    titleModal.value = 'Ver ruta';
+    showModal.value = !flag;
+    onlyReadFlag.value = true;
+    viewRoute(data);
+    return;
+  }
+  if (!flag && action === 'editar') {
+    titleModal.value = 'Editar ruta';
+    showModal.value = !flag;
+    setEditRoute(data);
+    return;
+  }
   showModal.value = false;
+  onlyReadFlag.value = false;
   title.value = '';
   resetForm();
 };

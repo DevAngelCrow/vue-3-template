@@ -153,7 +153,11 @@ const checkWrapMenu = () => {
 
       if (wrapIndex !== null) {
         // Si hay desbordamiento, cortamos el menú visible y emitimos el resto
-        menuAppsideBar.value = menuCopy.value.slice(wrapIndex);
+        const menuAppSideBarWithoutUser = menuCopy.value.slice(wrapIndex);
+
+        menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
+          item => !item.isUser,
+        );
         menuMapped.value = menuCopy.value.slice(0, wrapIndex);
       } else {
         // Si no hay desbordamiento, nos aseguramos de que el sidebar esté vacío
@@ -167,10 +171,11 @@ const checkWrapMenu = () => {
 };
 
 watch(widthNavBarMenu, new_value => {
-  console.log(new_value, 'width');
   if (new_value <= 769) {
-    console.log('ingreso en este bloque');
-    menuAppsideBar.value = [...menuCopy.value];
+    const menuAppSideBarWithoutUser = [...menuCopy.value];
+    menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
+      item => !item.isUser,
+    );
     emit('update:menu-sidebar', menuAppsideBar.value);
   } else {
     console.log('ingreso en el else');

@@ -82,15 +82,19 @@ export function useAdmin() {
   const [show, showAttrs] = defineField('show');
   const [parent_route, parent_routeAttrs] = defineField('parent_route');
 
+  const filter_name = ref<string | null>(null);
   const invalidRouteRegex = /[^A-Za-z0-9\-/]/g;
   const routeValidRegex =
     /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
+
+  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const getRoutes = async () => {
     try {
       startLoading();
       let filter = {
         page: page.value,
         per_page: per_page.value,
+        filter_name: filter_name.value,
       };
       const response = await adminServices.getAllRoutes(filter);
       const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
@@ -153,6 +157,51 @@ export function useAdmin() {
     });
   };
 
+  const validateAlphaInput = (
+    value: string | null,
+    regex: RegExp = findRegex,
+  ) => {
+    if (!value) {
+      value = '';
+    }
+    const sanitizedValue = sanitizedValueInput(value, regex);
+    nextTick(() => {
+      filter_name.value = sanitizedValue;
+    });
+  };
+
+  const cleanSearch = () => {
+    if (!filter_name.value || filter_name.value === '') {
+      return;
+    }
+    filter_name.value = null;
+    getRoutes();
+  };
+
+  const viewRoute = (value: Event) => {
+    name.value = value?.name;
+    title.value = value?.title;
+    uri.value = value?.uri;
+    description.value = value?.description;
+    order.value = value?.order.toString();
+    icon.value = value?.icon;
+    parent_route.value = value?.parent_route;
+    child_route.value = parent_route.value ? true : false;
+    show.value = value?.show;
+  };
+
+  const setEditRoute = (value: Event) => {
+    name.value = value?.name;
+    title.value = value?.title;
+    uri.value = value?.uri;
+    description.value = value?.description;
+    order.value = value?.order.toString();
+    icon.value = value?.icon;
+    parent_route.value = value?.parent_route;
+    child_route.value = parent_route.value ? true : false;
+    show.value = value?.show;
+  };
+
   return {
     getRoutes,
     addRoute,
@@ -186,5 +235,10 @@ export function useAdmin() {
     total_items,
     items,
     validateInputUri,
+    filter_name,
+    validateAlphaInput,
+    cleanSearch,
+    viewRoute,
+    setEditRoute,
   };
 }
