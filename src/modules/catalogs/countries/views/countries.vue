@@ -37,6 +37,7 @@
         :per_page="10"
         :total_pages="1"
       >
+        
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button unstyled class="!outline-none">
@@ -108,7 +109,7 @@
 
       <AppModal
         :show="showModalCambioStatus"
-        show-icon-close
+        :show-icon-close=false
         title="Cambiar estado"
         :show-btn-confirm-footer="true"
         :title-btn-confirm="'Confirmar'"
@@ -117,7 +118,11 @@
         @close-modal="CloseModalEstado"
         @confirm-modal="confirmModalEstado"
         width="450px">
-
+        <template #header>
+          <div class="mt-2">
+            <i class="pi pi-exclamation-circle" style="font-size: 5rem; color: #ffdd04; text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;"></i>          
+          </div>
+        </template>
         <div class="flex flex-col gap-6 py-5 w-full">
           
           <p class="text-center">¿Está seguro que desea cambiar el estado del país?</p>

@@ -58,7 +58,6 @@ import { onMounted, ref } from 'vue';
 const email = ref<string>('');
 onMounted(() => {
   email.value = history.state.email;
-  console.log(email.value, 'email');
 });
 </script>
 <style scoped></style>

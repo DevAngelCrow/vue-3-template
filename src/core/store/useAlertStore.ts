@@ -22,6 +22,10 @@ export const useAlertStore = defineStore('message', {
       this.closable = options?.closable ?? false;
       this.maxWith = options?.maxWith ?? 500;
       this.timeout = options?.timeout ?? 3000;
+
+      setTimeout(() => {
+        this.close();
+      }, this.timeout);
     },
     reset() {
       this.show = false;

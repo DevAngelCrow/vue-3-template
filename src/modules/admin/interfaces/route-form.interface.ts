@@ -7,4 +7,5 @@ export interface RouteForm {
   child_route: boolean;
   show: boolean;
   parent_route?: string;
+  title: string;
 }

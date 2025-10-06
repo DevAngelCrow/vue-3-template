@@ -239,6 +239,7 @@ export function useAuth() {
 
         if (menu.statusCode === 200) {
           setMenu(menu.data);
+          localStorage.setItem('menu', JSON.stringify(menu.data));
         }
 
         const redirectTo = (route.query.redirect as string) || '/';

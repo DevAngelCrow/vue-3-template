@@ -34,8 +34,15 @@
         :headers="headers"
         :items="items"
         :paginator="true"
-        :per_page="10"
-        :total_pages="1"
+        :per_page="per_page"
+        :total_items="total_items"
+        :page="page"
+        @page-update="
+          (value: number) => {
+            page = value + 1;
+            getRoutes();
+          }
+        "
       >
         <template #body-acciones>
           <div class="flex gap-0 justify-center">
@@ -67,7 +74,7 @@
       </AppDataTable>
     </section>
     <AppModal
-      :title="title"
+      :title="titleModal"
       :show="showModal"
       :title-btn-cancel="'Cancelar'"
       :title-btn-confirm="'Guardar'"
@@ -91,11 +98,20 @@
         />
         <AppInputText
           class="w-full min-w-0"
+          id="title"
+          label="Título*"
+          v-model="title"
+          :error-messages="errors.title"
+          v-bind="titleAttrs"
+        />
+        <AppInputText
+          class="w-full min-w-0"
           id="uri"
           label="Uri*"
           v-model="uri"
           :error-messages="errors.uri"
           v-bind="uriAttrs"
+          @update:modelValue="validateInputUri(uri, 'uri')"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -144,11 +160,7 @@
           </div>
         </div>
         <AppAutocomplete
-          :class="
-            child_route
-              ? ' w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300'
-              : ' w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0'
-          "
+          :class="showParentRoute"
           id="patern_route"
           label="Ruta padre"
           v-model="parent_route"
@@ -165,13 +177,12 @@
 </template>
 <script setup lang="ts">
 import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
-import { onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
 import { RouteForm } from '../interfaces/route-form.interface';
 
 const { startLoading, finishLoading } = useLoaderStore();
@@ -181,6 +192,8 @@ const {
   errors,
   name,
   nameAttrs,
+  title,
+  titleAttrs,
   uri,
   uriAttrs,
   description,
@@ -197,6 +210,13 @@ const {
   parent_routeAttrs,
   handleSubmit,
   parentRoutes,
+  resetField,
+  page,
+  total_items,
+  per_page,
+  items,
+  resetForm,
+  validateInputUri,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -272,27 +292,25 @@ const headers = ref<TableHeaders[]>([
   },
 ]);
 
-const items = ref<RoutesResponse[] | undefined>([]);
-console.log('Routes items:',items);
-const title = ref<string>('');
+const titleModal = ref<string>('');
 
 const showModal = ref<boolean>(false);
 const routesFiltered = ref<any[]>([]);
 
 const handledModal = (flag: boolean, action: string) => {
   if (!flag && action === 'agregar') {
-    title.value = 'Agregar ruta';
+    titleModal.value = 'Agregar ruta';
     showModal.value = !flag;
     return;
   }
   showModal.value = false;
   title.value = '';
+  resetForm();
 };
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
-  console.log(parentRoutes.value, 'parent routes');
   for (let i = 0; i < parentRoutes.value.length; i++) {
     let item = parentRoutes.value[i];
 
@@ -304,27 +322,62 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
 };
 
 const onSubMit = handleSubmit(async values => {
-  const form: RouteForm = {
-    name: values.name,
-    description: values.description,
-    child_route: values.child_route,
-    icon: values.icon,
-    order: values.order,
-    show: values.show,
-    uri: values.uri,
-    parent_route: values.parent_route,
-  };
-  await addRoute(form);
+  try {
+    startLoading();
+    const form: RouteForm = {
+      name: values.name,
+      description: values.description,
+      child_route: values.child_route,
+      icon: values.icon,
+      order: values.order,
+      show: values.show,
+      uri: values.uri,
+      parent_route: values.parent_route,
+      title: values.title,
+    };
+    await addRoute(form);
+    handledModal(showModal.value, 'agregar');
+  } catch (error) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 });
+
+const showParentRoute = computed(() => {
+  try {
+    if (child_route.value) {
+      return 'w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300';
+    }
+    return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0';
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+watch(
+  child_route,
+  (newValue, oldValue) => {
+    if (oldValue === true && newValue === false) {
+      try {
+        nextTick(() => {
+          resetField('parent_route', { errors: undefined, value: null });
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  },
+  {
+    immediate: false,
+  },
+);
 
 onMounted(async () => {
   try {
-    startLoading();
-    items.value = await getRoutes();
+    await getRoutes();
   } catch (error) {
-    console.log(error);
-  } finally {
-    finishLoading();
+    console.error(error);
   }
 });
 </script>

@@ -12,6 +12,7 @@ interface State {
   token: Token | null | string;
   token_type: string | null;
   menu: Menu[];
+  menuSideBar: Menu[];
 }
 
 const getFromLocalStorage = (key: string) => {
@@ -49,6 +50,7 @@ export const useAuthStore = defineStore('authStore', {
       ? localStorage.getItem('token_type')
       : null,
     menu: getFromLocalStorage('menu') || [],
+    menuSideBar: [],
   }),
   getters: {
     userInfo(): UserStateStore | null | string {
@@ -72,6 +74,9 @@ export const useAuthStore = defineStore('authStore', {
     menuInfo(): Menu[] {
       return this.menu;
     },
+    menuSideBarInfo(): Menu[] {
+      return this.menuSideBar;
+    },
   },
   actions: {
     setUserInfo(payload: UserStateStore) {
@@ -88,7 +93,10 @@ export const useAuthStore = defineStore('authStore', {
     },
     setMenu(payload: Menu[]) {
       this.menu = payload;
-      setToLocalStorage('menu', payload);
+      //setToLocalStorage('menu', payload);
+    },
+    setMenuSideBar(payload: Menu[]) {
+      this.menuSideBar = payload;
     },
     isTokenExpired(): boolean {
       if (!this.token) return true;

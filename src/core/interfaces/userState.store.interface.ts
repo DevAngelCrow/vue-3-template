@@ -23,4 +23,7 @@ export interface Menu {
   requiredAuth: boolean;
   title: string;
   active: boolean;
+  is_open: boolean;
+  label: string;
+  isUser: boolean;
 }

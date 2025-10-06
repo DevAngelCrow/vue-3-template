@@ -1,9 +1,11 @@
 import { httpClient } from '@/core/utils/httpClient';
 import { ApiResponseGeneric } from '@/core/services/interfaces/auth/apiResponseGeneric.interface';
+import { ApiPostResponse } from '@/core/services/apiPostResponse.interface';
 import { paginateParams } from '@/core/services/interfaces/params.paginate.interface';
 
 import { RoutesResponse } from '../interfaces/routes.response.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
+import { RouteForm } from '../interfaces/route-form.interface';
 
 const getAllRoutes = async (
   params: paginateParams,
@@ -23,7 +25,16 @@ const getAllRoutesWithOutPaginate = async () => {
   return response.data;
 };
 
+const addRoute = async (data: RouteForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'security/routes',
+    data,
+  );
+  return response;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
+  addRoute,
 };
