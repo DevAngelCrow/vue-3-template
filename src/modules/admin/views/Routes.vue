@@ -15,6 +15,7 @@
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
+            @keydown.enter="findRoute(filter_name)"
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
@@ -29,7 +30,7 @@
           >
           <Button
             class="flex-shrink-0 grow rounded-md"
-            @click="handledModal(showModal, 'agregar')"
+            @click="openModal('add')"
             ><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"
@@ -43,12 +44,12 @@
         :headers="headers"
         :items="items"
         :paginator="true"
-        :per_page="per_page"
-        :total_items="total_items"
-        :page="page"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
         @page-update="
           (value: number) => {
-            page = value + 1;
+            pagination.page = value + 1;
             getRoutes();
           }
         "
@@ -59,19 +60,19 @@
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-eye"
-              @click="handledModal(showModal, 'ver', data)"
+              @click="openModal('view', data)"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
-              @click="handledModal(showModal, 'editar', data)"
+              @click="openModal('edit', data)"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
-              @click=""
+              @click="openModal('delete', data)"
             ></Button>
           </div>
         </template>
@@ -79,28 +80,29 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data ? 'bg-green-600' : 'bg-red-600'">{{
-            data ? 'Activo' : 'Inactivo'
+          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
+            data.active ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
         <template #body-show="{ data }">
-          <i :class="data ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
         </template>
       </AppDataTable>
     </section>
     <AppModal
-      :title="titleModal"
-      :show="showModal"
-      :title-btn-cancel="onlyReadFlag ? 'Cerrar' : 'Cancelar'"
-      :title-btn-confirm="'Guardar'"
+      :title="modalState.title"
+      :show="modalState.show"
+      :title-btn-cancel="modalButtons.cancelText"
+      :title-btn-confirm="modalButtons.confirmText"
       footer-buttons
       show-icon-close
       width="35rem"
-      @close-modal="handledModal(showModal, 'cerrar')"
+      @close-modal="closeModal"
       @confirm-modal="onSubMit"
-      :showBtnConfirmFooter="!onlyReadFlag"
+      :showBtnConfirmFooter="modalState.mode !== 'view'"
     >
       <section
+        v-if="modalState.mode !== 'delete'"
         id="body_modal"
         class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5"
       >
@@ -111,7 +113,7 @@
           v-model="name"
           :error-messages="errors.name"
           v-bind="nameAttrs"
-          :readonly="onlyReadFlag"
+          :readonly="modalState.isReadonly"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -120,7 +122,7 @@
           v-model="title"
           :error-messages="errors.title"
           v-bind="titleAttrs"
-          :readonly="onlyReadFlag"
+          :readonly="modalState.isReadonly"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -130,7 +132,7 @@
           :error-messages="errors.uri"
           v-bind="uriAttrs"
           @update:modelValue="validateInputUri(uri, 'uri')"
-          :readonly="onlyReadFlag"
+          :readonly="modalState.isReadonly"
         />
         <AppInputText
           class="w-full min-w-0"
@@ -139,17 +141,17 @@
           v-model="description"
           :error-messages="errors.description"
           v-bind="descriptionAttrs"
-          :readonly="onlyReadFlag"
+          :readonly="modalState.isReadonly"
         />
         <div class="w-full flex flex-wrap gap-5">
           <AppInputText
             class="grow w-[50%] min-w-auto"
             id="order"
             label="Orden*"
-            v-model="order"
+            v-model.number="order"
             :error-messages="errors.order"
             v-bind="orderAttrs"
-            :readonly="onlyReadFlag"
+            :readonly="modalState.isReadonly"
           />
           <AppInputText
             class="grow w-[50%] min-w-auto"
@@ -158,28 +160,28 @@
             v-model="icon"
             :error-messages="errors.icon"
             v-bind="iconAttrs"
-            :readonly="onlyReadFlag"
+            :readonly="modalState.isReadonly"
           />
         </div>
         <div class="w-full flex flex-wrap justify-start">
           <div class="w-[50%]">
             <AppCheckBox
               id="child_route"
-              label="Ruta padre"
+              label="Es sub-ruta"
               v-model="child_route"
               v-bind="child_routeAttrs"
               binary
-              :readonly="onlyReadFlag"
+              :readonly="modalState.isReadonly"
             />
           </div>
           <div class="w-[50%]">
             <AppCheckBox
               id="show"
-              label="Mostrar"
+              label="Mostrar en el menú"
               v-model="show"
               v-bind="showAttrs"
               binary
-              :readonly="onlyReadFlag"
+              :readonly="modalState.isReadonly"
             />
           </div>
         </div>
@@ -194,17 +196,25 @@
           :suggestions="routesFiltered"
           dropdown
           @complete="findAutocomplete"
-          :readonly="onlyReadFlag"
+          :readonly="modalState.isReadonly"
         />
+      </section>
+      <section
+        v-else
+        id="body_delete_modal"
+        class="w-full flex flex-wrap gap-5"
+      >
+        <div class="w-full flex justify-center text-center items-center">
+          <span class="text-center flex">{{ modalState.description }}</span>
+        </div>
       </section>
     </AppModal>
   </div>
 </template>
 <script setup lang="ts">
 import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 
-import { TableHeaders } from '@/core/interfaces';
 import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
@@ -216,6 +226,7 @@ const {
   getRoutes,
   addRoute,
   editRoute,
+  deleteRoute,
   errors,
   name,
   nameAttrs,
@@ -238,128 +249,65 @@ const {
   handleSubmit,
   parentRoutes,
   resetField,
-  page,
-  total_items,
-  per_page,
   items,
   filter_name,
   resetForm,
   validateInputUri,
   validateAlphaInput,
   cleanSearch,
-  viewRoute,
-  setEditRoute,
+  setRouteItem,
   findRoute,
+  pagination,
+  headers,
 } = useAdmin();
 
-const headers = ref<TableHeaders[]>([
-  {
-    field: 'id',
-    header: 'No.',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'name',
-    header: 'Nombre',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'description',
-    header: 'Descripción',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'icon',
-    header: 'Ícono',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'uri',
-    header: 'Uri',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'show',
-    header: 'Mostrar',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'order',
-    header: 'Orden',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'parent_route.uri',
-    header: 'Ruta padre',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'active',
-    header: 'Estado',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'acciones',
-    header: 'Acciones',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-]);
+const modalState = reactive({
+  show: false,
+  mode: 'closed',
+  title: '',
+  description: '',
+  isReadonly: false,
+  selectedItem: null as number | null,
+});
 
-const titleModal = ref<string>('');
-
-const showModal = ref<boolean>(false);
 const routesFiltered = ref<any[]>([]);
-const onlyReadFlag = ref<boolean>(false);
-const editFlag = ref<boolean>(false);
 
-const handledModal = (
-  flag: boolean,
-  action: 'agregar' | 'ver' | 'editar' | 'cerrar',
+const openModal = (
+  action: 'add' | 'view' | 'edit' | 'delete',
   data?: RoutesResponse,
 ) => {
-  if (!flag && action === 'agregar') {
-    titleModal.value = 'Agregar ruta';
-    showModal.value = !flag;
-    return;
+  modalState.mode = action;
+  modalState.isReadonly = action === 'view';
+
+  switch (action) {
+    case 'add':
+      modalState.title = 'Agregar Ruta';
+      break;
+    case 'view':
+      modalState.title = 'Ver Ruta';
+      setRouteItem(data!);
+      break;
+    case 'edit':
+      modalState.title = 'Editar Ruta';
+      setRouteItem(data!);
+      break;
+    case 'delete':
+      setRouteItem(data!);
+      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
+      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
+      modalState.selectedItem = data!.id;
+      break;
   }
-  if (!flag && action === 'ver' && data) {
-    titleModal.value = 'Ver ruta';
-    showModal.value = !flag;
-    onlyReadFlag.value = true;
-    viewRoute(data);
-    return;
-  }
-  if (!flag && action === 'editar' && data) {
-    editFlag.value = true;
-    titleModal.value = 'Editar ruta';
-    showModal.value = !flag;
-    setEditRoute(data);
-    return;
-  }
-  showModal.value = false;
-  onlyReadFlag.value = false;
-  title.value = '';
-  editFlag.value = false;
+  modalState.show = true;
+};
+
+const closeModal = () => {
+  modalState.show = false;
+  modalState.mode = 'closed';
+  modalState.title = '';
+  modalState.description = '';
+  modalState.isReadonly = false;
+  modalState.selectedItem = null;
   resetForm();
 };
 
@@ -385,20 +333,28 @@ const onSubMit = handleSubmit(async values => {
       child_route: values.child_route,
       icon: values.icon,
       order: values.order,
-      show: values.show,
+      show: values.show ? true : false,
       uri: values.uri,
       parent_route: values.parent_route,
       title: values.title,
     };
-    if (editFlag.value) {
-      form.id = values.id;
-      form.active = values.active;
-      await editRoute(form);
-      handledModal(showModal.value, 'cerrar');
-      return;
+    let success = false;
+    switch (modalState.mode) {
+      case 'add':
+        success = (await addRoute(form)) ? true : false;
+        break;
+      case 'edit':
+        form.id = values.id;
+        form.active = values.active;
+        success = (await editRoute(form)) ? true : false;
+        break;
+      case 'delete':
+        success = (await deleteRoute(values.id)) ? true : false;
+        break;
     }
-    await addRoute(form);
-    handledModal(showModal.value, 'agregar');
+    if (success) {
+      closeModal();
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -414,6 +370,19 @@ const showParentRoute = computed(() => {
     return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0';
   } catch (error) {
     console.error(error);
+  }
+});
+
+const modalButtons = computed(() => {
+  switch (modalState.mode) {
+    case 'edit':
+      return { confirmText: 'Editar', cancelText: 'Cancelar' };
+    case 'delete':
+      return { confirmText: 'Aceptar', cancelText: 'Cancelar' };
+    case 'view':
+      return { confirmText: '', cancelText: 'Cerrar' };
+    default:
+      return { confirmText: 'Agregar', cancelText: 'Cancelar' };
   }
 });
 

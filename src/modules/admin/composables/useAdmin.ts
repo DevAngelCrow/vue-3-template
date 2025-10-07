@@ -1,10 +1,11 @@
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { nextTick, ref } from 'vue';
+import { nextTick, reactive, ref } from 'vue';
 
 import adminServices from '@/core/services/index.services';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { TableHeaders } from '@/core/interfaces';
 
 import { RouteForm } from '../interfaces/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
@@ -62,15 +63,89 @@ export function useAdmin() {
     }),
   });
 
+  const headers = ref<TableHeaders[]>([
+    {
+      field: 'id',
+      header: 'No.',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'name',
+      header: 'Nombre',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'description',
+      header: 'Descripción',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'icon',
+      header: 'Ícono',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'uri',
+      header: 'Uri',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'show',
+      header: 'Mostrar en menú',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'order',
+      header: 'Orden',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'parent_route.uri',
+      header: 'Ruta padre',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'active',
+      header: 'Estado',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'acciones',
+      header: 'Acciones',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+  ]);
+
   const parentRoutes = ref<
     { title: string; id: number; uri: string; name: string }[]
   >([]);
 
-  const page = ref<number>(1);
-  const per_page = ref<number>(10);
-  const total_items = ref<number>(0);
   const items = ref<RoutesResponse[] | undefined>([]);
-
+  const pagination = reactive({
+    page: 1,
+    per_page: 10,
+    total_items: 0,
+  });
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
 
@@ -95,9 +170,9 @@ export function useAdmin() {
   const getRoutes = async () => {
     try {
       startLoading();
-      let filter = {
-        page: page.value,
-        per_page: per_page.value,
+      const filter = {
+        page: pagination.page,
+        per_page: pagination.per_page,
         filter_name: filter_name.value,
       };
       const response = await adminServices.getAllRoutes(filter);
@@ -116,9 +191,9 @@ export function useAdmin() {
           }));
       }
       if (response.statusCode === 200) {
-        page.value = response.data.pagination.currentPage;
-        per_page.value = response.data.pagination.perPage;
-        total_items.value = response.data.pagination.totalItems;
+        pagination.page = response.data.pagination.currentPage;
+        pagination.per_page = response.data.pagination.perPage;
+        pagination.total_items = response.data.pagination.totalItems;
         items.value = response.data.items;
       }
       return [];
@@ -156,12 +231,29 @@ export function useAdmin() {
           title: `${response.data.message}`,
           show: true,
         });
+        return response.data;
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const deleteRoute = async (id: number) => {
+    try {
+      const response = await adminServices.deleteRoute(id);
+      if (response.status === 200) {
+        getRoutes();
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+        return response.data;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const validateInputUri = (
     value: string,
     input: string,
@@ -198,30 +290,18 @@ export function useAdmin() {
     getRoutes();
   };
 
-  const viewRoute = (value: RoutesResponse) => {
-    name.value = value?.name;
-    title.value = value?.title;
-    uri.value = value?.uri;
-    description.value = value?.description;
-    order.value = value?.order.toString();
-    icon.value = value?.icon;
-    parent_route.value = value?.parent_route;
-    child_route.value = parent_route.value ? true : false;
-    show.value = value?.show;
-  };
-
-  const setEditRoute = (value: RoutesResponse) => {
-    id.value = value?.id;
-    name.value = value?.name;
-    title.value = value?.title;
-    uri.value = value?.uri;
-    description.value = value?.description;
-    order.value = value?.order.toString();
-    icon.value = value?.icon;
-    parent_route.value = value?.parent_route;
-    child_route.value = parent_route.value ? true : false;
-    show.value = value?.show;
-    active.value = value?.active;
+  const setRouteItem = (value: RoutesResponse) => {
+    setFieldValue('id', value?.id);
+    setFieldValue('name', value?.name);
+    setFieldValue('title', value?.title);
+    setFieldValue('uri', value?.uri);
+    setFieldValue('description', value?.description);
+    setFieldValue('order', value?.order.toString());
+    setFieldValue('icon', value?.icon);
+    setFieldValue('parent_route', value?.parent_route);
+    setFieldValue('child_route', parent_route.value ? true : false);
+    setFieldValue('show', value?.show);
+    setFieldValue('active', value.active);
   };
 
   const findRoute = (value: string | null) => {
@@ -234,6 +314,7 @@ export function useAdmin() {
     getRoutes,
     addRoute,
     editRoute,
+    deleteRoute,
     id,
     idAttrs,
     name,
@@ -263,16 +344,14 @@ export function useAdmin() {
     resetForm,
     resetField,
     setFieldError,
-    page,
-    per_page,
-    total_items,
     items,
     validateInputUri,
     filter_name,
     validateAlphaInput,
     cleanSearch,
-    viewRoute,
-    setEditRoute,
+    setRouteItem,
     findRoute,
+    pagination,
+    headers,
   };
 }

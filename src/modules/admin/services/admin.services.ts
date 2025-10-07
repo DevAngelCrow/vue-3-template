@@ -41,9 +41,17 @@ const editRoute = async (data: RouteForm) => {
   return response;
 };
 
+const deleteRoute = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `security/routes/${id}`,
+  );
+  return response;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
   addRoute,
   editRoute,
+  deleteRoute,
 };
