@@ -22,6 +22,7 @@ export function useAdmin() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
+      id: yup.number().typeError('El campo id debe ser de tipo entero'),
       name: yup
         .string()
         .required('El nombre de la ruta es requerido')
@@ -52,6 +53,7 @@ export function useAdmin() {
       icon: yup.string().min(2),
       child_route: yup.boolean(),
       show: yup.boolean(),
+      active: yup.boolean(),
       parent_route: yup.mixed<RouteParentAutocomplete>().when('child_route', {
         is: true,
         then: schema => schema.required('El campo de ruta padre es requerido'),
@@ -72,6 +74,7 @@ export function useAdmin() {
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
 
+  const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
   const [title, titleAttrs] = defineField('title');
   const [uri, uriAttrs] = defineField('uri');
@@ -80,6 +83,7 @@ export function useAdmin() {
   const [icon, iconAttrs] = defineField('icon');
   const [child_route, child_routeAttrs] = defineField('child_route');
   const [show, showAttrs] = defineField('show');
+  const [active, activeAttrs] = defineField('active');
   const [parent_route, parent_routeAttrs] = defineField('parent_route');
 
   const filter_name = ref<string | null>(null);
@@ -142,6 +146,22 @@ export function useAdmin() {
     }
   };
 
+  const editRoute = async (form: RouteForm) => {
+    try {
+      const response = await adminServices.editRoute(form);
+      if (response.status === 200) {
+        getRoutes();
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const validateInputUri = (
     value: string,
     input: string,
@@ -191,6 +211,7 @@ export function useAdmin() {
   };
 
   const setEditRoute = (value: RoutesResponse) => {
+    id.value = value?.id;
     name.value = value?.name;
     title.value = value?.title;
     uri.value = value?.uri;
@@ -200,11 +221,21 @@ export function useAdmin() {
     parent_route.value = value?.parent_route;
     child_route.value = parent_route.value ? true : false;
     show.value = value?.show;
+    active.value = value?.active;
+  };
+
+  const findRoute = (value: string | null) => {
+    if (value) {
+      getRoutes();
+    }
   };
 
   return {
     getRoutes,
     addRoute,
+    editRoute,
+    id,
+    idAttrs,
     name,
     nameAttrs,
     title,
@@ -221,6 +252,8 @@ export function useAdmin() {
     child_routeAttrs,
     show,
     showAttrs,
+    active,
+    activeAttrs,
     parent_route,
     parent_routeAttrs,
     errors,
@@ -240,5 +273,6 @@ export function useAdmin() {
     cleanSearch,
     viewRoute,
     setEditRoute,
+    findRoute,
   };
 }

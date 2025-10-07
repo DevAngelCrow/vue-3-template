@@ -1,4 +1,5 @@
 export interface RouteForm {
+  id?: number;
   name: string;
   uri: string;
   description: string;
@@ -8,4 +9,5 @@ export interface RouteForm {
   show: boolean;
   parent_route?: string;
   title: string;
+  active?: boolean;
 }

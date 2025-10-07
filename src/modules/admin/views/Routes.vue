@@ -16,7 +16,9 @@
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
           />
-          <Button class="flex-shrink-0 grow rounded-md" @click="getRoutes"
+          <Button
+            class="flex-shrink-0 grow rounded-md"
+            @click="findRoute(filter_name)"
             >Buscar</Button
           >
           <Button
@@ -213,6 +215,7 @@ const { startLoading, finishLoading } = useLoaderStore();
 const {
   getRoutes,
   addRoute,
+  editRoute,
   errors,
   name,
   nameAttrs,
@@ -246,6 +249,7 @@ const {
   cleanSearch,
   viewRoute,
   setEditRoute,
+  findRoute,
 } = useAdmin();
 
 const headers = ref<TableHeaders[]>([
@@ -326,6 +330,7 @@ const titleModal = ref<string>('');
 const showModal = ref<boolean>(false);
 const routesFiltered = ref<any[]>([]);
 const onlyReadFlag = ref<boolean>(false);
+const editFlag = ref<boolean>(false);
 
 const handledModal = (
   flag: boolean,
@@ -345,6 +350,7 @@ const handledModal = (
     return;
   }
   if (!flag && action === 'editar' && data) {
+    editFlag.value = true;
     titleModal.value = 'Editar ruta';
     showModal.value = !flag;
     setEditRoute(data);
@@ -353,6 +359,7 @@ const handledModal = (
   showModal.value = false;
   onlyReadFlag.value = false;
   title.value = '';
+  editFlag.value = false;
   resetForm();
 };
 
@@ -383,6 +390,13 @@ const onSubMit = handleSubmit(async values => {
       parent_route: values.parent_route,
       title: values.title,
     };
+    if (editFlag.value) {
+      form.id = values.id;
+      form.active = values.active;
+      await editRoute(form);
+      handledModal(showModal.value, 'cerrar');
+      return;
+    }
     await addRoute(form);
     handledModal(showModal.value, 'agregar');
   } catch (error) {
