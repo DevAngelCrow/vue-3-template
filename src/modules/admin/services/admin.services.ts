@@ -6,6 +6,7 @@ import { paginateParams } from '@/core/services/interfaces/params.paginate.inter
 import { RoutesResponse } from '../interfaces/routes.response.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
 import { RouteForm } from '../interfaces/route-form.interface';
+import { PermissionsResponse } from '../interfaces/permissions.response.interface';
 
 const getAllRoutes = async (
   params: paginateParams,
@@ -48,10 +49,18 @@ const deleteRoute = async (id: number) => {
   return response;
 };
 
+const getPermissions = async () => {
+  const response = await httpClient.get<PermissionsResponse>(
+    'security/permissions/',
+  );
+  return response.data;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
   addRoute,
   editRoute,
   deleteRoute,
+  getPermissions,
 };

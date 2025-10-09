@@ -1,23 +1,34 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { Button } from 'primevue';
+// import { Button } from 'primevue';
 
-import { TableHeaders } from '../interfaces';
-const show = ref<boolean>(false);
+// import { TableHeaders } from '../interfaces';
+// const show = ref<boolean>(false);
 
-const openModal = (value: boolean) => {
-  show.value = !value;
-};
+// const openModal = (value: boolean) => {
+//   show.value = !value;
+// };
 
-const closeModal = (value: boolean) => {
-  show.value = value;
-};
+// const closeModal = (value: boolean) => {
+//   show.value = value;
+// };
 
-const confirmModal = () => {
-  //TODO
-  //aca debe hacer algo
-  closeModal(false);
-};
+// const confirmModal = () => {
+//   //TODO
+//   //aca debe hacer algo
+//   closeModal(false);
+// };
+
+const permisos = ref<any[][]>([
+  [
+    { id: 1, name: 'view_users' },
+    { id: 2, name: 'create_users' },
+    { id: 3, name: 'delete_users' },
+    { id: 4, name: 'view_routes' },
+    { id: 5, name: 'edit_routes' },
+  ],
+  [],
+]);
 onMounted(() => {});
 const fecha = ref();
 
@@ -25,58 +36,58 @@ watch(fecha, newVale => {
   console.log(newVale);
 });
 
-const headers = ref<TableHeaders[]>([
-  {
-    field: 'vinculador_uno',
-    header: 'cabecera_Uno',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'vinculador_dos',
-    header: 'cabecera_Dos',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'vinculador_tres',
-    header: 'cabecera_Tres',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'acciones',
-    header: 'Acciones',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-]);
+// const headers = ref<TableHeaders[]>([
+//   {
+//     field: 'vinculador_uno',
+//     header: 'cabecera_Uno',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+//   {
+//     field: 'vinculador_dos',
+//     header: 'cabecera_Dos',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+//   {
+//     field: 'vinculador_tres',
+//     header: 'cabecera_Tres',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+//   {
+//     field: 'acciones',
+//     header: 'Acciones',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+// ]);
 
-const items = ref([
-  {
-    vinculador_uno: 'item_cabecera_uno_pagina_1',
-    vinculador_dos: 'item_cabecera_dos_pagina_1',
-    vinculador_tres: 'item_cabecera_tres_pagina_1',
-  },
-  {
-    vinculador_uno: 'item_cabecera_uno_pagina_2',
-    vinculador_dos: 'item_cabecera_dos_pagina_2',
-    vinculador_tres: 'item_cabecera_tres_pagina_2',
-  },
-  {
-    vinculador_uno: 'item_cabecera_uno_pagina_3',
-    vinculador_dos: 'item_cabecera_dos_pagina_3',
-    vinculador_tres: 'item_cabecera_tres_pagina_3',
-  },
-]);
+// const items = ref([
+//   {
+//     vinculador_uno: 'item_cabecera_uno_pagina_1',
+//     vinculador_dos: 'item_cabecera_dos_pagina_1',
+//     vinculador_tres: 'item_cabecera_tres_pagina_1',
+//   },
+//   {
+//     vinculador_uno: 'item_cabecera_uno_pagina_2',
+//     vinculador_dos: 'item_cabecera_dos_pagina_2',
+//     vinculador_tres: 'item_cabecera_tres_pagina_2',
+//   },
+//   {
+//     vinculador_uno: 'item_cabecera_uno_pagina_3',
+//     vinculador_dos: 'item_cabecera_dos_pagina_3',
+//     vinculador_tres: 'item_cabecera_tres_pagina_3',
+//   },
+// ]);
 </script>
 
 <template>
-  <Button class="mt-10" @click="openModal(show)">Modal</Button>
+  <!-- <Button class="mt-10" @click="openModal(show)">Modal</Button>
   <AppModal
     :show="show"
     @close-modal="closeModal"
@@ -105,7 +116,9 @@ const items = ref([
       <i class="pi pi-trash"></i>
       <i class="pi pi-times-circle"></i>
     </template>
-  </AppDataTable>
+</AppDataTable> -->
+  <br />
+  <AppPickList v-model="permisos" :option-label="'name'" />
 </template>
 
 <style scoped>

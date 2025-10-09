@@ -167,6 +167,15 @@ export function useAdmin() {
     /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
 
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
+
+  const permissionsList = ref<
+    {
+      name: string;
+      description: string;
+      active: boolean;
+      show: boolean;
+    }[]
+  >([]);
   const getRoutes = async () => {
     try {
       startLoading();
@@ -249,6 +258,18 @@ export function useAdmin() {
           show: true,
         });
         return response.data;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getPermissions = async () => {
+    try {
+      const response = await adminServices.getPermissions();
+      if (response.statusCode === 200) {
+        permissionsList.value = response.data;
+        console.log(permissionsList.value, 'listado de permisos');
       }
     } catch (error) {
       console.error(error);
@@ -353,5 +374,7 @@ export function useAdmin() {
     findRoute,
     pagination,
     headers,
+    getPermissions,
+    permissionsList,
   };
 }

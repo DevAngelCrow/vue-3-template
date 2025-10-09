@@ -96,7 +96,7 @@
       :title-btn-confirm="modalButtons.confirmText"
       footer-buttons
       show-icon-close
-      width="35rem"
+      width="45rem"
       @close-modal="closeModal"
       @confirm-modal="onSubMit"
       :showBtnConfirmFooter="modalState.mode !== 'view'"
@@ -197,6 +197,14 @@
           dropdown
           @complete="findAutocomplete"
           :readonly="modalState.isReadonly"
+          :disabled="!child_route"
+        />
+        <AppPickList
+          v-model="permissionsListPicker"
+          :option-label="'name'"
+          :responsive="true"
+          :show-source-controls="false"
+          :show-target-controls="false"
         />
       </section>
       <section
@@ -259,6 +267,8 @@ const {
   findRoute,
   pagination,
   headers,
+  getPermissions,
+  permissionsList,
 } = useAdmin();
 
 const modalState = reactive({
@@ -271,6 +281,7 @@ const modalState = reactive({
 });
 
 const routesFiltered = ref<any[]>([]);
+const permissionsListPicker = ref<any[][]>([[], []]);
 
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
@@ -367,7 +378,7 @@ const showParentRoute = computed(() => {
     if (child_route.value) {
       return 'w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300';
     }
-    return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0';
+    return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0 !pointer-events-none';
   } catch (error) {
     console.error(error);
   }
@@ -407,6 +418,9 @@ watch(
 onMounted(async () => {
   try {
     await getRoutes();
+    await getPermissions();
+    permissionsListPicker.value = [permissionsList.value, []];
+    nextTick(() => {});
   } catch (error) {
     console.error(error);
   }
