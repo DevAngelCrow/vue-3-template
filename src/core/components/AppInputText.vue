@@ -22,7 +22,7 @@
           @focus="() => (isFocused = true)"
           @blur="() => (isFocused = false)"
           :variant="inputVarian"
-          :size="size"
+          :size="inputSize"
         />
         <InputIcon
           v-if="showIcon"
@@ -78,6 +78,10 @@ const props = defineProps({
   size: {
     type: String,
     default: 'small',
+  },
+  inputSize: {
+    type: String,
+    default: 'normal',
   },
   variant: {
     type: String,

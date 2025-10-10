@@ -24,7 +24,7 @@
           <span>Disponibles</span>
           <AppInputText
             class="w-full"
-            size="small"
+            input-size="small"
             v-model="findSourceElementValue.value"
             @update:model-value="findSourceElements"
           />
@@ -35,7 +35,7 @@
       <slot name="targetheader">
         <section id="header_app_pick_list" class="flex justify-start flex-col">
           <span>Seleccionados</span>
-          <AppInputText class="w-full" size="small" />
+          <AppInputText class="w-full" input-size="small" />
         </section>
       </slot>
     </template>
@@ -65,6 +65,11 @@ const filteredAttrs = computed(() => {
 const findSourceElementValue = reactive({
   value: '',
   array_copy_vmodel_values: props.modelValue[0],
+});
+
+const _findTargetElementValue = reactive({
+  value: '',
+  array_copy_vmodel_values: props.modelValue[1],
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -99,7 +104,12 @@ const dataKey = computed(() =>
 const findSourceElements = (value: string | undefined) => {
   let _filteredItems = [];
   for (let i = 0; i < props.modelValue[0].length; i++) {
-    //let item = props.modelValue[0][i];
+    let item = props.modelValue[0][i];
+    if (item?.name.toLowerCase().indexOf(value?.toLocaleLowerCase()) === 0) {
+      _filteredItems.push(item);
+    }
+    findSourceElementValue.array_copy_vmodel_values = _filteredItems;
+    console.log(findSourceElementValue.array_copy_vmodel_values);
   }
   console.log(value);
 };
