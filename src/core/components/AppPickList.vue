@@ -5,6 +5,7 @@
     :data-key="dataKey"
     @update:model-value="onUpdated"
     v-bind="filteredAttrs"
+    ref="pickListRef"
     :pt="{
       pcListbox: {
         root: {
@@ -14,9 +15,17 @@
     }"
   >
     <template #option="{ option }">
-      <slot name="option" :option="option">
-        {{ getOptionLabel(option) }}
-      </slot>
+      <div
+        :ref="el => registerOptionRef(el, option)"
+        :class="[
+          'p-2 rounded transition-colors duration-300',
+          highlightedOption === option ? 'bg-primary-200' : '',
+        ]"
+      >
+        <slot name="option" :option="option">
+          {{ getOptionLabel(option) }}
+        </slot>
+      </div>
     </template>
     <template #sourceheader>
       <slot name="sourceheader">
@@ -25,8 +34,9 @@
           <AppInputText
             class="w-full"
             input-size="small"
-            v-model="findSourceElementValue.value"
-            @update:model-value="findSourceElements"
+            placeholder="Buscar..."
+            v-model="findSourceElementValue"
+            @update:model-value="highlightSourceElement"
           />
         </section>
       </slot>
@@ -35,7 +45,11 @@
       <slot name="targetheader">
         <section id="header_app_pick_list" class="flex justify-start flex-col">
           <span>Seleccionados</span>
-          <AppInputText class="w-full" input-size="small" />
+          <AppInputText
+            class="w-full"
+            input-size="small"
+            placeholder="Buscar..."
+          />
         </section>
       </slot>
     </template>
@@ -43,7 +57,7 @@
 </template>
 <script setup lang="ts" generic="T">
 import { PickList } from 'primevue';
-import { computed, reactive, useAttrs } from 'vue';
+import { computed, ref, useAttrs } from 'vue';
 
 /**
  * Props genéricas
@@ -62,15 +76,32 @@ const filteredAttrs = computed(() => {
   return rest;
 });
 
-const findSourceElementValue = reactive({
-  value: '',
-  array_copy_vmodel_values: props.modelValue[0],
-});
+const findSourceElementValue = ref<string>('');
+const highlightedOption = ref<T | null>(null);
+const optionsRefs = new Map<T, HTMLElement>();
 
-const _findTargetElementValue = reactive({
-  value: '',
-  array_copy_vmodel_values: props.modelValue[1],
-});
+const registerOptionRef = (el: HTMLElement | null, option: T) => {
+  if (el) optionsRefs.set(option, el);
+};
+
+const highlightSourceElement = () => {
+  const searchValue = findSourceElementValue.value.trim().toLocaleLowerCase();
+  if (!searchValue) return;
+
+  const found = props.modelValue[0].find(item =>
+    getOptionLabel(item).toLocaleLowerCase().includes(searchValue),
+  );
+
+  if (found) {
+    highlightedOption.value = found;
+    const el = optionsRefs.get(found);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    setTimeout(() => {
+      highlightedOption.value = null;
+    }, 1000);
+  }
+};
 
 const emit = defineEmits(['update:modelValue']);
 const onUpdated = (value: T[][]) => {
@@ -101,17 +132,22 @@ const dataKey = computed(() =>
   props.optionValue ? String(props.optionValue) : undefined,
 );
 
-const findSourceElements = (value: string | undefined) => {
-  let _filteredItems = [];
-  for (let i = 0; i < props.modelValue[0].length; i++) {
-    let item = props.modelValue[0][i];
-    if (item?.name.toLowerCase().indexOf(value?.toLocaleLowerCase()) === 0) {
-      _filteredItems.push(item);
-    }
-    findSourceElementValue.array_copy_vmodel_values = _filteredItems;
-    console.log(findSourceElementValue.array_copy_vmodel_values);
-  }
-  console.log(value);
-};
+// const findSourceElements = (value: string | undefined) => {
+//   let _filteredItems = [];
+//   for (let i = 0; i < props.modelValue[0].length; i++) {
+//     let item = props.modelValue[0][i];
+//     if (item?.name.toLowerCase().indexOf(value?.toLocaleLowerCase()) === 0) {
+//       _filteredItems.push(item);
+//     }
+//     findSourceElementValue.array_copy_vmodel_values = _filteredItems;
+//     console.log(findSourceElementValue.array_copy_vmodel_values);
+//   }
+//   console.log(value);
+// };
 </script>
-<style></style>
+<style scoped>
+.bg-primary-100 {
+  background-color: rgba(59, 130, 246, 0.2); /* azul suave */
+  transition: background-color 0.3s ease;
+}
+</style>
