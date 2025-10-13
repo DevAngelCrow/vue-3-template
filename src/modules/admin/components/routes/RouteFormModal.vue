@@ -110,50 +110,13 @@
             :disabled="!child_route"
           />
         </div>
-      </div>
-      <div class="w-full flex flex-wrap justify-start gap-2">
-        <div class="flex h-12 w-full">
-          <AppInputText class="w-[85%]" label="Buscar permiso..." />
-          <div class="width_circular_counter w-[45%] xs:w-[20%] sm:w-[15%]">
-            <AppCircularCounter
-              class="flex justify-end"
-              :selected="selectedPermissionsIds.size"
-              :total="permissionsPagination.total_items"
-              color="#082f49"
-            />
-          </div>
-        </div>
-        <AppDataTable
-          class="w-full"
-          :headers="headerPermissions"
-          :items="permissionItemsFormated"
-          :paginator="true"
-          :per_page="permissionsPagination.per_page"
-          :total_items="permissionsPagination.total_items"
-          :page="permissionsPagination.page"
-          @page-update="handlePagination"
-        >
-          <template #header-Seleccion>
-            <div class="flex justify-center flex-row">
-              <AppCheckBox
-                binary
-                @update:model-value="checkAll"
-                v-model="selectAll"
-              ></AppCheckBox>
-              <span>Seleccion</span>
-            </div>
-          </template>
-          <template #body-state="{ data, index }">
-            <div class="flex justify-center">
-              <AppCheckBox
-                binary
-                :model-value="isPermissionSelected(data.id)"
-                :id="`${index}`"
-                @update:model-value="togglePermission(data.id, $event)"
-              />
-            </div>
-          </template>
-        </AppDataTable>
+        <RoutePermissionDataTable
+          :modal-state="props.modalState.mode"
+          @update:selected-permissions-ids="
+            value => (selectedPermissionsIds = value)
+          "
+          ref="routePermissionDataTable"
+        />
       </div>
     </section>
     <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
@@ -165,12 +128,13 @@
 </template>
 <script setup lang="ts">
 import { AutoCompleteCompleteEvent } from 'primevue';
-import { computed, ref, inject, watch } from 'vue';
+import { computed, ref, inject, provide } from 'vue';
 
 import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../../composables/useAdmin';
 import { RouteForm } from '../../interfaces/route-form.interface';
+import RoutePermissionDataTable from './RoutePermissionDataTable.vue';
 
 type AdminType = ReturnType<typeof useAdmin>;
 
@@ -187,7 +151,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['close-modal']);
 const admin = inject<AdminType>('useAdmin')!;
-
+const adminInstance = admin;
+provide('useAdmin', adminInstance);
 const { startLoading, finishLoading } = useLoaderStore();
 const {
   errors,
@@ -209,43 +174,24 @@ const {
   showAttrs,
   parent_route,
   parent_routeAttrs,
-  permissions_ids,
+  //permissions_ids,
   validateInputUri,
   handleSubmit,
   parentRoutes,
   addRoute,
   editRoute,
   deleteRoute,
-  permissionsList,
-  headerPermissions,
-  permissionsPagination,
-  getPermissions,
+  //permissionsList,
+  //headerPermissions,
+  //permissionsPagination,
+  //getPermissions,
 } = admin;
 
 const routesFiltered = ref<any[]>([]);
-
-const selectAll = ref<boolean>(false);
-const permissionItemsFormated = ref<
-  {
-    id: number;
-    name: string;
-    description: string;
-    active: boolean;
-    show: boolean;
-    state: boolean;
-  }[]
->([]);
-
 const selectedPermissionsIds = ref<Set<number>>(new Set());
-
-const handlePagination = async (page: number) => {
-  if (page + 1 === permissionsPagination.page) {
-    return;
-  }
-  permissionsPagination.page = page + 1;
-  await getPermissions();
-  updateSelectAllState();
-};
+const routePermissionDataTable = ref<InstanceType<
+  typeof RoutePermissionDataTable
+> | null>(null);
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
@@ -299,76 +245,22 @@ const onSubMit = handleSubmit(async values => {
   }
 });
 
-const isPermissionSelected = (permissionId: number) => {
-  return selectedPermissionsIds.value.has(permissionId);
-};
-
-const checkAll = (flag: boolean) => {
-  if (flag) {
-    permissionItemsFormated.value.forEach(item => {
-      selectedPermissionsIds.value.add(item.id);
-    });
-  } else {
-    permissionItemsFormated.value.forEach(item => {
-      selectedPermissionsIds.value.delete(item.id);
-    });
-  }
-};
-
-const togglePermission = (permissionId: number, isChecked: boolean) => {
-  if (isChecked) {
-    selectedPermissionsIds.value.add(permissionId);
-  } else {
-    selectedPermissionsIds.value.delete(permissionId);
-  }
-  updateSelectAllState();
-};
-const updateSelectAllState = (): void => {
-  if (permissionItemsFormated.value.length === 0) {
-    selectAll.value = false;
-    return;
-  }
-  const allCurrentItemsSelected = permissionItemsFormated.value.every(item =>
-    selectedPermissionsIds.value.has(item.id),
-  );
-
-  selectAll.value = allCurrentItemsSelected;
-};
-
 const closeModal = () => {
-  permissionItemsFormated.value = permissionsList.value.map(item => {
-    return {
-      ...item,
-      state: false,
-    };
-  });
-  selectedPermissionsIds.value.clear();
-  if (permissionsPagination.page > 1) {
-    permissionsPagination.page = 1;
-    getPermissions();
-  }
-
+  // permissionItemsFormated.value = permissionsList.value.map(item => {
+  //   return {
+  //     ...item,
+  //     state: false,
+  //   };
+  // });
+  // selectedPermissionsIds.value.clear();
+  // if (permissionsPagination.page > 1) {
+  //   permissionsPagination.page = 1;
+  //   getPermissions();
+  // }
+  routePermissionDataTable.value?.closeModal();
   emit('close-modal');
 };
 
-const setPermissionsIds = (
-  value: {
-    id: number;
-    name: string;
-    description: string;
-    active: boolean;
-    show: boolean;
-  }[],
-) => {
-  if (value.length) {
-    permissionItemsFormated.value = value.map(item => {
-      return {
-        ...item,
-        state: false,
-      };
-    });
-  }
-};
 const showParentRoute = computed(() => {
   try {
     if (child_route.value) {
@@ -393,39 +285,34 @@ const modalButtons = computed(() => {
   }
 });
 
-watch(permissionsList, newVal => {
-  setPermissionsIds(newVal);
-  updateSelectAllState();
-});
-
-watch(
-  () => props.modalState.mode,
-  newVal => {
-    switch (newVal) {
-      case 'add':
-        updateSelectAllState();
-        break;
-      case 'view':
-        permissions_ids.value?.forEach((id: number) => {
-          selectedPermissionsIds.value.add(id);
-        });
-        permissionItemsFormated.value.forEach(item => {
-          isPermissionSelected(item.id);
-        });
-        updateSelectAllState();
-        break;
-      case 'edit':
-        permissions_ids.value?.forEach((id: number) => {
-          selectedPermissionsIds.value.add(id);
-        });
-        permissionItemsFormated.value.forEach(item => {
-          isPermissionSelected(item.id);
-        });
-        updateSelectAllState();
-        break;
-    }
-  },
-);
+// watch(
+//   () => props.modalState.mode,
+//   newVal => {
+//     switch (newVal) {
+//       case 'add':
+//         updateSelectAllState();
+//         break;
+//       case 'view':
+//         permissions_ids.value?.forEach((id: number) => {
+//           selectedPermissionsIds.value.add(id);
+//         });
+//         permissionItemsFormated.value.forEach(item => {
+//           isPermissionSelected(item.id);
+//         });
+//         updateSelectAllState();
+//         break;
+//       case 'edit':
+//         permissions_ids.value?.forEach((id: number) => {
+//           selectedPermissionsIds.value.add(id);
+//         });
+//         permissionItemsFormated.value.forEach(item => {
+//           isPermissionSelected(item.id);
+//         });
+//         updateSelectAllState();
+//         break;
+//     }
+//   },
+// );
 </script>
 <style scoped>
 @media (min-width: 325px) and (max-width: 470px) {
