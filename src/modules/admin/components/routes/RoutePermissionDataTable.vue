@@ -159,15 +159,11 @@ const closeModal = () => {
 watch(selectedPermissionsIds, newVal => {
   emit('update:selected-permissions-ids', newVal);
 });
-watch(
-  permissionsList,
-  newVal => {
-    console.log(newVal, 'nuevo');
-    setPermissionsIds(newVal);
-    updateSelectAllState();
-  },
-  { deep: true },
-);
+watch(permissionsList, newVal => {
+  console.log(newVal, 'nuevo');
+  setPermissionsIds(newVal);
+  updateSelectAllState();
+});
 watch(
   () => modalState,
   newVal => {
