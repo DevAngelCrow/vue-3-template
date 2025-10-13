@@ -10,4 +10,5 @@ export interface RouteForm {
   parent_route?: string;
   title: string;
   active?: boolean;
+  permissions_id: number[];
 }

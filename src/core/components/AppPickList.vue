@@ -1,153 +1,133 @@
 <template>
-  <PickList
-    class="w-full"
-    v-model="internalValue"
-    :data-key="dataKey"
-    @update:model-value="onUpdated"
-    v-bind="filteredAttrs"
-    ref="pickListRef"
-    :pt="{
-      pcListbox: {
-        root: {
-          class: 'border-1 border-primary-950',
-        },
-      },
-    }"
+  <div
+    id="pick_list_custom"
+    class="flex justify-center w-full h-auto max-h-[250px] flex-row flex-wrap"
   >
-    <template #option="{ option }">
-      <div
-        :ref="el => registerOptionRef(el, option)"
-        :class="[
-          'p-2 rounded transition-colors duration-300',
-          highlightedOption === option ? 'bg-primary-200' : '',
-        ]"
-      >
-        <slot name="option" :option="option">
-          {{ getOptionLabel(option) }}
-        </slot>
-      </div>
-    </template>
-    <template #sourceheader>
-      <slot name="sourceheader">
-        <section id="header_app_pick_list" class="flex justify-start flex-col">
-          <span>Disponibles</span>
-          <AppInputText
-            class="w-full"
-            input-size="small"
-            placeholder="Buscar..."
-            v-model="findSourceElementValue"
-            @update:model-value="highlightSourceElement"
-          />
-        </section>
+    <section
+      id="source_elements"
+      class="flex flex-col flex-wrap border border-primary-950 w-[48%] rounded-xl h-full max-h-[250px] overflow-hidden"
+    >
+      <slot name="source_column">
+        <div class="flex flex-col px-1 py-1 gap-2 h-full w-full">
+          <AppInputText class="w-full flex-shrink-0" input-size="small" />
+          <div class="overflow-y-auto flex-1 min-h-0">
+            <ul class="flex flex-col gap-2 w-full">
+              <li
+                v-for="(item, index) in source"
+                :key="index"
+                class="flex justify-start hover:cursor-pointer w-full flex-shrink-0"
+                @click="selectedItem(item)"
+              >
+                <Button :class="btnClass(item?.is_selected)" variant="text">{{
+                  item[props.labelKey]
+                }}</Button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </slot>
-    </template>
-    <template #targetheader>
-      <slot name="targetheader">
-        <section id="header_app_pick_list" class="flex justify-start flex-col">
-          <span>Seleccionados</span>
-          <AppInputText
-            class="w-full"
-            input-size="small"
-            placeholder="Buscar..."
-          />
-        </section>
+    </section>
+    <section
+      id="buttons_section"
+      class="flex flex-col flex-wrap w-[4%] justify-center items-center gap-4"
+    >
+      <Button
+        class="flex items-center justify-center text-center"
+        rounded
+        variant="outlined"
+        icon="pi pi-angle-right"
+        @click=""
+      />
+      <Button
+        class="flex items-center justify-center text-center"
+        rounded
+        variant="outlined"
+        icon="pi pi-angle-double-right"
+        @click=""
+      />
+      <Button
+        class="flex items-center justify-center text-center"
+        rounded
+        variant="outlined"
+        icon="pi pi-angle-left"
+        @click=""
+      />
+      <Button
+        class="flex items-center justify-center text-center"
+        rounded
+        variant="outlined"
+        icon="pi pi-angle-double-left"
+        @click=""
+      />
+    </section>
+    <section
+      id="target_element"
+      class="flex flex-col flex-wrap w-[48%] border border-primary-950 rounded-xl overflow-y-hidden max-h-[250px]"
+    >
+      <slot name="target_column">
+        <div class="flex flex-col px-1 py-1 gap-2 h-full w-full">
+          <AppInputText class="w-full flex-shrink-0" input-size="small" />
+          <div class="overflow-y-auto flex-1 min-h-0">
+            <ul class="flex flex-col gap-2 w-full">
+              <li
+                v-for="(item, index) in target"
+                :key="index"
+                class="flex justify-start hover:cursor-pointer w-full flex-shrink-0"
+                @click="selectedItem(item)"
+              >
+                <Button :class="btnClass(item?.is_selected)" variant="text">{{
+                  item[props.labelKey]
+                }}</Button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </slot>
-    </template>
-  </PickList>
+    </section>
+  </div>
 </template>
 <script setup lang="ts" generic="T">
-import { PickList } from 'primevue';
-import { computed, ref, useAttrs } from 'vue';
+import { Button } from 'primevue';
+import { computed, onMounted, ref } from 'vue';
 
-/**
- * Props genéricas
- * T = tipo de los elementos en las listas
- */
 const props = defineProps<{
   modelValue: T[][];
-  optionLabel?: keyof T | ((_item: T) => string);
-  optionValue?: keyof T;
+  dataKey: string;
+  labelKey: string;
+  pagination?: boolean;
+  rows?: number;
+  totalRecords?: number;
+  first?: number;
 }>();
 
-const attrs = useAttrs();
+const source = ref<T[]>([]);
+const target = ref<T[]>([]);
 
-const filteredAttrs = computed(() => {
-  const { 'data-key': _, ...rest } = attrs;
-  return rest;
+//const emit = defineEmits(['update:modelValue', 'update:page']);
+
+const btnClass = computed(() => (flag: boolean) => {
+  if (!flag) {
+    return 'w-full text-start flex justify-start transition-colors duration-200';
+  }
+  return 'w-full text-start flex justify-start transition-colors duration-200 bg-surface-300 hover:bg-surface-300';
 });
 
-const findSourceElementValue = ref<string>('');
-const highlightedOption = ref<T | null>(null);
-const optionsRefs = new Map<T, HTMLElement>();
-
-const registerOptionRef = (el: HTMLElement | null, option: T) => {
-  if (el) optionsRefs.set(option, el);
+const selectedItem = item => {
+  item.is_selected = !item.is_selected;
 };
-
-const highlightSourceElement = () => {
-  const searchValue = findSourceElementValue.value.trim().toLocaleLowerCase();
-  if (!searchValue) return;
-
-  const found = props.modelValue[0].find(item =>
-    getOptionLabel(item).toLocaleLowerCase().includes(searchValue),
-  );
-
-  if (found) {
-    highlightedOption.value = found;
-    const el = optionsRefs.get(found);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    setTimeout(() => {
-      highlightedOption.value = null;
-    }, 1000);
-  }
-};
-
-const emit = defineEmits(['update:modelValue']);
-const onUpdated = (value: T[][]) => {
-  return emit('update:modelValue', value);
-};
-
-const internalValue = computed<T[][]>({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value),
+onMounted(() => {
+  source.value = props.modelValue[0].map(item => ({
+    ...item,
+    is_selected: false,
+    moved_to_target: false,
+    moved_to_source: false,
+  }));
+  target.value = props.modelValue[1].map(item => ({
+    ...item,
+    is_selected: false,
+    moved_to_target: false,
+    moved_to_source: false,
+  }));
 });
-
-const getOptionLabel = (item: T): string => {
-  const { optionLabel } = props;
-  if (!item) return '';
-
-  if (typeof optionLabel === 'function') {
-    return optionLabel(item);
-  }
-
-  if (typeof optionLabel === 'string') {
-    const key = optionLabel as keyof T;
-    return String(item[key] ?? '');
-  }
-  return String(item);
-};
-
-const dataKey = computed(() =>
-  props.optionValue ? String(props.optionValue) : undefined,
-);
-
-// const findSourceElements = (value: string | undefined) => {
-//   let _filteredItems = [];
-//   for (let i = 0; i < props.modelValue[0].length; i++) {
-//     let item = props.modelValue[0][i];
-//     if (item?.name.toLowerCase().indexOf(value?.toLocaleLowerCase()) === 0) {
-//       _filteredItems.push(item);
-//     }
-//     findSourceElementValue.array_copy_vmodel_values = _filteredItems;
-//     console.log(findSourceElementValue.array_copy_vmodel_values);
-//   }
-//   console.log(value);
-// };
 </script>
-<style scoped>
-.bg-primary-100 {
-  background-color: rgba(59, 130, 246, 0.2); /* azul suave */
-  transition: background-color 0.3s ease;
-}
-</style>
+<style scoped></style>

@@ -1,9 +1,7 @@
 export interface PermissionsResponse {
-  data: {
-    name: string;
-    description: string;
-    active: boolean;
-    show: boolean;
-  }[];
-  statusCode: number;
+  id: number;
+  name: string;
+  description: string;
+  active: boolean;
+  show: boolean;
 }

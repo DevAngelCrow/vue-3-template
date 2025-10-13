@@ -60,6 +60,7 @@ export function useAdmin() {
         then: schema => schema.required('El campo de ruta padre es requerido'),
         otherwise: schema => schema.nullable().notRequired(),
       }),
+      permissions_ids: yup.array(),
     }),
   });
 
@@ -136,12 +137,35 @@ export function useAdmin() {
     },
   ]);
 
+  const headerPermissions = ref<TableHeaders[]>([
+    {
+      field: 'state',
+      header: 'Seleccion',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+      width: 10,
+    },
+    {
+      field: 'name',
+      header: 'Nombre',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
+  ]);
+
   const parentRoutes = ref<
     { title: string; id: number; uri: string; name: string }[]
   >([]);
 
   const items = ref<RoutesResponse[] | undefined>([]);
   const pagination = reactive({
+    page: 1,
+    per_page: 10,
+    total_items: 0,
+  });
+  const permissionsPagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
@@ -160,8 +184,11 @@ export function useAdmin() {
   const [show, showAttrs] = defineField('show');
   const [active, activeAttrs] = defineField('active');
   const [parent_route, parent_routeAttrs] = defineField('parent_route');
+  const [permissions_ids, permissions_idsAttrs] =
+    defineField('permissions_ids');
 
   const filter_name = ref<string | null>(null);
+  const filter_permission_name = ref<string | null>(null);
   const invalidRouteRegex = /[^A-Za-z0-9\-/]/g;
   const routeValidRegex =
     /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
@@ -170,6 +197,7 @@ export function useAdmin() {
 
   const permissionsList = ref<
     {
+      id: number;
       name: string;
       description: string;
       active: boolean;
@@ -266,13 +294,23 @@ export function useAdmin() {
 
   const getPermissions = async () => {
     try {
-      const response = await adminServices.getPermissions();
+      startLoading();
+      const filter = {
+        page: permissionsPagination.page,
+        per_page: permissionsPagination.per_page,
+        filter_name: filter_permission_name.value,
+      };
+      const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
-        permissionsList.value = response.data;
-        console.log(permissionsList.value, 'listado de permisos');
+        permissionsList.value = response.data.items;
+        permissionsPagination.page = response.data.pagination.currentPage;
+        permissionsPagination.per_page = response.data.pagination.perPage;
+        permissionsPagination.total_items = response.data.pagination.totalItems;
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      finishLoading();
     }
   };
   const validateInputUri = (
@@ -317,12 +355,13 @@ export function useAdmin() {
     setFieldValue('title', value?.title);
     setFieldValue('uri', value?.uri);
     setFieldValue('description', value?.description);
-    setFieldValue('order', value?.order.toString());
+    setFieldValue('order', value?.order);
     setFieldValue('icon', value?.icon);
     setFieldValue('parent_route', value?.parent_route);
     setFieldValue('child_route', parent_route.value ? true : false);
     setFieldValue('show', value?.show);
     setFieldValue('active', value.active);
+    setFieldValue('permissions_ids', value.permissionsId);
   };
 
   const findRoute = (value: string | null) => {
@@ -358,6 +397,8 @@ export function useAdmin() {
     activeAttrs,
     parent_route,
     parent_routeAttrs,
+    permissions_ids,
+    permissions_idsAttrs,
     errors,
     handleSubmit,
     validateField,
@@ -376,5 +417,7 @@ export function useAdmin() {
     headers,
     getPermissions,
     permissionsList,
+    headerPermissions,
+    permissionsPagination,
   };
 }

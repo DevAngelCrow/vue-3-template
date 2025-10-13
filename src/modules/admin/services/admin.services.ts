@@ -49,10 +49,12 @@ const deleteRoute = async (id: number) => {
   return response;
 };
 
-const getPermissions = async () => {
-  const response = await httpClient.get<PermissionsResponse>(
-    'security/permissions/',
-  );
+const getPermissions = async (
+  params: paginateParams,
+): Promise<ApiResponseGeneric<PermissionsResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<PermissionsResponse>
+  >('security/permissions/', params);
   return response.data;
 };
 

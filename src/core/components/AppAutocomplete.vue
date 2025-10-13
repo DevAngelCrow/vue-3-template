@@ -1,5 +1,5 @@
 <template>
-  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon

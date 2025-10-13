@@ -10,4 +10,5 @@ export interface RoutesResponse {
   order: number;
   title: string;
   parent_route: [] | null;
+  permissionsId: number[];
 }
