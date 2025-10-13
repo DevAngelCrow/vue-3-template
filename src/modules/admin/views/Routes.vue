@@ -98,7 +98,7 @@ import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes.response.interface';
-import RouteFormModal from '../components/RouteFormModal.vue';
+import RouteFormModal from '../components/routes/RouteFormModal.vue';
 
 const adminInstance = useAdmin();
 provide('useAdmin', adminInstance);

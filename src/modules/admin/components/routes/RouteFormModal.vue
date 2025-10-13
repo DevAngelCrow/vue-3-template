@@ -169,8 +169,8 @@ import { computed, ref, inject, watch } from 'vue';
 
 import { useLoaderStore } from '@/core/store';
 
-import { useAdmin } from '../composables/useAdmin';
-import { RouteForm } from '../interfaces/route-form.interface';
+import { useAdmin } from '../../composables/useAdmin';
+import { RouteForm } from '../../interfaces/route-form.interface';
 
 type AdminType = ReturnType<typeof useAdmin>;
 
