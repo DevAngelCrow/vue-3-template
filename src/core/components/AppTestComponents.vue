@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 // import { Button } from 'primevue';
 
-import { TableHeaders } from '../interfaces';
+//import { TableHeaders } from '../interfaces';
 // const show = ref<boolean>(false);
 
 // const openModal = (value: boolean) => {
@@ -40,67 +40,67 @@ watch(fecha, newVale => {
   console.log(newVale);
 });
 
-const headers = ref<TableHeaders[]>([
-  {
-    field: 'estado',
-    header: 'cabecera_Uno',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-    width: 5,
-  },
-  {
-    field: 'vinculador_dos',
-    header: 'cabecera_Dos',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'vinculador_tres',
-    header: 'cabecera_Tres',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'acciones',
-    header: 'Acciones',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-]);
+// const headers = ref<TableHeaders[]>([
+//   {
+//     field: 'estado',
+//     header: 'cabecera_Uno',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//     width: 5,
+//   },
+//   {
+//     field: 'vinculador_dos',
+//     header: 'cabecera_Dos',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+//   {
+//     field: 'vinculador_tres',
+//     header: 'cabecera_Tres',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+//   {
+//     field: 'acciones',
+//     header: 'Acciones',
+//     sortable: false,
+//     alignHeaders: 'center',
+//     alignItems: 'center',
+//   },
+// ]);
 
-const items = ref([
-  {
-    estado: false,
-    vinculador_dos: 'item_cabecera_dos_pagina_1',
-    vinculador_tres: 'item_cabecera_tres_pagina_1',
-  },
-  {
-    estado: false,
-    vinculador_dos: 'item_cabecera_dos_pagina_2',
-    vinculador_tres: 'item_cabecera_tres_pagina_2',
-  },
-  {
-    estado: false,
-    vinculador_dos: 'item_cabecera_dos_pagina_3',
-    vinculador_tres: 'item_cabecera_tres_pagina_3',
-  },
-]);
+// const items = ref([
+//   {
+//     estado: false,
+//     vinculador_dos: 'item_cabecera_dos_pagina_1',
+//     vinculador_tres: 'item_cabecera_tres_pagina_1',
+//   },
+//   {
+//     estado: false,
+//     vinculador_dos: 'item_cabecera_dos_pagina_2',
+//     vinculador_tres: 'item_cabecera_tres_pagina_2',
+//   },
+//   {
+//     estado: false,
+//     vinculador_dos: 'item_cabecera_dos_pagina_3',
+//     vinculador_tres: 'item_cabecera_tres_pagina_3',
+//   },
+// ]);
 
-const selectAll = ref<boolean>(false);
-const checkAll = (flag: boolean) => {
-  items.value = items.value.map(item => ({
-    ...item,
-    estado: flag,
-  }));
-};
-const updateItemState = (index: number, flag: boolean) => {
-  items.value[index].estado = flag;
-  selectAll.value = items.value.every(item => item.estado);
-};
+// const selectAll = ref<boolean>(false);
+// const checkAll = (flag: boolean) => {
+//   items.value = items.value.map(item => ({
+//     ...item,
+//     estado: flag,
+//   }));
+// };
+// const updateItemState = (index: number, flag: boolean) => {
+//   items.value[index].estado = flag;
+//   selectAll.value = items.value.every(item => item.estado);
+// };
 </script>
 
 <template>
@@ -136,7 +136,7 @@ const updateItemState = (index: number, flag: boolean) => {
 </AppDataTable> -->
   <br />
   <!-- <AppPickList v-model="permisos" :label-key="'name'" /> -->
-  <AppDataTable :headers :items>
+  <!-- <AppDataTable :headers :items>
     <template #header-cabecera_Uno>
       <div class="flex justify-center flex-row">
         <AppCheckBox
@@ -157,7 +157,8 @@ const updateItemState = (index: number, flag: boolean) => {
         />
       </div>
     </template>
-  </AppDataTable>
+  </AppDataTable> -->
+  <AppCircularCounter :selected="3" :total="10" color="#082f49" />
 </template>
 
 <style scoped>

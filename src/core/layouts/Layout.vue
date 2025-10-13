@@ -39,7 +39,6 @@ const menuAppSideBar = ref<MenuBar[]>();
 
 const toggleMenuSidebar = (value: MenuBar[]) => {
   menuAppSideBar.value = [...value];
-  console.log(value, 'esto llega al layout');
 };
 
 onMounted(() => {

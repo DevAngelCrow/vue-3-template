@@ -361,7 +361,10 @@ export function useAdmin() {
     setFieldValue('child_route', parent_route.value ? true : false);
     setFieldValue('show', value?.show);
     setFieldValue('active', value.active);
-    setFieldValue('permissions_ids', value.permissionsId);
+    setFieldValue(
+      'permissions_ids',
+      value.permissionsId?.length ? value.permissionsId : [],
+    );
   };
 
   const findRoute = (value: string | null) => {

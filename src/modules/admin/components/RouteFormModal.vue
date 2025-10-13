@@ -14,7 +14,7 @@
     <section
       v-if="props.modalState.mode !== 'delete'"
       id="body_modal"
-      class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5"
+      class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5 w-full"
     >
       <AppInputText
         class="w-full min-w-0"
@@ -112,8 +112,17 @@
         </div>
       </div>
       <div class="w-full flex flex-wrap justify-start gap-2">
-        <AppInputText class="w-[50%]" label="Buscar permiso..." />
-        <div>aqui deberia</div>
+        <div class="flex h-12 w-full">
+          <AppInputText class="w-[85%]" label="Buscar permiso..." />
+          <div class="width_circular_counter w-[45%] xs:w-[20%] sm:w-[15%]">
+            <AppCircularCounter
+              class="flex justify-end"
+              :selected="selectedPermissionsIds.size"
+              :total="permissionsPagination.total_items"
+              color="#082f49"
+            />
+          </div>
+        </div>
         <AppDataTable
           class="w-full"
           :headers="headerPermissions"
@@ -341,12 +350,31 @@ const closeModal = () => {
 
   emit('close-modal');
 };
+
+const setPermissionsIds = (
+  value: {
+    id: number;
+    name: string;
+    description: string;
+    active: boolean;
+    show: boolean;
+  }[],
+) => {
+  if (value.length) {
+    permissionItemsFormated.value = value.map(item => {
+      return {
+        ...item,
+        state: false,
+      };
+    });
+  }
+};
 const showParentRoute = computed(() => {
   try {
     if (child_route.value) {
-      return 'w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300';
+      return 'w-full !max-w-full min-w-0 max-h-20 transition-all transition-discrete duration-300';
     }
-    return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0 !pointer-events-none';
+    return 'w-full !max-w-full min-w-0 max-h-0 transition-all transition-discrete duration-300 opacity-0 !pointer-events-none';
   } catch (error) {
     console.error(error);
   }
@@ -366,21 +394,27 @@ const modalButtons = computed(() => {
 });
 
 watch(permissionsList, newVal => {
-  if (newVal.length) {
-    permissionItemsFormated.value = newVal.map(item => {
-      return {
-        ...item,
-        state: false,
-      };
-    });
-  }
+  setPermissionsIds(newVal);
+  updateSelectAllState();
 });
 
 watch(
   () => props.modalState.mode,
   newVal => {
     switch (newVal) {
+      case 'add':
+        updateSelectAllState();
+        break;
       case 'view':
+        permissions_ids.value?.forEach((id: number) => {
+          selectedPermissionsIds.value.add(id);
+        });
+        permissionItemsFormated.value.forEach(item => {
+          isPermissionSelected(item.id);
+        });
+        updateSelectAllState();
+        break;
+      case 'edit':
         permissions_ids.value?.forEach((id: number) => {
           selectedPermissionsIds.value.add(id);
         });
@@ -393,4 +427,10 @@ watch(
   },
 );
 </script>
-<style scoped></style>
+<style scoped>
+@media (min-width: 325px) and (max-width: 470px) {
+  .width_circular_counter {
+    @apply w-[30%];
+  }
+}
+</style>

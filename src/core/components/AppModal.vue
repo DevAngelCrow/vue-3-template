@@ -11,7 +11,7 @@
     :stylesShowDocument="stylesShowDocument"
     :pt="{
       content: {
-        class: 'scrollbar-hide',
+        class: 'scrollbar-hide px-0.5 md:pr-[1.25rem] md:pl-[1.25rem]',
       },
     }"
     :pt-options="{ mergeProps: true }"

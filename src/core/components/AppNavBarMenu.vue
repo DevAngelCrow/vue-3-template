@@ -164,7 +164,6 @@ const checkWrapMenu = () => {
         menuAppsideBar.value = [];
         menuMapped.value = menuCopy.value.filter(item => !item.isUser);
       }
-      console.log(wrapIndex, 'HAY UN WRAPINDEX');
       emit('update:menu-sidebar', menuAppsideBar.value);
     });
   });
@@ -178,7 +177,6 @@ watch(widthNavBarMenu, new_value => {
     );
     emit('update:menu-sidebar', menuAppsideBar.value);
   } else {
-    console.log('ingreso en el else');
     checkWrapMenu();
   }
 });

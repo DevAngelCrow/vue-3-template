@@ -12,7 +12,6 @@ export function useCountries() {
   const getCountries = async () => {
     try {
       const response = await catalogServices.getAllCountries();
-      console.log(response);
       if (response.statusCode === 200) {
         return response.data.items;
       }
@@ -24,7 +23,6 @@ export function useCountries() {
   const createCountry = async (data: CreateCountry) => {
     try {
       const response = await catalogServices.createCountries(data);
-      console.log(response, 'response');
       if (response.status === 201) {
         const newCountry = response.data;
         return newCountry;
@@ -42,7 +40,6 @@ export function useCountries() {
   const updateCountry = async (data: UpdateCountry) => {
     try {
       const response = await catalogServices.updateCountries(data);
-      console.log(response, 'response');
       if (response.status === 200) {
         const updatedCountry = response.data;
         return updatedCountry;
