@@ -12,34 +12,34 @@ import { onMounted, onUnmounted } from 'vue';
 
 defineOptions({ name: 'AppLoader' });
 
-const bloquearTeclado = (event: Event) => {
-  event.preventDefault();
-  event.stopPropagation();
-};
+// const bloquearTeclado = (event: Event) => {
+//   event.preventDefault();
+//   event.stopPropagation();
+// };
 
-const bloquearCursor = (event: Event) => {
-  event.preventDefault();
-  event.stopPropagation();
-};
+// const bloquearCursor = (event: Event) => {
+//   event.preventDefault();
+//   event.stopPropagation();
+// };
 
 onMounted(() => {
-  document.body.style.pointerEvents = 'none';
-  document.addEventListener('keydown', bloquearTeclado, true);
-  document.addEventListener('click', bloquearCursor, true);
-  document.addEventListener('mousedown', bloquearCursor, true);
-  document.addEventListener('mouseup', bloquearCursor, true);
-  document.addEventListener('touchstart', bloquearCursor, true);
-  document.addEventListener('touchend', bloquearCursor, true);
+  // document.body.style.pointerEvents = 'none';
+  // document.addEventListener('keydown', bloquearTeclado, true);
+  // document.addEventListener('click', bloquearCursor, true);
+  // document.addEventListener('mousedown', bloquearCursor, true);
+  // document.addEventListener('mouseup', bloquearCursor, true);
+  // document.addEventListener('touchstart', bloquearCursor, true);
+  // document.addEventListener('touchend', bloquearCursor, true);
 });
 
 onUnmounted(() => {
-  document.body.style.pointerEvents = 'auto';
-  document.removeEventListener('keydown', bloquearTeclado, true);
-  document.removeEventListener('click', bloquearCursor, true);
-  document.removeEventListener('mousedown', bloquearCursor, true);
-  document.removeEventListener('mouseup', bloquearCursor, true);
-  document.removeEventListener('touchstart', bloquearCursor, true);
-  document.removeEventListener('touchend', bloquearCursor, true);
+  // document.body.style.pointerEvents = 'auto';
+  // document.removeEventListener('keydown', bloquearTeclado, true);
+  // document.removeEventListener('click', bloquearCursor, true);
+  // document.removeEventListener('mousedown', bloquearCursor, true);
+  // document.removeEventListener('mouseup', bloquearCursor, true);
+  // document.removeEventListener('touchstart', bloquearCursor, true);
+  // document.removeEventListener('touchend', bloquearCursor, true);
 });
 </script>
 

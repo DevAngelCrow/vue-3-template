@@ -173,20 +173,15 @@ const {
   showAttrs,
   parent_route,
   parent_routeAttrs,
-  //permissions_ids,
-  validateInputUri,
   handleSubmit,
   parentRoutes,
-  addRoute,
-  editRoute,
-  deleteRoute,
-  //permissionsList,
-  //headerPermissions,
-  //permissionsPagination,
-  //getPermissions,
+  handleAddRoute,
+  handleDeleteRoute,
+  handleEditRoute,
+  validateInputUri,
 } = admin;
 
-const routesFiltered = ref<any[]>([]);
+const routesFiltered = ref<unknown[]>([]);
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const routePermissionDataTable = ref<InstanceType<
   typeof RoutePermissionDataTable
@@ -223,15 +218,15 @@ const onSubMit = handleSubmit(async values => {
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        success = (await addRoute(form)) ? true : false;
+        success = (await handleAddRoute(form)) ? true : false;
         break;
       case 'edit':
         form.id = values.id;
         form.active = values.active;
-        success = (await editRoute(form)) ? true : false;
+        success = (await handleEditRoute(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deleteRoute(values.id)) ? true : false;
+        success = (await handleDeleteRoute(values.id)) ? true : false;
         break;
     }
     if (success) {

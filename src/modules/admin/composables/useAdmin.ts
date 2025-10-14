@@ -6,6 +6,7 @@ import adminServices from '@/core/services/index.services';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { TableHeaders } from '@/core/interfaces';
+import { debounce } from '@/core/utils/debounceFunction';
 
 import { RouteForm } from '../interfaces/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
@@ -204,6 +205,9 @@ export function useAdmin() {
       show: boolean;
     }[]
   >([]);
+
+  const DEBOUNCE_DELAY = 1000;
+
   const getRoutes = async () => {
     try {
       startLoading();
@@ -243,6 +247,7 @@ export function useAdmin() {
 
   const addRoute = async (form: RouteForm) => {
     try {
+      startLoading();
       const response = await adminServices.addRoute(form);
       if (response.status === 201) {
         getRoutes();
@@ -255,11 +260,13 @@ export function useAdmin() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      finishLoading();
     }
   };
-
   const editRoute = async (form: RouteForm) => {
     try {
+      startLoading();
       const response = await adminServices.editRoute(form);
       if (response.status === 200) {
         getRoutes();
@@ -272,11 +279,14 @@ export function useAdmin() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      finishLoading();
     }
   };
 
   const deleteRoute = async (id: number) => {
     try {
+      startLoading();
       const response = await adminServices.deleteRoute(id);
       if (response.status === 200) {
         getRoutes();
@@ -289,16 +299,49 @@ export function useAdmin() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
+  const handleAddRoute = (form: RouteForm) => {
+    try {
+      debouncePostRoute(form);
+      return true;
+    } catch (error) {
+      return error;
+    }
+  };
+  const handleEditRoute = (form: RouteForm) => {
+    try {
+      debounceEditRoute(form);
+      return true;
+    } catch (error) {
+      return error;
+    }
+  };
+  const handleDeleteRoute = (id: number) => {
+    try {
+      debounceDelete(id);
+      return true;
+    } catch (error) {
+      return error;
     }
   };
 
+  const findPermission = (value: string | null) => {
+    if (value) {
+      debounceGetPermissions();
+    }
+  };
   const getPermissions = async () => {
     try {
       startLoading();
       const filter = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
-        filter_name: filter_permission_name.value,
+        filter_name: filter_permission_name.value
+          ? filter_permission_name.value
+          : null,
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
@@ -346,7 +389,7 @@ export function useAdmin() {
       return;
     }
     filter_name.value = null;
-    getRoutes();
+    debounceGetRoutes();
   };
 
   const setRouteItem = (value: RoutesResponse) => {
@@ -369,9 +412,15 @@ export function useAdmin() {
 
   const findRoute = (value: string | null) => {
     if (value) {
-      getRoutes();
+      debounceGetRoutes();
     }
   };
+
+  const debounceGetRoutes = debounce(getRoutes, DEBOUNCE_DELAY);
+  const debouncePostRoute = debounce(addRoute, 10);
+  const debounceEditRoute = debounce(editRoute, 10);
+  const debounceDelete = debounce(deleteRoute, 10);
+  const debounceGetPermissions = debounce(getPermissions, DEBOUNCE_DELAY);
 
   return {
     getRoutes,
@@ -422,5 +471,10 @@ export function useAdmin() {
     permissionsList,
     headerPermissions,
     permissionsPagination,
+    handleAddRoute,
+    handleEditRoute,
+    handleDeleteRoute,
+    findPermission,
+    filter_permission_name,
   };
 }

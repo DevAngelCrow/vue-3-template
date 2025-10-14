@@ -1,10 +1,25 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex h-12 w-full">
-      <AppInputText class="w-[85%]" label="Buscar permiso..." />
-      <div class="width_circular_counter w-[45%] xs:w-[20%] sm:w-[15%]">
+    <div class="flex w-full gap-1 flex-wrap">
+      <AppInputText
+        class="w-[75%] grow order-1"
+        label="Buscar permiso..."
+        v-model="filter_permission_name"
+        @update:model-value="searchPermission"
+        @keydown.enter="searchPermission"
+      />
+      <Button
+        class="w-[2%] sm:min-w-[40px] sm:max-w-[40px] xs:w-[6%] grow sm:rounded-full md:grow-0 order-3 md:order-2"
+        icon="pi pi-search"
+      />
+      <Button
+        class="w-[2%] sm:min-w-[40px] sm:max-w-[40px] xs:w-[6%] grow sm:rounded-full md:grow-0 order-4 md:order-2"
+        icon="pi pi-eraser"
+        variant="outlined"
+      />
+      <div class="grow order-2 md:order-4 flex">
         <AppCircularCounter
-          class="flex justify-end"
+          class="flex justify-center items-center"
           :selected="selectedPermissionsIds.size"
           :total="permissionsPagination.total_items"
           color="#082f49"
@@ -28,7 +43,8 @@
             binary
             @update:model-value="checkAll"
             v-model="selectAll"
-          ></AppCheckBox>
+          >
+          </AppCheckBox>
           <span>Seleccion</span>
         </div>
       </template>
@@ -48,6 +64,7 @@
 </template>
 <script setup lang="ts">
 import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
+import { Button } from 'primevue';
 
 import { useAdmin } from '../../composables/useAdmin';
 
@@ -67,7 +84,9 @@ const {
   permissionsPagination,
   permissionsList,
   permissions_ids,
+  filter_permission_name,
   getPermissions,
+  findPermission,
 } = admin;
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const selectAll = ref<boolean>(false);
@@ -81,6 +100,12 @@ const permissionItemsFormated = ref<
     state: boolean;
   }[]
 >([]);
+
+const searchPermission = async (value: string | null) => {
+  if (!value) return;
+  await findPermission(value);
+  setPermissionsIds(permissionsList.value);
+};
 
 const handlePagination = async (page: number) => {
   if (page + 1 === permissionsPagination.page) {
@@ -160,9 +185,12 @@ const closeModal = () => {
   emit('close-modal');
 };
 
-watch(selectedPermissionsIds, newVal => {
-  emit('update:selected-permissions-ids', newVal);
-});
+watch(
+  () => selectedPermissionsIds.value.size,
+  () => {
+    emit('update:selected-permissions-ids', selectedPermissionsIds.value);
+  },
+);
 watch(permissionsList, newVal => {
   setPermissionsIds(newVal);
   updateSelectAllState();

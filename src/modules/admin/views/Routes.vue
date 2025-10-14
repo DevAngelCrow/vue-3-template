@@ -47,12 +47,7 @@
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
-        @page-update="
-          (value: number) => {
-            pagination.page = value + 1;
-            getRoutes();
-          }
-        "
+        @page-update="handlePagination"
       >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
@@ -192,6 +187,13 @@ watch(
   },
 );
 
+const handlePagination = async (page: number) => {
+  if (page + 1 === pagination.page) {
+    return;
+  }
+  pagination.page = page + 1;
+  getRoutes();
+};
 onMounted(async () => {
   try {
     await getRoutes();

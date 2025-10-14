@@ -6,7 +6,7 @@
           :class="
             invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
           "
-          v-if="showIcon"
+          v-if="showIcon && prependInnerIcon"
           id="append-icon"
         />
         <InputText
@@ -25,7 +25,7 @@
           :size="inputSize"
         />
         <InputIcon
-          v-if="showIcon"
+          v-if="showIcon && appendIconLocal"
           :class="
             invalid
               ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
@@ -131,6 +131,10 @@ const props = defineProps({
   },
   id: {
     type: String,
+  },
+  clearable: {
+    type: Boolean,
+    default: false,
   },
 });
 
