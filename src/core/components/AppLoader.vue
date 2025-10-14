@@ -23,13 +23,23 @@ const bloquearCursor = (event: Event) => {
 };
 
 onMounted(() => {
-  document.addEventListener('keydown', bloquearTeclado);
-  document.addEventListener('click', bloquearCursor);
+  document.body.style.pointerEvents = 'none';
+  document.addEventListener('keydown', bloquearTeclado, true);
+  document.addEventListener('click', bloquearCursor, true);
+  document.addEventListener('mousedown', bloquearCursor, true);
+  document.addEventListener('mouseup', bloquearCursor, true);
+  document.addEventListener('touchstart', bloquearCursor, true);
+  document.addEventListener('touchend', bloquearCursor, true);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', bloquearTeclado);
-  document.removeEventListener('click', bloquearCursor);
+  document.body.style.pointerEvents = 'auto';
+  document.removeEventListener('keydown', bloquearTeclado, true);
+  document.removeEventListener('click', bloquearCursor, true);
+  document.removeEventListener('mousedown', bloquearCursor, true);
+  document.removeEventListener('mouseup', bloquearCursor, true);
+  document.removeEventListener('touchstart', bloquearCursor, true);
+  document.removeEventListener('touchend', bloquearCursor, true);
 });
 </script>
 
