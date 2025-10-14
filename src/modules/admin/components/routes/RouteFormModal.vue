@@ -73,8 +73,8 @@
           :readonly="props.modalState.isReadonly"
         />
       </div>
-      <div class="w-full flex flex-wrap justify-start">
-        <div class="w-[50%]">
+      <div class="w-full flex flex-wrap justify-start gap-5">
+        <div class="flex-1">
           <AppCheckBox
             id="child_route"
             label="Es sub-ruta"
@@ -84,7 +84,7 @@
             :readonly="props.modalState.isReadonly"
           />
         </div>
-        <div class="w-[50%]">
+        <div class="flex-1">
           <AppCheckBox
             id="show"
             label="Mostrar en el menú"
@@ -116,6 +116,7 @@
             value => (selectedPermissionsIds = value)
           "
           ref="routePermissionDataTable"
+          :readonly="props.modalState.isReadonly"
         />
       </div>
     </section>
@@ -128,7 +129,7 @@
 </template>
 <script setup lang="ts">
 import { AutoCompleteCompleteEvent } from 'primevue';
-import { computed, ref, inject, provide } from 'vue';
+import { computed, ref, inject } from 'vue';
 
 import { useLoaderStore } from '@/core/store';
 
@@ -151,8 +152,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['close-modal']);
 const admin = inject<AdminType>('useAdmin')!;
-const adminInstance = admin;
-provide('useAdmin', adminInstance);
 const { startLoading, finishLoading } = useLoaderStore();
 const {
   errors,
@@ -246,17 +245,6 @@ const onSubMit = handleSubmit(async values => {
 });
 
 const closeModal = () => {
-  // permissionItemsFormated.value = permissionsList.value.map(item => {
-  //   return {
-  //     ...item,
-  //     state: false,
-  //   };
-  // });
-  // selectedPermissionsIds.value.clear();
-  // if (permissionsPagination.page > 1) {
-  //   permissionsPagination.page = 1;
-  //   getPermissions();
-  // }
   routePermissionDataTable.value?.closeModal();
   emit('close-modal');
 };

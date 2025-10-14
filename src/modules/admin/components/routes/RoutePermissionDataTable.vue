@@ -24,6 +24,7 @@
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
           <AppCheckBox
+            :readonly="props.readonly"
             binary
             @update:model-value="checkAll"
             v-model="selectAll"
@@ -34,6 +35,7 @@
       <template #body-state="{ data, index }">
         <div class="flex justify-center">
           <AppCheckBox
+            :readonly="props.readonly"
             binary
             :model-value="isPermissionSelected(data.id)"
             :id="`${index}`"
@@ -45,7 +47,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
 
 import { useAdmin } from '../../composables/useAdmin';
 
@@ -53,9 +55,11 @@ type AdminType = ReturnType<typeof useAdmin>;
 
 const admin = inject<AdminType>('useAdmin')!;
 
-const { modalState } = defineProps<{
+const props = defineProps<{
   modalState: 'add' | 'view' | 'edit' | 'delete' | 'closed';
+  readonly: boolean;
 }>();
+const modalState = toRef(props, 'modalState');
 const emit = defineEmits(['update:selected-permissions-ids', 'close-modal']);
 
 const {
@@ -160,38 +164,39 @@ watch(selectedPermissionsIds, newVal => {
   emit('update:selected-permissions-ids', newVal);
 });
 watch(permissionsList, newVal => {
-  console.log(newVal, 'nuevo');
   setPermissionsIds(newVal);
   updateSelectAllState();
 });
-watch(
-  () => modalState,
-  newVal => {
-    switch (newVal) {
-      case 'add':
-        updateSelectAllState();
-        break;
-      case 'view':
-        permissions_ids.value?.forEach((id: number) => {
-          selectedPermissionsIds.value.add(id);
-        });
-        permissionItemsFormated.value.forEach(item => {
-          isPermissionSelected(item.id);
-        });
-        updateSelectAllState();
-        break;
-      case 'edit':
-        permissions_ids.value?.forEach((id: number) => {
-          selectedPermissionsIds.value.add(id);
-        });
-        permissionItemsFormated.value.forEach(item => {
-          isPermissionSelected(item.id);
-        });
-        updateSelectAllState();
-        break;
-    }
-  },
-);
+
+onMounted(() => {
+  setPermissionsIds(permissionsList.value);
+  switch (modalState.value) {
+    case 'add':
+      updateSelectAllState();
+      break;
+    case 'view':
+      permissions_ids.value?.forEach((id: number) => {
+        selectedPermissionsIds.value.add(id);
+      });
+      permissionItemsFormated.value.forEach(item => {
+        isPermissionSelected(item.id);
+      });
+      updateSelectAllState();
+      break;
+    case 'edit':
+      permissions_ids.value?.forEach((id: number) => {
+        selectedPermissionsIds.value.add(id);
+      });
+      permissionItemsFormated.value.forEach(item => {
+        isPermissionSelected(item.id);
+      });
+      updateSelectAllState();
+      break;
+  }
+});
+defineComponent({
+  name: 'RoutePermissionDataTable',
+});
 defineExpose({
   closeModal,
 });

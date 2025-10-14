@@ -10,7 +10,7 @@
           id="append-icon"
         />
         <AutoComplete
-          class="w-full"
+          :class="['w-full', readonly ? 'pointer-events-none' : '']"
           :type="typeInputLocal"
           :model-value="modelValue"
           @update:model-value="onUpdate"
@@ -144,6 +144,10 @@ const props = defineProps({
     default: '',
   },
   multiple: {
+    type: Boolean,
+    default: false,
+  },
+  readonly: {
     type: Boolean,
     default: false,
   },
