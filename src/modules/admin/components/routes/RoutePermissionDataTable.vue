@@ -5,14 +5,18 @@
         class="w-[65%] grow order-1"
         label="Buscar permiso..."
         v-model="filter_permission_name"
-        @update:model-value="searchPermission"
         @keydown.enter="searchPermission"
       />
-      <Button class="rounded_btn_search" icon="pi pi-search" />
+      <Button
+        class="rounded_btn_search"
+        icon="pi pi-search"
+        @click="searchPermission(filter_permission_name)"
+      />
       <Button
         class="rounded_btn_clean"
         icon="pi pi-eraser"
         variant="outlined"
+        @click="cleanSearch"
       />
       <div class="rounded_counter">
         <AppCircularCounter
@@ -182,6 +186,10 @@ const closeModal = () => {
   emit('close-modal');
 };
 
+const cleanSearch = () => {
+  filter_permission_name.value = null;
+  getPermissions();
+};
 watch(
   () => selectedPermissionsIds.value.size,
   () => {
@@ -254,6 +262,7 @@ defineExpose({
     @apply order-3;
     @apply rounded-full;
   }
+
   .rounded_counter {
     @apply min-w-[100px] max-w-[100px] max-h-[45px] order-4 flex !justify-end;
   }
@@ -266,27 +275,33 @@ defineExpose({
     @apply max-w-[46px];
     @apply rounded-full;
   }
+
   .rounded_btn_clean {
     @apply grow order-4;
     @apply min-w-[46px];
   }
+
   .rounded_counter {
     @apply min-w-[100px] max-w-[100px] max-h-[45px] order-3 flex justify-end;
   }
 }
+
 @media (min-width: 200px) and (max-width: 451px) {
   .rounded_btn_search {
     @apply grow order-3;
     @apply min-w-[46px];
   }
+
   .rounded_btn_clean {
     @apply grow order-4;
     @apply min-w-[46px];
   }
+
   .rounded_counter {
     @apply min-w-[100px] max-w-[100px] order-2 flex justify-end;
   }
 }
+
 @media (max-width: 309px) {
   .item_justify_counter {
     @apply flex justify-start;
