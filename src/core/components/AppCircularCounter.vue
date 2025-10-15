@@ -33,9 +33,16 @@
         <div
           class="rounded-full bg-white w-[80%] h-[80%] flex justify-center items-center"
         >
-          <span class="text-[10px] font-semibold"
-            >{{ selected }} / {{ total }}</span
-          >
+          <div class="flex flex-col w-[75%] justify-center">
+            <span
+              class="text-[9px] tracking-tighter font-semibold border-b text-center"
+              >{{ selected }}</span
+            >
+            <span
+              class="text-[9px] tracking-tighter font-semibold text-center"
+              >{{ total }}</span
+            >
+          </div>
         </div>
       </div>
     </div>

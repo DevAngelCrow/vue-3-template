@@ -2,24 +2,21 @@
   <div class="w-full flex flex-wrap justify-start gap-2">
     <div class="flex w-full gap-1 flex-wrap">
       <AppInputText
-        class="w-[75%] grow order-1"
+        class="w-[65%] grow order-1"
         label="Buscar permiso..."
         v-model="filter_permission_name"
         @update:model-value="searchPermission"
         @keydown.enter="searchPermission"
       />
+      <Button class="rounded_btn_search" icon="pi pi-search" />
       <Button
-        class="w-[2%] sm:min-w-[40px] sm:max-w-[40px] xs:w-[6%] grow sm:rounded-full md:grow-0 order-3 md:order-2"
-        icon="pi pi-search"
-      />
-      <Button
-        class="w-[2%] sm:min-w-[40px] sm:max-w-[40px] xs:w-[6%] grow sm:rounded-full md:grow-0 order-4 md:order-2"
+        class="rounded_btn_clean"
         icon="pi pi-eraser"
         variant="outlined"
       />
-      <div class="grow order-2 md:order-4 flex">
+      <div class="rounded_counter">
         <AppCircularCounter
-          class="flex justify-center items-center"
+          class="item_justify_counter"
           :selected="selectedPermissionsIds.size"
           :total="permissionsPagination.total_items"
           color="#082f49"
@@ -229,4 +226,70 @@ defineExpose({
   closeModal,
 });
 </script>
-<style scoped></style>
+<style scoped>
+.rounded_counter {
+  @apply min-w-[100px] max-w-[100px] max-h-[50px] order-4 flex justify-end;
+}
+
+.item_justify_counter {
+  @apply flex justify-end;
+}
+
+@media (min-width: 595px) {
+  .rounded_btn_search {
+    @apply min-w-[46px];
+    @apply max-w-[46px];
+    @apply grow;
+    @apply order-2;
+    /*@apply md:order-2;*/
+    @apply rounded-full;
+  }
+
+  .rounded_btn_clean {
+    @apply min-w-[46px];
+    @apply max-w-[46px];
+    /*@apply xs:w-[6%];*/
+    @apply grow;
+    /*@apply order-4;*/
+    @apply order-3;
+    @apply rounded-full;
+  }
+  .rounded_counter {
+    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-4 flex !justify-end;
+  }
+}
+
+@media (min-width: 452px) and (max-width: 594px) {
+  .rounded_btn_search {
+    @apply grow order-2;
+    @apply min-w-[46px];
+    @apply max-w-[46px];
+    @apply rounded-full;
+  }
+  .rounded_btn_clean {
+    @apply grow order-4;
+    @apply min-w-[46px];
+  }
+  .rounded_counter {
+    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-3 flex justify-end;
+  }
+}
+@media (min-width: 200px) and (max-width: 451px) {
+  .rounded_btn_search {
+    @apply grow order-3;
+    @apply min-w-[46px];
+  }
+  .rounded_btn_clean {
+    @apply grow order-4;
+    @apply min-w-[46px];
+  }
+  .rounded_counter {
+    @apply min-w-[100px] max-w-[100px] order-2 flex justify-end;
+  }
+}
+@media (max-width: 309px) {
+  .item_justify_counter {
+    @apply flex justify-start;
+  }
+}
+</style>
