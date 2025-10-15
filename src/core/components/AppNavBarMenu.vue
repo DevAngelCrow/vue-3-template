@@ -1,36 +1,40 @@
 <template>
-  <div
-    class="w-full xs:mr-2 sm:w-[93%] md:w-full h-full border-none rounded-none"
-  >
+  <div class="w-full xs:mr-2 md:w-full h-full border-none rounded-none">
     <Menubar
       class="rounded-none bg-primary border-none h-full hidden md:flex"
       breakpoint="767px"
       :model="menuMapped"
+      ref="menuBar"
     >
       <template #item="{ item, props, hasSubmenu, root }">
-        <div
+        <router-link
+          v-if="item.uri"
+          v-slot="{ href, navigate }"
+          :to="root && item.items?.length ? '' : item.uri"
+          custom
           class="flex items-center text-white hover:text-primary-950 group"
-          v-bind="props.action"
         >
-          <i :class="`${item.icon} group-hover:text-primary-700`"></i>
-          <span class="group-hover:text-primary-700">
-            {{ item.label }}
-          </span>
-          <i
-            v-if="hasSubmenu"
-            :class="[
-              'pi pi-angle-down ml-auto',
-              { 'pi-angle-down': root, 'pi-angle-right': !root },
-              'group-focus:text-primary-700',
-              'group-active:text-primary-700',
-              'group-hover:text-primary-700',
-            ]"
-          ></i>
-        </div>
+          <a ripple :href="href" v-bind="props.action" @click="navigate">
+            <i :class="`${item.icon} group-hover:text-primary-700`"></i>
+            <span class="group-hover:text-primary-700">
+              {{ item.label }}
+            </span>
+            <i
+              v-if="hasSubmenu"
+              :class="[
+                'pi pi-angle-down ml-auto',
+                { 'pi-angle-down': root, 'pi-angle-right': !root },
+                'group-focus:text-primary-700',
+                'group-active:text-primary-700',
+                'group-hover:text-primary-700',
+              ]"
+            ></i>
+          </a>
+        </router-link>
       </template>
-      <template #end>
+      <!-- <template #end>
         <div
-          class="hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full w-full h-full"
+          class="app-navbar-end hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full w-auto h-fauto"
           @click="toggle"
           aria-haspopup="true"
           aria-controls="overlay_menu"
@@ -50,10 +54,10 @@
             :model="menuUser"
           />
         </div>
-      </template>
+      </template> -->
     </Menubar>
     <div
-      class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full md:hidden aspect-square"
+      class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full aspect-square"
       @click="toggle"
       aria-haspopup="true"
       aria-controls="overlay_menu"
@@ -76,11 +80,18 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, type PropType } from 'vue';
+import {
+  ComponentPublicInstance,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  watch,
+  type PropType,
+} from 'vue';
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
-import type { Menu as MenuModel } from '../interfaces/menu.navbar.interface';
+import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
 
 defineOptions({ name: 'AppNavBarMenu' });
 
@@ -91,27 +102,119 @@ const { menu } = defineProps({
   },
 });
 
+const emit = defineEmits(['update:menu-sidebar']);
+
 const menuMapped = ref<MenuModel[]>();
+const menuAppsideBar = ref<MenuModel[]>();
 const menuUser = ref<MenuModel[]>();
 const popUp = ref<InstanceType<typeof MenuPrime>>();
+const menuBar = ref<ComponentPublicInstance>();
+
+const menuCopy = ref<MenuModel[]>([]);
+const widthNavBarMenu = ref<number>(0);
 
 const toggle = (event: MouseEvent | KeyboardEvent) => {
   popUp.value?.toggle(event);
 };
 
 const mapperMenuUser = () => {
-  if (menu.length) {
-    menuUser.value = menu.filter(item => item.isUser);
-    menuMapped.value = menu.filter(item => !item.isUser);
+  const cleanMenu = JSON.parse(JSON.stringify(menu));
+  menuCopy.value = structuredClone(cleanMenu);
+  if (menuCopy.value.length) {
+    menuUser.value = menuCopy.value.filter(item => item.isUser);
+    menuMapped.value = menuCopy.value.filter(item => !item.isUser);
   }
 };
 
-onMounted(() => {
-  mapperMenuUser();
+const checkWrapMenu = () => {
+  menuMapped.value = menuCopy.value.filter(item => !item.isUser);
+
+  //isMenuVisible.value = true;
+  nextTick(() => {
+    // Ahora que el menú está completo, verificamos si hay desbordamiento (wrap)
+    window.requestAnimationFrame(() => {
+      const root = menuBar.value?.$el?.querySelector?.(
+        '.p-menubar-root-list',
+      ) as HTMLElement;
+      if (!root) return;
+
+      const children = Array.from(root.children) as HTMLElement[];
+      let wrapIndex: number | null = null;
+
+      if (children.length > 0) {
+        const firstTop = children[0].offsetTop;
+        for (let i = 0; i < children.length; i++) {
+          if (children[i].offsetTop > firstTop) {
+            wrapIndex = i; // Encontramos el primer elemento que saltó de línea
+            break;
+          }
+        }
+      }
+
+      if (wrapIndex !== null) {
+        // Si hay desbordamiento, cortamos el menú visible y emitimos el resto
+        const menuAppSideBarWithoutUser = menuCopy.value.slice(wrapIndex);
+
+        menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
+          item => !item.isUser,
+        );
+        menuMapped.value = menuCopy.value.slice(0, wrapIndex);
+      } else {
+        // Si no hay desbordamiento, nos aseguramos de que el sidebar esté vacío
+        menuAppsideBar.value = [];
+        menuMapped.value = menuCopy.value.filter(item => !item.isUser);
+      }
+      emit('update:menu-sidebar', menuAppsideBar.value);
+    });
+  });
+};
+
+watch(widthNavBarMenu, new_value => {
+  if (new_value <= 769) {
+    const menuAppSideBarWithoutUser = [...menuCopy.value];
+    menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
+      item => !item.isUser,
+    );
+    emit('update:menu-sidebar', menuAppsideBar.value);
+  } else {
+    checkWrapMenu();
+  }
+});
+
+const handleResize = () => {
+  widthNavBarMenu.value = window.innerWidth;
+};
+
+onMounted(async () => {
+  await mapperMenuUser();
+
+  window.addEventListener('resize', handleResize);
+
+  // Disparamos una comprobación inicial
+
+  widthNavBarMenu.value = window.innerWidth;
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
 });
 </script>
 <style scoped>
 @reference "@/core/assets/style.css";
+
+/* Evitamos que los ítems del menubar se estiren */
+:deep(.p-menubar-root-list > li),
+:deep(.p-menubar-root-list > .p-menuitem),
+:deep(.p-menubar-root-list > .p-menubar-item) {
+  flex: 0 0 auto !important;
+}
+
+/* Aseguramos que el end slot no crezca */
+:deep(.app-navbar-end) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: auto !important;
+}
 
 :deep(.p-menubar-item-active > .p-menubar-item-content > .p-menubar-item-link) {
   @apply text-primary transform transition-all;

@@ -1,4 +1,5 @@
 export interface RouteForm {
+  id?: number;
   name: string;
   uri: string;
   description: string;
@@ -7,4 +8,7 @@ export interface RouteForm {
   child_route: boolean;
   show: boolean;
   parent_route?: string;
+  title: string;
+  active?: boolean;
+  permissions_id: number[];
 }

@@ -6,13 +6,28 @@ export interface TableHeaders {
   alignHeaders?: 'start' | 'center' | 'end';
   alignItems?: 'start' | 'center' | 'end';
 }
-export interface TableProps<T> {
+export interface BaseTableProps<T> {
   headers: TableHeaders[];
   items: T[];
-  per_page: number;
   loading?: boolean;
   loadingIcon?: string;
   rowHover?: boolean;
-  paginator?: boolean;
+}
+
+interface PaginatorOff<T> extends BaseTableProps<T> {
+  paginator?: false;
+  per_page?: number;
+  total_items?: number;
+  page?: number;
   total_pages?: number;
 }
+
+interface PaginatorOn<T> extends BaseTableProps<T> {
+  paginator: true;
+  per_page: number;
+  total_items: number;
+  page: number;
+  total_pages?: number;
+}
+
+export type TableProps<T> = PaginatorOff<T> | PaginatorOn<T>;

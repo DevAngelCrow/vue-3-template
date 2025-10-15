@@ -1,31 +1,62 @@
 <template>
-  <div class="w-full max-w-[322px] relative">
+  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
-        <InputIcon :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon" v-if="showIcon" />
-        <InputNumber :class type="text" :model-value="modelValue" @update:model-value="onUpdate" :invalid="invalid"
-          v-bind="$attrs" :autocomplete :placeholder="displayPlaceholder" :id="inputId"
-          @focus="() => (isFocused = true)" @blur="() => (isFocused = false)" :show-buttons :min :max :button-layout
-          :variant="inputVariant">
+        <InputIcon
+          :class="
+            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
+          "
+          v-if="showIcon"
+        />
+        <InputNumber
+          class="w-full"
+          :model-value="modelValue"
+          @update:model-value="onUpdate"
+          :invalid="invalid"
+          v-bind="$attrs"
+          :autocomplete
+          :placeholder="displayPlaceholder"
+          :id="inputId"
+          @focus="() => (isFocused = true)"
+          @blur="() => (isFocused = false)"
+          :show-buttons
+          :min
+          :max
+          :button-layout
+          :variant="inputVariant"
+          :size="inputSize"
+        >
           <template #incrementicon>
-            <span :class="buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
-              " />
+            <span
+              :class="
+                buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
+              "
+            />
           </template>
           <template #decrementicon>
-            <span :class="buttonLayout === 'vertical' ? 'pi pi-chevron-down' : 'pi pi-minus'
-              " />
+            <span
+              :class="
+                buttonLayout === 'vertical'
+                  ? 'pi pi-chevron-down'
+                  : 'pi pi-minus'
+              "
+            />
           </template>
         </InputNumber>
-
       </IconField>
       <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
         label
-        }}</label>
+      }}</label>
     </FloatLabel>
-    <Message class="left-0 top-full mt-0 text-xs z-10" v-if="errorMessages.length" :severity :size :variant>{{
-      messageErrorField }}</Message>
+    <Message
+      class="left-0 top-full mt-0 text-xs z-10"
+      v-if="errorMessages.length"
+      :severity
+      :size
+      :variant
+      >{{ messageErrorField }}</Message
+    >
   </div>
-
 </template>
 <script setup lang="ts">
 import { ref, computed, defineEmits, watch, onMounted } from 'vue';
@@ -42,10 +73,11 @@ defineOptions({ inheritAttrs: false, name: 'AppInputNumber' });
 const props = defineProps({
   modelValue: {
     type: Number,
+    default: null,
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   placeholder: {
     type: String,
@@ -54,6 +86,10 @@ const props = defineProps({
   severity: {
     type: String,
     default: 'error',
+  },
+  inputSize: {
+    type: String,
+    default: 'normal',
   },
   size: {
     type: String,
@@ -140,7 +176,7 @@ const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: number | undefined) => {
-  return emit('update:modelValue', value ?? '');
+  return emit('update:modelValue', value ?? null);
 };
 const messageErrorField = computed(() => {
   if (props.errorMessages.length) {
@@ -166,7 +202,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

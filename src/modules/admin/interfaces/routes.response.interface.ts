@@ -8,4 +8,7 @@ export interface RoutesResponse {
   icon: string;
   uri: string;
   order: number;
+  title: string;
+  parent_route: [] | null;
+  permissionsId: number[];
 }

@@ -1,7 +1,5 @@
 export interface ApiResponseMenu<T> {
-  data: {
-    items: T;
-  };
+  data: T;
   message: string;
   statusCode: number;
 }

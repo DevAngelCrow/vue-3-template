@@ -1,7 +1,7 @@
 import { LocationQueryValue } from 'vue-router';
 
 import { httpClient } from '../utils/httpClient';
-import { ApiResponseGeneric } from './interfaces/auth/apiResponseGeneric.interface';
+import { ApiResponseGeneric } from './interfaces/apiResponseGeneric.interface';
 import { Country } from './interfaces/auth/country.interface';
 import { District } from './interfaces/auth/district.interface';
 import { DocumentType } from './interfaces/auth/documentType.interface';
@@ -10,6 +10,11 @@ import { Gender } from './interfaces/auth/gender.interface';
 //import { GetAllDocumentTypeResponse } from "./interfaces/auth/getAllDocumentTypeResponse.interface";
 //import { GetAllGenderResponse } from "./interfaces/auth/getAllGendersResponse.interface";
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
+import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
+import { Menu } from '../interfaces/userState.store.interface';
+import { Login } from './interfaces/auth/login.interface';
+import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
+import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
 // import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
 
 // import { Menu } from './interfaces/auth/menu.interface';
@@ -63,6 +68,16 @@ const signUp = async (data: FormData) => {
   return response;
 };
 
+const login = async (data: Login): Promise<ApiResponseLogin> => {
+  const response = await httpClient.post<ApiResponseLogin>('auth/login', data);
+  return response.data;
+};
+
+const logout = async () => {
+  const response = await httpClient.post<ApiResponseLogout>('auth/logout');
+  return response.data;
+};
+
 const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
   let urlFormatedString = url?.toString();
   let response;
@@ -78,9 +93,11 @@ const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
   return response;
 };
 
-// const getMenu = async (id_user: number) : Promise<ApiResponseMenu<Menu>> => {
-//   const response = await httpClient.get<ApiResponseMenu<Menu>>();
-// }
+const getMenu = async (): Promise<ApiResponseMenu<Menu[]>> => {
+  const response =
+    await httpClient.get<ApiResponseMenu<Menu[]>>('security/menu/');
+  return response.data;
+};
 
 export default {
   getMaritalStatus,
@@ -90,4 +107,7 @@ export default {
   getDocumentTypes,
   signUp,
   verifyEmail,
+  getMenu,
+  login,
+  logout,
 };

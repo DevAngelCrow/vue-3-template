@@ -1,6 +1,10 @@
 <template>
   <div class="flex gap-2 items-center">
-    <Checkbox v-bind="$attrs" @update:model-value="onUpdate" />
+    <Checkbox
+      v-bind="$attrs"
+      :model-value="modelValue"
+      @update:model-value="onUpdate"
+    />
     <label :for="id">{{ label }}</label>
   </div>
   <Message

@@ -1,7 +1,7 @@
 <template>
   <section
     id="card_direccion_personal"
-    class="w-[95%] min-h-[400px] sm:w-[65%] md:w-[55%] lg:w-[55%] bg-surface-200 h-[65%] md:h-[65%] lg:h-[45%] rounded-xl flex flex-col align-top gap-5 px-3 py-3 sm:px-10 overflow-y-auto"
+    class="w-[95%] min-h-[400px] sm:w-[65%] md:w-[55%] lg:w-[55%] bg-surface-200 h-[65%] md:h-[65%] lg:h-[45%] rounded-xl flex flex-col align-top gap-5 px-3 py-3 sm:px-10 overflow-y-auto border border-primary-950"
   >
     <div class="w-full mt-5 gap-5 flex flex-col">
       <span class="text-xl">Información dirección:</span>
