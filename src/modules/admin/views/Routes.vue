@@ -15,17 +15,17 @@
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
-            @keydown.enter="findRoute(filter_name)"
+            v-debounce:700.keydown.enter="() => findRoute(filter_name)"
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
-            @click="findRoute(filter_name)"
+            v-debounce:700.click="() => findRoute(filter_name)"
             >Buscar</Button
           >
           <Button
             class="flex-shrink-0 grow rounded-md"
             outlined
-            @click="cleanSearch"
+            v-debounce:700.click="cleanSearch"
             >Limpiar</Button
           >
           <Button

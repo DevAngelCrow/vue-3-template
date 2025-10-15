@@ -6,6 +6,8 @@ import StyleClass from 'primevue/styleclass';
 import FocusTrap from 'primevue/focustrap';
 import type { App } from 'vue';
 
+import { debounceDirective } from './debounce';
+
 export function registerDirectives(app: App) {
   app.directive('tooltip', Tooltip);
   app.directive('badge', BadgeDirective);
@@ -13,4 +15,5 @@ export function registerDirectives(app: App) {
   app.directive('styleclass', StyleClass);
   app.directive('focustrap', FocusTrap);
   app.directive('animateonscroll', AnimateOnScrol);
+  app.directive('debounce', debounceDirective);
 }

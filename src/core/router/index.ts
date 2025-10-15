@@ -45,6 +45,12 @@ const routes = [
         meta: { requiresAuth: true },
         component: () => import('../../modules/admin/views/Routes.vue'),
       },
+      {
+        path: '/departments',
+        name: 'departments',
+        component: () =>
+          import('../../modules/catalogs/departments/views/Departments.vue'),
+      },
     ],
   },
   {

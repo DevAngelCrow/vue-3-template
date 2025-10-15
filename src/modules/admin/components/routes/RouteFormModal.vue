@@ -175,9 +175,9 @@ const {
   parent_routeAttrs,
   handleSubmit,
   parentRoutes,
-  handleAddRoute,
-  handleDeleteRoute,
-  handleEditRoute,
+  addRoute,
+  deleteRoute,
+  editRoute,
   validateInputUri,
 } = admin;
 
@@ -218,15 +218,15 @@ const onSubMit = handleSubmit(async values => {
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        success = (await handleAddRoute(form)) ? true : false;
+        success = (await addRoute(form)) ? true : false;
         break;
       case 'edit':
         form.id = values.id;
         form.active = values.active;
-        success = (await handleEditRoute(form)) ? true : false;
+        success = (await editRoute(form)) ? true : false;
         break;
       case 'delete':
-        success = (await handleDeleteRoute(values.id)) ? true : false;
+        success = (await deleteRoute(values.id)) ? true : false;
         break;
     }
     if (success) {
@@ -267,40 +267,5 @@ const modalButtons = computed(() => {
       return { confirmText: 'Agregar', cancelText: 'Cancelar' };
   }
 });
-
-// watch(
-//   () => props.modalState.mode,
-//   newVal => {
-//     switch (newVal) {
-//       case 'add':
-//         updateSelectAllState();
-//         break;
-//       case 'view':
-//         permissions_ids.value?.forEach((id: number) => {
-//           selectedPermissionsIds.value.add(id);
-//         });
-//         permissionItemsFormated.value.forEach(item => {
-//           isPermissionSelected(item.id);
-//         });
-//         updateSelectAllState();
-//         break;
-//       case 'edit':
-//         permissions_ids.value?.forEach((id: number) => {
-//           selectedPermissionsIds.value.add(id);
-//         });
-//         permissionItemsFormated.value.forEach(item => {
-//           isPermissionSelected(item.id);
-//         });
-//         updateSelectAllState();
-//         break;
-//     }
-//   },
-// );
 </script>
-<style scoped>
-@media (min-width: 325px) and (max-width: 470px) {
-  .width_circular_counter {
-    @apply w-[30%];
-  }
-}
-</style>
+<style scoped></style>
