@@ -35,6 +35,7 @@
         :readonly="props.modalState.isReadonly"
       />
       <AppAutocomplete
+        class="grow"
         id="country"
         label="País*"
         v-model="country"
@@ -46,6 +47,26 @@
         @complete="findAutocomplete"
         :readonly="props.modalState.isReadonly"
       />
+      <div
+        class="flex-1"
+        v-if="
+          props.modalState.mode === 'edit' || props.modalState.mode === 'view'
+        "
+      >
+        <AppCheckBox
+          id="active"
+          label="Activo"
+          v-model="active"
+          v-bind="activeAttrs"
+          binary
+          :readonly="props.modalState.isReadonly"
+        />
+      </div>
+    </section>
+    <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
+      <div class="w-full flex justify-center text-center items-center">
+        <span class="text-center flex">{{ props.modalState.description }}</span>
+      </div>
     </section>
   </AppModal>
 </template>
@@ -83,12 +104,15 @@ const {
   //id, idAttrs,
   description,
   descriptionAttrs,
-  //active, activeAttrs,
+  active,
+  activeAttrs,
   country,
   countryAttrs,
   handleSubmit,
   //getCountries,
   countries,
+  addDepartment,
+  editDepartment,
 } = department;
 
 const countriesFiltered = ref<unknown[]>([]);
@@ -99,17 +123,17 @@ const onSubMit = handleSubmit(async values => {
     const form: DepartmentForm = {
       name: values?.name,
       description: values?.description,
-      country: values?.country?.id,
+      id_country: values?.country?.id,
     };
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        //success = (await addRoute(form)) ? true : false;
+        success = (await addDepartment(form)) ? true : false;
         break;
       case 'edit':
         form.id = values.id;
         form.active = values.active;
-        //success = (await editRoute(form)) ? true : false;
+        success = (await editDepartment(form)) ? true : false;
         break;
       case 'delete':
         //success = (await deleteRoute(values.id)) ? true : false;

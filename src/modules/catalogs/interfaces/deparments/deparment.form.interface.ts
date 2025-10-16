@@ -3,5 +3,5 @@ export interface DepartmentForm {
   name: string;
   description?: string;
   active?: boolean;
-  country: number;
+  id_country: number;
 }

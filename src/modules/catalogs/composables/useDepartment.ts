@@ -3,13 +3,14 @@ import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useLoaderStore } from '@/core/store';
+import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 import { Country } from '../interfaces/deparments/deparment.country.interface';
 import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
 import catalogServices from '../Services/catalog.services';
 import { CountryResponse } from '../interfaces/country.response.interface';
+import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
 export function useDepartment() {
   const {
     errors,
@@ -59,7 +60,7 @@ export function useDepartment() {
       alignItems: 'center',
     },
     {
-      field: 'country',
+      field: 'country.name',
       header: 'País',
       sortable: false,
       alignHeaders: 'center',
@@ -68,6 +69,13 @@ export function useDepartment() {
     {
       field: 'active',
       header: 'Estado',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'acciones',
+      header: 'Acciones',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
@@ -81,7 +89,7 @@ export function useDepartment() {
     total_items: 0,
   });
   const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useLoaderStore();
+  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -98,7 +106,9 @@ export function useDepartment() {
       startLoading();
       const response = await catalogServices.getAllCountries();
       if (response.statusCode === 200) {
-        countries.value = response.data.items;
+        if (Array.isArray(response.data)) {
+          countries.value = response.data;
+        }
       }
     } catch (error) {
       console.error(error);
@@ -124,6 +134,46 @@ export function useDepartment() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
+
+  const addDepartment = async (form: DepartmentForm) => {
+    try {
+      startLoading();
+      const response = await catalogServices.postDepartment(form);
+      if (response.status === 201) {
+        getDepartments();
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+        return response.data;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
+
+  const editDepartment = async (form: DepartmentForm) => {
+    try {
+      startLoading();
+      const response = await catalogServices.putDepartment(form);
+      if (response.status === 200) {
+        getDepartments();
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
     } finally {
       finishLoading();
     }
@@ -193,5 +243,8 @@ export function useDepartment() {
     filter_name,
     pagination,
     countries,
+    deparments,
+    addDepartment,
+    editDepartment,
   };
 }

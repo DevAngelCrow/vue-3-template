@@ -42,29 +42,74 @@
           >
         </div>
       </div>
+      <AppDataTable
+        class="w-full"
+        :headers="headers"
+        :items="deparments"
+        :paginator="true"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        @page-update="handlePagination"
+      >
+        <template #body-acciones="{ data }">
+          <div class="flex gap-0 justify-center">
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-eye"
+              @click="openModal('view', data)"
+            ></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-pencil"
+              @click="openModal('edit', data)"
+            ></Button>
+            <Button
+              class="rounded-full"
+              variant="text"
+              icon="pi pi-trash"
+              @click="openModal('delete', data)"
+            ></Button>
+          </div>
+        </template>
+        <template #body-icon="{ data }">
+          <i :class="data.icon"></i>
+        </template>
+        <template #body-active="{ data }">
+          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
+            data.active ? 'Activo' : 'Inactivo'
+          }}</Chip>
+        </template>
+      </AppDataTable>
     </section>
+    <DepartmentFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
 <script setup lang="ts">
 import { onMounted, provide, reactive } from 'vue';
-import { Button } from 'primevue';
+import { Button, Chip } from 'primevue';
 
 import { useDepartment } from '../../composables/useDepartment';
 import { DepartmentResponse } from '../../interfaces/deparments/department.response.interface';
+import DepartmentFormModal from '../components/DepartmentFormModal.vue';
 
 const departmentInstance = useDepartment();
 provide('useDepartment', departmentInstance);
 
 const {
   filter_name,
-  //resetForm,
+  resetForm,
   cleanSearch,
   findDepartment,
   validateAlphaInput,
   setDepartmenItem,
   getCountries,
   getDepartments,
-  //headers, pagination
+  headers,
+  pagination,
+  deparments,
 } = departmentInstance;
 
 const modalState = reactive<{
@@ -109,21 +154,29 @@ const openModal = (
         : 'Activar Departamento';
       modalState.description = `¿Está seguro de cambiar el estado del departamento a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
+      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;
 };
 
-// const closeModal = () => {
-//   modalState.show = false;
-//   modalState.mode = 'closed';
-//   modalState.title = '';
-//   modalState.description = '';
-//   modalState.isReadonly = false;
-//   modalState.selectedItem = null;
-//   resetForm();
-// };
+const closeModal = () => {
+  modalState.show = false;
+  modalState.mode = 'closed';
+  modalState.title = '';
+  modalState.description = '';
+  modalState.isReadonly = false;
+  modalState.selectedItem = null;
+  resetForm();
+};
 
+const handlePagination = async (page: number) => {
+  if (page + 1 === pagination.page) {
+    return;
+  }
+  pagination.page = page + 1;
+  getDepartments();
+};
 onMounted(async () => {
   await getCountries();
   await getDepartments();
