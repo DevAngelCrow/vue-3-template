@@ -36,13 +36,13 @@
       />
       <AppAutocomplete
         class="grow"
-        id="country"
-        label="País*"
-        v-model="country"
-        v-bind="countryAttrs"
-        :error-messages="errors.country"
+        id="municipality"
+        label="Municipio*"
+        v-model="municipality"
+        v-bind="municipalityAttrs"
+        :error-messages="errors?.municipality"
         option-label="name"
-        :suggestions="countriesFiltered"
+        :suggestions="municipalitiesFiltered"
         dropdown
         @complete="findAutocomplete"
         :readonly="props.modalState.isReadonly"
@@ -62,10 +62,10 @@ import { AutoCompleteCompleteEvent } from 'primevue';
 import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
 
-import { useDepartment } from '../../composables/useDepartment';
-import { DepartmentForm } from '../../interfaces/deparments/deparment.form.interface';
+import { useDistrict } from '../../composables/useDistrict';
+import { DistrictForm } from '../../interfaces/districts/district.form.interface';
 
-type DepartmentType = ReturnType<typeof useDepartment>;
+type DistrictType = ReturnType<typeof useDistrict>;
 
 const props = defineProps<{
   modalState: {
@@ -79,7 +79,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['close-modal']);
-const department = inject<DepartmentType>('useDepartment')!;
+const district = inject<DistrictType>('useDistrict')!;
 const { startLoading, finishLoading } = useLoaderStore();
 
 const {
@@ -89,38 +89,38 @@ const {
   //id, idAttrs,
   description,
   descriptionAttrs,
-  country,
-  countryAttrs,
+  municipalities,
   handleSubmit,
+  municipality,
+  municipalityAttrs,
   //getCountries,
-  countries,
-  addDepartment,
-  editDepartment,
-  deleteDepartment,
-} = department;
+  addDistrict,
+  editDistrict,
+  deleteDistrict,
+} = district;
 
-const countriesFiltered = ref<unknown[]>([]);
+const municipalitiesFiltered = ref<unknown[]>([]);
 
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
-    const form: DepartmentForm = {
+    const form: DistrictForm = {
       name: values?.name,
       description: values?.description,
-      id_country: values?.country?.id,
+      id_municipality: values?.municipality?.id,
     };
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        success = (await addDepartment(form)) ? true : false;
+        success = (await addDistrict(form)) ? true : false;
         break;
       case 'edit':
         form.id = values.id;
         form.active = values.active;
-        success = (await editDepartment(form)) ? true : false;
+        success = (await editDistrict(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deleteDepartment(values.id)) ? true : false;
+        success = (await deleteDistrict(values.id)) ? true : false;
         break;
     }
     if (success) {
@@ -140,14 +140,14 @@ const closeModal = () => {
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
-  for (let i = 0; i < countries.value.length; i++) {
-    let item = countries.value[i];
+  for (let i = 0; i < municipalities.value.length; i++) {
+    let item = municipalities.value[i];
 
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);
     }
   }
-  countriesFiltered.value = _filteredItems;
+  municipalitiesFiltered.value = _filteredItems;
 };
 
 const modalButtons = computed(() => {

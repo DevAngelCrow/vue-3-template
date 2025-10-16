@@ -6,12 +6,12 @@ import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
-import { Country } from '../interfaces/deparments/deparment.country.interface';
-import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
 import catalogServices from '../Services/catalog.services';
 import { CountryResponse } from '../interfaces/country.response.interface';
-import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
-export function useDepartment() {
+import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
+import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
+import { Department } from '../interfaces/municipalities/municipality.department.interface';
+export function useMunicipality() {
   const {
     errors,
     defineField,
@@ -32,7 +32,9 @@ export function useDepartment() {
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .nullable(),
-      country: yup.mixed<Country>().required('El campo del país es requerido'),
+      department: yup
+        .mixed<Department>()
+        .required('El campo de departamento es requerido'),
       active: yup.boolean(),
     }),
   });
@@ -60,8 +62,8 @@ export function useDepartment() {
       alignItems: 'center',
     },
     {
-      field: 'country.name',
-      header: 'País',
+      field: 'department.name',
+      header: 'Departamento',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
@@ -82,7 +84,7 @@ export function useDepartment() {
     },
   ]);
 
-  const deparments = ref<DepartmentResponse[] | undefined>([]);
+  const municipalities = ref<MunicipalityResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
@@ -94,20 +96,20 @@ export function useDepartment() {
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
-  const [country, countryAttrs] = defineField('country');
+  const [department, departmentAttrs] = defineField('department');
   const [active, activeAttrs] = defineField('active');
 
   const filter_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
-  const countries = ref<CountryResponse[]>([]);
+  const departments = ref<CountryResponse[]>([]);
 
-  const getCountries = async () => {
+  const getDepartments = async () => {
     try {
       startLoading();
-      const response = await catalogServices.getAllCountries();
+      const response = await catalogServices.getAllDepartments();
       if (response.statusCode === 200) {
         if (Array.isArray(response.data)) {
-          countries.value = response.data;
+          departments.value = response.data;
         }
       }
     } catch (error) {
@@ -116,7 +118,7 @@ export function useDepartment() {
       finishLoading();
     }
   };
-  const getDepartments = async () => {
+  const getMunicipalities = async () => {
     try {
       startLoading();
       const filter = {
@@ -124,10 +126,10 @@ export function useDepartment() {
         per_page: pagination.per_page,
         filter_name: filter_name.value,
       };
-      const response = await catalogServices.getAllDepartments(filter);
+      const response = await catalogServices.getMunicipalities(filter);
 
       if (response.statusCode === 200) {
-        deparments.value = response.data.items;
+        municipalities.value = response.data.items;
         pagination.page = response.data.pagination.currentPage;
         pagination.per_page = response.data.pagination.perPage;
         pagination.total_items = response.data.pagination.totalItems;
@@ -139,12 +141,12 @@ export function useDepartment() {
     }
   };
 
-  const addDepartment = async (form: DepartmentForm) => {
+  const addMunicipality = async (form: MunicipalityForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postDepartment(form);
+      const response = await catalogServices.postMunicipality(form);
       if (response.status === 201) {
-        getDepartments();
+        getMunicipalities();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -159,12 +161,12 @@ export function useDepartment() {
     }
   };
 
-  const editDepartment = async (form: DepartmentForm) => {
+  const editMunicipality = async (form: MunicipalityForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putDepartment(form);
+      const response = await catalogServices.putMunicipality(form);
       if (response.status === 200) {
-        getDepartments();
+        getMunicipalities();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -179,12 +181,12 @@ export function useDepartment() {
     }
   };
 
-  const deleteDepartment = async (id: number) => {
+  const deleteMunicipality = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDepartment(id);
+      const response = await catalogServices.deleteMunicipality(id);
       if (response.status === 200) {
-        getDepartments();
+        getMunicipalities();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -217,20 +219,20 @@ export function useDepartment() {
       return;
     }
     filter_name.value = null;
-    getDepartments();
+    getMunicipalities();
   };
 
-  const setDepartmenItem = (value: DepartmentResponse) => {
+  const setMunicipalityItem = (value: MunicipalityResponse) => {
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
     setFieldValue('active', value?.active);
-    setFieldValue('country', value?.country);
+    setFieldValue('department', value?.department);
   };
 
-  const findDepartment = (value: string | null) => {
+  const findMunicipality = (value: string | null) => {
     if (value) {
-      getDepartments();
+      getMunicipalities();
     }
   };
   return {
@@ -246,9 +248,8 @@ export function useDepartment() {
     getDepartments,
     validateAlphaInput,
     cleanSearch,
-    setDepartmenItem,
-    findDepartment,
-    getCountries,
+    setMunicipalityItem,
+    findMunicipality,
     id,
     idAttrs,
     name,
@@ -257,15 +258,16 @@ export function useDepartment() {
     descriptionAttrs,
     active,
     activeAttrs,
-    country,
-    countryAttrs,
+    department,
+    departmentAttrs,
     alert,
     filter_name,
     pagination,
-    countries,
-    deparments,
-    addDepartment,
-    editDepartment,
-    deleteDepartment,
+    departments,
+    municipalities,
+    getMunicipalities,
+    addMunicipality,
+    editMunicipality,
+    deleteMunicipality,
   };
 }

@@ -6,12 +6,12 @@ import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
-import { Country } from '../interfaces/deparments/deparment.country.interface';
-import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
 import catalogServices from '../Services/catalog.services';
-import { CountryResponse } from '../interfaces/country.response.interface';
-import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
-export function useDepartment() {
+import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
+import { Municipality } from '../interfaces/districts/districts.municipality.interface';
+import { DistrictResponse } from '../interfaces/districts/district.response.interface';
+import { DistrictForm } from '../interfaces/districts/district.form.interface';
+export function useDistrict() {
   const {
     errors,
     defineField,
@@ -26,13 +26,15 @@ export function useDepartment() {
       id: yup.number().typeError('El campo id debe ser de tipo entero'),
       name: yup
         .string()
-        .required('El nombre del departamento es requerido')
+        .required('El nombre del distrito es requerido')
         .min(3, 'El nombre de tener al menos 3 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .nullable(),
-      country: yup.mixed<Country>().required('El campo del país es requerido'),
+      municipality: yup
+        .mixed<Municipality>()
+        .required('El campo de municipio es requerido'),
       active: yup.boolean(),
     }),
   });
@@ -60,8 +62,8 @@ export function useDepartment() {
       alignItems: 'center',
     },
     {
-      field: 'country.name',
-      header: 'País',
+      field: 'municipality.name',
+      header: 'Municipio',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
@@ -82,7 +84,7 @@ export function useDepartment() {
     },
   ]);
 
-  const deparments = ref<DepartmentResponse[] | undefined>([]);
+  const districts = ref<DistrictResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
@@ -94,20 +96,20 @@ export function useDepartment() {
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
-  const [country, countryAttrs] = defineField('country');
+  const [municipality, municipalityAttrs] = defineField('municipality');
   const [active, activeAttrs] = defineField('active');
 
   const filter_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
-  const countries = ref<CountryResponse[]>([]);
+  const municipalities = ref<MunicipalityResponse[]>([]);
 
-  const getCountries = async () => {
+  const getMunicipalities = async () => {
     try {
       startLoading();
-      const response = await catalogServices.getAllCountries();
+      const response = await catalogServices.getMunicipalities();
       if (response.statusCode === 200) {
         if (Array.isArray(response.data)) {
-          countries.value = response.data;
+          municipalities.value = response.data;
         }
       }
     } catch (error) {
@@ -116,7 +118,7 @@ export function useDepartment() {
       finishLoading();
     }
   };
-  const getDepartments = async () => {
+  const getDistricts = async () => {
     try {
       startLoading();
       const filter = {
@@ -124,10 +126,10 @@ export function useDepartment() {
         per_page: pagination.per_page,
         filter_name: filter_name.value,
       };
-      const response = await catalogServices.getAllDepartments(filter);
+      const response = await catalogServices.getDistricts(filter);
 
       if (response.statusCode === 200) {
-        deparments.value = response.data.items;
+        districts.value = response.data.items;
         pagination.page = response.data.pagination.currentPage;
         pagination.per_page = response.data.pagination.perPage;
         pagination.total_items = response.data.pagination.totalItems;
@@ -139,12 +141,12 @@ export function useDepartment() {
     }
   };
 
-  const addDepartment = async (form: DepartmentForm) => {
+  const addDistrict = async (form: DistrictForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postDepartment(form);
+      const response = await catalogServices.postDistrict(form);
       if (response.status === 201) {
-        getDepartments();
+        getDistricts();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -159,12 +161,12 @@ export function useDepartment() {
     }
   };
 
-  const editDepartment = async (form: DepartmentForm) => {
+  const editDistrict = async (form: DistrictForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putDepartment(form);
+      const response = await catalogServices.putDistrict(form);
       if (response.status === 200) {
-        getDepartments();
+        getDistricts();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -179,12 +181,12 @@ export function useDepartment() {
     }
   };
 
-  const deleteDepartment = async (id: number) => {
+  const deleteDistrict = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDepartment(id);
+      const response = await catalogServices.deleteDistrict(id);
       if (response.status === 200) {
-        getDepartments();
+        getDistricts();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -217,20 +219,20 @@ export function useDepartment() {
       return;
     }
     filter_name.value = null;
-    getDepartments();
+    getDistricts();
   };
 
-  const setDepartmenItem = (value: DepartmentResponse) => {
+  const setDistrictItem = (value: DistrictResponse) => {
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
     setFieldValue('active', value?.active);
-    setFieldValue('country', value?.country);
+    setFieldValue('municipality', value?.municipality);
   };
 
-  const findDepartment = (value: string | null) => {
+  const findDistrict = (value: string | null) => {
     if (value) {
-      getDepartments();
+      getDistricts();
     }
   };
   return {
@@ -243,12 +245,11 @@ export function useDepartment() {
     resetField,
     setFieldError,
     setFieldValue,
-    getDepartments,
+    getMunicipalities,
     validateAlphaInput,
     cleanSearch,
-    setDepartmenItem,
-    findDepartment,
-    getCountries,
+    setDistrictItem,
+    findDistrict,
     id,
     idAttrs,
     name,
@@ -257,15 +258,16 @@ export function useDepartment() {
     descriptionAttrs,
     active,
     activeAttrs,
-    country,
-    countryAttrs,
+    municipality,
+    municipalityAttrs,
     alert,
     filter_name,
     pagination,
-    countries,
-    deparments,
-    addDepartment,
-    editDepartment,
-    deleteDepartment,
+    municipalities,
+    districts,
+    getDistricts,
+    addDistrict,
+    editDistrict,
+    deleteDistrict,
   };
 }
