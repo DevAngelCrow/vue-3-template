@@ -1,9 +1,9 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full">
-    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
+    <section id="district_content" class="w-full flex flex-row flex-wrap gap-5">
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
-          title="Rutas"
+          title="Distritos"
           class="w-full md:w-auto flex justify-center items-center"
         />
         <div
@@ -15,11 +15,11 @@
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findRoute(filter_name)"
+            v-debounce:700.keydown.enter="() => findDistrict(filter_name)"
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRoute(filter_name)"
+            v-debounce:700.click="() => findDistrict(filter_name)"
             >Buscar</Button
           >
           <Button
@@ -42,7 +42,7 @@
       <AppDataTable
         class="w-full"
         :headers="headers"
-        :items="items"
+        :items="districts"
         :paginator="true"
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
@@ -79,40 +79,35 @@
             data.active ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
-        <template #body-show="{ data }">
-          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-        </template>
       </AppDataTable>
     </section>
-    <RouteFormModal :modal-state="modalState" @close-modal="closeModal" />
+    <DistrictFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
 <script setup lang="ts">
+import { onMounted, provide, reactive } from 'vue';
 import { Button, Chip } from 'primevue';
-import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
-import { useAdmin } from '../composables/useAdmin';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
-import RouteFormModal from '../components/routes/RouteFormModal.vue';
+import { useDistrict } from '../../composables/useDistrict';
+import DistrictFormModal from '../components/DistrictFormModal.vue';
+import { DistrictResponse } from '../../interfaces/districts/district.response.interface';
 
-const adminInstance = useAdmin();
-provide('useAdmin', adminInstance);
+const districtInstance = useDistrict();
+provide('useDistrict', districtInstance);
 
 const {
-  getRoutes,
-  child_route,
-  resetField,
-  items,
   filter_name,
   resetForm,
-  validateAlphaInput,
   cleanSearch,
-  setRouteItem,
-  findRoute,
-  pagination,
+  findDistrict,
+  validateAlphaInput,
+  setDistrictItem,
+  getDistricts,
+  getMunicipalities,
   headers,
-  getPermissions,
-} = adminInstance;
+  pagination,
+  districts,
+} = districtInstance;
 
 const modalState = reactive<{
   show: boolean;
@@ -132,28 +127,31 @@ const modalState = reactive<{
 
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
-  data?: RoutesResponse,
+  data?: DistrictResponse,
 ) => {
   modalState.mode = action;
   modalState.isReadonly = action === 'view';
 
   switch (action) {
     case 'add':
-      modalState.title = 'Agregar Ruta';
+      modalState.title = 'Agregar Distrito';
       break;
     case 'view':
-      modalState.title = 'Ver Ruta';
-      setRouteItem(data!);
+      modalState.title = 'Ver Distrito';
+      setDistrictItem(data!);
       break;
     case 'edit':
-      modalState.title = 'Editar Ruta';
-      setRouteItem(data!);
+      modalState.title = 'Editar Distrito';
+      setDistrictItem(data!);
       break;
     case 'delete':
-      setRouteItem(data!);
-      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
-      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
+      setDistrictItem(data!);
+      modalState.title = data!.active
+        ? 'Desactivar Distrito'
+        : 'Activar Distrito';
+      modalState.description = `¿Está seguro de cambiar el estado del distrito a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
+      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;
@@ -169,38 +167,16 @@ const closeModal = () => {
   resetForm();
 };
 
-watch(
-  child_route,
-  (newValue, oldValue) => {
-    if (oldValue === true && newValue === false) {
-      try {
-        nextTick(() => {
-          resetField('parent_route', { errors: undefined, value: null });
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  },
-  {
-    immediate: false,
-  },
-);
-
 const handlePagination = async (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getRoutes();
+  getDistricts();
 };
 onMounted(async () => {
-  try {
-    await getRoutes();
-    await getPermissions();
-  } catch (error) {
-    console.error(error);
-  }
+  await getMunicipalities();
+  await getDistricts();
 });
 </script>
 <style scoped></style>

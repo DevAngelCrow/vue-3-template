@@ -20,7 +20,7 @@ export interface Menu {
   order: number;
   parent: Menu[];
   children: Menu[];
-  requiredAuth: boolean;
+  required_auth: boolean;
   title: string;
   active: boolean;
   is_open: boolean;

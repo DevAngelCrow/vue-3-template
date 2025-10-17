@@ -1,9 +1,12 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full">
-    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
+    <section
+      id="municipalities_content"
+      class="w-full flex flex-row flex-wrap gap-5"
+    >
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
-          title="Rutas"
+          title="Municipios"
           class="w-full md:w-auto flex justify-center items-center"
         />
         <div
@@ -15,11 +18,11 @@
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findRoute(filter_name)"
+            v-debounce:700.keydown.enter="() => findMunicipality(filter_name)"
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRoute(filter_name)"
+            v-debounce:700.click="() => findMunicipality(filter_name)"
             >Buscar</Button
           >
           <Button
@@ -42,7 +45,7 @@
       <AppDataTable
         class="w-full"
         :headers="headers"
-        :items="items"
+        :items="municipalities"
         :paginator="true"
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
@@ -79,40 +82,38 @@
             data.active ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
-        <template #body-show="{ data }">
-          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-        </template>
       </AppDataTable>
     </section>
-    <RouteFormModal :modal-state="modalState" @close-modal="closeModal" />
+    <MunicipalityFormModal
+      :modal-state="modalState"
+      @close-modal="closeModal"
+    />
   </div>
 </template>
 <script setup lang="ts">
+import { onMounted, provide, reactive } from 'vue';
 import { Button, Chip } from 'primevue';
-import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
-import { useAdmin } from '../composables/useAdmin';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
-import RouteFormModal from '../components/routes/RouteFormModal.vue';
+import { useMunicipality } from '../../composables/useMunicipalities';
+import { MunicipalityResponse } from '../../interfaces/municipalities/municipality.response.interface';
+import MunicipalityFormModal from '../components/MunicipalityFormModal.vue';
 
-const adminInstance = useAdmin();
-provide('useAdmin', adminInstance);
+const municipalityInstance = useMunicipality();
+provide('useMunicipality', municipalityInstance);
 
 const {
-  getRoutes,
-  child_route,
-  resetField,
-  items,
   filter_name,
   resetForm,
-  validateAlphaInput,
   cleanSearch,
-  setRouteItem,
-  findRoute,
-  pagination,
+  findMunicipality,
+  validateAlphaInput,
+  setMunicipalityItem,
+  getDepartments,
+  getMunicipalities,
   headers,
-  getPermissions,
-} = adminInstance;
+  pagination,
+  municipalities,
+} = municipalityInstance;
 
 const modalState = reactive<{
   show: boolean;
@@ -132,28 +133,31 @@ const modalState = reactive<{
 
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
-  data?: RoutesResponse,
+  data?: MunicipalityResponse,
 ) => {
   modalState.mode = action;
   modalState.isReadonly = action === 'view';
 
   switch (action) {
     case 'add':
-      modalState.title = 'Agregar Ruta';
+      modalState.title = 'Agregar Municipio';
       break;
     case 'view':
-      modalState.title = 'Ver Ruta';
-      setRouteItem(data!);
+      modalState.title = 'Ver Municipio';
+      setMunicipalityItem(data!);
       break;
     case 'edit':
-      modalState.title = 'Editar Ruta';
-      setRouteItem(data!);
+      modalState.title = 'Editar Municipio';
+      setMunicipalityItem(data!);
       break;
     case 'delete':
-      setRouteItem(data!);
-      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
-      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
+      setMunicipalityItem(data!);
+      modalState.title = data!.active
+        ? 'Desactivar Municipio'
+        : 'Activar Municipio';
+      modalState.description = `¿Está seguro de cambiar el estado del municipio a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
+      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;
@@ -169,38 +173,16 @@ const closeModal = () => {
   resetForm();
 };
 
-watch(
-  child_route,
-  (newValue, oldValue) => {
-    if (oldValue === true && newValue === false) {
-      try {
-        nextTick(() => {
-          resetField('parent_route', { errors: undefined, value: null });
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  },
-  {
-    immediate: false,
-  },
-);
-
 const handlePagination = async (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getRoutes();
+  getDepartments();
 };
 onMounted(async () => {
-  try {
-    await getRoutes();
-    await getPermissions();
-  } catch (error) {
-    console.error(error);
-  }
+  await getMunicipalities();
+  await getDepartments();
 });
 </script>
 <style scoped></style>

@@ -5,18 +5,20 @@
         class="w-[65%] grow order-1"
         label="Buscar permiso..."
         v-model="filter_permission_name"
-        @keydown.enter="searchPermission"
+        v-debounce:700.keydown.enter="
+          () => searchPermission(filter_permission_name)
+        "
       />
       <Button
         class="rounded_btn_search"
         icon="pi pi-search"
-        @click="searchPermission(filter_permission_name)"
+        v-debounce:700.click="() => searchPermission(filter_permission_name)"
       />
       <Button
         class="rounded_btn_clean"
         icon="pi pi-eraser"
         variant="outlined"
-        @click="cleanSearch"
+        v-debounce:700.click="cleanSearch"
       />
       <div class="rounded_counter">
         <AppCircularCounter
@@ -183,6 +185,7 @@ const closeModal = () => {
     permissionsPagination.page = 1;
     getPermissions();
   }
+  filter_permission_name.value = null;
   emit('close-modal');
 };
 

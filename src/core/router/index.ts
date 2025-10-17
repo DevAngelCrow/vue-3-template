@@ -45,6 +45,26 @@ const routes = [
         meta: { requiresAuth: true },
         component: () => import('../../modules/admin/views/Routes.vue'),
       },
+      {
+        path: '/departments',
+        name: 'departments',
+        component: () =>
+          import('../../modules/catalogs/departments/views/Departments.vue'),
+      },
+      {
+        path: '/municipalities',
+        name: 'municipalities',
+        component: () =>
+          import(
+            '../../modules/catalogs/municipalities/views/Municipalities.vue'
+          ),
+      },
+      {
+        path: '/districts',
+        name: 'districts',
+        component: () =>
+          import('../../modules/catalogs/districts/views/Districts.vue'),
+      },
     ],
   },
   {
