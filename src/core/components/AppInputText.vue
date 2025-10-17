@@ -6,7 +6,7 @@
           :class="
             invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
           "
-          v-if="showIcon && prependInnerIcon"
+          v-if="showIcon"
           id="append-icon"
         />
         <InputText
@@ -25,7 +25,7 @@
           :size="inputSize"
         />
         <InputIcon
-          v-if="showIcon && appendIconLocal"
+          v-if="showIcon"
           :class="
             invalid
               ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`

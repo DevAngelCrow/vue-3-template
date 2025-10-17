@@ -12,6 +12,8 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { DistrictResponse } from '../interfaces/districts/district.response.interface';
 import { DistrictForm } from '../interfaces/districts/district.form.interface';
+import { GlobalStatusResponse } from '../interfaces/global-status/global-status.response.interface';
+import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 
 const getAllCountries = async (
   params?: paginateParams,
@@ -129,6 +131,37 @@ const deleteDistrict = async (id: number) => {
   return response;
 };
 
+const getGlobalStatus = async (params?: paginateParams) => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<GlobalStatusResponse>
+  >('catalogs/global_status/', params);
+  return response.data;
+};
+
+const postGlobalStatus = async (data: GlobalStatusForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'catalogs/global_status/',
+    data,
+  );
+  return response;
+};
+
+const putGlobalStatus = async (data: GlobalStatusForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `catalogs/global_status/${data.id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteGlobalStatus = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `catalogs/global_status/${id}`,
+  );
+
+  return response;
+};
+
 export default {
   getAllCountries,
   createCountries,
@@ -145,4 +178,8 @@ export default {
   postDistrict,
   putDistrict,
   deleteDistrict,
+  getGlobalStatus,
+  postGlobalStatus,
+  putGlobalStatus,
+  deleteGlobalStatus,
 };

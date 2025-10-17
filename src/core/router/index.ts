@@ -65,6 +65,17 @@ const routes = [
         component: () =>
           import('../../modules/catalogs/districts/views/Districts.vue'),
       },
+      {
+        path: '/global-status',
+        name: 'global-status',
+        component: () =>
+          import('../../modules/catalogs/global-status/views/GlobalStatus.vue'),
+      },
+      {
+        path: '/permissions',
+        name: 'permissions',
+        component: () => import('../../modules/admin/views/Permissions.vue'),
+      },
     ],
   },
   {
