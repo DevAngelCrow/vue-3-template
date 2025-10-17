@@ -10,7 +10,7 @@ export interface MenuBar {
   order: number;
   parent: MenuBar[];
   children: MenuBar[];
-  requiredAuth: boolean;
+  required_auth: boolean;
   title: string;
   active: boolean;
   is_open: boolean;
