@@ -3,12 +3,15 @@ import { ApiResponseGeneric } from '@/core/services/interfaces/apiResponseGeneri
 import { ApiPostResponse } from '@/core/services/apiPostResponse.interface';
 import { paginateParams } from '@/core/services/interfaces/params.paginate.interface';
 
-import { RoutesResponse } from '../interfaces/routes.response.interface';
-import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
-import { RouteForm } from '../interfaces/route-form.interface';
+import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
+import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autocomplete-obj.interface';
+import { RouteForm } from '../interfaces/routes/route-form.interface';
 import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
 import { PermissionForm } from '../interfaces/permissions/permission.form.interface';
 import { PermissionsCategoryResponse } from '../interfaces/permissions/permission.category.response.interface';
+import { CategoryPermissionForm } from '../interfaces/category-permissions/category-permission-form.interface';
+import { RoleResponse } from '../interfaces/role/role.response.interface';
+import { RoleForm } from '../interfaces/role/role.form.interface';
 
 const getAllRoutes = async (
   params: paginateParams,
@@ -56,7 +59,7 @@ const getPermissions = async (
 ): Promise<ApiResponseGeneric<PermissionsResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsResponse>
-  >('security/permissions/', params);
+  >('security/permissions/list', params);
   return response.data;
 };
 
@@ -70,7 +73,7 @@ const postPermission = async (data: PermissionForm) => {
 
 const putPermission = async (data: PermissionForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `secutiry/permissions/${data.id}`,
+    `security/permissions/${data.id}`,
     data,
   );
   return response;
@@ -90,6 +93,59 @@ const getCategoryPermissions = async (params?: paginateParams) => {
   return response.data;
 };
 
+const postCategoryPermission = async (data: CategoryPermissionForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    `security/category-permissions`,
+    data,
+  );
+  return response;
+};
+const putCategoryPermission = async (data: CategoryPermissionForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `security/category-permissions/${data.id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteCategoryPermission = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `security/category-permissions/${id}`,
+  );
+  return response;
+};
+
+const getRole = async (params: paginateParams) => {
+  const response = await httpClient.get<ApiResponseGeneric<RoleResponse>>(
+    'security/roles/list',
+    params,
+  );
+  return response.data;
+};
+
+const postRole = async (data: RoleForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'security/roles',
+    data,
+  );
+  return response;
+};
+
+const putRole = async (data: RoleForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `security/roles/${data.id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteRole = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `security/roles/${id}`,
+  );
+  return response;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
@@ -101,4 +157,11 @@ export default {
   putPermission,
   deletePermission,
   getCategoryPermissions,
+  postCategoryPermission,
+  putCategoryPermission,
+  deleteCategoryPermission,
+  getRole,
+  postRole,
+  putRole,
+  deleteRole,
 };

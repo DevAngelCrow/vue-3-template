@@ -34,19 +34,6 @@
         v-bind="descriptionAttrs"
         :readonly="props.modalState.isReadonly"
       />
-      <AppAutocomplete
-        class="grow"
-        id="category_permissions"
-        label="Categoría*"
-        v-model="category"
-        v-bind="categoryAttrs"
-        :error-messages="errors.category"
-        option-label="name"
-        :suggestions="categoryPermissionsFiltered"
-        dropdown
-        @complete="findAutocomplete"
-        :readonly="props.modalState.isReadonly"
-      />
     </section>
     <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
       <div class="w-full flex justify-center text-center items-center">
@@ -56,16 +43,15 @@
   </AppModal>
 </template>
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
-import { AutoCompleteCompleteEvent } from 'primevue';
+import { computed, inject } from 'vue';
 
 import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
 
-import { usePermission } from '../../composables/usePermissions';
-import { PermissionForm } from '../../interfaces/permissions/permission.form.interface';
+import { useCategoryPermission } from '../../composables/useCategoryPermission';
+import { CategoryPermissionForm } from '../../interfaces/category-permissions/category-permission-form.interface';
 
-type PermissionType = ReturnType<typeof usePermission>;
+type CategoryPermissionType = ReturnType<typeof useCategoryPermission>;
 
 const props = defineProps<{
   modalState: {
@@ -79,7 +65,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['close-modal']);
-const permission = inject<PermissionType>('usePermission')!;
+const categoryPermission = inject<CategoryPermissionType>(
+  'useCategoryPermission',
+)!;
 const { startLoading, finishLoading } = useLoaderStore();
 
 const {
@@ -88,37 +76,31 @@ const {
   nameAttrs,
   description,
   descriptionAttrs,
-  category,
-  categoryAttrs,
   handleSubmit,
-  categoryPermissions,
-  addPermission,
-  editPermission,
-  deletePermission,
-} = permission;
-
-const categoryPermissionsFiltered = ref<unknown[]>([]);
+  addCategoryPermission,
+  editCategoryPermission,
+  deleteCategoryPermission,
+} = categoryPermission;
 
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
-    const form: PermissionForm = {
+    const form: CategoryPermissionForm = {
       name: values?.name,
       description: values?.description,
-      id_category_permissions: values?.category?.id,
     };
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        success = (await addPermission(form)) ? true : false;
+        success = (await addCategoryPermission(form)) ? true : false;
         break;
       case 'edit':
         form.id = values.id;
         form.active = values.active;
-        success = (await editPermission(form)) ? true : false;
+        success = (await editCategoryPermission(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deletePermission(values.id)) ? true : false;
+        success = (await deleteCategoryPermission(values.id)) ? true : false;
         break;
     }
     if (success) {
@@ -133,19 +115,6 @@ const onSubMit = handleSubmit(async values => {
 
 const closeModal = () => {
   emit('close-modal');
-};
-
-const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-  let query = event?.query;
-  let _filteredItems = [];
-  for (let i = 0; i < categoryPermissions.value.length; i++) {
-    let item = categoryPermissions.value[i];
-
-    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-      _filteredItems.push(item);
-    }
-  }
-  categoryPermissionsFiltered.value = _filteredItems;
 };
 
 const modalButtons = computed(() => {

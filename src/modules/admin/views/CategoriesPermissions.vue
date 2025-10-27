@@ -6,7 +6,7 @@
     >
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
-          title="Permisos"
+          title="Categoría de Permisos"
           class="w-full md:w-auto flex justify-center items-center"
         />
         <div
@@ -18,11 +18,13 @@
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findPermission(filter_name)"
+            v-debounce:700.keydown.enter="
+              () => findCategoryPermission(filter_name)
+            "
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findPermission(filter_name)"
+            v-debounce:700.click="() => findCategoryPermission(filter_name)"
             >Buscar</Button
           >
           <Button
@@ -45,7 +47,7 @@
       <AppDataTable
         class="w-full"
         :headers="headers"
-        :items="permissions"
+        :items="categories"
         :paginator="true"
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
@@ -84,33 +86,35 @@
         </template>
       </AppDataTable>
     </section>
-    <PermissionFormModal :modal-state="modalState" @close-modal="closeModal" />
+    <CategoryPermissionFormModal
+      :modal-state="modalState"
+      @close-modal="closeModal"
+    />
   </div>
 </template>
 <script setup lang="ts">
 import { onMounted, provide, reactive } from 'vue';
 import { Button, Chip } from 'primevue';
 
-import { usePermission } from '../composables/usePermissions';
 import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
-import PermissionFormModal from '../components/permissions/PermissionFormModal.vue';
+import { useCategoryPermission } from '../composables/useCategoryPermission';
+import CategoryPermissionFormModal from '../components/category-permissions/CategoryPermissionFormModal.vue';
 
-const permissionInstance = usePermission();
-provide('usePermission', permissionInstance);
+const categoryPermissionInstance = useCategoryPermission();
+provide('useCategoryPermission', categoryPermissionInstance);
 
 const {
   filter_name,
   resetForm,
   cleanSearch,
-  findPermission,
+  findCategoryPermission,
   validateAlphaInput,
-  setPermissionItem,
-  getPermissions,
+  setCategoryPermissionItem,
   getCategoryPermissions,
   headers,
   pagination,
-  permissions,
-} = permissionInstance;
+  categories,
+} = categoryPermissionInstance;
 
 const modalState = reactive<{
   show: boolean;
@@ -137,24 +141,23 @@ const openModal = (
 
   switch (action) {
     case 'add':
-      modalState.title = 'Agregar Departamento';
+      modalState.title = 'Agregar Categoría';
       break;
     case 'view':
-      modalState.title = 'Ver Departamento';
-      setPermissionItem(data!);
+      modalState.title = 'Ver Categoría';
+      setCategoryPermissionItem(data!);
       break;
     case 'edit':
-      modalState.title = 'Editar Departamento';
-      setPermissionItem(data!);
+      modalState.title = 'Editar Categoría';
+      setCategoryPermissionItem(data!);
       break;
     case 'delete':
-      setPermissionItem(data!);
+      setCategoryPermissionItem(data!);
       modalState.title = data!.active
-        ? 'Desactivar Permiso'
-        : 'Activar Permiso';
-      modalState.description = `¿Está seguro de cambiar el estado del permiso a ${data!.active ? 'inactivo' : 'activo'}?`;
+        ? 'Desactivar Categoría'
+        : 'Activar Categoría';
+      modalState.description = `¿Está seguro de cambiar el estado de la categoría a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
-      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;
@@ -175,10 +178,9 @@ const handlePagination = async (page: number) => {
     return;
   }
   pagination.page = page + 1;
-  getPermissions();
+  getCategoryPermissions();
 };
 onMounted(async () => {
-  await getPermissions();
   await getCategoryPermissions();
 });
 </script>

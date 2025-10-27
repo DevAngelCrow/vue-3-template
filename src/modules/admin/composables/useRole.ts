@@ -5,14 +5,14 @@ import * as yup from 'yup';
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import catalogServices from '@/modules/catalogs/Services/catalog.services';
 
 import adminServices from '../services/admin.services';
-import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
-import { PermissionsCategory } from '../interfaces/permissions/permission.category.interface';
-import { PermissionsCategoryResponse } from '../interfaces/permissions/permission.category.response.interface';
-import { PermissionForm } from '../interfaces/permissions/permission.form.interface';
+import { RoleStatus } from '../interfaces/role/role.status.response.interface';
+import { RoleResponse } from '../interfaces/role/role.response.interface';
+import { RoleForm } from '../interfaces/role/role.form.interface';
 
-export function usePermission() {
+export function useRole() {
   const {
     errors,
     defineField,
@@ -27,16 +27,16 @@ export function usePermission() {
       id: yup.number().typeError('El campo id debe ser de tipo entero'),
       name: yup
         .string()
-        .required('El nombre del permiso es requerido')
+        .required('El nombre del rol es requerido')
         .min(3, 'El nombre de tener al menos 3 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .nullable(),
-      category: yup
-        .mixed<PermissionsCategory>()
-        .required('El campo de la categoría del permiso es requerido'),
-      active: yup.boolean(),
+      status: yup
+        .mixed<RoleStatus>()
+        .required('El campo del estado del rol es requerido'),
+      permissions_ids: yup.array(),
     }),
   });
 
@@ -63,14 +63,7 @@ export function usePermission() {
       alignItems: 'center',
     },
     {
-      field: 'category.name',
-      header: 'Categoria',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
-      field: 'active',
+      field: 'status.name',
       header: 'Estado',
       sortable: false,
       alignHeaders: 'center',
@@ -85,32 +78,69 @@ export function usePermission() {
     },
   ]);
 
-  const permissions = ref<PermissionsResponse[] | undefined>([]);
+  const headerPermissions = ref<TableHeaders[]>([
+    {
+      field: 'state',
+      header: 'Seleccion',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+      width: 10,
+    },
+    {
+      field: 'name',
+      header: 'Nombre',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
+  ]);
+
+  const role = ref<RoleResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
+  const permissionsPagination = reactive({
+    page: 1,
+    per_page: 5,
+    total_items: 0,
+  });
+  const permissionsList = ref<
+    {
+      id: number;
+      name: string;
+      description: string;
+      active: boolean;
+    }[]
+  >([]);
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
-  const [category, categoryAttrs] = defineField('category');
-  const [active, activeAttrs] = defineField('active');
+  const [status, statusAttrs] = defineField('status');
+  const [permissions_ids, permissionsIdsAttrs] = defineField('permissions_ids');
 
   const filter_name = ref<string | null>(null);
+  const filter_permission_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
-  const categoryPermissions = ref<PermissionsCategoryResponse[]>([]);
+  const globalStatus = ref<RoleStatus[]>([]);
 
-  const getCategoryPermissions = async () => {
+  const getStatus = async () => {
     try {
       startLoading();
-      const response = await adminServices.getCategoryPermissions();
+      const filter = {
+        page: undefined,
+        per_page: undefined,
+        table_header: 'mnt_role',
+      };
+      const response = await catalogServices.getGlobalStatus(filter);
       if (response.statusCode === 200) {
         if (Array.isArray(response.data)) {
-          categoryPermissions.value = response.data;
+          globalStatus.value = response.data;
         }
       }
     } catch (error) {
@@ -119,7 +149,7 @@ export function usePermission() {
       finishLoading();
     }
   };
-  const getPermissions = async () => {
+  const getRole = async () => {
     try {
       startLoading();
       const filter = {
@@ -127,10 +157,10 @@ export function usePermission() {
         per_page: pagination.per_page,
         filter_name: filter_name.value,
       };
-      const response = await adminServices.getPermissions(filter);
+      const response = await adminServices.getRole(filter);
 
       if (response.statusCode === 200) {
-        permissions.value = response.data.items;
+        role.value = response.data.items;
         pagination.page = response.data.pagination.currentPage;
         pagination.per_page = response.data.pagination.perPage;
         pagination.total_items = response.data.pagination.totalItems;
@@ -142,12 +172,12 @@ export function usePermission() {
     }
   };
 
-  const addPermission = async (form: PermissionForm) => {
+  const addRol = async (form: RoleForm) => {
     try {
       startLoading();
-      const response = await adminServices.postPermission(form);
+      const response = await adminServices.postRole(form);
       if (response.status === 201) {
-        getPermissions();
+        getRole();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -162,12 +192,12 @@ export function usePermission() {
     }
   };
 
-  const editPermission = async (form: PermissionForm) => {
+  const editRole = async (form: RoleForm) => {
     try {
       startLoading();
-      const response = await adminServices.putPermission(form);
+      const response = await adminServices.putRole(form);
       if (response.status === 200) {
-        getPermissions();
+        getRole();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -182,18 +212,42 @@ export function usePermission() {
     }
   };
 
-  const deletePermission = async (id: number) => {
+  const deleteRol = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deletePermission(id);
+      const response = await adminServices.deleteRole(id);
       if (response.status === 200) {
-        getPermissions();
+        getRole();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
           show: true,
         });
         return response.data;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
+  const getPermissions = async () => {
+    try {
+      startLoading();
+      const filter = {
+        page: permissionsPagination.page,
+        per_page: permissionsPagination.per_page,
+        filter_name: filter_permission_name.value
+          ? filter_permission_name.value
+          : null,
+        active: 1,
+      };
+      const response = await adminServices.getPermissions(filter);
+      if (response.statusCode === 200) {
+        permissionsList.value = response.data.items;
+        permissionsPagination.page = response.data.pagination.currentPage;
+        permissionsPagination.per_page = response.data.pagination.perPage;
+        permissionsPagination.total_items = response.data.pagination.totalItems;
       }
     } catch (error) {
       console.error(error);
@@ -220,18 +274,25 @@ export function usePermission() {
       return;
     }
     filter_name.value = null;
-    getPermissions();
+    getRole();
   };
 
-  const setPermissionItem = (value: PermissionsResponse) => {
+  const setRoleItem = (value: RoleResponse) => {
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
-    setFieldValue('active', value?.active);
-    console.log('Permission', value);
-    setFieldValue('category', value?.category);
+    setFieldValue('status', value?.status);
+    setFieldValue(
+      'permissions_ids',
+      value.permissionsId?.length ? value.permissionsId : [],
+    );
   };
 
+  const findRole = (value: string | null) => {
+    if (value) {
+      getRole();
+    }
+  };
   const findPermission = (value: string | null) => {
     if (value) {
       getPermissions();
@@ -247,29 +308,35 @@ export function usePermission() {
     resetField,
     setFieldError,
     setFieldValue,
-    getCategoryPermissions,
+    getStatus,
     validateAlphaInput,
     cleanSearch,
-    setPermissionItem,
-    findPermission,
-    getPermissions,
+    setRoleItem,
+    findRole,
+    getRole,
     id,
     idAttrs,
     name,
     nameAttrs,
     description,
     descriptionAttrs,
-    active,
-    activeAttrs,
-    category,
-    categoryAttrs,
+    status,
+    statusAttrs,
     alert,
     filter_name,
     pagination,
-    categoryPermissions,
-    permissions,
-    addPermission,
-    editPermission,
-    deletePermission,
+    globalStatus,
+    role,
+    headerPermissions,
+    permissionsPagination,
+    permissionsList,
+    permissions_ids,
+    permissionsIdsAttrs,
+    filter_permission_name,
+    addRol,
+    editRole,
+    deleteRol,
+    findPermission,
+    getPermissions,
   };
 }

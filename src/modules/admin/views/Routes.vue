@@ -92,7 +92,7 @@ import { Button, Chip } from 'primevue';
 import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
 import { useAdmin } from '../composables/useAdmin';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
+import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 import RouteFormModal from '../components/routes/RouteFormModal.vue';
 
 const adminInstance = useAdmin();

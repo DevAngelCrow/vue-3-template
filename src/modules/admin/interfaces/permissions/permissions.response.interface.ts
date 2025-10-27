@@ -5,5 +5,5 @@ export interface PermissionsResponse {
   name: string;
   description: string;
   active: boolean;
-  permissions_category: PermissionsCategory;
+  category: PermissionsCategory;
 }

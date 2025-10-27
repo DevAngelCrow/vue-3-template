@@ -19,13 +19,13 @@
       <div
         class="flex justify-center items-center flex-wrap flex-row gap-5 w-full"
       >
-        <RouteFormComponent :modal-state="modalState" />
-        <RoutePermissionDataTable
+        <RoleFormComponent :modal-state="modalState" />
+        <RolePermissionDataTable
           :modal-state="props.modalState.mode"
           @update:selected-permissions-ids="
             value => (selectedPermissionsIds = value)
           "
-          ref="routePermissionDataTable"
+          ref="rolePermissionDataTable"
           :readonly="props.modalState.isReadonly"
         />
       </div>
@@ -42,12 +42,12 @@ import { computed, ref, inject } from 'vue';
 
 import { useLoaderStore } from '@/core/store';
 
-import { useAdmin } from '../../composables/useAdmin';
-import { RouteForm } from '../../interfaces/routes/route-form.interface';
-import RoutePermissionDataTable from './RoutePermissionDataTable.vue';
-import RouteFormComponent from './RouteForm.vue';
+import RoleFormComponent from './RoleForm.vue';
+import RolePermissionDataTable from './RolePermissionDataTable.vue';
+import { RoleForm } from '../../interfaces/role/role.form.interface';
+import { useRole } from '../../composables/useRole';
 
-type AdminType = ReturnType<typeof useAdmin>;
+type RoleType = ReturnType<typeof useRole>;
 
 const props = defineProps<{
   modalState: {
@@ -61,42 +61,35 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['close-modal']);
-const admin = inject<AdminType>('useAdmin')!;
+const rol = inject<RoleType>('useRole')!;
 const { startLoading, finishLoading } = useLoaderStore();
-const { handleSubmit, addRoute, deleteRoute, editRoute } = admin;
+const { handleSubmit, addRol, deleteRol, editRole } = rol;
 
 const selectedPermissionsIds = ref<Set<number>>(new Set());
-const routePermissionDataTable = ref<InstanceType<
-  typeof RoutePermissionDataTable
+const rolePermissionDataTable = ref<InstanceType<
+  typeof RolePermissionDataTable
 > | null>(null);
 
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
-    const form: RouteForm = {
+    const form: RoleForm = {
       name: values.name,
       description: values.description,
-      child_route: values.child_route,
-      icon: values.icon,
-      order: values.order,
-      show: values.show ? true : false,
-      uri: values.uri,
-      parent_route: values.parent_route,
-      title: values.title,
+      id_status: values.id_status,
       permissions_id: [...selectedPermissionsIds.value],
     };
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        success = (await addRoute(form)) ? true : false;
+        success = (await addRol(form)) ? true : false;
         break;
       case 'edit':
         form.id = values.id;
-        form.active = values.active;
-        success = (await editRoute(form)) ? true : false;
+        success = (await editRole(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deleteRoute(values.id)) ? true : false;
+        success = (await deleteRol(values.id)) ? true : false;
         break;
     }
     if (success) {
@@ -110,7 +103,7 @@ const onSubMit = handleSubmit(async values => {
 });
 
 const closeModal = () => {
-  routePermissionDataTable.value?.closeModal();
+  rolePermissionDataTable.value?.closeModal();
   emit('close-modal');
 };
 

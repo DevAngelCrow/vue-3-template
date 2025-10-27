@@ -7,12 +7,10 @@ import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 import adminServices from '../services/admin.services';
-import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
-import { PermissionsCategory } from '../interfaces/permissions/permission.category.interface';
-import { PermissionsCategoryResponse } from '../interfaces/permissions/permission.category.response.interface';
-import { PermissionForm } from '../interfaces/permissions/permission.form.interface';
+import { CategoryPermissionsResponse } from '../interfaces/category-permissions/category-permissions-response.interface';
+import { CategoryPermissionForm } from '../interfaces/category-permissions/category-permission-form.interface';
 
-export function usePermission() {
+export function useCategoryPermission() {
   const {
     errors,
     defineField,
@@ -27,15 +25,12 @@ export function usePermission() {
       id: yup.number().typeError('El campo id debe ser de tipo entero'),
       name: yup
         .string()
-        .required('El nombre del permiso es requerido')
+        .required('El nombre de la categoría es requerido')
         .min(3, 'El nombre de tener al menos 3 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .nullable(),
-      category: yup
-        .mixed<PermissionsCategory>()
-        .required('El campo de la categoría del permiso es requerido'),
       active: yup.boolean(),
     }),
   });
@@ -63,13 +58,6 @@ export function usePermission() {
       alignItems: 'center',
     },
     {
-      field: 'category.name',
-      header: 'Categoria',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'active',
       header: 'Estado',
       sortable: false,
@@ -85,7 +73,7 @@ export function usePermission() {
     },
   ]);
 
-  const permissions = ref<PermissionsResponse[] | undefined>([]);
+  const categories = ref<CategoryPermissionsResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
@@ -97,29 +85,12 @@ export function usePermission() {
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
-  const [category, categoryAttrs] = defineField('category');
   const [active, activeAttrs] = defineField('active');
 
   const filter_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
-  const categoryPermissions = ref<PermissionsCategoryResponse[]>([]);
 
   const getCategoryPermissions = async () => {
-    try {
-      startLoading();
-      const response = await adminServices.getCategoryPermissions();
-      if (response.statusCode === 200) {
-        if (Array.isArray(response.data)) {
-          categoryPermissions.value = response.data;
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const getPermissions = async () => {
     try {
       startLoading();
       const filter = {
@@ -127,10 +98,9 @@ export function usePermission() {
         per_page: pagination.per_page,
         filter_name: filter_name.value,
       };
-      const response = await adminServices.getPermissions(filter);
-
+      const response = await adminServices.getCategoryPermissions(filter);
       if (response.statusCode === 200) {
-        permissions.value = response.data.items;
+        categories.value = response.data.items;
         pagination.page = response.data.pagination.currentPage;
         pagination.per_page = response.data.pagination.perPage;
         pagination.total_items = response.data.pagination.totalItems;
@@ -142,12 +112,12 @@ export function usePermission() {
     }
   };
 
-  const addPermission = async (form: PermissionForm) => {
+  const addCategoryPermission = async (form: CategoryPermissionForm) => {
     try {
       startLoading();
-      const response = await adminServices.postPermission(form);
+      const response = await adminServices.postCategoryPermission(form);
       if (response.status === 201) {
-        getPermissions();
+        getCategoryPermissions();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -162,12 +132,12 @@ export function usePermission() {
     }
   };
 
-  const editPermission = async (form: PermissionForm) => {
+  const editCategoryPermission = async (form: CategoryPermissionForm) => {
     try {
       startLoading();
-      const response = await adminServices.putPermission(form);
+      const response = await adminServices.putCategoryPermission(form);
       if (response.status === 200) {
-        getPermissions();
+        getCategoryPermissions();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -182,12 +152,12 @@ export function usePermission() {
     }
   };
 
-  const deletePermission = async (id: number) => {
+  const deleteCategoryPermission = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deletePermission(id);
+      const response = await adminServices.deleteCategoryPermission(id);
       if (response.status === 200) {
-        getPermissions();
+        getCategoryPermissions();
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -220,21 +190,20 @@ export function usePermission() {
       return;
     }
     filter_name.value = null;
-    getPermissions();
+    getCategoryPermissions();
   };
 
-  const setPermissionItem = (value: PermissionsResponse) => {
+  const setCategoryPermissionItem = (value: CategoryPermissionsResponse) => {
+    console.log(value, 'values');
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
     setFieldValue('active', value?.active);
-    console.log('Permission', value);
-    setFieldValue('category', value?.category);
   };
 
-  const findPermission = (value: string | null) => {
+  const findCategoryPermission = (value: string | null) => {
     if (value) {
-      getPermissions();
+      getCategoryPermissions();
     }
   };
   return {
@@ -250,9 +219,8 @@ export function usePermission() {
     getCategoryPermissions,
     validateAlphaInput,
     cleanSearch,
-    setPermissionItem,
-    findPermission,
-    getPermissions,
+    setCategoryPermissionItem,
+    findCategoryPermission,
     id,
     idAttrs,
     name,
@@ -261,15 +229,12 @@ export function usePermission() {
     descriptionAttrs,
     active,
     activeAttrs,
-    category,
-    categoryAttrs,
     alert,
     filter_name,
     pagination,
-    categoryPermissions,
-    permissions,
-    addPermission,
-    editPermission,
-    deletePermission,
+    addCategoryPermission,
+    editCategoryPermission,
+    deleteCategoryPermission,
+    categories,
   };
 }

@@ -72,11 +72,11 @@
 import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
 import { Button } from 'primevue';
 
-import { useAdmin } from '../../composables/useAdmin';
+import { useRole } from '../../composables/useRole';
 
-type AdminType = ReturnType<typeof useAdmin>;
+type RoleType = ReturnType<typeof useRole>;
 
-const admin = inject<AdminType>('useAdmin')!;
+const rol = inject<RoleType>('useRole')!;
 
 const props = defineProps<{
   modalState: 'add' | 'view' | 'edit' | 'delete' | 'closed';
@@ -93,7 +93,7 @@ const {
   filter_permission_name,
   getPermissions,
   findPermission,
-} = admin;
+} = rol;
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const selectAll = ref<boolean>(false);
 const permissionItemsFormated = ref<

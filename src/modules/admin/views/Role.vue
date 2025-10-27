@@ -1,12 +1,9 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full">
-    <section
-      id="departments_content"
-      class="w-full flex flex-row flex-wrap gap-5"
-    >
+    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
-          title="Permisos"
+          title="Roles"
           class="w-full md:w-auto flex justify-center items-center"
         />
         <div
@@ -14,15 +11,15 @@
           class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
         >
           <AppInputText
-            label="Buscar"
+            label="Buscar..."
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findPermission(filter_name)"
+            v-debounce:700.keydown.enter="() => findRole(filter_name)"
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findPermission(filter_name)"
+            v-debounce:700.click="() => findRole(filter_name)"
             >Buscar</Button
           >
           <Button
@@ -45,7 +42,7 @@
       <AppDataTable
         class="w-full"
         :headers="headers"
-        :items="permissions"
+        :items="role"
         :paginator="true"
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
@@ -82,35 +79,39 @@
             data.active ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
+        <template #body-show="{ data }">
+          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+        </template>
       </AppDataTable>
     </section>
-    <PermissionFormModal :modal-state="modalState" @close-modal="closeModal" />
+    <RoleFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, provide, reactive } from 'vue';
 import { Button, Chip } from 'primevue';
+import { onMounted, reactive, provide } from 'vue';
 
-import { usePermission } from '../composables/usePermissions';
-import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
-import PermissionFormModal from '../components/permissions/PermissionFormModal.vue';
+import { useRole } from '../composables/useRole';
+import { RoleResponse } from '../interfaces/role/role.response.interface';
+import RoleFormModal from '../components/roles/RoleFormModal.vue';
 
-const permissionInstance = usePermission();
-provide('usePermission', permissionInstance);
+const roleInstance = useRole();
+provide('useRole', roleInstance);
 
 const {
+  getRole,
+  role,
   filter_name,
   resetForm,
-  cleanSearch,
-  findPermission,
   validateAlphaInput,
-  setPermissionItem,
-  getPermissions,
-  getCategoryPermissions,
-  headers,
+  cleanSearch,
+  setRoleItem,
+  findRole,
   pagination,
-  permissions,
-} = permissionInstance;
+  headers,
+  getPermissions,
+  getStatus,
+} = roleInstance;
 
 const modalState = reactive<{
   show: boolean;
@@ -130,31 +131,28 @@ const modalState = reactive<{
 
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
-  data?: PermissionsResponse,
+  data?: RoleResponse,
 ) => {
   modalState.mode = action;
   modalState.isReadonly = action === 'view';
 
   switch (action) {
     case 'add':
-      modalState.title = 'Agregar Departamento';
+      modalState.title = 'Agregar Ruta';
       break;
     case 'view':
-      modalState.title = 'Ver Departamento';
-      setPermissionItem(data!);
+      modalState.title = 'Ver Ruta';
+      setRoleItem(data!);
       break;
     case 'edit':
-      modalState.title = 'Editar Departamento';
-      setPermissionItem(data!);
+      modalState.title = 'Editar Ruta';
+      setRoleItem(data!);
       break;
     case 'delete':
-      setPermissionItem(data!);
-      modalState.title = data!.active
-        ? 'Desactivar Permiso'
-        : 'Activar Permiso';
-      modalState.description = `¿Está seguro de cambiar el estado del permiso a ${data!.active ? 'inactivo' : 'activo'}?`;
+      setRoleItem(data!);
+      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
+      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
-      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;
@@ -175,11 +173,16 @@ const handlePagination = async (page: number) => {
     return;
   }
   pagination.page = page + 1;
-  getPermissions();
+  getRole();
 };
 onMounted(async () => {
-  await getPermissions();
-  await getCategoryPermissions();
+  try {
+    await getRole();
+    await getPermissions();
+    await getStatus();
+  } catch (error) {
+    console.error(error);
+  }
 });
 </script>
 <style scoped></style>

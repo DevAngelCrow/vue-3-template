@@ -7,9 +7,9 @@ import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { TableHeaders } from '@/core/interfaces';
 
-import { RouteForm } from '../interfaces/route-form.interface';
-import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
+import { RouteForm } from '../interfaces/routes/route-form.interface';
+import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autocomplete-obj.interface';
+import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 
 export function useAdmin() {
   const {
@@ -167,7 +167,7 @@ export function useAdmin() {
   });
   const permissionsPagination = reactive({
     page: 1,
-    per_page: 10,
+    per_page: 5,
     total_items: 0,
   });
   const { startLoading, finishLoading } = useLoaderStore();
@@ -201,7 +201,6 @@ export function useAdmin() {
       name: string;
       description: string;
       active: boolean;
-      show: boolean;
     }[]
   >([]);
 
@@ -315,6 +314,7 @@ export function useAdmin() {
         filter_name: filter_permission_name.value
           ? filter_permission_name.value
           : null,
+        active: 1,
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {

@@ -76,6 +76,17 @@ const routes = [
         name: 'permissions',
         component: () => import('../../modules/admin/views/Permissions.vue'),
       },
+      {
+        path: '/category-permissions',
+        name: 'category-permissions',
+        component: () =>
+          import('../../modules/admin/views/CategoriesPermissions.vue'),
+      },
+      {
+        path: '/role',
+        name: 'role',
+        component: () => import('../../modules/admin/views/Role.vue'),
+      },
     ],
   },
   {
