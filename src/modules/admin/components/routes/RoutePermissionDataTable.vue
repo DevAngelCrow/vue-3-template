@@ -187,6 +187,7 @@ const closeModal = () => {
     getPermissions();
   }
   filter_permission_name.value = null;
+  cleanSearch();
   emit('close-modal');
 };
 
@@ -201,10 +202,10 @@ watch(
   },
 );
 watch(permissionsList, newVal => {
+  permissionItemsFormated.value = [];
   setPermissionsIds(newVal);
   updateSelectAllState();
 });
-
 onMounted(() => {
   totalPermissions = permissionsPagination.total_items;
   setPermissionsIds(permissionsList.value);

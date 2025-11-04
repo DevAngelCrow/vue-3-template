@@ -100,6 +100,7 @@ provide('useAdmin', adminInstance);
 
 const {
   getRoutes,
+  getRouteById,
   child_route,
   resetField,
   items,
@@ -142,6 +143,7 @@ const openModal = (
       modalState.title = 'Agregar Ruta';
       break;
     case 'view':
+      getRouteById(data!.id);
       modalState.title = 'Ver Ruta';
       setRouteItem(data!);
       break;

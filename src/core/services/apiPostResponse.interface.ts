@@ -1,5 +1,5 @@
-export interface ApiPostResponse {
-  data: object;
+export interface ApiPostResponse<T = object> {
+  data: T;
   message: string;
   statusCode: number;
 }

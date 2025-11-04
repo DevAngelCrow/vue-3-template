@@ -1,4 +1,4 @@
-export interface RoutesResponse {
+export interface RouteResponseById {
   id: number;
   name: string;
   description: string;
@@ -15,6 +15,6 @@ export interface RoutesResponse {
     name: string;
     description: string;
     active: boolean;
-    category: number;
+    //category: number;
   }[];
 }

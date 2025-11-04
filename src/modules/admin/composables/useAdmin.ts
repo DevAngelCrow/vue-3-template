@@ -240,7 +240,26 @@ export function useAdmin() {
       finishLoading();
     }
   };
-
+  const getRouteById = async (id: number) => {
+    try {
+      startLoading();
+      permissionsList.value = [];
+      permissionsPagination.per_page = 0;
+      permissionsPagination.total_items = 0;
+      const response = await adminServices.getRoute(id);
+      if (response.statusCode === 200) {
+        permissionsList.value = response.data.permissions
+          ? response.data.permissions
+          : [];
+        permissionsPagination.per_page = 5;
+        permissionsPagination.total_items = response.data.permissions.length;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
   const addRoute = async (form: RouteForm) => {
     try {
       startLoading();
@@ -379,7 +398,9 @@ export function useAdmin() {
     setFieldValue('active', value.active);
     setFieldValue(
       'permissions_ids',
-      value.permissionsId?.length ? value.permissionsId : [],
+      value.permissions?.length
+        ? value.permissions.map(permission => permission.id)
+        : [],
     );
   };
 
@@ -393,6 +414,7 @@ export function useAdmin() {
     addRoute,
     editRoute,
     deleteRoute,
+    getRouteById,
     id,
     idAttrs,
     name,
