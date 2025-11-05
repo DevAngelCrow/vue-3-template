@@ -111,6 +111,7 @@ const {
   headers,
   getPermissions,
   getStatus,
+  getRolById,
 } = roleInstance;
 
 const modalState = reactive<{
@@ -141,6 +142,7 @@ const openModal = (
       modalState.title = 'Agregar Ruta';
       break;
     case 'view':
+      getRolById(data!.id);
       modalState.title = 'Ver Ruta';
       setRoleItem(data!);
       break;

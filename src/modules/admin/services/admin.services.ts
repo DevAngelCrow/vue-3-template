@@ -13,6 +13,7 @@ import { CategoryPermissionForm } from '../interfaces/category-permissions/categ
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { RouteResponseById } from '../interfaces/routes/route-by-id.response.interface';
+import { RolByIdResponse } from '../interfaces/role/rol-by-id.response.interface';
 
 const getAllRoutes = async (
   params: paginateParams,
@@ -154,6 +155,13 @@ const deleteRole = async (id: number) => {
   return response;
 };
 
+const getRol = async (id: number) => {
+  const response = await httpClient.get<ApiPostResponse<RolByIdResponse>>(
+    `security/roles/${id}`,
+  );
+  return response.data;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
@@ -173,4 +181,5 @@ export default {
   putRole,
   deleteRole,
   getRoute,
+  getRol,
 };

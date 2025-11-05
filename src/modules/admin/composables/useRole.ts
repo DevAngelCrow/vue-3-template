@@ -231,6 +231,25 @@ export function useRole() {
       finishLoading();
     }
   };
+  const getRolById = async (id: number) => {
+    try {
+      startLoading();
+      permissionsList.value = [];
+      permissionsPagination.total_items = 0;
+      const response = await adminServices.getRol(id);
+      if (response.statusCode === 200) {
+        permissionsList.value = response.data.permissions
+          ? response.data.permissions
+          : [];
+        permissionsPagination.per_page = 5;
+        permissionsPagination.total_items = response.data.permissions.length;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
   const getPermissions = async () => {
     try {
       startLoading();
@@ -284,7 +303,9 @@ export function useRole() {
     setFieldValue('status', value?.status);
     setFieldValue(
       'permissions_ids',
-      value.permissionsId?.length ? value.permissionsId : [],
+      value.permissions?.length
+        ? value.permissions.map(permission => permission.id)
+        : [],
     );
   };
 
@@ -338,5 +359,6 @@ export function useRole() {
     deleteRol,
     findPermission,
     getPermissions,
+    getRolById,
   };
 }

@@ -116,6 +116,11 @@ const handlePagination = async (page: number) => {
   if (page + 1 === permissionsPagination.page) {
     return;
   }
+  if (modalState.value === 'view') {
+    localPaginationViewMode(page);
+    updateSelectAllState();
+    return;
+  }
   permissionsPagination.page = page + 1;
   await getPermissions();
   updateSelectAllState();
@@ -194,6 +199,12 @@ const closeModal = () => {
 const cleanSearch = () => {
   filter_permission_name.value = null;
   getPermissions();
+};
+const localPaginationViewMode = (page: number) => {
+  permissionsList.value.slice(
+    (page - 1) * permissionsPagination.per_page,
+    page * permissionsPagination.per_page,
+  );
 };
 watch(
   () => selectedPermissionsIds.value.size,
