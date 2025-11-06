@@ -34,13 +34,16 @@
           dropdown
           @complete="findAutocomplete"
           :readonly="props.modalState.isReadonly"
+          :disabled="
+            props.modalState.mode === 'add' || props.modalState.mode === 'edit'
+          "
         />
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { AutoCompleteCompleteEvent } from 'primevue';
 
 import { useRole } from '../../composables/useRole';
@@ -83,5 +86,15 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   }
   statusFiltered.value = _filteredItems;
 };
+onMounted(() => {
+  if (props.modalState.mode === 'add') {
+    status.value = globalStatus.value.find(item => {
+      return (
+        item?.name?.toLowerCase() === 'activo' &&
+        item?.table_header === 'mnt_role'
+      );
+    });
+  }
+});
 </script>
 <style scoped></style>

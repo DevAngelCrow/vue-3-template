@@ -11,4 +11,5 @@ export interface RouteForm {
   title: string;
   active?: boolean;
   permissions_id: number[];
+  id_parent?: number;
 }

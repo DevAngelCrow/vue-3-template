@@ -61,12 +61,17 @@
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
+              :disabled="data?.status?.name === 'Inactivo'"
               @click="openModal('edit', data)"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
-              icon="pi pi-trash"
+              :icon="
+                data?.status?.name === 'Inactivo'
+                  ? 'pi pi-check-circle'
+                  : 'pi pi-trash'
+              "
               @click="openModal('delete', data)"
             ></Button>
           </div>
@@ -74,10 +79,13 @@
         <template #body-icon="{ data }">
           <i :class="data.icon"></i>
         </template>
-        <template #body-active="{ data }">
-          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
-            data.active ? 'Activo' : 'Inactivo'
-          }}</Chip>
+        <template #body-status.name="{ data }">
+          <Chip
+            :class="
+              data?.status?.name === 'Activo' ? 'bg-green-600' : 'bg-red-600'
+            "
+            >{{ data?.status?.name }}</Chip
+          >
         </template>
         <template #body-show="{ data }">
           <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
@@ -139,21 +147,22 @@ const openModal = (
 
   switch (action) {
     case 'add':
-      modalState.title = 'Agregar Ruta';
+      modalState.title = 'Agregar Rol';
       break;
     case 'view':
       getRolById(data!.id);
-      modalState.title = 'Ver Ruta';
+      modalState.title = 'Ver Rol';
       setRoleItem(data!);
       break;
     case 'edit':
-      modalState.title = 'Editar Ruta';
+      modalState.title = 'Editar Rol';
       setRoleItem(data!);
       break;
     case 'delete':
       setRoleItem(data!);
-      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
-      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
+      modalState.title =
+        data!.status.name === 'Activo' ? 'Desactivar Rol' : 'Activar Rol';
+      modalState.description = `¿Está seguro de cambiar el estado del rol a ${data!.status.name === 'Activo' ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
       break;
   }

@@ -106,21 +106,38 @@ const permissionItemsFormated = ref<
   }[]
 >([]);
 let totalPermissions: number = 0;
+const permissionsItemsLocal = ref<any>([]);
+const permissionsItemsFindLocal = ref<any>([]);
 const searchPermission = async (value: string | null) => {
   if (!value) return;
+  if (modalState.value === 'view') {
+    let _filteredItems = [];
+    for (let i = 0; i < permissionsItemsLocal.value.length; i++) {
+      let item = permissionsItemsLocal.value[i];
+      if (item?.name.toLowerCase().indexOf(value.toLocaleLowerCase()) === 0) {
+        _filteredItems.push(item);
+      }
+    }
+    permissionItemsFormated.value = _filteredItems;
+    permissionsItemsFindLocal.value = _filteredItems;
+    permissionsPagination.total_items = permissionItemsFormated.value.length;
+    localPaginationViewMode(0, true);
+    return;
+  }
   await findPermission(value);
   setPermissionsIds(permissionsList.value);
 };
 
 const handlePagination = async (page: number) => {
-  if (page + 1 === permissionsPagination.page) {
-    return;
-  }
   if (modalState.value === 'view') {
     localPaginationViewMode(page);
     updateSelectAllState();
     return;
   }
+  if (page + 1 === permissionsPagination.page) {
+    return;
+  }
+
   permissionsPagination.page = page + 1;
   await getPermissions();
   updateSelectAllState();
@@ -180,31 +197,50 @@ const setPermissionsIds = (
 };
 
 const closeModal = () => {
-  permissionItemsFormated.value = permissionsList.value.map(item => {
-    return {
-      ...item,
-      state: false,
-    };
-  });
+  // permissionItemsFormated.value = permissionsList.value.map(item => {
+  //   return {
+  //     ...item,
+  //     state: false,
+  //   };
+  // });
   selectedPermissionsIds.value.clear();
   if (permissionsPagination.page > 1) {
     permissionsPagination.page = 1;
     getPermissions();
   }
   filter_permission_name.value = null;
+  permissionItemsFormated.value = [];
+  if (modalState.value === 'view') {
+    getPermissions();
+  }
   cleanSearch();
   emit('close-modal');
 };
 
 const cleanSearch = () => {
   filter_permission_name.value = null;
+  if (modalState.value === 'view') {
+    permissionItemsFormated.value = [...permissionsItemsLocal.value];
+    totalPermissions = permissionsItemsLocal.value.length;
+    permissionsPagination.total_items = totalPermissions;
+    localPaginationViewMode(0);
+    return;
+  }
   getPermissions();
 };
-const localPaginationViewMode = (page: number) => {
-  permissionsList.value.slice(
-    (page - 1) * permissionsPagination.per_page,
-    page * permissionsPagination.per_page,
+const localPaginationViewMode = (page: number, find?: boolean) => {
+  let permissionsTemporalItems = [...permissionsItemsLocal.value];
+  if (find) {
+    permissionsTemporalItems = [...permissionsItemsFindLocal.value];
+  }
+  const currentPage = page + 1;
+  const start = (currentPage - 1) * permissionsPagination.per_page;
+  const end = currentPage * permissionsPagination.per_page;
+  const temporalPermissionsItemFormated = permissionsTemporalItems.slice(
+    start,
+    end,
   );
+  permissionItemsFormated.value = temporalPermissionsItemFormated;
 };
 watch(
   () => selectedPermissionsIds.value.size,
@@ -216,6 +252,11 @@ watch(permissionsList, newVal => {
   permissionItemsFormated.value = [];
   setPermissionsIds(newVal);
   updateSelectAllState();
+  if (modalState.value === 'view') {
+    permissionsItemsLocal.value = [...permissionItemsFormated.value];
+    localPaginationViewMode(0);
+    totalPermissions = permissionsItemsLocal.value.length;
+  }
 });
 onMounted(() => {
   totalPermissions = permissionsPagination.total_items;

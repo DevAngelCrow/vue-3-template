@@ -111,6 +111,7 @@ const permissionItemsFormated = ref<
 >([]);
 let totalPermissions: number = 0;
 const permissionsItemsLocal = ref<any>([]);
+const permissionsItemsFindLocal = ref<any>([]);
 const searchPermission = async (value: string | null) => {
   if (!value) return;
   if (modalState.value === 'view') {
@@ -122,8 +123,9 @@ const searchPermission = async (value: string | null) => {
       }
     }
     permissionItemsFormated.value = _filteredItems;
+    permissionsItemsFindLocal.value = _filteredItems;
     permissionsPagination.total_items = permissionItemsFormated.value.length;
-
+    localPaginationViewMode(0, true);
     return;
   }
   await findPermission(value);
@@ -214,6 +216,7 @@ const closeModal = () => {
   if (modalState.value === 'view') {
     getPermissions();
   }
+  //cleanSearch();
   emit('close-modal');
 };
 
@@ -229,13 +232,14 @@ const cleanSearch = () => {
   getPermissions();
 };
 const localPaginationViewMode = (page: number, find?: boolean) => {
+  let permissionsTemporalItems = [...permissionsItemsLocal.value];
   if (find) {
-    return;
+    permissionsTemporalItems = [...permissionsItemsFindLocal.value];
   }
   const currentPage = page + 1;
   const start = (currentPage - 1) * permissionsPagination.per_page;
   const end = currentPage * permissionsPagination.per_page;
-  const temporalPermissionsItemFormated = permissionsItemsLocal.value.slice(
+  const temporalPermissionsItemFormated = permissionsTemporalItems.slice(
     start,
     end,
   );

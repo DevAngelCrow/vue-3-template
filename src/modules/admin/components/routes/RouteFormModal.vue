@@ -82,6 +82,7 @@ const onSubMit = handleSubmit(async values => {
       show: values.show ? true : false,
       uri: values.uri,
       parent_route: values.parent_route,
+      id_parent: values.parent_route.id,
       title: values.title,
       permissions_id: [...selectedPermissionsIds.value],
     };

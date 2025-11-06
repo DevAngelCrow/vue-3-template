@@ -252,7 +252,7 @@ export function useAdmin() {
           ? response.data.permissions
           : [];
         permissionsPagination.per_page = 5;
-        permissionsPagination.total_items = response.data.permissions.length;
+        permissionsPagination.total_items = response?.data?.permissions?.length;
       }
     } catch (error) {
       console.error(error);

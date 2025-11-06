@@ -76,7 +76,7 @@ const onSubMit = handleSubmit(async values => {
     const form: RoleForm = {
       name: values.name,
       description: values.description,
-      id_status: values.id_status,
+      id_status: values.status.id,
       permissions_id: [...selectedPermissionsIds.value],
     };
     let success = false;
