@@ -56,18 +56,21 @@
               variant="text"
               icon="pi pi-eye"
               @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver detalle'"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
               @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
               @click="openModal('delete', data)"
+              v-tooltip.bottom="'Eliminar'"
             ></Button>
           </div>
         </template>

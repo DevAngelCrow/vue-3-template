@@ -56,6 +56,7 @@
               variant="text"
               icon="pi pi-eye"
               @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver detalle'"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
@@ -63,6 +64,7 @@
               icon="pi pi-pencil"
               :disabled="data?.status?.name === 'Inactivo'"
               @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
@@ -73,6 +75,9 @@
                   : 'pi pi-trash'
               "
               @click="openModal('delete', data)"
+              v-tooltip.bottom="
+                data?.status?.name === 'Inactivo' ? 'Activar' : 'Desactivar'
+              "
             ></Button>
           </div>
         </template>
