@@ -134,16 +134,12 @@ const modalState = reactive<{
   selectedItem: null as number | null,
 });
 
-<<<<<<< HEAD
-const titleModal = ref<string>('');
-=======
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
   data?: RoutesResponse,
 ) => {
   modalState.mode = action;
   modalState.isReadonly = action === 'view';
->>>>>>> 1651bb9bd185110febdf29bc4e1b48e701f4837a
 
   switch (action) {
     case 'add':
