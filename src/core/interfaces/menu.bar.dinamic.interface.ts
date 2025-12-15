@@ -8,9 +8,9 @@ export interface MenuBar {
   description: string;
   show: boolean;
   order: number;
-  parent?: MenuBar[];
-  children?: MenuBar[];
-  requiredAuth: boolean;
+  parent: MenuBar[];
+  children: MenuBar[];
+  required_auth: boolean;
   title: string;
   active: boolean;
   is_open: boolean;

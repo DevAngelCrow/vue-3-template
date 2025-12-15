@@ -41,7 +41,10 @@
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button unstyled class="!outline-none">
-              <i class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2" @click="openModal('details', data)"></i>
+              <i
+                class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2"
+                @click="openModal('details', data)"
+              ></i>
             </Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
@@ -53,7 +56,7 @@
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
-              @click=" openModalEstado('changeStatus', data)"
+              @click="openModalEstado('changeStatus', data)"
             ></Button>
           </div>
         </template>
@@ -63,71 +66,69 @@
             data ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
-        
       </AppDataTable>
     </section>
-      <AppModal
-          :show="showModal"
-          show-icon-close
-          :title="isDetailsMode ? 'Detalle País' : (isMode ? 'Editar País' : 'Agregar País')"
-          :show-btn-confirm-footer="isDetailsMode ? false : true"
-          :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
-          :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
-          :show-buttons="!isDetailsMode"
-          @close-modal="closeModalCreate"
-          @confirm-modal="confirmModal"
-          width="350px"
-        >
-          <div class="flex flex-col gap-6 py-5 w-[250px]">
-            <AppInputText 
-              v-model="name"
-              class="lg:w-full grow sm:max-w-[500px]"
-              label="Ingrese el nombre del país"
-              v-bind="nameAttrs"
-              :error-messages="errors.name"
-              :disabled="isDetailsMode"
-            />
-            <AppInputText 
-              v-model="abbreviation"
-              class="lg:w-full grow sm:max-w-[500px]"
-              label="Ingrese la abreviación del país"
-              v-bind="abbreviationAttrs"
-              :error-messages="errors.abbreviation"
-              :disabled="isDetailsMode"
-            />
+    <AppModal
+      :show="showModal"
+      show-icon-close
+      :title="
+        isDetailsMode ? 'Detalle País' : isMode ? 'Editar País' : 'Agregar País'
+      "
+      :show-btn-confirm-footer="isDetailsMode ? false : true"
+      :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
+      :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
+      :show-buttons="!isDetailsMode"
+      @close-modal="closeModalCreate"
+      @confirm-modal="confirmModal"
+      width="350px"
+    >
+      <div class="flex flex-col gap-6 py-5 w-[250px]">
+        <AppInputText
+          v-model="name"
+          class="lg:w-full grow sm:max-w-[500px]"
+          label="Ingrese el nombre del país"
+          v-bind="nameAttrs"
+          :error-messages="errors.name"
+          :disabled="isDetailsMode"
+        />
+        <AppInputText
+          v-model="abbreviation"
+          class="lg:w-full grow sm:max-w-[500px]"
+          label="Ingrese la abreviación del país"
+          v-bind="abbreviationAttrs"
+          :error-messages="errors.abbreviation"
+          :disabled="isDetailsMode"
+        />
 
-            <AppInputText 
-              v-model="code"
-              class="lg:w-full grow sm:max-w-[500px]"
-              label="Ingrese el código del país"
-              v-bind="codeAttrs"
-              :error-messages="errors.code"
-              :disabled="isDetailsMode"
-            />
-          </div>
-      </AppModal>
+        <AppInputText
+          v-model="code"
+          class="lg:w-full grow sm:max-w-[500px]"
+          label="Ingrese el código del país"
+          v-bind="codeAttrs"
+          :error-messages="errors.code"
+          :disabled="isDetailsMode"
+        />
+      </div>
+    </AppModal>
 
-      <AppModal
-        :show="showModalCambioStatus"
-        :show-icon-close=false
-        title="Cambiar estado"
-        :show-btn-confirm-footer="true"
-        :title-btn-confirm="'Confirmar'"
-        :title-btn-cancel="'Cancelar'"
-        :show-buttons="true"
-        @close-modal="CloseModalEstado"
-        @confirm-modal="confirmModalEstado"
-        width="450px">
-        <template #header>
-          <div class="mt-2">
-            <i class="pi pi-exclamation-circle" style="font-size: 5rem; color: #ffdd04; text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;"></i>          
-          </div>
-        </template>
-        <div class="flex flex-col gap-6 py-5 w-full">
-          
-          <p class="text-center">¿Está seguro que desea cambiar el estado del país?</p>
-        </div>
-      </AppModal>
+    <AppModal
+      :show="showModalCambioStatus"
+      show-icon-close
+      title="Cambiar estado"
+      :show-btn-confirm-footer="true"
+      :title-btn-confirm="'Confirmar'"
+      :title-btn-cancel="'Cancelar'"
+      :show-buttons="true"
+      @close-modal="CloseModalEstado"
+      @confirm-modal="confirmModalEstado"
+      width="450px"
+    >
+      <div class="flex flex-col gap-6 py-5 w-full">
+        <p class="text-center">
+          ¿Está seguro que desea cambiar el estado del país?
+        </p>
+      </div>
+    </AppModal>
   </div>
 </template>
 
@@ -151,7 +152,6 @@ const isDetailsMode = ref<boolean>(false);
 const editingCountryId = ref<number | null>(null);
 const showModalCambioStatus = ref<boolean>(false);
 
-
 /** Zona de Variables */
 const { startLoading, finishLoading } = useLoaderStore();
 const items = ref<CountryResponse[] | undefined>([]);
@@ -160,7 +160,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   isMode.value = false;
   isDetailsMode.value = false;
   editingCountryId.value = null;
-  
+
   if (type === 'create') {
     console.log('type', type);
     // Limpiar los campos del formulario
@@ -180,7 +180,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     abbreviation.value = country.abbreviation || '';
     code.value = country.code || '';
   }
-  
+
   showModal.value = true;
 };
 
@@ -206,7 +206,6 @@ const {
   errors,
   resetForm,
   updateCountry,
-
 } = useCountries();
 
 const closeModalCreate = (value: boolean) => {
@@ -223,28 +222,27 @@ const CloseModalEstado = (value: boolean) => {
   showModalCambioStatus.value = value;
 };
 const confirmModal = handleSubmit(async values => {
-   try {
+  try {
     console.log('values:', values);
     console.log('isMode:', isMode.value);
     console.log('editingCountryId:', editingCountryId.value);
     startLoading();
 
-    if(isMode.value && editingCountryId.value !== null) {
+    if (isMode.value && editingCountryId.value !== null) {
       // Modo edición
-      const updateForm: UpdateCountry= {
+      const updateForm: UpdateCountry = {
         id: editingCountryId.value,
         name: values.name,
         abbreviation: values.abbreviation,
         code: values.code,
         active: true,
       };
-      
-      console.log('Actualizando país', updateForm)
-      await updateCountry(updateForm);
 
-    }else {
+      console.log('Actualizando país', updateForm);
+      await updateCountry(updateForm);
+    } else {
       // Modo creación
-      const form: CreateCountry= {
+      const form: CreateCountry = {
         name: values.name,
         abbreviation: values.abbreviation,
         code: values.code,
@@ -253,15 +251,14 @@ const confirmModal = handleSubmit(async values => {
       console.log('Creando país', form);
       await createCountry(form);
     }
-      // Refrescar la lista de países después de crear uno nuevo
-      items.value = await getCountries();
-      closeModalCreate(false);
-      
-     } catch (error: unknown) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    // Refrescar la lista de países después de crear uno nuevo
+    items.value = await getCountries();
+    closeModalCreate(false);
+  } catch (error: unknown) {
+    console.error(error);
+  } finally {
+    finishLoading();
+  }
 });
 
 /** Zona de Headers de la tabla */
@@ -339,6 +336,6 @@ onMounted(async () => {
   } finally {
     finishLoading();
   }
-})
+});
 </script>
 <style scoped></style>

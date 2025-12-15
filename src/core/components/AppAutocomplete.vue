@@ -1,5 +1,5 @@
 <template>
-  <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
+  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon
@@ -10,7 +10,7 @@
           id="append-icon"
         />
         <AutoComplete
-          class="w-full"
+          :class="['w-full', readonly ? 'pointer-events-none' : '']"
           :type="typeInputLocal"
           :model-value="modelValue"
           @update:model-value="onUpdate"
@@ -144,6 +144,10 @@ const props = defineProps({
     default: '',
   },
   multiple: {
+    type: Boolean,
+    default: false,
+  },
+  readonly: {
     type: Boolean,
     default: false,
   },

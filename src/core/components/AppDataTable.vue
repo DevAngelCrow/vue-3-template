@@ -15,7 +15,11 @@
           </slot>
         </template>
         <template #body="slotProps">
-          <slot :name="`body-${header.field}`" :data="slotProps.data">
+          <slot
+            :name="`body-${header.field}`"
+            :data="slotProps.data"
+            :index="slotProps.index"
+          >
             {{ getNestedValue(slotProps.data, header.field) ?? '-' }}
           </slot>
         </template>
@@ -52,7 +56,7 @@ const {
   loadingIcon = 'pi pi-spin pi-spinner',
   rowHover = true,
   paginator = false,
-  page,
+  page = 1,
 } = defineProps<TableProps<T>>();
 
 const emit = defineEmits(['pageUpdate']);

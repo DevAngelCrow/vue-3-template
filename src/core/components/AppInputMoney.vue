@@ -1,62 +1,65 @@
 <template>
-  <div class="w-full max-w-[322px] relative">
-    <FloatLabel :variant="labelVariant" >
-    <IconField class="w-full group">
-      <InputIcon
-        :class="invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon"
-        v-if="showIcon"
-      />
-      <InputNumber
-        :class
-        type="text"
-        :model-value="modelValue"
-        @update:model-value="onUpdate"
-        :invalid="invalid"
-        v-bind="$attrs"
-        :autocomplete
-        :placeholder="displayPlaceholder"
-        :id="inputId"
-        @focus="() => (isFocused = true)"
-        @blur="() => (isFocused = false)"
-        mode="currency"
-        :currency
-        :locale
-        :show-buttons
-        :min
-        :max
-        :button-layout
-        fluid
-        :variant="inputVariant"
-      >
-        <template #incrementicon>
-          <span
-            :class="
-              buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
-            "
-          />
-        </template>
-        <template #decrementicon>
-          <span
-            :class="
-              buttonLayout === 'vertical' ? 'pi pi-chevron-down' : 'pi pi-minus'
-            "
-          />
-        </template>
-      </InputNumber>
-      
-    </IconField>
-    <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-      label
-    }}</label>
-  </FloatLabel>
-  <Message
-        class="left-0 top-full mt-0 text-xs z-10"
-        v-if="errorMessages.length"
-        :severity
-        :size
-        :variant
-        >{{ messageErrorField }}</Message
-      >
+  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
+    <FloatLabel :variant="labelVariant">
+      <IconField class="w-full group">
+        <InputIcon
+          :class="
+            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
+          "
+          v-if="showIcon"
+        />
+        <InputNumber
+          class="w-full"
+          type="text"
+          :model-value="modelValue"
+          @update:model-value="onUpdate"
+          :invalid="invalid"
+          v-bind="$attrs"
+          :autocomplete
+          :placeholder="displayPlaceholder"
+          :id="inputId"
+          @focus="() => (isFocused = true)"
+          @blur="() => (isFocused = false)"
+          mode="currency"
+          :currency
+          :locale
+          :show-buttons
+          :min
+          :max
+          :button-layout
+          fluid
+          :variant="inputVariant"
+        >
+          <template #incrementicon>
+            <span
+              :class="
+                buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
+              "
+            />
+          </template>
+          <template #decrementicon>
+            <span
+              :class="
+                buttonLayout === 'vertical'
+                  ? 'pi pi-chevron-down'
+                  : 'pi pi-minus'
+              "
+            />
+          </template>
+        </InputNumber>
+      </IconField>
+      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+        label
+      }}</label>
+    </FloatLabel>
+    <Message
+      class="left-0 top-full mt-0 text-xs z-10"
+      v-if="errorMessages.length"
+      :severity
+      :size
+      :variant
+      >{{ messageErrorField }}</Message
+    >
   </div>
 </template>
 <script setup lang="ts">
@@ -77,7 +80,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   placeholder: {
     type: String,
@@ -195,7 +198,7 @@ onMounted(() => {
 
 watch(
   () => props.errorMessages,
-  (newValue) => {
+  newValue => {
     invalid.value = true;
     if (!newValue.length) {
       invalid.value = false;

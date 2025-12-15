@@ -34,16 +34,58 @@ const routes = [
         component: () => import('@/views/Dashboard.vue'),
       },
       {
-
         path: '/countries',
         name: 'countries',
-        component: () => import('../../modules/catalogs/countries/views/countries.vue'),
+        component: () =>
+          import('../../modules/catalogs/countries/views/countries.vue'),
       },
       {
         path: '/routes-administration',
         name: 'routes-administration',
         meta: { requiresAuth: true },
         component: () => import('../../modules/admin/views/Routes.vue'),
+      },
+      {
+        path: '/departments',
+        name: 'departments',
+        component: () =>
+          import('../../modules/catalogs/departments/views/Departments.vue'),
+      },
+      {
+        path: '/municipalities',
+        name: 'municipalities',
+        component: () =>
+          import(
+            '../../modules/catalogs/municipalities/views/Municipalities.vue'
+          ),
+      },
+      {
+        path: '/districts',
+        name: 'districts',
+        component: () =>
+          import('../../modules/catalogs/districts/views/Districts.vue'),
+      },
+      {
+        path: '/global-status',
+        name: 'global-status',
+        component: () =>
+          import('../../modules/catalogs/global-status/views/GlobalStatus.vue'),
+      },
+      {
+        path: '/permissions',
+        name: 'permissions',
+        component: () => import('../../modules/admin/views/Permissions.vue'),
+      },
+      {
+        path: '/category-permissions',
+        name: 'category-permissions',
+        component: () =>
+          import('../../modules/admin/views/CategoriesPermissions.vue'),
+      },
+      {
+        path: '/role',
+        name: 'role',
+        component: () => import('../../modules/admin/views/Role.vue'),
       },
     ],
   },

@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-[322px] relative">
+  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon
@@ -10,7 +10,7 @@
           id="append-icon"
         />
         <Textarea
-          :class
+          class="w-full"
           :type="typeInputLocal"
           :model-value="modelValue"
           @update:model-value="onUpdate"
@@ -60,7 +60,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full',
+    default: 'w-full max-w-[322px]',
   },
   type: {
     type: String,

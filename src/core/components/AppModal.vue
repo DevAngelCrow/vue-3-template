@@ -11,7 +11,7 @@
     :stylesShowDocument="stylesShowDocument"
     :pt="{
       content: {
-        class: 'scrollbar-hide',
+        class: 'scrollbar-hide px-0.5 md:pr-[1.25rem] md:pl-[1.25rem]',
       },
     }"
     :pt-options="{ mergeProps: true }"
@@ -45,8 +45,12 @@
           v-if="footerButtons"
           class="w-full flex justify-center columns-2 gap-8"
         >
-          <Button v-if="showBtnCancelFooter" outlined @click="closeModal">{{ titleBtnCancel }}</Button>
-          <Button v-if="showBtnConfirmFooter" @click="confirmModal">{{ titleBtnConfirm }}</Button>
+          <Button v-if="showBtnCancelFooter" outlined @click="closeModal">{{
+            titleBtnCancel
+          }}</Button>
+          <Button v-if="showBtnConfirmFooter" @click="confirmModal">{{
+            titleBtnConfirm
+          }}</Button>
         </div>
       </slot>
     </template>

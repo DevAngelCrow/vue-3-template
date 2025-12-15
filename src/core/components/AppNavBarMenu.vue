@@ -32,29 +32,6 @@
           </a>
         </router-link>
       </template>
-      <!-- <template #end>
-        <div
-          class="app-navbar-end hover:bg-surface-400 hover:scale-110 transform transition-all flex justify-center items-center pa-0 ma-0 rounded-full w-auto h-fauto"
-          @click="toggle"
-          aria-haspopup="true"
-          aria-controls="overlay_menu"
-        >
-          <Avatar
-            class="hover:scale-100 hover:px-1 hover:py-1 transform transition-all"
-            image="https://i.pravatar.cc/150"
-            shape="circle"
-            alt="prueba"
-            size="xlarge"
-          />
-          <MenuPrime
-            class="mt-2"
-            ref="popUp"
-            id="overlay_menu"
-            :popup="true"
-            :model="menuUser"
-          />
-        </div>
-      </template> -->
     </Menubar>
     <div
       class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full aspect-square"
@@ -153,27 +130,30 @@ const checkWrapMenu = () => {
 
       if (wrapIndex !== null) {
         // Si hay desbordamiento, cortamos el menú visible y emitimos el resto
-        menuAppsideBar.value = menuCopy.value.slice(wrapIndex);
+        const menuAppSideBarWithoutUser = menuCopy.value.slice(wrapIndex);
+
+        menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
+          item => !item.isUser,
+        );
         menuMapped.value = menuCopy.value.slice(0, wrapIndex);
       } else {
         // Si no hay desbordamiento, nos aseguramos de que el sidebar esté vacío
         menuAppsideBar.value = [];
         menuMapped.value = menuCopy.value.filter(item => !item.isUser);
       }
-      console.log(wrapIndex, 'HAY UN WRAPINDEX');
       emit('update:menu-sidebar', menuAppsideBar.value);
     });
   });
 };
 
 watch(widthNavBarMenu, new_value => {
-  console.log(new_value, 'width');
   if (new_value <= 769) {
-    console.log('ingreso en este bloque');
-    menuAppsideBar.value = [...menuCopy.value];
+    const menuAppSideBarWithoutUser = [...menuCopy.value];
+    menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
+      item => !item.isUser,
+    );
     emit('update:menu-sidebar', menuAppsideBar.value);
   } else {
-    console.log('ingreso en el else');
     checkWrapMenu();
   }
 });

@@ -13,14 +13,24 @@
           <AppInputText
             label="Buscar"
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
+            v-model="filter_name"
+            @update:modelValue="validateAlphaInput(filter_name)"
+            v-debounce:700.keydown.enter="() => findRoute(filter_name)"
           />
-          <Button class="flex-shrink-0 grow rounded-md">Buscar</Button>
-          <Button class="flex-shrink-0 grow rounded-md" outlined
+          <Button
+            class="flex-shrink-0 grow rounded-md"
+            v-debounce:700.click="() => findRoute(filter_name)"
+            >Buscar</Button
+          >
+          <Button
+            class="flex-shrink-0 grow rounded-md"
+            outlined
+            v-debounce:700.click="cleanSearch"
             >Limpiar</Button
           >
           <Button
             class="flex-shrink-0 grow rounded-md"
-            @click="handledModal(showModal, 'agregar')"
+            @click="openModal('add')"
             ><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"
@@ -34,29 +44,33 @@
         :headers="headers"
         :items="items"
         :paginator="true"
-        :per_page="per_page"
-        :total_items="total_items"
-        :page="page"
-        @page-update="
-          (value: number) => {
-            page = value + 1;
-            getRoutes();
-          }
-        "
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        @page-update="handlePagination"
       >
-        <template #body-acciones>
+        <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
+              icon="pi pi-eye"
+              @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver detalle'"
+            ></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
               icon="pi pi-pencil"
-              @click=""
+              @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
-              @click=""
+              @click="openModal('delete', data)"
+              v-tooltip.bottom="'Eliminar'"
             ></Button>
           </div>
         </template>
@@ -64,296 +78,105 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data ? 'bg-green-600' : 'bg-red-600'">{{
-            data ? 'Activo' : 'Inactivo'
+          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
+            data.active ? 'Activo' : 'Inactivo'
           }}</Chip>
         </template>
         <template #body-show="{ data }">
-          <i :class="data ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
         </template>
       </AppDataTable>
     </section>
-    <AppModal
-      :title="titleModal"
-      :show="showModal"
-      :title-btn-cancel="'Cancelar'"
-      :title-btn-confirm="'Guardar'"
-      footer-buttons
-      show-icon-close
-      width="35rem"
-      @close-modal="handledModal(showModal, '')"
-      @confirm-modal="onSubMit"
-    >
-      <section
-        id="body_modal"
-        class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5"
-      >
-        <AppInputText
-          class="w-full min-w-0"
-          id="name"
-          label="Nombre*"
-          v-model="name"
-          :error-messages="errors.name"
-          v-bind="nameAttrs"
-        />
-        <AppInputText
-          class="w-full min-w-0"
-          id="title"
-          label="Título*"
-          v-model="title"
-          :error-messages="errors.title"
-          v-bind="titleAttrs"
-        />
-        <AppInputText
-          class="w-full min-w-0"
-          id="uri"
-          label="Uri*"
-          v-model="uri"
-          :error-messages="errors.uri"
-          v-bind="uriAttrs"
-          @update:modelValue="validateInputUri(uri, 'uri')"
-        />
-        <AppInputText
-          class="w-full min-w-0"
-          id="description"
-          label="Descripción*"
-          v-model="description"
-          :error-messages="errors.description"
-          v-bind="descriptionAttrs"
-        />
-        <div class="w-full flex flex-wrap gap-5">
-          <AppInputText
-            class="grow w-[50%] min-w-auto"
-            id="order"
-            label="Orden*"
-            v-model="order"
-            :error-messages="errors.order"
-            v-bind="orderAttrs"
-          />
-          <AppInputText
-            class="grow w-[50%] min-w-auto"
-            id="icon"
-            label="Ícono (nombre)*"
-            v-model="icon"
-            :error-messages="errors.icon"
-            v-bind="iconAttrs"
-          />
-        </div>
-        <div class="w-full flex flex-wrap justify-start">
-          <div class="w-[50%]">
-            <AppCheckBox
-              id="child_route"
-              label="Ruta padre"
-              v-model="child_route"
-              v-bind="child_routeAttrs"
-              binary
-            />
-          </div>
-          <div class="w-[50%]">
-            <AppCheckBox
-              id="show"
-              label="Mostrar"
-              v-model="show"
-              v-bind="showAttrs"
-              binary
-            />
-          </div>
-        </div>
-        <AppAutocomplete
-          :class="showParentRoute"
-          id="patern_route"
-          label="Ruta padre"
-          v-model="parent_route"
-          v-bind="parent_routeAttrs"
-          :error-messages="errors.parent_route"
-          option-label="title"
-          :suggestions="routesFiltered"
-          dropdown
-          @complete="findAutocomplete"
-        />
-      </section>
-    </AppModal>
+    <RouteFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
 <script setup lang="ts">
-import { AutoCompleteCompleteEvent, Button, Chip } from 'primevue';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
-
-import { TableHeaders } from '@/core/interfaces';
-import { useLoaderStore } from '@/core/store';
+import { Button, Chip } from 'primevue';
+import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
 import { useAdmin } from '../composables/useAdmin';
-import { RouteForm } from '../interfaces/route-form.interface';
+import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
+import RouteFormModal from '../components/routes/RouteFormModal.vue';
 
-const { startLoading, finishLoading } = useLoaderStore();
+const adminInstance = useAdmin();
+provide('useAdmin', adminInstance);
+
 const {
   getRoutes,
-  addRoute,
-  errors,
-  name,
-  nameAttrs,
-  title,
-  titleAttrs,
-  uri,
-  uriAttrs,
-  description,
-  descriptionAttrs,
-  order,
-  orderAttrs,
-  icon,
-  iconAttrs,
+  getRouteById,
   child_route,
-  child_routeAttrs,
-  show,
-  showAttrs,
-  parent_route,
-  parent_routeAttrs,
-  handleSubmit,
-  parentRoutes,
   resetField,
-  page,
-  total_items,
-  per_page,
   items,
+  filter_name,
   resetForm,
-  validateInputUri,
-} = useAdmin();
+  validateAlphaInput,
+  cleanSearch,
+  setRouteItem,
+  findRoute,
+  pagination,
+  headers,
+  getPermissions,
+} = adminInstance;
 
-const headers = ref<TableHeaders[]>([
-  {
-    field: 'id',
-    header: 'No.',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'name',
-    header: 'Nombre',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'description',
-    header: 'Descripción',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'icon',
-    header: 'Ícono',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'uri',
-    header: 'Uri',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'show',
-    header: 'Mostrar',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'order',
-    header: 'Orden',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'parent_route.uri',
-    header: 'Ruta padre',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'active',
-    header: 'Estado',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'acciones',
-    header: 'Acciones',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-]);
+const modalState = reactive<{
+  show: boolean;
+  mode: 'closed' | 'add' | 'view' | 'edit' | 'delete';
+  title: string;
+  description: string;
+  isReadonly: boolean;
+  selectedItem: null | number;
+}>({
+  show: false,
+  mode: 'closed',
+  title: '',
+  description: '',
+  isReadonly: false,
+  selectedItem: null as number | null,
+});
 
+<<<<<<< HEAD
 const titleModal = ref<string>('');
+=======
+const openModal = (
+  action: 'add' | 'view' | 'edit' | 'delete',
+  data?: RoutesResponse,
+) => {
+  modalState.mode = action;
+  modalState.isReadonly = action === 'view';
+>>>>>>> 1651bb9bd185110febdf29bc4e1b48e701f4837a
 
-const showModal = ref<boolean>(false);
-const routesFiltered = ref<any[]>([]);
-
-const handledModal = (flag: boolean, action: string) => {
-  if (!flag && action === 'agregar') {
-    titleModal.value = 'Agregar ruta';
-    showModal.value = !flag;
-    return;
+  switch (action) {
+    case 'add':
+      modalState.title = 'Agregar Ruta';
+      break;
+    case 'view':
+      getRouteById(data!.id);
+      modalState.title = 'Ver Ruta';
+      setRouteItem(data!);
+      break;
+    case 'edit':
+      modalState.title = 'Editar Ruta';
+      setRouteItem(data!);
+      break;
+    case 'delete':
+      setRouteItem(data!);
+      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
+      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
+      modalState.selectedItem = data!.id;
+      break;
   }
-  showModal.value = false;
-  title.value = '';
+  modalState.show = true;
+};
+
+const closeModal = () => {
+  modalState.show = false;
+  modalState.mode = 'closed';
+  modalState.title = '';
+  modalState.description = '';
+  modalState.isReadonly = false;
+  modalState.selectedItem = null;
   resetForm();
 };
-
-const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-  let query = event?.query;
-  let _filteredItems = [];
-  for (let i = 0; i < parentRoutes.value.length; i++) {
-    let item = parentRoutes.value[i];
-
-    if (item?.title?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-      _filteredItems.push(item);
-    }
-  }
-  routesFiltered.value = _filteredItems;
-};
-
-const onSubMit = handleSubmit(async values => {
-  try {
-    startLoading();
-    const form: RouteForm = {
-      name: values.name,
-      description: values.description,
-      child_route: values.child_route,
-      icon: values.icon,
-      order: values.order,
-      show: values.show,
-      uri: values.uri,
-      parent_route: values.parent_route,
-      title: values.title,
-    };
-    await addRoute(form);
-    handledModal(showModal.value, 'agregar');
-  } catch (error) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
-});
-
-const showParentRoute = computed(() => {
-  try {
-    if (child_route.value) {
-      return 'w-full !max-w-full min-w-auto max-h-20 transition-all transition-discrete duration-300';
-    }
-    return 'w-full !max-w-full min-w-auto max-h-0 transition-all transition-discrete duration-300 opacity-0';
-  } catch (error) {
-    console.error(error);
-  }
-});
 
 watch(
   child_route,
@@ -373,9 +196,17 @@ watch(
   },
 );
 
+const handlePagination = async (page: number) => {
+  if (page + 1 === pagination.page) {
+    return;
+  }
+  pagination.page = page + 1;
+  getRoutes();
+};
 onMounted(async () => {
   try {
     await getRoutes();
+    await getPermissions();
   } catch (error) {
     console.error(error);
   }

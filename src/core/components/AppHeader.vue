@@ -43,7 +43,7 @@ const items = computed<MenuBar[]>(() => {
   return menuInfo.value
     .filter(
       item =>
-        (item.show && item.children.length > 0) ||
+        (item.show && item.children.length > 0 && item.title) ||
         (item.show && item.children.length === 0 && item.parent === null),
     )
     .map(m => {
