@@ -13,14 +13,22 @@
           <AppInputText
             label="Buscar"
             class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
+            v-model="filter_name"
+            @update:modelValue="validateAlphaInput(filter_name)"
+            v-debounce:700.keydown.enter="() => findCountry(filter_name)"
           />
-          <Button class="flex-shrink-0 grow rounded-md">Buscar</Button>
-          <Button class="flex-shrink-0 grow rounded-md" outlined
+          <Button class="flex-shrink-0 grow rounded-md"
+          v-debounce:700.click="() => findCountry(filter_name)"
+          >Buscar</Button>
+
+          <Button class="flex-shrink-0 grow rounded-md"
+          v-debounce:700.click="cleanSearch"
+           outlined
             >Limpiar</Button
           >
           <Button
             class="flex-shrink-0 grow rounded-md"
-            @click="openModal('create')"
+            @click="openModal('add')"
             ><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"
@@ -32,10 +40,12 @@
       <AppDataTable
         class="w-full"
         :headers="headers"
-        :items="items"
+        :items="countries"
         :paginator="true"
-        :per_page="10"
-        :total_pages="1"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        @page-update="handlePagination"
       >
         
         <template #body-acciones="{ data }">
@@ -43,7 +53,7 @@
             <Button unstyled class="!outline-none">
               <i
                 class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2"
-                @click="openModal('details', data)"
+                @click="openModal('view', data)"
               ></i>
             </Button>
             <Button
@@ -56,7 +66,7 @@
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
-              @click="openModalEstado('changeStatus', data)"
+              @click="openModal('delete', data)"
             ></Button>
           </div>
         </template>
@@ -69,27 +79,28 @@
       </AppDataTable>
     </section>
     <AppModal
-      :show="showModal"
+      :show="modalState.show"
       show-icon-close
-      :title="
-        isDetailsMode ? 'Detalle País' : isMode ? 'Editar País' : 'Agregar País'
-      "
-      :show-btn-confirm-footer="isDetailsMode ? false : true"
-      :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
-      :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
-      :show-buttons="!isDetailsMode"
-      @close-modal="closeModalCreate"
+      :title="modalState.title"
+      :show-btn-confirm-footer="modalState.mode !== 'view'"
+      :title-btn-confirm="getModalButtons().confirmText"
+      :title-btn-cancel="getModalButtons().cancelText"
+      :show-buttons="true"
+      @close-modal="closeModal"
       @confirm-modal="confirmModal"
-      width="350px"
+      width="450px"
     >
-      <div class="flex flex-col gap-6 py-5 w-[250px]">
+      <section
+        v-if="modalState.mode !== 'delete'"
+        class="flex flex-col gap-6 py-5 w-full"
+      >
         <AppInputText
           v-model="name"
           class="lg:w-full grow sm:max-w-[500px]"
           label="Ingrese el nombre del país"
           v-bind="nameAttrs"
           :error-messages="errors.name"
-          :disabled="isDetailsMode"
+          :disabled="modalState.isReadonly"
         />
         <AppInputText
           v-model="abbreviation"
@@ -97,44 +108,29 @@
           label="Ingrese la abreviación del país"
           v-bind="abbreviationAttrs"
           :error-messages="errors.abbreviation"
-          :disabled="isDetailsMode"
+          :disabled="modalState.isReadonly"
         />
-
         <AppInputText
           v-model="code"
           class="lg:w-full grow sm:max-w-[500px]"
           label="Ingrese el código del país"
           v-bind="codeAttrs"
           :error-messages="errors.code"
-          :disabled="isDetailsMode"
+          :disabled="modalState.isReadonly"
         />
-      </div>
-    </AppModal>
-
-    <AppModal
-      :show="showModalCambioStatus"
-      show-icon-close
-      title="Cambiar estado"
-      :show-btn-confirm-footer="true"
-      :title-btn-confirm="'Confirmar'"
-      :title-btn-cancel="'Cancelar'"
-      :show-buttons="true"
-      @close-modal="CloseModalEstado"
-      @confirm-modal="confirmModalEstado"
-      width="450px"
-    >
-      <div class="flex flex-col gap-6 py-5 w-full">
-        <p class="text-center">
-          ¿Está seguro que desea cambiar el estado del país?
-        </p>
-      </div>
+      </section>
+      <section v-else class="w-full flex flex-wrap gap-5 py-5">
+        <div class="w-full flex justify-center text-center items-center">
+          <span class="text-center flex">{{ modalState.description }}</span>
+        </div>
+      </section>
     </AppModal>
   </div>
 </template>
 
 <script setup lang="ts">
 /** Zona de Imports */
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 import { Button, Chip } from 'primevue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -143,54 +139,65 @@ import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
 
 import { useCountries } from '../../composables/useCountries';
-import { CountryResponse } from '../../interfaces/country.response.interface';
 import { CreateCountry } from '../../interfaces/country.create.interface';
 import { UpdateCountry } from '../../interfaces/country.update.interface';
-const showModal = ref<boolean>(false);
-const isMode = ref<boolean>(false);
-const isDetailsMode = ref<boolean>(false);
 const editingCountryId = ref<number | null>(null);
-const showModalCambioStatus = ref<boolean>(false);
+
+const modalState = reactive<{
+  show: boolean;
+  mode: 'closed' | 'add' | 'view' | 'edit' | 'delete';
+  title: string;
+  description: string;
+  isReadonly: boolean;
+  selectedItem: null | number;
+}>({
+  show: false,
+  mode: 'closed',
+  title: '',
+  description: '',
+  isReadonly: false,
+  selectedItem: null as number | null,
+});
 
 /** Zona de Variables */
 const { startLoading, finishLoading } = useLoaderStore();
-const items = ref<CountryResponse[] | undefined>([]);
-const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
-  // Resetear todos los estados
-  isMode.value = false;
-  isDetailsMode.value = false;
+
+const openModal = (
+  action: 'add' | 'view' | 'edit' | 'delete',
+  country?: any,
+) => {
+  modalState.mode = action;
+  modalState.isReadonly = action === 'view';
   editingCountryId.value = null;
 
-  if (type === 'create') {
-    console.log('type', type);
-    // Limpiar los campos del formulario
-    resetForm();
-  } else if (type === 'edit') {
-    isMode.value = true;
-    // Rellena con los datos del país a editar
-    editingCountryId.value = country.id;
-    name.value = country.name || '';
-    abbreviation.value = country.abbreviation || '';
-    code.value = country.code || '';
-  } else if (type === 'details') {
-    console.log('entro a detalle:', country);
-    isDetailsMode.value = true;
-    // Rellena con los datos del país a ver
-    name.value = country.name || '';
-    abbreviation.value = country.abbreviation || '';
-    code.value = country.code || '';
+  switch (action) {
+    case 'add':
+      modalState.title = 'Agregar País';
+      resetForm();
+      break;
+    case 'view':
+      modalState.title = 'Ver País';
+      setCountriesItem(country!);
+      break;
+    case 'edit':
+      modalState.title = 'Editar País';
+      editingCountryId.value = country.id;
+      setCountriesItem(country!);
+      break;
+    case 'delete':
+      setCountriesItem(country!);
+      modalState.title = country!.active
+        ? 'Desactivar País'
+        : 'Activar País';
+      modalState.description = `¿Está seguro de cambiar el estado del país a ${country!.active ? 'inactivo' : 'activo'}?`;
+      modalState.selectedItem = country!.id;
+      editingCountryId.value = country!.id;
+      break;
   }
-
-  showModal.value = true;
+  modalState.show = true;
 };
 
-const openModalEstado = (type: 'changeStatus', country?: any) => {
-  if (type === 'changeStatus') {
-    // Aquí puedes agregar lógica adicional si es necesario
-    console.log('Abriendo modal para cambiar estado del país:', country);
-  }
-  showModalCambioStatus.value = true;
-};
+
 
 /** Zona de Composables */
 const {
@@ -206,54 +213,80 @@ const {
   errors,
   resetForm,
   updateCountry,
+  countries, // Usar el ref del composable
+  setCountriesItem,
+  deleteCountry,
+  pagination,
+  filter_name,
+  validateAlphaInput,
+  findCountry,
+  cleanSearch,
 } = useCountries();
 
-const closeModalCreate = (value: boolean) => {
-  showModal.value = value;
-  if (!value) {
-    // Resetear estados cuando se cierra el modal
-    isMode.value = false;
-    isDetailsMode.value = false;
-    editingCountryId.value = null;
-  }
+const closeModal = () => {
+  modalState.show = false;
+  modalState.mode = 'closed';
+  modalState.title = '';
+  modalState.description = '';
+  modalState.selectedItem = null;
+  modalState.isReadonly = false;
+  editingCountryId.value = null;
+  resetForm();
 };
 
-const CloseModalEstado = (value: boolean) => {
-  showModalCambioStatus.value = value;
+const getModalButtons = () => {
+  switch (modalState.mode) {
+    case 'add':
+      return { confirmText: 'Agregar', cancelText: 'Cancelar' };
+    case 'edit':
+      return { confirmText: 'Guardar', cancelText: 'Cancelar' };
+    case 'delete':
+      return { confirmText: 'Confirmar', cancelText: 'Cancelar' };
+    case 'view':
+      return { confirmText: '', cancelText: 'Cerrar' };
+    default:
+      return { confirmText: 'Aceptar', cancelText: 'Cancelar' };
+  }
 };
 const confirmModal = handleSubmit(async values => {
   try {
-    console.log('values:', values);
-    console.log('isMode:', isMode.value);
-    console.log('editingCountryId:', editingCountryId.value);
     startLoading();
+    let success = false;
 
-    if (isMode.value && editingCountryId.value !== null) {
-      // Modo edición
-      const updateForm: UpdateCountry = {
-        id: editingCountryId.value,
-        name: values.name,
-        abbreviation: values.abbreviation,
-        code: values.code,
-        active: true,
-      };
+    switch (modalState.mode) {
+      case 'add':
+        // eslint-disable-next-line no-case-declarations
+        const form: CreateCountry = {
+          name: values.name,
+          abbreviation: values.abbreviation,
+          code: values.code,
+          active: true,
+        };
+        success = (await createCountry(form)) ? true : false;
+        break;
 
-      console.log('Actualizando país', updateForm);
-      await updateCountry(updateForm);
-    } else {
-      // Modo creación
-      const form: CreateCountry = {
-        name: values.name,
-        abbreviation: values.abbreviation,
-        code: values.code,
-        active: true,
-      };
-      console.log('Creando país', form);
-      await createCountry(form);
+      case 'edit':
+        // eslint-disable-next-line no-case-declarations
+        const updateForm: UpdateCountry = {
+          id: editingCountryId.value!,
+          name: values.name,
+          abbreviation: values.abbreviation,
+          code: values.code,
+          active: true,
+        };
+        success = (await updateCountry(updateForm)) ? true : false;
+        break;
+
+      case 'delete':
+        if (modalState.selectedItem !== null) {
+          success = (await deleteCountry(modalState.selectedItem)) ? true : false;
+        }
+        break;
     }
-    // Refrescar la lista de países después de crear uno nuevo
-    items.value = await getCountries();
-    closeModalCreate(false);
+
+    if (success || modalState.mode === 'view') {
+      closeModal();
+    }
   } catch (error: unknown) {
     console.error(error);
   } finally {
@@ -327,14 +360,19 @@ const headers = ref<TableHeaders[]>([
 // ]);
 
 /** Zona de Métodos */
+const handlePagination = async (page: number) => {
+  if (page + 1 === pagination.page) {
+    return;
+  }
+  pagination.page = page + 1;
+  getCountries();
+};
+
 onMounted(async () => {
   try {
-    startLoading();
-    items.value = await getCountries();
+    await getCountries(); 
   } catch (error) {
     console.log(error);
-  } finally {
-    finishLoading();
   }
 });
 </script>

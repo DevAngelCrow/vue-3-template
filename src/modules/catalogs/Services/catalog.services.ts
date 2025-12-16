@@ -35,6 +35,13 @@ const updateCountries = async (data: UpdateCountry) => {
   return response;
 };
 
+const deleteCountry = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `catalogs/countries/${id}`,
+  );
+  return response;
+};
+
 const getAllDepartments = async (
   params?: paginateParams,
 ): Promise<ApiResponseGeneric<DepartmentResponse>> => {
@@ -182,4 +189,5 @@ export default {
   postGlobalStatus,
   putGlobalStatus,
   deleteGlobalStatus,
+  deleteCountry,
 };
