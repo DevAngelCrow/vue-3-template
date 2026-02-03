@@ -119,7 +119,7 @@
       :title-btn-cancel="'Cancelar'"
       :show-buttons="true"
       @close-modal="CloseModalEstado"
-      @confirm-modal="confirmModalEstado"
+      @confirm-modal=""
       width="450px"
     >
       <div class="flex flex-col gap-6 py-5 w-full">

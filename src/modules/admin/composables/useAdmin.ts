@@ -213,6 +213,7 @@ export function useAdmin() {
         filter_name: filter_name.value,
       };
       const response = await adminServices.getAllRoutes(filter);
+      console.log(response);
       const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
       if (secondResponse.statusCode === 200) {
         parentRoutes.value = secondResponse.data
@@ -228,10 +229,10 @@ export function useAdmin() {
           }));
       }
       if (response.statusCode === 200) {
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
-        items.value = response.data.items;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
+        items.value = response.data.data;
       }
       return [];
     } catch (error) {
@@ -337,10 +338,10 @@ export function useAdmin() {
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
-        permissionsList.value = response.data.items;
-        permissionsPagination.page = response.data.pagination.currentPage;
-        permissionsPagination.per_page = response.data.pagination.perPage;
-        permissionsPagination.total_items = response.data.pagination.totalItems;
+        permissionsList.value = response.data.data;
+        permissionsPagination.page = response.data.current_page;
+        permissionsPagination.per_page = response.data.per_page;
+        permissionsPagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);

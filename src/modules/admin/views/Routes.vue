@@ -138,6 +138,7 @@ const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
   data?: RoutesResponse,
 ) => {
+  console.log(data);
   modalState.mode = action;
   modalState.isReadonly = action === 'view';
 

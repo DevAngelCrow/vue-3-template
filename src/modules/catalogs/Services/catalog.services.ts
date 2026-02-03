@@ -39,7 +39,7 @@ const getAllDepartments = async (
   params?: paginateParams,
 ): Promise<ApiResponseGeneric<DepartmentResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<DepartmentResponse>>(
-    'catalogs/departments/list',
+    'catalogs/departments',
     params,
   );
   return response.data;
@@ -71,7 +71,7 @@ const deleteDepartment = async (id: number) => {
 const getMunicipalities = async (params?: paginateParams) => {
   const response = await httpClient.get<
     ApiResponseGeneric<MunicipalityResponse>
-  >('catalogs/municipalities/list', params);
+  >('catalogs/municipalities', params);
   return response.data;
 };
 
@@ -101,7 +101,7 @@ const deleteMunicipality = async (id: number) => {
 
 const getDistricts = async (params: paginateParams) => {
   const response = await httpClient.get<ApiResponseGeneric<DistrictResponse>>(
-    'catalogs/districts/list',
+    'catalogs/districts',
     params,
   );
   return response.data;
@@ -134,13 +134,13 @@ const deleteDistrict = async (id: number) => {
 const getGlobalStatus = async (params?: paginateParams) => {
   const response = await httpClient.get<
     ApiResponseGeneric<GlobalStatusResponse>
-  >('catalogs/global_status/', params);
+  >('catalogs/global-statuses/', params);
   return response.data;
 };
 
 const postGlobalStatus = async (data: GlobalStatusForm) => {
   const response = await httpClient.post<ApiPostResponse>(
-    'catalogs/global_status/',
+    'catalogs/global-statuses/',
     data,
   );
   return response;
@@ -148,7 +148,7 @@ const postGlobalStatus = async (data: GlobalStatusForm) => {
 
 const putGlobalStatus = async (data: GlobalStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/global_status/${data.id}`,
+    `catalogs/global-statuses/${data.id}`,
     data,
   );
   return response;
@@ -156,7 +156,7 @@ const putGlobalStatus = async (data: GlobalStatusForm) => {
 
 const deleteGlobalStatus = async (id: number) => {
   const response = await httpClient.delete<ApiPostResponse>(
-    `catalogs/global_status/${id}`,
+    `catalogs/global-statuses/${id}`,
   );
 
   return response;

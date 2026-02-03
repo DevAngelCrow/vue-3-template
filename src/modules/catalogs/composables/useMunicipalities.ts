@@ -129,10 +129,10 @@ export function useMunicipality() {
       const response = await catalogServices.getMunicipalities(filter);
 
       if (response.statusCode === 200) {
-        municipalities.value = response.data.items;
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
+        municipalities.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);

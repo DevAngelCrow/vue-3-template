@@ -19,16 +19,15 @@ const getAllRoutes = async (
   params: paginateParams,
 ): Promise<ApiResponseGeneric<RoutesResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<RoutesResponse>>(
-    'security/routes/list',
+    'security/routes/',
     params,
   );
   return response.data;
 };
 
 const getAllRoutesWithOutPaginate = async () => {
-  const response = await httpClient.get<RouteParentAutocomplete>(
-    'security/routes/list',
-  );
+  const response =
+    await httpClient.get<RouteParentAutocomplete>('security/routes/');
 
   return response.data;
 };
@@ -68,7 +67,7 @@ const getPermissions = async (
 ): Promise<ApiResponseGeneric<PermissionsResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsResponse>
-  >('security/permissions/list', params);
+  >('security/permissions/', params);
   return response.data;
 };
 

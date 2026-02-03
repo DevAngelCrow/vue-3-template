@@ -95,7 +95,7 @@ const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
 
 const getMenu = async (): Promise<ApiResponseMenu<Menu[]>> => {
   const response =
-    await httpClient.get<ApiResponseMenu<Menu[]>>('security/menu/');
+    await httpClient.get<ApiResponseMenu<Menu[]>>('security/menus/');
   return response.data;
 };
 
