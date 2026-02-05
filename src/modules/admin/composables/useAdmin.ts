@@ -115,7 +115,7 @@ export function useAdmin() {
       alignItems: 'center',
     },
     {
-      field: 'parent_route.uri',
+      field: 'parent.uri',
       header: 'Ruta padre',
       sortable: false,
       alignHeaders: 'center',
