@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 
 defineOptions({ name: 'AppFloatButton' });
 
