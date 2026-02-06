@@ -122,7 +122,7 @@ export function useDepartment() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await catalogServices.getAllDepartments(filter);
 
@@ -142,7 +142,10 @@ export function useDepartment() {
   const addDepartment = async (form: DepartmentForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postDepartment(form);
+      const response = await catalogServices.postDepartment({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getDepartments();
         alert.showAlert({
@@ -162,7 +165,8 @@ export function useDepartment() {
   const editDepartment = async (form: DepartmentForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putDepartment(form);
+      const { id, ...body } = form;
+      const response = await catalogServices.putDepartment(id!, body);
       if (response.status === 200) {
         getDepartments();
         alert.showAlert({

@@ -53,9 +53,9 @@ const postDepartment = async (data: DepartmentForm) => {
   return response;
 };
 
-const putDepartment = async (data: DepartmentForm) => {
+const putDepartment = async (id: number, data: DepartmentForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/departments/${data.id}`,
+    `catalogs/departments/${id}`,
     data,
   );
   return response;
