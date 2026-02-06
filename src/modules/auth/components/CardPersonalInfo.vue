@@ -159,7 +159,7 @@ const {
 const { startLoading, finishLoading } = useLoaderStore();
 
 const maritalStatusItems = ref<{
-  items: {
+  data: {
     id: number;
     name: string;
     description: string;
@@ -188,7 +188,7 @@ const getGenders = async () => {
     startLoading();
     const response = await authServices.getGenders();
     if (response.statusCode === 200) {
-      gendersItems.value = response.data.items;
+      gendersItems.value = response.data.data;
     }
   } catch (error: unknown) {
     console.error(error);
@@ -201,7 +201,7 @@ const getCountries = async () => {
     startLoading();
     const response = await authServices.getCountriesNationalities();
     if (response.statusCode === 200) {
-      countriesItems.value = response.data.items;
+      countriesItems.value = response.data.data;
     }
   } catch (error: unknown) {
     console.error(error);

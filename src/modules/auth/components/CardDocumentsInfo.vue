@@ -56,7 +56,7 @@ const getDocumentTypes = async () => {
     startLoading();
     const response = await authServices.getDocumentTypes();
     if (response.statusCode === 200) {
-      documentTypesItems.value = response.data.items;
+      documentTypesItems.value = response.data.data;
     }
   } catch (error: unknown) {
     console.error(error);

@@ -144,7 +144,7 @@ const getDistricts = async () => {
     startLoading();
     const response = await authServices.getDistricts();
     if (response.statusCode === 200) {
-      districtItems.value = response.data.items;
+      districtItems.value = response.data.data;
     }
   } catch (error: unknown) {
     console.error(error);

@@ -25,7 +25,7 @@ const getMaritalStatus = async (): Promise<
   ApiResponseGeneric<MaritalStatus>
 > => {
   const response = await httpClient.get<ApiResponseGeneric<MaritalStatus>>(
-    'catalogs/marital-status',
+    'catalogs/marital-statuses',
   );
 
   return response.data;
@@ -58,7 +58,7 @@ const getDocumentTypes = async (): Promise<
   ApiResponseGeneric<DocumentType>
 > => {
   const response = await httpClient.get<ApiResponseGeneric<DocumentType>>(
-    'profile/documentType?page=1&per_page=10',
+    'profile/document-types?page=1&per_page=10',
   );
   return response.data;
 };
