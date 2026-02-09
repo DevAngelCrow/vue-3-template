@@ -194,7 +194,8 @@ export function useRole() {
   const editRole = async (form: RoleForm) => {
     try {
       startLoading();
-      const response = await adminServices.putRole(form);
+      const { id, ...body } = form;
+      const response = await adminServices.putRole(id!, body);
       if (response.status === 200) {
         getRole();
         alert.showAlert({

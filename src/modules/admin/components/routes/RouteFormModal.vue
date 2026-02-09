@@ -76,15 +76,15 @@ const onSubMit = handleSubmit(async values => {
     const form: RouteForm = {
       name: values.name,
       description: values.description,
-      child_route: values.child_route,
       icon: values.icon,
       order: values.order,
       show: values.show ? true : false,
       uri: values.uri,
-      parent_route: values.parent_route,
-      id_parent: values.parent_route.id,
+      id_parent: values.parent_route?.id ?? null,
       title: values.title,
       permissions_id: [...selectedPermissionsIds.value],
+      required_auth: values.required_auth ?? false,
+      child_route: values.child_route ?? false,
     };
     let success = false;
     switch (props.modalState.mode) {

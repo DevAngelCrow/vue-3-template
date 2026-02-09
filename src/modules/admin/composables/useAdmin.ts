@@ -61,6 +61,7 @@ export function useAdmin() {
         otherwise: schema => schema.nullable().notRequired(),
       }),
       permissions_ids: yup.array(),
+      required_auth: yup.boolean(),
     }),
   });
 
@@ -186,6 +187,7 @@ export function useAdmin() {
   const [parent_route, parent_routeAttrs] = defineField('parent_route');
   const [permissions_ids, permissions_idsAttrs] =
     defineField('permissions_ids');
+  const [required_auth, required_authAttrs] = defineField('required_auth');
 
   const filter_name = ref<string | null>(null);
   const filter_permission_name = ref<string | null>(null);
@@ -264,7 +266,7 @@ export function useAdmin() {
   const addRoute = async (form: RouteForm) => {
     try {
       startLoading();
-      const response = await adminServices.addRoute(form);
+      const response = await adminServices.addRoute({ ...form, active: true });
       if (response.status === 201) {
         getRoutes();
         alert.showAlert({
@@ -283,7 +285,8 @@ export function useAdmin() {
   const editRoute = async (form: RouteForm) => {
     try {
       startLoading();
-      const response = await adminServices.editRoute(form);
+      const { id, ...body } = form;
+      const response = await adminServices.editRoute(id!, body);
       if (response.status === 200) {
         getRoutes();
         alert.showAlert({
@@ -403,6 +406,7 @@ export function useAdmin() {
         ? value.permissions.map(permission => permission.id)
         : [],
     );
+    setFieldValue('required_auth', value.required_auth);
   };
 
   const findRoute = (value: string | null) => {
@@ -440,6 +444,8 @@ export function useAdmin() {
     parent_routeAttrs,
     permissions_ids,
     permissions_idsAttrs,
+    required_auth,
+    required_authAttrs,
     errors,
     handleSubmit,
     validateField,

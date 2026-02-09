@@ -98,6 +98,16 @@
           :disabled="!child_route"
         />
       </div>
+      <div class="flex-1">
+        <AppCheckBox
+          id="required_auth"
+          label="Requiere autenticación"
+          v-model="required_auth"
+          v-bind="required_authAttrs"
+          binary
+          :readonly="props.modalState.isReadonly"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -141,8 +151,9 @@ const {
   showAttrs,
   parent_route,
   parent_routeAttrs,
+  required_auth,
+  required_authAttrs,
   parentRoutes,
-
   validateInputUri,
 } = admin;
 

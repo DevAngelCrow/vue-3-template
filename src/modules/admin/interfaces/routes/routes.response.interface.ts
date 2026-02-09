@@ -17,4 +17,5 @@ export interface RoutesResponse {
     active: boolean;
     category: number;
   }[];
+  required_auth: boolean;
 }

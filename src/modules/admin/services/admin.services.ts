@@ -40,9 +40,9 @@ const addRoute = async (data: RouteForm) => {
   return response;
 };
 
-const editRoute = async (data: RouteForm) => {
+const editRoute = async (id: number, data: RouteForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `security/routes/${data.id}`,
+    `security/routes/${id}`,
     data,
   );
   return response;
@@ -142,9 +142,9 @@ const postRole = async (data: RoleForm) => {
   return response;
 };
 
-const putRole = async (data: RoleForm) => {
+const putRole = async (id: number, data: RoleForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `security/roles/${data.id}`,
+    `security/role/${id}`,
     data,
   );
   return response;
@@ -152,7 +152,7 @@ const putRole = async (data: RoleForm) => {
 
 const deleteRole = async (id: number) => {
   const response = await httpClient.delete<ApiPostResponse>(
-    `security/roles/${id}`,
+    `security/role/${id}`,
   );
   return response;
 };
