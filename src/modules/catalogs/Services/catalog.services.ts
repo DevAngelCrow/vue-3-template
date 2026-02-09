@@ -83,9 +83,9 @@ const postMunicipality = async (data: MunicipalityForm) => {
   return response;
 };
 
-const putMunicipality = async (data: MunicipalityForm) => {
+const putMunicipality = async (id: number, data: MunicipalityForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/municipalities/${data.id}`,
+    `catalogs/municipalities/${id}`,
     data,
   );
 
@@ -115,9 +115,9 @@ const postDistrict = async (data: DistrictForm) => {
   return response;
 };
 
-const putDistrict = async (data: DistrictForm) => {
+const putDistrict = async (id: number, data: DistrictForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/districts/${data.id}`,
+    `catalogs/districts/${id}`,
     data,
   );
 

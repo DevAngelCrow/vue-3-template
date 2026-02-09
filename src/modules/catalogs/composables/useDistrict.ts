@@ -124,7 +124,7 @@ export function useDistrict() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await catalogServices.getDistricts(filter);
 
@@ -144,7 +144,10 @@ export function useDistrict() {
   const addDistrict = async (form: DistrictForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postDistrict(form);
+      const response = await catalogServices.postDistrict({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getDistricts();
         alert.showAlert({
@@ -164,7 +167,8 @@ export function useDistrict() {
   const editDistrict = async (form: DistrictForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putDistrict(form);
+      const { id, ...body } = form;
+      const response = await catalogServices.putDistrict(id!, body);
       if (response.status === 200) {
         getDistricts();
         alert.showAlert({

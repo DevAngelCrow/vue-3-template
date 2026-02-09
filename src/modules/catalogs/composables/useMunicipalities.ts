@@ -124,7 +124,7 @@ export function useMunicipality() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await catalogServices.getMunicipalities(filter);
 
@@ -144,7 +144,10 @@ export function useMunicipality() {
   const addMunicipality = async (form: MunicipalityForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postMunicipality(form);
+      const response = await catalogServices.postMunicipality({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getMunicipalities();
         alert.showAlert({
@@ -164,7 +167,8 @@ export function useMunicipality() {
   const editMunicipality = async (form: MunicipalityForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putMunicipality(form);
+      const { id, ...body } = form;
+      const response = await catalogServices.putMunicipality(id!, body);
       if (response.status === 200) {
         getMunicipalities();
         alert.showAlert({

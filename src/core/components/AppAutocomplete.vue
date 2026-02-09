@@ -14,7 +14,7 @@
           :invalid="invalid"
           v-bind="$attrs"
           :placeholder="displayPlaceholder"
-          :id="inputId"
+          :input-id="inputId"
           @focus="isFocused = true"
           @blur="isFocused = false"
           :variant="inputVarian"
