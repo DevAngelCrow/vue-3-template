@@ -155,15 +155,14 @@ export function useRole() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await adminServices.getRole(filter);
-
       if (response.statusCode === 200) {
-        role.value = response.data.items;
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
+        role.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);
@@ -237,6 +236,7 @@ export function useRole() {
       permissionsList.value = [];
       permissionsPagination.total_items = 0;
       const response = await adminServices.getRol(id);
+      console.log(response, 'response get rol by id');
       if (response.statusCode === 200) {
         permissionsList.value = response.data.permissions
           ? response.data.permissions
@@ -256,17 +256,17 @@ export function useRole() {
       const filter = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
-        filter_name: filter_permission_name.value
+        filter: filter_permission_name.value
           ? filter_permission_name.value
           : null,
         active: 1,
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
-        permissionsList.value = response.data.items;
-        permissionsPagination.page = response.data.pagination.currentPage;
-        permissionsPagination.per_page = response.data.pagination.perPage;
-        permissionsPagination.total_items = response.data.pagination.totalItems;
+        permissionsList.value = response.data.data;
+        permissionsPagination.page = response.data.current_page;
+        permissionsPagination.per_page = response.data.per_page;
+        permissionsPagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);

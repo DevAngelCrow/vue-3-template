@@ -153,7 +153,7 @@ const showModalCambioStatus = ref<boolean>(false);
 
 /** Zona de Variables */
 const { startLoading, finishLoading } = useLoaderStore();
-const items = ref<CountryResponse[] | undefined>([]);
+const items = ref<CountryResponse[] | unknown>([]);
 const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   // Resetear todos los estados
   isMode.value = false;
@@ -161,7 +161,6 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   editingCountryId.value = null;
 
   if (type === 'create') {
-    console.log('type', type);
     // Limpiar los campos del formulario
     resetForm();
   } else if (type === 'edit') {
@@ -172,7 +171,6 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     abbreviation.value = country.abbreviation || '';
     code.value = country.code || '';
   } else if (type === 'details') {
-    console.log('entro a detalle:', country);
     isDetailsMode.value = true;
     // Rellena con los datos del país a ver
     name.value = country.name || '';
@@ -330,6 +328,7 @@ onMounted(async () => {
   try {
     startLoading();
     items.value = await getCountries();
+    console.log(items.value, 'items.value');
   } catch (error) {
     console.log(error);
   } finally {

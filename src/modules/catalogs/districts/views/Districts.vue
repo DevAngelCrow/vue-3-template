@@ -155,7 +155,6 @@ const openModal = (
         : 'Activar Distrito';
       modalState.description = `¿Está seguro de cambiar el estado del distrito a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
-      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;

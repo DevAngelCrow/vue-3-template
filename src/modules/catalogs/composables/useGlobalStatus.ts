@@ -155,7 +155,7 @@ export function useGlobalStatus() {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       finishLoading();
     }
@@ -203,7 +203,6 @@ export function useGlobalStatus() {
   };
 
   const setGlobalStatusItem = (value: GlobalStatusResponse) => {
-    console.log(value, 'value');
     setFieldValue('table_header', value?.table_header);
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);

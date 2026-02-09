@@ -96,14 +96,14 @@ export function useCategoryPermission() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await adminServices.getCategoryPermissions(filter);
       if (response.statusCode === 200) {
-        categories.value = response.data.items;
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
+        categories.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);
@@ -115,7 +115,10 @@ export function useCategoryPermission() {
   const addCategoryPermission = async (form: CategoryPermissionForm) => {
     try {
       startLoading();
-      const response = await adminServices.postCategoryPermission(form);
+      const response = await adminServices.postCategoryPermission({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getCategoryPermissions();
         alert.showAlert({
@@ -135,7 +138,8 @@ export function useCategoryPermission() {
   const editCategoryPermission = async (form: CategoryPermissionForm) => {
     try {
       startLoading();
-      const response = await adminServices.putCategoryPermission(form);
+      const { id, ...body } = form;
+      const response = await adminServices.putCategoryPermission(id!, body);
       if (response.status === 200) {
         getCategoryPermissions();
         alert.showAlert({

@@ -79,9 +79,9 @@ const postPermission = async (data: PermissionForm) => {
   return response;
 };
 
-const putPermission = async (data: PermissionForm) => {
+const putPermission = async (id: number, data: PermissionForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `security/permissions/${data.id}`,
+    `security/permissions/${id}`,
     data,
   );
   return response;
@@ -108,9 +108,12 @@ const postCategoryPermission = async (data: CategoryPermissionForm) => {
   );
   return response;
 };
-const putCategoryPermission = async (data: CategoryPermissionForm) => {
+const putCategoryPermission = async (
+  id: number,
+  data: CategoryPermissionForm,
+) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `security/category-permissions/${data.id}`,
+    `security/category-permissions/${id}`,
     data,
   );
   return response;
@@ -125,7 +128,7 @@ const deleteCategoryPermission = async (id: number) => {
 
 const getRole = async (params: paginateParams) => {
   const response = await httpClient.get<ApiResponseGeneric<RoleResponse>>(
-    'security/roles/list',
+    'security/role/',
     params,
   );
   return response.data;
@@ -133,7 +136,7 @@ const getRole = async (params: paginateParams) => {
 
 const postRole = async (data: RoleForm) => {
   const response = await httpClient.post<ApiPostResponse>(
-    'security/roles',
+    'security/role',
     data,
   );
   return response;
@@ -156,7 +159,7 @@ const deleteRole = async (id: number) => {
 
 const getRol = async (id: number) => {
   const response = await httpClient.get<ApiPostResponse<RolByIdResponse>>(
-    `security/roles/${id}`,
+    `security/role/${id}`,
   );
   return response.data;
 };
