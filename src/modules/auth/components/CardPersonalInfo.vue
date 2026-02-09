@@ -110,9 +110,9 @@
     <div>
       <AppDragDropFile
         accept="image/*"
-        v-model="imgFile"
-        v-bind="imgFileAttrs"
-        :error-messages="errors.imgFile"
+        v-model="file_img"
+        v-bind="file_imgAttrs"
+        :error-messages="errors.file_img"
       />
     </div>
   </section>
@@ -149,8 +149,8 @@ const {
   phoneNumberAttrs,
   nationalities,
   nationalitiesAttrs,
-  imgFile,
-  imgFileAttrs,
+  file_img,
+  file_imgAttrs,
   errors,
   validationInputAlphanumeric,
   validationInputEmail,
@@ -253,8 +253,8 @@ defineExpose({
   phoneNumberAttrs,
   nationalities,
   nationalitiesAttrs,
-  imgFile,
-  imgFileAttrs,
+  file_img,
+  file_imgAttrs,
   errors,
 });
 </script>

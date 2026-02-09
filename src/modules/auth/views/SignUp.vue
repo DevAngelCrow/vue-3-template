@@ -16,7 +16,7 @@
 import { reactive, markRaw, ref } from 'vue';
 
 import type { StepperVerticalInterface } from '@/core/interfaces/stepperVertical.interface';
-import { getToday } from '@/core/utils/dates';
+import { getToday, FormatDateToISO } from '@/core/utils/dates';
 import { useLoaderStore } from '@/core/store';
 
 import CardPersonalInfo from '../components/CardPersonalInfo.vue';
@@ -65,7 +65,7 @@ const personalInfoFieldNames = [
   'phoneNumber',
   'status',
   'nationalities',
-  'imgFile',
+  'file_img',
   'email',
 ];
 
@@ -132,11 +132,14 @@ const onSubmitStepPersonalInfo = handleSubmit(async values => {
     form.append('first_name', values.firstName);
     form.append('middle_name', values.middleName);
     form.append('last_name', values.lastName);
-    form.append('birthdate', values.birthDate);
+    form.append(
+      'birthdate',
+      FormatDateToISO(values.birthDate, 'DD/MM/YYYY') || values.birthDate,
+    );
     form.append('id_gender', values.gender);
     form.append('email', values.email);
     form.append('id_marital_status', values.maritalStatus);
-    form.append('fileImg', values.imgFile[0]);
+    form.append('file_img', values.file_img[0]);
     form.append('phone', values.phoneNumber);
     values.nationalities.map((_item: Nationality) => {
       form.append('nationalities[]', _item.id.toString());

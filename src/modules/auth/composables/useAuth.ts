@@ -59,7 +59,7 @@ function createForm() {
           .array<NationalitiesArray>()
           .required('El campo de nacionalidades es requerido')
           .min(1, 'Debes agregar al menos una nacionalidad'),
-        imgFile: yup
+        file_img: yup
           .mixed<PrimeVueFile[]>()
           .test(
             'required',
@@ -142,8 +142,8 @@ function createForm() {
     statusAttrs: defineField('status')[1],
     nationalities: defineField('nationalities')[0],
     nationalitiesAttrs: defineField('nationalities')[1],
-    imgFile: defineField('imgFile')[0],
-    imgFileAttrs: defineField('imgFile')[1],
+    file_img: defineField('file_img')[0],
+    file_imgAttrs: defineField('file_img')[1],
     street: defineField('street')[0],
     streetAttrs: defineField('street')[1],
     streetNumber: defineField('streetNumber')[0],
