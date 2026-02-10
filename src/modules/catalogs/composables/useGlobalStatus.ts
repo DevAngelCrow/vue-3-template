@@ -104,7 +104,7 @@ export function useGlobalStatus() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await catalogServices.getGlobalStatus(filter);
 

@@ -21,4 +21,10 @@ export const routesCatalogs = [
     name: 'districts',
     component: () => import('@/modules/catalogs/districts/views/Districts.vue'),
   },
+  {
+    path: 'catalogs/global-status',
+    name: 'global-status',
+    component: () =>
+      import('@/modules/catalogs/global-status/views/GlobalStatus.vue'),
+  },
 ];

@@ -55,7 +55,7 @@ export function useAdmin() {
       child_route: yup.boolean(),
       show: yup.boolean(),
       active: yup.boolean(),
-      parent_route: yup.mixed<RouteParentAutocomplete>().when('child_route', {
+      parent: yup.mixed<RouteParentAutocomplete>().when('child_route', {
         is: true,
         then: schema => schema.required('El campo de ruta padre es requerido'),
         otherwise: schema => schema.nullable().notRequired(),
@@ -184,7 +184,7 @@ export function useAdmin() {
   const [child_route, child_routeAttrs] = defineField('child_route');
   const [show, showAttrs] = defineField('show');
   const [active, activeAttrs] = defineField('active');
-  const [parent_route, parent_routeAttrs] = defineField('parent_route');
+  const [parent, parentAttrs] = defineField('parent');
   const [permissions_ids, permissions_idsAttrs] =
     defineField('permissions_ids');
   const [required_auth, required_authAttrs] = defineField('required_auth');
@@ -212,17 +212,13 @@ export function useAdmin() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await adminServices.getAllRoutes(filter);
-      console.log(response);
       const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
       if (secondResponse.statusCode === 200) {
         parentRoutes.value = secondResponse.data
-          .filter(
-            item =>
-              item.parent_route === null || item.parent_route === undefined,
-          )
+          .filter(item => item.parent === null || item.parent === undefined)
           .map(item => ({
             title: item.title,
             id: item.id,
@@ -288,6 +284,7 @@ export function useAdmin() {
   const editRoute = async (form: RouteForm) => {
     try {
       startLoading();
+      console.log(form);
       const { id, ...body } = form;
       const response = await adminServices.editRoute(id!, body);
       if (response.status === 200) {
@@ -392,6 +389,7 @@ export function useAdmin() {
   };
 
   const setRouteItem = (value: RoutesResponse) => {
+    console.log(value, 'values');
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('title', value?.title);
@@ -399,8 +397,8 @@ export function useAdmin() {
     setFieldValue('description', value?.description);
     setFieldValue('order', value?.order);
     setFieldValue('icon', value?.icon);
-    setFieldValue('parent_route', value?.parent_route);
-    setFieldValue('child_route', parent_route.value);
+    setFieldValue('parent', value?.parent);
+    setFieldValue('child_route', !!parent.value);
     setFieldValue('show', value?.show);
     setFieldValue('active', value.active);
     setFieldValue(
@@ -443,8 +441,8 @@ export function useAdmin() {
     showAttrs,
     active,
     activeAttrs,
-    parent_route,
-    parent_routeAttrs,
+    parent,
+    parentAttrs,
     permissions_ids,
     permissions_idsAttrs,
     required_auth,

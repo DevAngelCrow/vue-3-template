@@ -87,9 +87,9 @@
           :class="showParentRoute"
           id="patern_route"
           label="Ruta padre"
-          v-model="parent_route"
-          v-bind="parent_routeAttrs"
-          :error-messages="errors.parent_route"
+          v-model="parent"
+          v-bind="parentAttrs"
+          :error-messages="errors.parent"
           option-label="title"
           :suggestions="routesFiltered"
           dropdown
@@ -149,8 +149,8 @@ const {
   child_routeAttrs,
   show,
   showAttrs,
-  parent_route,
-  parent_routeAttrs,
+  parent,
+  parentAttrs,
   required_auth,
   required_authAttrs,
   parentRoutes,

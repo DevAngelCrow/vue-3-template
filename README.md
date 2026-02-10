@@ -1,4 +1,20 @@
-# Vue 3 + Typescript + Tailwind (4.0) + Vite + PrimeVue (4) Template
+<p  align="center">
+<a  style="display:inline-block; vertical-align:middle;"  href=""  target="blank"><img  src="https://api.iconify.design/logos:vue.svg"  width="120"  alt="Vue Logo"  /></a>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+<a  style="display:inline-block; vertical-align:middle;"  href=""  target="blank"><img  src="https://api.iconify.design/logos:vitejs.svg"  width="120"  alt="Vite"  /></a>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+<a  style="display:inline-block; vertical-align:middle;"  href="http://nestjs.com/"  target="blank"><img  src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg"  width="120"  alt="TypeScript"  /></a>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+<a  style="display:inline-block; vertical-align:middle;"  href="http://nestjs.com/"  target="blank"><img  src="https://api.iconify.design/simple-icons:primevue.svg?color=%234ADE80"  width="120"  alt="Primevue"  /></a>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+<a  style="display:inline-block; vertical-align:middle;"  href="http://nestjs.com/"  target="blank"><img  src="https://cdn.simpleicons.org/tailwindcss/06B6D4"  width="120"  alt="Tailwind"  /></a>
+</p>
+
+# Vue 3 + Vite + Typescript + PrimeVue (4) + Tailwind (4.0) Template
 
 Esta plantilla cuenta con las tecnologias descritas para poder iniciar con un desarrollo rapido, asi como cuenta con componentes
 basicos listos para utilizarse.

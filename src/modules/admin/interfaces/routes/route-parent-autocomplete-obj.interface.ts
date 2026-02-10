@@ -3,7 +3,7 @@ export interface RouteParentAutocomplete {
     title: string;
     id: number;
     uri: string;
-    parent_route: object;
+    parent: object;
     name: string;
   }[];
   statusCode: number;

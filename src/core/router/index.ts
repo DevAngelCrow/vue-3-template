@@ -38,12 +38,6 @@ const routes = [
         meta: { requiresAuth: true },
         component: () => import('@/views/Dashboard.vue'),
       },
-      {
-        path: 'catalogs/global-status',
-        name: 'global-status',
-        component: () =>
-          import('../../modules/catalogs/global-status/views/GlobalStatus.vue'),
-      },
     ],
   },
   {

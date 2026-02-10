@@ -7,7 +7,7 @@ export interface RouteForm {
   icon: string;
   child_route: boolean;
   show: boolean;
-  parent_route?: string;
+  parent?: string;
   title: string;
   active?: boolean;
   permissions_id: number[];
