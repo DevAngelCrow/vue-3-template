@@ -397,7 +397,7 @@ export function useAdmin() {
     setFieldValue('order', value?.order);
     setFieldValue('icon', value?.icon);
     setFieldValue('parent_route', value?.parent_route);
-    setFieldValue('child_route', parent_route.value ? true : false);
+    setFieldValue('child_route', parent_route.value);
     setFieldValue('show', value?.show);
     setFieldValue('active', value.active);
     setFieldValue(
