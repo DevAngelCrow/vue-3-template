@@ -266,6 +266,9 @@ export function useAdmin() {
   const addRoute = async (form: RouteForm) => {
     try {
       startLoading();
+      if (form.id_parent) {
+        form.uri = `${form.uri}`;
+      }
       const response = await adminServices.addRoute({ ...form, active: true });
       if (response.status === 201) {
         getRoutes();

@@ -4,6 +4,7 @@
       v-bind="$attrs"
       :model-value="modelValue"
       @update:model-value="onUpdate"
+      :input-id="id"
     />
     <label :for="id">{{ label }}</label>
   </div>

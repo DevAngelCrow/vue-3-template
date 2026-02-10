@@ -49,6 +49,7 @@
             binary
             @update:model-value="checkAll"
             v-model="selectAll"
+            id="select_all"
           >
           </AppCheckBox>
           <span>Seleccion</span>

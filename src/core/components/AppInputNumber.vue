@@ -14,7 +14,7 @@
           v-bind="$attrs"
           :autocomplete
           :placeholder="displayPlaceholder"
-          :id="inputId"
+          :input-id="inputId"
           @focus="isFocused = true"
           @blur="isFocused = false"
           :show-buttons
