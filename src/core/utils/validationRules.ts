@@ -57,7 +57,18 @@ export const emailFormat = (
 };
 
 export const passwordValidation = (
-  minLength: number = 6,
+  minLength: number = 8,
   messageMinLength: string = `La contrasena debe tener al menos ${minLength} caracteres.`,
   messageRequired: string = `La contrasena es obligatoria`,
-) => yup.string().min(minLength, messageMinLength).required(messageRequired);
+) =>
+  yup
+    .string()
+    .min(minLength, messageMinLength)
+    .required(messageRequired)
+    .test(
+      'no-emojis',
+      'no se permite emojis en la contraseña',
+      value =>
+        !value ||
+        !/(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu.test(value),
+    );

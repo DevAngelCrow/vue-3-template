@@ -1,13 +1,11 @@
 import axios, { type AxiosInstance } from 'axios';
 
-const API_BASE_URL =
-  `${import.meta.env.VITE_VUE_APP_API_URL}` || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_VUE_APP_API_URL
+  ? `${import.meta.env.VITE_VUE_APP_API_URL}/api/v1`
+  : 'http://localhost:3000/api/v1';
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000,
+  timeout: 15000,
 });
 export default axiosInstance;

@@ -2,14 +2,19 @@ import { defineStore } from 'pinia';
 
 export const useLoaderStore = defineStore('loader', {
   state: () => ({
-    loader: false,
+    activeRequest: 0,
   }),
+  getters: {
+    isLoading: (state): boolean => state.activeRequest > 0,
+  },
   actions: {
-    showLoader(payload: { show: boolean }) {
-      this.loader = payload.show;
+    startLoading() {
+      this.activeRequest++;
     },
-    hideLoader(payload: { show: boolean }) {
-      this.loader = payload.show;
+    finishLoading() {
+      if (this.activeRequest > 0) {
+        this.activeRequest--;
+      }
     },
   },
 });

@@ -17,5 +17,12 @@ export default defineConfig({
   server: {
     host: true,
     port: port,
+    hmr: {
+      overlay: false,
+    },
   },
+  // logLevel: 'warn',
+  // define: {
+  //   __VUE_PROD_DEVTOOLS__: false,
+  // },
 });
