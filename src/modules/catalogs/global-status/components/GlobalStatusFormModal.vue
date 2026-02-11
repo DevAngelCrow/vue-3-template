@@ -43,6 +43,22 @@
         v-bind="tableHeaderAttrs"
         :readonly="props.modalState.isReadonly"
       />
+      <div class="flex justify-between w-full flex-wrap gap-2">
+        <AppColorPicker
+          class="w-auto min-w-0"
+          v-model="state_color"
+          id="state_color"
+          :error-messages="errors.state_color"
+          v-bind="stateColorAttrs"
+        />
+        <AppColorPicker
+          class="w-auto min-w-0"
+          v-model="text_color"
+          id="text_color"
+          :error-messages="errors.text_color"
+          v-bind="textColorAttrs"
+        />
+      </div>
     </section>
     <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
       <div class="w-full flex justify-center text-center items-center">
@@ -56,6 +72,7 @@ import { computed, inject } from 'vue';
 
 import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
+import AppColorPicker from '@/core/components/AppColorPicker.vue';
 
 import { useGlobalStatus } from '../../composables/useGlobalStatus';
 import { GlobalStatusForm } from '../../interfaces/global-status/global-status.form.interface';
@@ -85,6 +102,10 @@ const {
   descriptionAttrs,
   table_header,
   tableHeaderAttrs,
+  state_color,
+  stateColorAttrs,
+  text_color,
+  textColorAttrs,
   handleSubmit,
   addGlobalStatus,
   editGlobalStatus,
@@ -98,6 +119,8 @@ const onSubMit = handleSubmit(async values => {
       name: values?.name,
       description: values?.description,
       table_header: values?.table_header,
+      state_color: values?.state_color,
+      text_color: values?.text_color,
     };
     let success = false;
     switch (props.modalState.mode) {
@@ -106,7 +129,7 @@ const onSubMit = handleSubmit(async values => {
         break;
       case 'edit':
         form.id = values.id;
-        form.state = values.state;
+        form.active = values.active;
         success = (await editGlobalStatus(form)) ? true : false;
         break;
       case 'delete':

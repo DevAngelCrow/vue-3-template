@@ -3,5 +3,7 @@ export interface GlobalStatusForm {
   table_header: string;
   name: string;
   description?: string;
-  state?: boolean;
+  active?: boolean;
+  state_color?: string;
+  text_color?: string;
 }

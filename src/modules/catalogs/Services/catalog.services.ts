@@ -146,9 +146,9 @@ const postGlobalStatus = async (data: GlobalStatusForm) => {
   return response;
 };
 
-const putGlobalStatus = async (data: GlobalStatusForm) => {
+const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/global-statuses/${data.id}`,
+    `catalogs/global-statuses/${id}`,
     data,
   );
   return response;

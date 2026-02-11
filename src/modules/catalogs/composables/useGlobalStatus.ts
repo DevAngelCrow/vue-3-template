@@ -33,6 +33,10 @@ export function useGlobalStatus() {
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .nullable(),
+      state_color: yup.string().required('El color del estado es obligatorio'),
+      text_color: yup
+        .string()
+        .required('El color del texto del estado es obligatorio'),
     }),
   });
 
@@ -73,6 +77,20 @@ export function useGlobalStatus() {
       alignItems: 'center',
     },
     {
+      field: 'state_color',
+      header: 'Color del estado',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'text_color',
+      header: 'Color del texto del estado',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
       field: 'acciones',
       header: 'Acciones',
       sortable: false,
@@ -94,6 +112,9 @@ export function useGlobalStatus() {
   const [table_header, tableHeaderAttrs] = defineField('table_header');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
+  //const [active, activeAttrs] = defineField('active');
+  const [state_color, stateColorAttrs] = defineField('state_color');
+  const [text_color, textColorAttrs] = defineField('text_color');
 
   const filter_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9_ ]/g;
@@ -124,7 +145,10 @@ export function useGlobalStatus() {
   const addGlobalStatus = async (form: GlobalStatusForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postGlobalStatus(form);
+      const response = await catalogServices.postGlobalStatus({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getGlobalStatus();
         alert.showAlert({
@@ -144,7 +168,9 @@ export function useGlobalStatus() {
   const editGlobalStatus = async (form: GlobalStatusForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putGlobalStatus(form);
+      const { id, ...body } = form;
+      console.log('body', body);
+      const response = await catalogServices.putGlobalStatus(id!, body);
       if (response.status === 200) {
         getGlobalStatus();
         alert.showAlert({
@@ -207,6 +233,9 @@ export function useGlobalStatus() {
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
+    setFieldValue('active', value?.active);
+    setFieldValue('state_color', value?.state_color);
+    setFieldValue('text_color', value?.text_color);
   };
 
   const findGlobalStatus = (value: string | null) => {
@@ -236,6 +265,10 @@ export function useGlobalStatus() {
     descriptionAttrs,
     table_header,
     tableHeaderAttrs,
+    state_color,
+    stateColorAttrs,
+    text_color,
+    textColorAttrs,
     alert,
     filter_name,
     pagination,
