@@ -27,6 +27,15 @@
       />
       <AppInputText
         class="w-full min-w-0"
+        id="code"
+        label="Código*"
+        v-model="code"
+        :error-messages="errors.code"
+        v-bind="codeAttrs"
+        :readonly="props.modalState.isReadonly"
+      />
+      <AppInputText
+        class="w-full min-w-0"
         id="description"
         label="Descripción"
         v-model="description"
@@ -34,47 +43,6 @@
         v-bind="descriptionAttrs"
         :readonly="props.modalState.isReadonly"
       />
-      <AppInputText
-        class="w-full min-w-0"
-        id="table_header"
-        label="Cabecera de tabla*"
-        v-model="table_header"
-        :error-messages="errors.table_header"
-        v-bind="tableHeaderAttrs"
-        :readonly="props.modalState.isReadonly"
-      />
-      <AppAutocomplete
-        class="w-full"
-        id="category_status"
-        label="Categoría de estado*"
-        v-model="status"
-        v-bind="statusAttrs"
-        :error-messages="errors.status"
-        option-label="name"
-        :suggestions="statusFiltered"
-        dropdown
-        @complete="findAutocomplete"
-        :readonly="props.modalState.isReadonly"
-        :disabled="
-          props.modalState.mode === 'add' || props.modalState.mode === 'edit'
-        "
-      />
-      <div class="flex justify-between w-full flex-wrap gap-2">
-        <AppColorPicker
-          class="w-auto min-w-0"
-          v-model="state_color"
-          id="state_color"
-          :error-messages="errors.state_color"
-          v-bind="stateColorAttrs"
-        />
-        <AppColorPicker
-          class="w-auto min-w-0"
-          v-model="text_color"
-          id="text_color"
-          :error-messages="errors.text_color"
-          v-bind="textColorAttrs"
-        />
-      </div>
     </section>
     <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
       <div class="w-full flex justify-center text-center items-center">
@@ -88,12 +56,11 @@ import { computed, inject } from 'vue';
 
 import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
-import AppColorPicker from '@/core/components/AppColorPicker.vue';
 
-import { useGlobalStatus } from '../../composables/useGlobalStatus';
-import { GlobalStatusForm } from '../../interfaces/global-status/global-status.form.interface';
+import { useCategoryStatus } from '../../composables/useCategoryStatus';
+import { CategoryStatusForm } from '../../interfaces/category-status/category-status.form.interface';
 
-type GlobalStateType = ReturnType<typeof useGlobalStatus>;
+type CategoryStatusType = ReturnType<typeof useCategoryStatus>;
 
 const props = defineProps<{
   modalState: {
@@ -107,49 +74,43 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['close-modal']);
-const useGlobalStatusComposable = inject<GlobalStateType>('useGlobalStatus')!;
+const categoryStatus = inject<CategoryStatusType>('useCategoryStatus')!;
 const { startLoading, finishLoading } = useLoaderStore();
 
 const {
   errors,
   name,
   nameAttrs,
+  code,
+  codeAttrs,
   description,
   descriptionAttrs,
-  table_header,
-  tableHeaderAttrs,
-  state_color,
-  stateColorAttrs,
-  text_color,
-  textColorAttrs,
   handleSubmit,
-  addGlobalStatus,
-  editGlobalStatus,
-  deleteGlobalStatus,
-} = useGlobalStatusComposable;
+  addCategoryStatus,
+  editCategoryStatus,
+  deleteCategoryStatus,
+} = categoryStatus;
 
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
-    const form: GlobalStatusForm = {
+    const form: CategoryStatusForm = {
       name: values?.name,
+      code: values?.code,
       description: values?.description,
-      table_header: values?.table_header,
-      state_color: values?.state_color,
-      text_color: values?.text_color,
     };
     let success = false;
     switch (props.modalState.mode) {
       case 'add':
-        success = (await addGlobalStatus(form)) ? true : false;
+        success = !!(await addCategoryStatus(form));
         break;
       case 'edit':
         form.id = values.id;
         form.active = values.active;
-        success = (await editGlobalStatus(form)) ? true : false;
+        success = !!(await editCategoryStatus(form));
         break;
       case 'delete':
-        success = (await deleteGlobalStatus(values.id)) ? true : false;
+        success = !!(await deleteCategoryStatus(values.id));
         break;
     }
     if (success) {
@@ -179,4 +140,3 @@ const modalButtons = computed(() => {
   }
 });
 </script>
-<style scoped></style>

@@ -14,6 +14,8 @@ import { DistrictResponse } from '../interfaces/districts/district.response.inte
 import { DistrictForm } from '../interfaces/districts/district.form.interface';
 import { GlobalStatusResponse } from '../interfaces/global-status/global-status.response.interface';
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
+import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
+import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
 
 const getAllCountries = async (
   params?: paginateParams,
@@ -162,6 +164,38 @@ const deleteGlobalStatus = async (id: number) => {
   return response;
 };
 
+const getAllCategoryStatuses = async (
+  params?: paginateParams,
+): Promise<ApiResponseGeneric<CategoryStatusResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<CategoryStatusResponse>
+  >('catalogs/categories-status', params);
+  return response.data;
+};
+
+const postCategoryStatus = async (data: CategoryStatusForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'catalogs/categories-status',
+    data,
+  );
+  return response;
+};
+
+const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `catalogs/categories-status/${id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteCategoryStatus = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `catalogs/categories-status/${id}`,
+  );
+  return response;
+};
+
 export default {
   getAllCountries,
   createCountries,
@@ -182,4 +216,8 @@ export default {
   postGlobalStatus,
   putGlobalStatus,
   deleteGlobalStatus,
+  getAllCategoryStatuses,
+  postCategoryStatus,
+  putCategoryStatus,
+  deleteCategoryStatus,
 };
