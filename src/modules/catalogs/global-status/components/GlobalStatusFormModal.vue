@@ -47,17 +47,14 @@
         class="w-full"
         id="category_status"
         label="Categoría de estado*"
-        v-model="status"
-        v-bind="statusAttrs"
-        :error-messages="errors.status"
+        v-model="category_status"
+        v-bind="categoryStatusAttrs"
+        :error-messages="errors.category_status"
         option-label="name"
-        :suggestions="statusFiltered"
+        :suggestions="categoryStatusFiltered"
         dropdown
         @complete="findAutocomplete"
         :readonly="props.modalState.isReadonly"
-        :disabled="
-          props.modalState.mode === 'add' || props.modalState.mode === 'edit'
-        "
       />
       <div class="flex justify-between w-full flex-wrap gap-2">
         <AppColorPicker
@@ -84,7 +81,8 @@
   </AppModal>
 </template>
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
+import { AutoCompleteCompleteEvent } from 'primevue';
 
 import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
@@ -122,12 +120,15 @@ const {
   stateColorAttrs,
   text_color,
   textColorAttrs,
+  category_status,
+  categoryStatusAttrs,
   handleSubmit,
   addGlobalStatus,
   editGlobalStatus,
   deleteGlobalStatus,
+  categoryStatuses,
 } = useGlobalStatusComposable;
-
+const categoryStatusFiltered = ref<unknown[]>([]);
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
@@ -137,6 +138,7 @@ const onSubMit = handleSubmit(async values => {
       table_header: values?.table_header,
       state_color: values?.state_color,
       text_color: values?.text_color,
+      id_category_status: values?.category_status?.id,
     };
     let success = false;
     switch (props.modalState.mode) {
@@ -165,7 +167,18 @@ const onSubMit = handleSubmit(async values => {
 const closeModal = () => {
   emit('close-modal');
 };
+const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
+  let query = event?.query;
+  let _filteredItems = [];
+  for (let i = 0; i < categoryStatuses.value.length; i++) {
+    let item = categoryStatuses.value[i];
 
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
+    }
+  }
+  categoryStatusFiltered.value = _filteredItems;
+};
 const modalButtons = computed(() => {
   switch (props.modalState.mode) {
     case 'edit':

@@ -6,4 +6,5 @@ export interface GlobalStatusForm {
   active?: boolean;
   state_color?: string;
   text_color?: string;
+  id_category_status?: number;
 }

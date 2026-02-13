@@ -75,9 +75,13 @@
           </div>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
-            data.active ? 'Activo' : 'Inactivo'
-          }}</Chip>
+          <Chip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
         </template>
         <template #body-state_color="{ data }">
           <div class="flex justify-center items-center gap-2 w-full h-full">
@@ -127,6 +131,7 @@ const {
   headers,
   pagination,
   globalStatus,
+  getCategoryStatuses,
 } = globalStatusInstance;
 
 const modalState = reactive<{
@@ -196,6 +201,7 @@ const handlePagination = async (page: number) => {
 };
 onMounted(async () => {
   await getGlobalStatus();
+  await getCategoryStatuses();
 });
 </script>
 <style scoped></style>

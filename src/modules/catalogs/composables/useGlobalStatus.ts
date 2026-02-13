@@ -10,6 +10,7 @@ import catalogServices from '../Services/catalog.services';
 import { GlobalStatusResponse } from '../interfaces/global-status/global-status.response.interface';
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatus } from '../interfaces/global-status/global-status.category-status.interface';
+import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
 export function useGlobalStatus() {
   const {
     errors,
@@ -103,7 +104,8 @@ export function useGlobalStatus() {
     },
   ]);
 
-  const globalStatus = ref<GlobalStatusResponse[] | undefined>([]);
+  const globalStatus = ref<GlobalStatusResponse[]>([]);
+  const categoryStatuses = ref<CategoryStatusResponse[]>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
@@ -119,6 +121,7 @@ export function useGlobalStatus() {
   //const [active, activeAttrs] = defineField('active');
   const [state_color, stateColorAttrs] = defineField('state_color');
   const [text_color, textColorAttrs] = defineField('text_color');
+  const [category_status, categoryStatusAttrs] = defineField('category_status');
 
   const filter_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9_ ]/g;
@@ -210,7 +213,28 @@ export function useGlobalStatus() {
       finishLoading();
     }
   };
+  const getCategoryStatuses = async () => {
+    try {
+      startLoading();
+      const filter = {
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter: filter_name.value,
+      };
+      const response = await catalogServices.getAllCategoryStatuses(filter);
 
+      if (response.statusCode === 200) {
+        categoryStatuses.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
   const validateAlphaInput = (
     value: string | null,
     regex: RegExp = findRegex,
@@ -240,6 +264,7 @@ export function useGlobalStatus() {
     setFieldValue('active', value?.active);
     setFieldValue('state_color', value?.state_color);
     setFieldValue('text_color', value?.text_color);
+    setFieldValue('category_status', value?.category_status);
   };
 
   const findGlobalStatus = (value: string | null) => {
@@ -273,6 +298,8 @@ export function useGlobalStatus() {
     stateColorAttrs,
     text_color,
     textColorAttrs,
+    category_status,
+    categoryStatusAttrs,
     alert,
     filter_name,
     pagination,
@@ -281,5 +308,7 @@ export function useGlobalStatus() {
     addGlobalStatus,
     editGlobalStatus,
     deleteGlobalStatus,
+    getCategoryStatuses,
+    categoryStatuses,
   };
 }

@@ -23,7 +23,7 @@
             <InputMask
               :size
               :model-value="modelValue"
-              :mask
+              :mask="computedMask"
               @update:model-value="onUpdate"
               :id="inputId"
               :placeholder="displayPlaceholder"
@@ -110,22 +110,97 @@ const props = defineProps({
   },
   mask: {
     type: String,
-    default: '#******',
+    default: '',
   },
   placeholder: {
     type: String,
-    default: '#000000',
+    default: '',
   },
 });
 
 const emit = defineEmits(['update:modelValue', 'click-clear']);
 
+const getDefaultPlaceholder = () => {
+  switch (props.format) {
+    case 'hex':
+      return '#000000';
+    case 'rgb':
+      return 'rgb(0, 0, 0)';
+    case 'hsb':
+      return 'hsb(0, 0, 0)';
+    default:
+      return '#000000';
+  }
+};
+
+const getDefaultMask = () => {
+  switch (props.format) {
+    case 'hex':
+      return '#******';
+    case 'rgb':
+      return 'rgb(999, 999, 999)';
+    case 'hsb':
+      return 'hsb(999, 999, 999)';
+    default:
+      return '#******';
+  }
+};
+
+const computedPlaceholder = computed(
+  () => props.placeholder || getDefaultPlaceholder(),
+);
+const computedMask = computed(() => props.mask || getDefaultMask());
+
 const onUpdate = (value: string | undefined) => {
-  emit('update:modelValue', value);
+  if (!value) {
+    emit('update:modelValue', value);
+    return;
+  }
+
+  let formattedValue = value;
+
+  switch (props.format) {
+    case 'hex':
+      // Asegurar que el valor hex siempre tenga el '#'
+      if (!value.startsWith('#')) {
+        formattedValue = `#${value}`;
+      }
+      break;
+    case 'rgb':
+      // Asegurar formato RGB correcto
+      if (!value.startsWith('rgb')) {
+        formattedValue = value; // El ColorPicker debería devolver el formato correcto
+      }
+      break;
+    case 'hsb':
+      // Asegurar formato HSB correcto
+      if (!value.startsWith('hsb')) {
+        formattedValue = value; // El ColorPicker debería devolver el formato correcto
+      }
+      break;
+    default:
+      formattedValue = value;
+  }
+
+  emit('update:modelValue', formattedValue);
 };
 
 const clearable = () => {
-  emit('update:modelValue', '#000000');
+  let defaultValue = '#000000';
+
+  switch (props.format) {
+    case 'hex':
+      defaultValue = '#000000';
+      break;
+    case 'rgb':
+      defaultValue = 'rgb(0, 0, 0)';
+      break;
+    case 'hsb':
+      defaultValue = 'hsb(0, 0, 0)';
+      break;
+  }
+
+  emit('update:modelValue', defaultValue);
   emit('click-clear');
 };
 
@@ -141,11 +216,12 @@ const appendIconDynamic = computed(() => {
 });
 const displayPlaceholder = computed(() => {
   if (isFocused.value && props.label) {
-    return props.placeholder;
+    return computedPlaceholder.value;
   }
   if (!props.label.length) {
-    return props.placeholder;
+    return computedPlaceholder.value;
   }
+  return '';
 });
 watch(
   () => props.errorMessages,
