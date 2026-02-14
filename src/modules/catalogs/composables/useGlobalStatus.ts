@@ -24,9 +24,7 @@ export function useGlobalStatus() {
   } = useForm({
     validationSchema: yup.object({
       id: yup.number().typeError('El campo id debe ser de tipo entero'),
-      table_header: yup
-        .string()
-        .required('El campo de cabecera es obligatorio'),
+      code: yup.string().required('El campo de cabecera es obligatorio'),
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
@@ -54,8 +52,8 @@ export function useGlobalStatus() {
       alignItems: 'center',
     },
     {
-      field: 'table_header',
-      header: 'Cabecera de tabla',
+      field: 'code',
+      header: 'Código',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
@@ -115,7 +113,7 @@ export function useGlobalStatus() {
   const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
-  const [table_header, tableHeaderAttrs] = defineField('table_header');
+  const [code, codeAttrs] = defineField('code');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
   //const [active, activeAttrs] = defineField('active');
@@ -257,7 +255,7 @@ export function useGlobalStatus() {
   };
 
   const setGlobalStatusItem = (value: GlobalStatusResponse) => {
-    setFieldValue('table_header', value?.table_header);
+    setFieldValue('code', value?.code);
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
@@ -292,8 +290,8 @@ export function useGlobalStatus() {
     nameAttrs,
     description,
     descriptionAttrs,
-    table_header,
-    tableHeaderAttrs,
+    code,
+    codeAttrs,
     state_color,
     stateColorAttrs,
     text_color,

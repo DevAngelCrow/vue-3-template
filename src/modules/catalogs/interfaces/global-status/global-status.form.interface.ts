@@ -1,6 +1,6 @@
 export interface GlobalStatusForm {
   id?: number;
-  table_header: string;
+  code: string;
   name: string;
   description?: string;
   active?: boolean;

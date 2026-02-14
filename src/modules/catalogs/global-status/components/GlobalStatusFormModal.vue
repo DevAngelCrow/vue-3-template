@@ -36,11 +36,11 @@
       />
       <AppInputText
         class="w-full min-w-0"
-        id="table_header"
-        label="Cabecera de tabla*"
-        v-model="table_header"
-        :error-messages="errors.table_header"
-        v-bind="tableHeaderAttrs"
+        id="code"
+        label="Código*"
+        v-model="code"
+        :error-messages="errors.code"
+        v-bind="codeAttrs"
         :readonly="props.modalState.isReadonly"
       />
       <AppAutocomplete
@@ -114,8 +114,8 @@ const {
   nameAttrs,
   description,
   descriptionAttrs,
-  table_header,
-  tableHeaderAttrs,
+  code,
+  codeAttrs,
   state_color,
   stateColorAttrs,
   text_color,
@@ -135,7 +135,7 @@ const onSubMit = handleSubmit(async values => {
     const form: GlobalStatusForm = {
       name: values?.name,
       description: values?.description,
-      table_header: values?.table_header,
+      code: values?.code,
       state_color: values?.state_color,
       text_color: values?.text_color,
       id_category_status: values?.category_status?.id,
