@@ -43,29 +43,26 @@ const verifyEmail = async () => {
 
 const loading = computed(() => {
   if (isLoading.value || stateVerified.value === null) {
-    // Mientras se verifica
     return 'pi pi-envelope animate-bounce';
   } else if (stateVerified.value) {
-    // Ya terminó la verificación
-    return 'pi pi-verified animate-none text-green-800'; // éxito
+    return 'pi pi-verified animate-none text-green-800';
   } else {
-    return 'pi pi-times-circle animate-none text-red-500'; // fallo
+    return 'pi pi-times-circle animate-none text-red-500';
   }
 });
 
 const message = computed(() => {
   if (isLoading.value || stateVerified.value === null) {
-    // Mientras se verifica
     return 'Verificando correo electrónico';
   } else if (stateVerified.value) {
-    // Ya terminó la verificación
-    return 'Correo electrónico verificado'; // éxito
+    return 'Correo electrónico verificado';
   } else {
-    return 'Error en la verificación del correo electrónico'; // fallo
+    return 'Error en la verificación del correo electrónico';
   }
 });
 
 onMounted(async () => {
+  console.log('Iniciando verificación de correo electrónico...');
   await verifyEmail();
 });
 </script>

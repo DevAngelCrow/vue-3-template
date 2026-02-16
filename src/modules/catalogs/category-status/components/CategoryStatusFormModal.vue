@@ -33,6 +33,9 @@
         :error-messages="errors.code"
         v-bind="codeAttrs"
         :readonly="props.modalState.isReadonly"
+        :disabled="
+          code === code_category_status_strict && !props.modalState.isReadonly
+        "
       />
       <AppInputText
         class="w-full min-w-0"
@@ -76,6 +79,7 @@ const props = defineProps<{
 const emit = defineEmits(['close-modal']);
 const categoryStatus = inject<CategoryStatusType>('useCategoryStatus')!;
 const { startLoading, finishLoading } = useLoaderStore();
+const code_category_status_strict = 'BL';
 
 const {
   errors,

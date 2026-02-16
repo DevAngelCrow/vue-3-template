@@ -57,8 +57,8 @@ const setupHttpClient = (api: AxiosInstance) => {
 
         alert.showAlert({
           type: 'error',
-          title: `${error.response.status} ${error.response.statusText}`,
-          content: error.message,
+          title: `${errorData.statusCode} ${error.response.statusText}`,
+          content: errorData.message,
         });
 
         return Promise.reject(errorData);

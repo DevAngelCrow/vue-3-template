@@ -42,6 +42,11 @@
         :error-messages="errors.code"
         v-bind="codeAttrs"
         :readonly="props.modalState.isReadonly"
+        :disabled="
+          code_status.includes(code) &&
+          code_status.includes(category_status.code) &&
+          !props.modalState.isReadonly
+        "
       />
       <AppAutocomplete
         class="w-full"
@@ -107,7 +112,6 @@ const props = defineProps<{
 const emit = defineEmits(['close-modal']);
 const useGlobalStatusComposable = inject<GlobalStateType>('useGlobalStatus')!;
 const { startLoading, finishLoading } = useLoaderStore();
-
 const {
   errors,
   name,
@@ -129,6 +133,7 @@ const {
   categoryStatuses,
 } = useGlobalStatusComposable;
 const categoryStatusFiltered = ref<unknown[]>([]);
+const code_status = ['AC', 'INA', 'BL'];
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
