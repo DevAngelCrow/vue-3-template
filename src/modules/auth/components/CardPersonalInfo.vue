@@ -66,7 +66,7 @@
         :error-messages="errors.maritalStatus"
         label="Estado civil*"
         v-bind="maritalStatusAttrs"
-        :options="maritalStatusItems"
+        :options="maritalStatuses"
         option-label="name"
         option-value="id"
       />
@@ -81,7 +81,7 @@
         v-bind="genderAttrs"
         option-label="name"
         option-value="id"
-        :options="gendersItems"
+        :options="genders"
       />
       <AppDatePicker
         class="flex-1"
@@ -118,17 +118,24 @@
   </section>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, toRefs } from 'vue';
 import { AutoCompleteCompleteEvent } from 'primevue';
 import dayjs from 'dayjs';
 
-import { useLoaderStore } from '@/core/store';
-import authServices from '@/core/services/auth.services';
 import { Gender } from '@/core/services/interfaces/auth/gender.interface';
 import { Country } from '@/core/services/interfaces/auth/country.interface';
-//import { sanitizeAlphaNumeric } from '@/core/utils/inputTextValidations';
+import { MaritalStatus } from '@/core/services/interfaces/auth/maritalStatus.interface';
 
 import { useAuth } from '../composables/useAuth';
+
+interface Props {
+  countries: Country[];
+  genders: Gender[];
+  maritalStatuses: MaritalStatus[];
+}
+
+const props = defineProps<Props>();
+const { countries, genders, maritalStatuses } = toRefs(props);
 
 const {
   email,
@@ -156,66 +163,14 @@ const {
   validationInputEmail,
 } = useAuth();
 
-const { startLoading, finishLoading } = useLoaderStore();
-
-const maritalStatusItems = ref<{
-  data: {
-    id: number;
-    name: string;
-    description: string;
-  }[];
-}>();
-const gendersItems = ref<Gender[]>([]);
-const countriesItems = ref<Country[]>([]);
 const countriesFiltered = ref<Country[]>([]);
-
-const getMaritalStatus = async () => {
-  try {
-    startLoading();
-    const response = await authServices.getMaritalStatus();
-    if (response.statusCode === 200) {
-      maritalStatusItems.value = response.data;
-    }
-  } catch (error: unknown) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
-};
-
-const getGenders = async () => {
-  try {
-    startLoading();
-    const response = await authServices.getGenders();
-    if (response.statusCode === 200) {
-      gendersItems.value = response.data.data;
-    }
-  } catch (error: unknown) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
-};
-const getCountries = async () => {
-  try {
-    startLoading();
-    const response = await authServices.getCountriesNationalities();
-    if (response.statusCode === 200) {
-      countriesItems.value = response.data.data;
-    }
-  } catch (error: unknown) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
-};
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
 
-  for (let i = 0; i < countriesItems.value.length; i++) {
-    let item = countriesItems.value[i];
+  for (let i = 0; i < countries.value.length; i++) {
+    let item = countries.value[i];
 
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);
@@ -223,12 +178,6 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   }
   countriesFiltered.value = _filteredItems;
 };
-
-onMounted(async () => {
-  await getMaritalStatus();
-  await getGenders();
-  await getCountries();
-});
 
 const maxDate = computed(() => {
   const date = dayjs();

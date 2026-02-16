@@ -6,20 +6,13 @@ import { Country } from './interfaces/auth/country.interface';
 import { District } from './interfaces/auth/district.interface';
 import { DocumentType } from './interfaces/auth/documentType.interface';
 import { Gender } from './interfaces/auth/gender.interface';
-//import { GetAllDistrictResponse } from "./interfaces/auth/getAllDistrictsResponse.interface";
-//import { GetAllDocumentTypeResponse } from "./interfaces/auth/getAllDocumentTypeResponse.interface";
-//import { GetAllGenderResponse } from "./interfaces/auth/getAllGendersResponse.interface";
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
 import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
 import { Menu } from '../interfaces/userState.store.interface';
 import { Login } from './interfaces/auth/login.interface';
 import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
 import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
-// import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
-
-// import { Menu } from './interfaces/auth/menu.interface';
-//import { PostSignUp } from './interfaces/auth/postSignUp.interface';
-//import { GetAllNationalitiesResponse } from "./interfaces/auth/getAllNationalitiesResponse.interface";
+import { ApiResponseCatalogs } from './interfaces/auth/catalogs.interface';
 
 const getMaritalStatus = async (): Promise<
   ApiResponseGeneric<MaritalStatus>
@@ -99,6 +92,11 @@ const getMenu = async (): Promise<ApiResponseMenu<Menu[]>> => {
   return response.data;
 };
 
+const getCatalogs = async (): Promise<ApiResponseCatalogs> => {
+  const response = await httpClient.get<ApiResponseCatalogs>('auth/catalogs');
+  return response.data;
+};
+
 export default {
   getMaritalStatus,
   getGenders,
@@ -110,4 +108,5 @@ export default {
   getMenu,
   login,
   logout,
+  getCatalogs,
 };

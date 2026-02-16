@@ -14,7 +14,7 @@
         v-model="documentType"
         v-bind="documentTypeAttrs"
         :error-messages="errors.documentType"
-        :options="documentTypesItems"
+        :options="documentTypes"
         option-label="name"
       />
       <AppInputMask
@@ -31,13 +31,18 @@
   </section>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { toRefs } from 'vue';
 
-import authServices from '@/core/services/auth.services';
 import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
-import { useLoaderStore } from '@/core/store';
 
 import { useAuth } from '../composables/useAuth';
+
+interface Props {
+  documentTypes: DocumentType[];
+}
+
+const props = defineProps<Props>();
+const { documentTypes } = toRefs(props);
 
 const {
   documentType,
@@ -46,28 +51,6 @@ const {
   documentNumberAttrs,
   errors,
 } = useAuth();
-
-const { startLoading, finishLoading } = useLoaderStore();
-
-const documentTypesItems = ref<DocumentType[]>([]);
-
-const getDocumentTypes = async () => {
-  try {
-    startLoading();
-    const response = await authServices.getDocumentTypes();
-    if (response.statusCode === 200) {
-      documentTypesItems.value = response.data.data;
-    }
-  } catch (error: unknown) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
-};
-
-onMounted(async () => {
-  await getDocumentTypes();
-});
 
 defineExpose({
   documentType,

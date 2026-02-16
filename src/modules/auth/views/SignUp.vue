@@ -4,7 +4,6 @@
       <AppVerticalStepper
         :components="components"
         :steps="components.length"
-        ref="stepperRef"
         @register="onSubmitStepPersonalInfo"
         @next="next"
         @back="back"
@@ -13,11 +12,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { reactive, markRaw, ref } from 'vue';
+import { reactive, markRaw, ref, onMounted } from 'vue';
 
 import type { StepperVerticalInterface } from '@/core/interfaces/stepperVertical.interface';
 import { getToday, FormatDateToISO } from '@/core/utils/dates';
 import { useLoaderStore } from '@/core/store';
+import authServices from '@/core/services/auth.services';
+import type { Country } from '@/core/services/interfaces/auth/country.interface';
+import type { District } from '@/core/services/interfaces/auth/district.interface';
+import type { Gender } from '@/core/services/interfaces/auth/gender.interface';
+import type { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
+import type { MaritalStatus } from '@/core/services/interfaces/auth/maritalStatus.interface';
 
 import CardPersonalInfo from '../components/CardPersonalInfo.vue';
 import CardDocumentsInfo from '../components/CardDocumentsInfo.vue';
@@ -32,21 +37,39 @@ interface Nationality {
 
 const { startLoading, finishLoading } = useLoaderStore();
 
+// Refs para los catálogos
+const countries = ref<Country[]>([]);
+const districts = ref<District[]>([]);
+const genders = ref<Gender[]>([]);
+const documentTypes = ref<DocumentType[]>([]);
+const maritalStatuses = ref<MaritalStatus[]>([]);
+
 const components = reactive<StepperVerticalInterface[]>([
   {
     component: markRaw(CardPersonalInfo),
     header: 'Información personal',
     ref: 'info_personal_ref',
+    props: {
+      countries: countries,
+      genders: genders,
+      maritalStatuses: maritalStatuses,
+    },
   },
   {
     component: markRaw(CardAddressInfo),
     header: 'Dirección',
     ref: 'info_direccion_ref',
+    props: {
+      districts: districts,
+    },
   },
   {
     component: markRaw(CardDocumentsInfo),
     header: 'Documentos',
     ref: 'info_documentos_ref',
+    props: {
+      documentTypes: documentTypes,
+    },
   },
   {
     component: markRaw(CardUserInfo),
@@ -85,7 +108,29 @@ const documentInfoFieldNames = ['documentType', 'documentNumber'];
 const userInfoFieldNames = ['userName', 'password'];
 
 const { validateField, handleSubmit, registerUser } = useAuth();
-const stepperRef = ref();
+
+// Cargar catálogos
+const loadCatalogs = async () => {
+  try {
+    startLoading();
+    const response = await authServices.getCatalogs();
+    if (response.statusCode === 200) {
+      countries.value = response.data.countries;
+      districts.value = response.data.districts;
+      genders.value = response.data.genders;
+      documentTypes.value = response.data.documentTypes;
+      maritalStatuses.value = response.data.maritalStatuses;
+    }
+  } catch (error: unknown) {
+    console.error('Error loading catalogs:', error);
+  } finally {
+    finishLoading();
+  }
+};
+
+onMounted(async () => {
+  await loadCatalogs();
+});
 
 const next = async (callback: Function, step: number) => {
   try {
