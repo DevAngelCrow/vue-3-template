@@ -19,6 +19,12 @@ const routes = [
     component: () => import('../../modules/auth/views/SignUp.vue'),
   },
   {
+    path: '/landing',
+    name: 'landing',
+    meta: { requiresAuth: false, title: 'Bienvenido' },
+    component: () => import('../../views/Landing.vue'),
+  },
+  {
     path: '/',
     name: 'layout',
     component: () => import('../layouts/Layout.vue'),

@@ -39,4 +39,9 @@ export const routesCatalogs = [
     component: () =>
       import('@/modules/catalogs/document-type/views/DocumentTypes.vue'),
   },
+  {
+    path: 'catalogs/genders',
+    name: 'genders',
+    component: () => import('@/modules/catalogs/gender/views/Genders.vue'),
+  },
 ];

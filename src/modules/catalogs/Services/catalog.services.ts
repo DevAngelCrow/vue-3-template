@@ -18,6 +18,7 @@ import { CategoryStatusResponse } from '../interfaces/category-status/category-s
 import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
 import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
 import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
+import { GenderResponse } from '../interfaces/gender/gender.response.interface';
 
 const getAllCountries = async (
   params?: paginateParams,
@@ -228,6 +229,17 @@ const deleteDocumentType = async (id: number) => {
   );
   return response;
 };
+
+const getGenders = async (
+  params?: paginateParams,
+): Promise<ApiResponseGeneric<GenderResponse>> => {
+  const response = await httpClient.get<ApiResponseGeneric<GenderResponse>>(
+    'catalogs/genders',
+    params,
+  );
+  return response.data;
+};
+
 export default {
   getAllCountries,
   createCountries,
@@ -256,4 +268,5 @@ export default {
   postDocumentType,
   putDocumentType,
   deleteDocumentType,
+  getGenders,
 };
