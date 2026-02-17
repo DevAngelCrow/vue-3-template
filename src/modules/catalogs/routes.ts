@@ -33,4 +33,10 @@ export const routesCatalogs = [
     component: () =>
       import('@/modules/catalogs/category-status/views/CategoryStatus.vue'),
   },
+  {
+    path: 'catalogs/document-types',
+    name: 'document-types',
+    component: () =>
+      import('@/modules/catalogs/document-type/views/DocumentTypes.vue'),
+  },
 ];

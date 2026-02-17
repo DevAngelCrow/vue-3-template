@@ -16,6 +16,8 @@ import { GlobalStatusResponse } from '../interfaces/global-status/global-status.
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
 import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
+import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
+import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
 
 const getAllCountries = async (
   params?: paginateParams,
@@ -195,7 +197,37 @@ const deleteCategoryStatus = async (id: number) => {
   );
   return response;
 };
+const getDocumentTypes = async (
+  params?: paginateParams,
+): Promise<ApiResponseGeneric<DocumentTypeResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<DocumentTypeResponse>
+  >('profile/document-types', params);
+  return response.data;
+};
 
+const postDocumentType = async (data: DocumentTypeForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'profile/document-types',
+    data,
+  );
+  return response;
+};
+
+const putDocumentType = async (id: number, data: DocumentTypeForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `profile/document-types/${id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteDocumentType = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `profile/document-types/${id}`,
+  );
+  return response;
+};
 export default {
   getAllCountries,
   createCountries,
@@ -220,4 +252,8 @@ export default {
   postCategoryStatus,
   putCategoryStatus,
   deleteCategoryStatus,
+  getDocumentTypes,
+  postDocumentType,
+  putDocumentType,
+  deleteDocumentType,
 };
