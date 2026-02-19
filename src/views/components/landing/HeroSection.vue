@@ -10,9 +10,11 @@
         tu negocio.
       </p>
     </div>
-    <div class="perspective-normal animate-fadeinleft overflow-hidden">
+    <div
+      class="perspective-normal animate-fadeinleft overflow-hidden text-white"
+    >
       <img
-        class="translate-z-1 -rotate-y-15 rotate-x-1"
+        class="translate-z-1 -rotate-y-15 rotate-x-1 text-white"
         src="../../../../public/images/factura_icon_oulined.svg"
         width="500"
         height="500"
