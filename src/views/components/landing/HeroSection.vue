@@ -3,7 +3,7 @@
     id="hero-section"
     class="flex flex-row items-center justify-around w-screen bg-primary text-white"
   >
-    <div class="w-full">
+    <div class="w-[70%]">
       <h1>Bienvenido a Facturación Electrónica SV</h1>
       <p>
         La solución definitiva para la integración de facturación electrónica en
@@ -11,13 +11,11 @@
       </p>
     </div>
     <div
-      class="perspective-normal animate-fadeinleft overflow-hidden text-white"
+      class="perspective-normal animate-fadeinleft text-white flex justify-end items-center w-[30%] h-full overflow-x-clip"
     >
       <img
-        class="translate-z-1 -rotate-y-15 rotate-x-1 text-white"
+        class="translate-z-1 -rotate-y-15 rotate-x-1 text-white w-[100%] h-[91%]"
         src="../../../../public/images/factura_icon_oulined.svg"
-        width="500"
-        height="500"
         alt="logo"
       />
     </div>
