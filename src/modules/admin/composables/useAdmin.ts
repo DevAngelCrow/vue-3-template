@@ -284,7 +284,6 @@ export function useAdmin() {
   const editRoute = async (form: RouteForm) => {
     try {
       startLoading();
-      console.log(form);
       const { id, ...body } = form;
       const response = await adminServices.editRoute(id!, body);
       if (response.status === 200) {

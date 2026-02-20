@@ -70,6 +70,7 @@
           v-bind="child_routeAttrs"
           binary
           :readonly="props.modalState.isReadonly"
+          @change="parent = null"
         />
       </div>
       <div class="flex-1">
