@@ -52,7 +52,19 @@
         id="overlay_menu"
         :popup="true"
         :model="menuUser"
-      />
+      >
+        <template #item="{ item }">
+          <div class="flex items-center w-full px-3 primary">
+            <div
+              class="flex items-center gap-2 primary"
+              @click="addFunctionItemMenuUser(`${item.label}`)"
+            >
+              <i :class="`${item.icon} primary`"></i>
+              <span class="primary">{{ item.label }}</span>
+            </div>
+          </div>
+        </template>
+      </MenuPrime>
     </div>
   </div>
 </template>
@@ -68,6 +80,8 @@ import {
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
 
+import { useAuth } from '@/modules/auth/composables/useAuth';
+
 import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
 
 defineOptions({ name: 'AppNavBarMenu' });
@@ -81,6 +95,7 @@ const { menu } = defineProps({
 
 const emit = defineEmits(['update:menu-sidebar']);
 
+const logout = useAuth().logout;
 const menuMapped = ref<MenuModel[]>();
 const menuAppsideBar = ref<MenuModel[]>();
 const menuUser = ref<MenuModel[]>();
@@ -146,6 +161,16 @@ const checkWrapMenu = () => {
   });
 };
 
+const addFunctionItemMenuUser = (item: string) => {
+  const itemsMenuUser = ['cerrar-sesion'];
+
+  if (item === itemsMenuUser[0]) {
+    return () => {
+      logout();
+    };
+  }
+  return undefined;
+};
 watch(widthNavBarMenu, new_value => {
   if (new_value <= 769) {
     const menuAppSideBarWithoutUser = [...menuCopy.value];
