@@ -10,6 +10,10 @@ export interface Token {
   access_token: string;
 }
 
+export interface RefreshToken {
+  refresh_token: string;
+}
+
 export interface Menu {
   id: number;
   name: string;

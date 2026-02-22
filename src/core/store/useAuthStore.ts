@@ -5,6 +5,7 @@ import {
   UserStateStore,
   Token,
   Menu,
+  RefreshToken,
 } from '../interfaces/userState.store.interface';
 
 interface State {
@@ -13,6 +14,7 @@ interface State {
   token_type: string | null;
   menu: Menu[];
   menuSideBar: Menu[];
+  refresh_token: RefreshToken | null | string;
 }
 
 const getFromLocalStorage = (key: string) => {
@@ -49,6 +51,9 @@ export const useAuthStore = defineStore('authStore', {
     token_type: localStorage.getItem('token_type')
       ? localStorage.getItem('token_type')
       : null,
+    refresh_token: localStorage.getItem('refresh_token')
+      ? localStorage.getItem('refresh_token')
+      : null,
     menu: getFromLocalStorage('menu') || [],
     menuSideBar: [],
   }),
@@ -62,6 +67,12 @@ export const useAuthStore = defineStore('authStore', {
     tokenInfo(): Token | null | string {
       if (this.token) {
         return this.token;
+      }
+      return null;
+    },
+    refreshTokenInfo(): RefreshToken | null | string {
+      if (this.refresh_token) {
+        return this.refresh_token;
       }
       return null;
     },
@@ -86,6 +97,10 @@ export const useAuthStore = defineStore('authStore', {
     setToken(payload: Token) {
       this.token = payload.access_token;
       localStorage.setItem('access_token', payload.access_token);
+    },
+    setRefreshToken(payload: RefreshToken) {
+      this.refresh_token = payload.refresh_token;
+      localStorage.setItem('refresh_token', payload.refresh_token);
     },
     setTokenType(payload: string) {
       this.token_type = payload;
@@ -120,9 +135,16 @@ export const useAuthStore = defineStore('authStore', {
     closeSession() {
       this.user = null;
       this.token = null;
+      this.refresh_token = null;
       this.token_type = null;
       this.menu = [];
-      removeAllFromLocalStorage(['access_token', 'user', 'menu', 'token_type']);
+      removeAllFromLocalStorage([
+        'access_token',
+        'user',
+        'menu',
+        'token_type',
+        'refresh_token',
+      ]);
     },
   },
 });

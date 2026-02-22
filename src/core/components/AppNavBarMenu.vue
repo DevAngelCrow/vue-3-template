@@ -162,12 +162,10 @@ const checkWrapMenu = () => {
 };
 
 const addFunctionItemMenuUser = (item: string) => {
-  const itemsMenuUser = ['cerrar-sesion'];
-
+  const itemsMenuUser = ['Cerrar sesion'];
   if (item === itemsMenuUser[0]) {
-    return () => {
-      logout();
-    };
+    console.log('cerrando sesion');
+    logout();
   }
   return undefined;
 };
