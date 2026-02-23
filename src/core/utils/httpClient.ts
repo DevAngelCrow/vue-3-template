@@ -105,5 +105,4 @@ const setupHttpClient = (api: AxiosInstance) => {
   };
 };
 
-// Exportamos la instancia de httpClient ya configurada con los interceptores
 export const httpClient = setupHttpClient(axiosInstance);
