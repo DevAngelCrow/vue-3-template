@@ -59,18 +59,22 @@
               variant="text"
               icon="pi pi-eye"
               @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver Detalle'"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
               @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
+              :disabled="!data?.active"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
-              icon="pi pi-trash"
+              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
               @click="openModal('delete', data)"
+              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
             ></Button>
           </div>
         </template>
@@ -78,9 +82,13 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
-            data.active ? 'Activo' : 'Inactivo'
-          }}</Chip>
+          <Chip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
         </template>
       </AppDataTable>
     </section>
@@ -154,7 +162,6 @@ const openModal = (
         : 'Activar Departamento';
       modalState.description = `¿Está seguro de cambiar el estado del departamento a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
-      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;

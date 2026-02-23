@@ -157,23 +157,11 @@
         </Card>
       </div>
     </section>
-
-    <AppDataTable
-      :items="items"
-      :headers="headers"
-      :paginator="true"
-      :per_page="1"
-      :total_pages="1"
-      class="w-full"
-    />
   </div>
 </template>
 <script setup lang="ts">
 import { Card, Button } from 'primevue';
 import { ref } from 'vue';
-
-import AppDataTable from '@/core/components/AppDataTable.vue';
-import type { TableHeaders } from '@/core/interfaces';
 
 import type { EstadoDocumento } from './interfaces/estado-documentos.interface';
 import { TiposDocumentos } from './interfaces/tipos-documentos-generados.interface';
@@ -196,38 +184,6 @@ const botonera = ref([
   {
     icon: 'pi pi-user',
     label: 'Clientes',
-  },
-]);
-
-const headers = ref<TableHeaders[]>([
-  {
-    field: 'vinculador_uno', // ---> corresponde al vinculador del item que recibira en su columna respectiva
-    header: 'cabecera_Uno', //---> corresponde al nombre de la cabecera de la columna
-    sortable: false, // ---> si usted require que la columna sea sorteable
-    alignHeaders: 'center', // ---> alineación de la cabecera, puede tener valores 'start', 'center' o 'end'
-    alignItems: 'center', // ---> alineación de los items bajo esa cabecera ('start', 'center', 'end')
-  },
-  {
-    field: 'vinculador_dos',
-    header: 'cabecera_Dos',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-  {
-    field: 'vinculador_tres',
-    header: 'cabecera_Tres',
-    sortable: false,
-    alignHeaders: 'center',
-    alignItems: 'center',
-  },
-]);
-
-const items = ref([
-  {
-    vinculador_uno: 'item_cabecera_uno',
-    vinculador_dos: 'item_cabecera_dos',
-    vinculador_tres: 'item_cabecera_tres',
   },
 ]);
 </script>

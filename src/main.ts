@@ -19,7 +19,6 @@ registerDirectives(app);
 app.use(PrimeVue, {
   ripple: true,
   locale: {
-    // https://github.com/primefaces/primelocale/tree/main
     monthNames: [
       'Enero',
       'Febrero',

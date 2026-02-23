@@ -56,17 +56,21 @@
               variant="text"
               icon="pi pi-eye"
               @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver detalle'"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
               @click="openModal('edit', data)"
+              :disabled="!data?.active"
+              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
-              icon="pi pi-trash"
+              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
               @click="openModal('delete', data)"
             ></Button>
           </div>
@@ -75,9 +79,13 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
-            data.active ? 'Activo' : 'Inactivo'
-          }}</Chip>
+          <Chip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
         </template>
       </AppDataTable>
     </section>
@@ -151,7 +159,6 @@ const openModal = (
         : 'Activar Distrito';
       modalState.description = `¿Está seguro de cambiar el estado del distrito a ${data!.active ? 'inactivo' : 'activo'}?`;
       modalState.selectedItem = data!.id;
-      console.log(modalState, 'modal state');
       break;
   }
   modalState.show = true;

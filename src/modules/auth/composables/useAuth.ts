@@ -59,7 +59,7 @@ function createForm() {
           .array<NationalitiesArray>()
           .required('El campo de nacionalidades es requerido')
           .min(1, 'Debes agregar al menos una nacionalidad'),
-        imgFile: yup
+        file_img: yup
           .mixed<PrimeVueFile[]>()
           .test(
             'required',
@@ -142,8 +142,8 @@ function createForm() {
     statusAttrs: defineField('status')[1],
     nationalities: defineField('nationalities')[0],
     nationalitiesAttrs: defineField('nationalities')[1],
-    imgFile: defineField('imgFile')[0],
-    imgFileAttrs: defineField('imgFile')[1],
+    file_img: defineField('file_img')[0],
+    file_imgAttrs: defineField('file_img')[1],
     street: defineField('street')[0],
     streetAttrs: defineField('street')[1],
     streetNumber: defineField('streetNumber')[0],
@@ -189,13 +189,14 @@ export function useAuth() {
   const API_URL =
     import.meta.env.VITE_VUE_APP_API_URL || 'http://127.0.0.1:8000';
 
-  const { setToken, setUserInfo, setTokenType } = useAuthStore();
+  const { setToken, setUserInfo, setTokenType, setRefreshToken } =
+    useAuthStore();
 
   const login = async (user: string, password: string) => {
     isLoading.value = true;
     error.value = null;
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -223,10 +224,11 @@ export function useAuth() {
       }
 
       const data = await response.json();
-
       if (data.data.access_token) {
         setToken(data.data);
-
+        if (data.data.refresh_token) {
+          setRefreshToken(data.data);
+        }
         if (data.data.user) {
           setUserInfo(data.data.user);
         }
@@ -258,14 +260,15 @@ export function useAuth() {
   const logout = async () => {
     isLoggingOut.value = true;
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem('access_token');
+      const refreshToken = localStorage.getItem('refresh_token');
       const tokenType = localStorage.getItem('token_type') || 'Bearer';
 
       if (token) {
-        await fetch(`${API_URL}/api/auth/logout`, {
+        await fetch(`${API_URL}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
-            Authorization: `${tokenType} ${token}`,
+            Authorization: `${tokenType} ${refreshToken}`,
             Accept: 'application/json',
             'Content-Type': 'application/json',
           },
@@ -276,9 +279,11 @@ export function useAuth() {
     } catch (error) {
       console.error('Error durante logout:', error);
     } finally {
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('token_type');
       localStorage.removeItem('user');
+      localStorage.removeItem('menu');
       router.push('/login');
     }
   };

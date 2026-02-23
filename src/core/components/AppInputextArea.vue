@@ -1,58 +1,39 @@
 <template>
   <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
-      <IconField class="w-full group">
-        <InputIcon
-          :class="
-            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
-          "
-          v-if="showIcon"
-          id="append-icon"
-        />
-        <Textarea
-          class="w-full"
-          :type="typeInputLocal"
-          :model-value="modelValue"
-          @update:model-value="onUpdate"
-          :invalid="invalid"
-          v-bind="$attrs"
-          :autocomplete
-          :placeholder="displayPlaceholder"
-          :id="inputId"
-          @focus="() => (isFocused = true)"
-          @blur="() => (isFocused = false)"
-          :variant="inputVarian"
-        />
-        <InputIcon
-          v-if="showIcon"
-          :class="
-            invalid
-              ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
-              : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
-          "
-          id="append-icon"
-          @click="clickSecondIcon"
-        />
-      </IconField>
-      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
-        label
-      }}</label>
+      <Textarea
+        class="w-full"
+        :model-value="modelValue"
+        @update:model-value="onUpdate"
+        :invalid="invalid"
+        v-bind="$attrs"
+        :autocomplete
+        :placeholder="displayPlaceholder"
+        :id="inputId"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+        :variant="inputVarian"
+      />
+      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+        {{ label }}
+      </label>
     </FloatLabel>
     <Message
-      class="left-0 top-full mt-0 text-xs z-10"
       v-if="errorMessages.length"
+      class="left-0 top-full mt-0 text-xs z-10"
       :severity
       :size
       :variant
-      >{{ messageErrorField }}</Message
     >
+      {{ errorMessages }}
+    </Message>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, defineEmits, watch, onMounted } from 'vue';
-import { Textarea, InputIcon, Message, IconField, FloatLabel } from 'primevue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { Textarea, Message, FloatLabel } from 'primevue';
 
-defineOptions({ inheritAttrs: false, name: 'AppInputText' });
+defineOptions({ inheritAttrs: false, name: 'AppInputTextArea' });
 
 const props = defineProps({
   modelValue: {
@@ -61,10 +42,6 @@ const props = defineProps({
   class: {
     type: String,
     default: 'w-full max-w-[322px]',
-  },
-  type: {
-    type: String,
-    default: 'text',
   },
   placeholder: {
     type: String,
@@ -94,28 +71,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  // icon: {
-  //   type: String,
-  //   default: '',
-  // },
-  showIcon: {
-    type: Boolean,
-    default: false,
-  },
-  appendIcon: {
-    //final, dentro del input
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    //Inicio dentro y al principio del input
-    type: String,
-    default: '',
-  },
-  clearIcon: {
-    type: String,
-    default: '',
-  },
   autocomplete: {
     type: String,
     default: 'off',
@@ -129,32 +84,15 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const emit = defineEmits(['update:modelValue']);
 
-const errors = ref<string>();
-const invalid = ref<boolean>();
-const appendIconLocal = ref<string>(props.appendIcon);
-const typeInputLocal = ref<string>(props.type);
+const invalid = ref<boolean>(false);
 const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: string | undefined) => {
-  return emit('update:modelValue', value ?? '');
+  emit('update:modelValue', value ?? '');
 };
-const messageErrorField = computed(() => {
-  if (props.errorMessages.length) {
-    errors.value = props.errorMessages;
-  }
-  return errors.value;
-});
-
-const passwordInputType = computed(() => {
-  if (props.type === 'password') {
-    appendIconLocal.value = 'pi pi-eye';
-    return 'hover:cursor-pointer';
-  }
-  return '';
-});
 
 const displayPlaceholder = computed(() => {
   if (isFocused.value && props.label) {
@@ -164,20 +102,6 @@ const displayPlaceholder = computed(() => {
     return props.placeholder;
   }
 });
-
-const clickSecondIcon = () => {
-  if (props.type === 'password' && appendIconLocal.value === 'pi pi-eye') {
-    appendIconLocal.value = 'pi pi-eye-slash';
-    typeInputLocal.value = 'text';
-  } else if (
-    appendIconLocal.value === 'pi pi-eye-slash' &&
-    props.type === 'password'
-  ) {
-    appendIconLocal.value = 'pi pi-eye';
-    typeInputLocal.value = 'password';
-  }
-  emit('click-end-icon');
-};
 
 onMounted(() => {
   if (!props.id) {

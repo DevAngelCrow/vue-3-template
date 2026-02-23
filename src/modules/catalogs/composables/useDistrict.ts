@@ -124,15 +124,15 @@ export function useDistrict() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await catalogServices.getDistricts(filter);
 
       if (response.statusCode === 200) {
-        districts.value = response.data.items;
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
+        districts.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);
@@ -144,7 +144,10 @@ export function useDistrict() {
   const addDistrict = async (form: DistrictForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postDistrict(form);
+      const response = await catalogServices.postDistrict({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getDistricts();
         alert.showAlert({
@@ -164,7 +167,8 @@ export function useDistrict() {
   const editDistrict = async (form: DistrictForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putDistrict(form);
+      const { id, ...body } = form;
+      const response = await catalogServices.putDistrict(id!, body);
       if (response.status === 200) {
         getDistricts();
         alert.showAlert({
@@ -175,7 +179,7 @@ export function useDistrict() {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       finishLoading();
     }

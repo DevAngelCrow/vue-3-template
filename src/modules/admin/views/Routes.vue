@@ -56,18 +56,21 @@
               variant="text"
               icon="pi pi-eye"
               @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver detalle'"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
               @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
               icon="pi pi-trash"
               @click="openModal('delete', data)"
+              v-tooltip.bottom="'Eliminar'"
             ></Button>
           </div>
         </template>
@@ -75,9 +78,13 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
-            data.active ? 'Activo' : 'Inactivo'
-          }}</Chip>
+          <Chip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
         </template>
         <template #body-show="{ data }">
           <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
@@ -92,7 +99,7 @@ import { Button, Chip } from 'primevue';
 import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
 import { useAdmin } from '../composables/useAdmin';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
+import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 import RouteFormModal from '../components/routes/RouteFormModal.vue';
 
 const adminInstance = useAdmin();
@@ -100,6 +107,7 @@ provide('useAdmin', adminInstance);
 
 const {
   getRoutes,
+  getRouteById,
   child_route,
   resetField,
   items,
@@ -142,6 +150,7 @@ const openModal = (
       modalState.title = 'Agregar Ruta';
       break;
     case 'view':
+      getRouteById(data!.id);
       modalState.title = 'Ver Ruta';
       setRouteItem(data!);
       break;

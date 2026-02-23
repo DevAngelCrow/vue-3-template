@@ -122,15 +122,15 @@ export function useDepartment() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await catalogServices.getAllDepartments(filter);
 
       if (response.statusCode === 200) {
-        deparments.value = response.data.items;
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
+        deparments.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);
@@ -142,7 +142,10 @@ export function useDepartment() {
   const addDepartment = async (form: DepartmentForm) => {
     try {
       startLoading();
-      const response = await catalogServices.postDepartment(form);
+      const response = await catalogServices.postDepartment({
+        ...form,
+        active: true,
+      });
       if (response.status === 201) {
         getDepartments();
         alert.showAlert({
@@ -162,7 +165,8 @@ export function useDepartment() {
   const editDepartment = async (form: DepartmentForm) => {
     try {
       startLoading();
-      const response = await catalogServices.putDepartment(form);
+      const { id, ...body } = form;
+      const response = await catalogServices.putDepartment(id!, body);
       if (response.status === 200) {
         getDepartments();
         alert.showAlert({
@@ -173,7 +177,7 @@ export function useDepartment() {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       finishLoading();
     }

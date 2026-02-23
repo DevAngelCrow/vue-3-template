@@ -1,4 +1,4 @@
-export interface RoutesResponse {
+export interface RouteResponseById {
   id: number;
   name: string;
   description: string;
@@ -10,5 +10,11 @@ export interface RoutesResponse {
   order: number;
   title: string;
   parent_route: [] | null;
-  permissionsId: number[];
+  permissions: {
+    id: number;
+    name: string;
+    description: string;
+    active: boolean;
+    //category: number;
+  }[];
 }

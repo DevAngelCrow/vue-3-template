@@ -7,9 +7,9 @@ import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { TableHeaders } from '@/core/interfaces';
 
-import { RouteForm } from '../interfaces/route-form.interface';
-import { RouteParentAutocomplete } from '../interfaces/route-parent-autocomplete-obj.interface';
-import { RoutesResponse } from '../interfaces/routes.response.interface';
+import { RouteForm } from '../interfaces/routes/route-form.interface';
+import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autocomplete-obj.interface';
+import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 
 export function useAdmin() {
   const {
@@ -55,12 +55,13 @@ export function useAdmin() {
       child_route: yup.boolean(),
       show: yup.boolean(),
       active: yup.boolean(),
-      parent_route: yup.mixed<RouteParentAutocomplete>().when('child_route', {
+      parent: yup.mixed<RouteParentAutocomplete>().when('child_route', {
         is: true,
         then: schema => schema.required('El campo de ruta padre es requerido'),
         otherwise: schema => schema.nullable().notRequired(),
       }),
       permissions_ids: yup.array(),
+      required_auth: yup.boolean(),
     }),
   });
 
@@ -115,7 +116,7 @@ export function useAdmin() {
       alignItems: 'center',
     },
     {
-      field: 'parent_route.uri',
+      field: 'parent.uri',
       header: 'Ruta padre',
       sortable: false,
       alignHeaders: 'center',
@@ -167,7 +168,7 @@ export function useAdmin() {
   });
   const permissionsPagination = reactive({
     page: 1,
-    per_page: 10,
+    per_page: 5,
     total_items: 0,
   });
   const { startLoading, finishLoading } = useLoaderStore();
@@ -183,9 +184,10 @@ export function useAdmin() {
   const [child_route, child_routeAttrs] = defineField('child_route');
   const [show, showAttrs] = defineField('show');
   const [active, activeAttrs] = defineField('active');
-  const [parent_route, parent_routeAttrs] = defineField('parent_route');
+  const [parent, parentAttrs] = defineField('parent');
   const [permissions_ids, permissions_idsAttrs] =
     defineField('permissions_ids');
+  const [required_auth, required_authAttrs] = defineField('required_auth');
 
   const filter_name = ref<string | null>(null);
   const filter_permission_name = ref<string | null>(null);
@@ -201,7 +203,6 @@ export function useAdmin() {
       name: string;
       description: string;
       active: boolean;
-      show: boolean;
     }[]
   >([]);
 
@@ -211,16 +212,13 @@ export function useAdmin() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter_name.value,
+        filter: filter_name.value,
       };
       const response = await adminServices.getAllRoutes(filter);
       const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
       if (secondResponse.statusCode === 200) {
         parentRoutes.value = secondResponse.data
-          .filter(
-            item =>
-              item.parent_route === null || item.parent_route === undefined,
-          )
+          .filter(item => item.parent === null || item.parent === undefined)
           .map(item => ({
             title: item.title,
             id: item.id,
@@ -229,10 +227,10 @@ export function useAdmin() {
           }));
       }
       if (response.statusCode === 200) {
-        pagination.page = response.data.pagination.currentPage;
-        pagination.per_page = response.data.pagination.perPage;
-        pagination.total_items = response.data.pagination.totalItems;
-        items.value = response.data.items;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
+        items.value = response.data.data;
       }
       return [];
     } catch (error) {
@@ -241,11 +239,33 @@ export function useAdmin() {
       finishLoading();
     }
   };
-
+  const getRouteById = async (id: number) => {
+    try {
+      startLoading();
+      permissionsList.value = [];
+      permissionsPagination.per_page = 0;
+      permissionsPagination.total_items = 0;
+      const response = await adminServices.getRoute(id);
+      if (response.statusCode === 200) {
+        permissionsList.value = response.data.permissions
+          ? response.data.permissions
+          : [];
+        permissionsPagination.per_page = 5;
+        permissionsPagination.total_items = response?.data?.permissions?.length;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
   const addRoute = async (form: RouteForm) => {
     try {
       startLoading();
-      const response = await adminServices.addRoute(form);
+      if (form.id_parent) {
+        form.uri = `${form.uri}`;
+      }
+      const response = await adminServices.addRoute({ ...form, active: true });
       if (response.status === 201) {
         getRoutes();
         alert.showAlert({
@@ -264,7 +284,8 @@ export function useAdmin() {
   const editRoute = async (form: RouteForm) => {
     try {
       startLoading();
-      const response = await adminServices.editRoute(form);
+      const { id, ...body } = form;
+      const response = await adminServices.editRoute(id!, body);
       if (response.status === 200) {
         getRoutes();
         alert.showAlert({
@@ -315,13 +336,14 @@ export function useAdmin() {
         filter_name: filter_permission_name.value
           ? filter_permission_name.value
           : null,
+        active: 1,
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
-        permissionsList.value = response.data.items;
-        permissionsPagination.page = response.data.pagination.currentPage;
-        permissionsPagination.per_page = response.data.pagination.perPage;
-        permissionsPagination.total_items = response.data.pagination.totalItems;
+        permissionsList.value = response.data.data;
+        permissionsPagination.page = response.data.current_page;
+        permissionsPagination.per_page = response.data.per_page;
+        permissionsPagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);
@@ -366,6 +388,7 @@ export function useAdmin() {
   };
 
   const setRouteItem = (value: RoutesResponse) => {
+    console.log(value, 'values');
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('title', value?.title);
@@ -373,14 +396,17 @@ export function useAdmin() {
     setFieldValue('description', value?.description);
     setFieldValue('order', value?.order);
     setFieldValue('icon', value?.icon);
-    setFieldValue('parent_route', value?.parent_route);
-    setFieldValue('child_route', parent_route.value ? true : false);
+    setFieldValue('parent', value?.parent);
+    setFieldValue('child_route', !!parent.value);
     setFieldValue('show', value?.show);
     setFieldValue('active', value.active);
     setFieldValue(
       'permissions_ids',
-      value.permissionsId?.length ? value.permissionsId : [],
+      value.permissions?.length
+        ? value.permissions.map(permission => permission.id)
+        : [],
     );
+    setFieldValue('required_auth', value.required_auth);
   };
 
   const findRoute = (value: string | null) => {
@@ -393,6 +419,7 @@ export function useAdmin() {
     addRoute,
     editRoute,
     deleteRoute,
+    getRouteById,
     id,
     idAttrs,
     name,
@@ -413,10 +440,12 @@ export function useAdmin() {
     showAttrs,
     active,
     activeAttrs,
-    parent_route,
-    parent_routeAttrs,
+    parent,
+    parentAttrs,
     permissions_ids,
     permissions_idsAttrs,
+    required_auth,
+    required_authAttrs,
     errors,
     handleSubmit,
     validateField,
