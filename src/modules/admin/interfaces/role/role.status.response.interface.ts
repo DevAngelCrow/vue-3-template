@@ -1,7 +1,9 @@
 export interface RoleStatus {
   id: number;
-  table_header: string;
+  code: string;
   name: string;
   description: string;
   active: boolean;
+  state_color: string;
+  text_color: string;
 }

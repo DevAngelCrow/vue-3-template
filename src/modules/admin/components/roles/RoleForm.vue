@@ -91,7 +91,7 @@ onMounted(() => {
     status.value = globalStatus.value.find(item => {
       return (
         item?.name?.toLowerCase() === 'activo' &&
-        item?.table_header === 'mnt_role'
+        item?.code?.toLowerCase() === 'ac'
       );
     });
   }
