@@ -80,7 +80,7 @@ const onSubMit = handleSubmit(async values => {
       order: values.order,
       show: values.show ? true : false,
       uri: values.uri,
-      id_parent: values.parent_route?.id ?? null,
+      id_parent: values.parent?.id ?? null,
       title: values.title,
       permissions_id: [...selectedPermissionsIds.value],
       required_auth: values.required_auth ?? false,

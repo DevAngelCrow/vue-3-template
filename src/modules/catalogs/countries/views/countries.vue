@@ -61,9 +61,13 @@
         </template>
 
         <template #body-active="{ data }">
-          <Chip :class="data ? 'bg-green-600' : 'bg-red-600'">{{
-            data ? 'Activo' : 'Inactivo'
-          }}</Chip>
+          <Chip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
         </template>
       </AppDataTable>
     </section>

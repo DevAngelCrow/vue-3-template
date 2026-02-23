@@ -75,9 +75,31 @@
           </div>
         </template>
         <template #body-active="{ data }">
-          <Chip :class="data.active ? 'bg-green-600' : 'bg-red-600'">{{
-            data.active ? 'Activo' : 'Inactivo'
-          }}</Chip>
+          <Chip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
+        </template>
+        <template #body-state_color="{ data }">
+          <div class="flex justify-center items-center gap-2 w-full h-full">
+            <div
+              :class="`rounded-xl border-1 h-5 w-[20px]`"
+              :style="{ backgroundColor: data.state_color }"
+            ></div>
+            <span>{{ data.state_color }}</span>
+          </div>
+        </template>
+        <template #body-text_color="{ data }">
+          <div class="flex justify-center items-center gap-2 w-full h-full">
+            <div
+              :class="`rounded-xl border-1 h-5 w-[20px]`"
+              :style="{ backgroundColor: data.text_color }"
+            ></div>
+            <span>{{ data.text_color }}</span>
+          </div>
         </template>
       </AppDataTable>
     </section>
@@ -109,6 +131,7 @@ const {
   headers,
   pagination,
   globalStatus,
+  getCategoryStatuses,
 } = globalStatusInstance;
 
 const modalState = reactive<{
@@ -144,6 +167,7 @@ const openModal = (
       break;
     case 'edit':
       modalState.title = 'Editar Estado Global';
+      console.log('data', data);
       setGlobalStatusItem(data!);
       break;
     case 'delete':
@@ -177,6 +201,7 @@ const handlePagination = async (page: number) => {
 };
 onMounted(async () => {
   await getGlobalStatus();
+  await getCategoryStatuses();
 });
 </script>
 <style scoped></style>

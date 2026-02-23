@@ -105,13 +105,18 @@
 </template>
 <script setup lang="ts">
 import { AutoCompleteCompleteEvent, Checkbox } from 'primevue';
-import { onMounted, ref } from 'vue';
+import { ref, toRefs } from 'vue';
 
-import authServices from '@/core/services/auth.services';
 import { District } from '@/core/services/interfaces/auth/district.interface';
-import { useLoaderStore } from '@/core/store';
 
 import { useAuth } from '../composables/useAuth';
+
+interface Props {
+  districts: District[];
+}
+
+const props = defineProps<Props>();
+const { districts } = toRefs(props);
 
 const {
   street,
@@ -134,31 +139,14 @@ const {
   validationInputAlphanumeric,
 } = useAuth();
 
-const { startLoading, finishLoading } = useLoaderStore();
-
-const districtItems = ref<District[]>([]);
 const districtsFiltered = ref<District[]>([]);
-
-const getDistricts = async () => {
-  try {
-    startLoading();
-    const response = await authServices.getDistricts();
-    if (response.statusCode === 200) {
-      districtItems.value = response.data.data;
-    }
-  } catch (error: unknown) {
-    console.error(error);
-  } finally {
-    finishLoading();
-  }
-};
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
 
-  for (let i = 0; i < districtItems.value.length; i++) {
-    let item = districtItems.value[i];
+  for (let i = 0; i < districts.value.length; i++) {
+    let item = districts.value[i];
 
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);
@@ -167,10 +155,6 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
 
   districtsFiltered.value = _filteredItems;
 };
-
-onMounted(async () => {
-  await getDistricts();
-});
 
 defineExpose({
   street,

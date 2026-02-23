@@ -14,13 +14,12 @@ import type {
 import { useAlertStore } from '../store';
 import { useAuthStore } from '../store/useAuthStore';
 
-const useAuth = useAuthStore();
-const alert = useAlertStore();
 // Función para configurar los interceptores y envolver la instancia de Axios
 const setupHttpClient = (api: AxiosInstance) => {
   // Configurar interceptores de petición
   api.interceptors.request.use(
     config => {
+      const useAuth = useAuthStore();
       const token = useAuth.token || localStorage.getItem('token');
       if (token) {
         if (!config.headers) {
@@ -41,6 +40,8 @@ const setupHttpClient = (api: AxiosInstance) => {
       return response;
     },
     (error: AxiosError<ErrorResponse>) => {
+      const alert = useAlertStore();
+
       if (error.response) {
         const responseData = error.response.data || {};
         const errorData: ErrorResponse = {
@@ -57,8 +58,8 @@ const setupHttpClient = (api: AxiosInstance) => {
 
         alert.showAlert({
           type: 'error',
-          title: `${error.response.status} ${error.response.statusText}`,
-          content: error.message,
+          title: `${errorData.statusCode} ${error.response.statusText}`,
+          content: errorData.message,
         });
 
         return Promise.reject(errorData);
@@ -104,5 +105,4 @@ const setupHttpClient = (api: AxiosInstance) => {
   };
 };
 
-// Exportamos la instancia de httpClient ya configurada con los interceptores
 export const httpClient = setupHttpClient(axiosInstance);

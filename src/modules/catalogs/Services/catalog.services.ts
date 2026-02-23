@@ -14,6 +14,11 @@ import { DistrictResponse } from '../interfaces/districts/district.response.inte
 import { DistrictForm } from '../interfaces/districts/district.form.interface';
 import { GlobalStatusResponse } from '../interfaces/global-status/global-status.response.interface';
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
+import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
+import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
+import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
+import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
+import { GenderResponse } from '../interfaces/gender/gender.response.interface';
 
 const getAllCountries = async (
   params?: paginateParams,
@@ -146,9 +151,9 @@ const postGlobalStatus = async (data: GlobalStatusForm) => {
   return response;
 };
 
-const putGlobalStatus = async (data: GlobalStatusForm) => {
+const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/global-statuses/${data.id}`,
+    `catalogs/global-statuses/${id}`,
     data,
   );
   return response;
@@ -160,6 +165,79 @@ const deleteGlobalStatus = async (id: number) => {
   );
 
   return response;
+};
+
+const getAllCategoryStatuses = async (
+  params?: paginateParams,
+): Promise<ApiResponseGeneric<CategoryStatusResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<CategoryStatusResponse>
+  >('catalogs/categories-status', params);
+  return response.data;
+};
+
+const postCategoryStatus = async (data: CategoryStatusForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'catalogs/categories-status',
+    data,
+  );
+  return response;
+};
+
+const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `catalogs/categories-status/${id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteCategoryStatus = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `catalogs/categories-status/${id}`,
+  );
+  return response;
+};
+const getDocumentTypes = async (
+  params?: paginateParams,
+): Promise<ApiResponseGeneric<DocumentTypeResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<DocumentTypeResponse>
+  >('profile/document-types', params);
+  return response.data;
+};
+
+const postDocumentType = async (data: DocumentTypeForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'profile/document-types',
+    data,
+  );
+  return response;
+};
+
+const putDocumentType = async (id: number, data: DocumentTypeForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `profile/document-types/${id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteDocumentType = async (id: number) => {
+  const response = await httpClient.delete<ApiPostResponse>(
+    `profile/document-types/${id}`,
+  );
+  return response;
+};
+
+const getGenders = async (
+  params?: paginateParams,
+): Promise<ApiResponseGeneric<GenderResponse>> => {
+  const response = await httpClient.get<ApiResponseGeneric<GenderResponse>>(
+    'catalogs/genders',
+    params,
+  );
+  return response.data;
 };
 
 export default {
@@ -182,4 +260,13 @@ export default {
   postGlobalStatus,
   putGlobalStatus,
   deleteGlobalStatus,
+  getAllCategoryStatuses,
+  postCategoryStatus,
+  putCategoryStatus,
+  deleteCategoryStatus,
+  getDocumentTypes,
+  postDocumentType,
+  putDocumentType,
+  deleteDocumentType,
+  getGenders,
 };

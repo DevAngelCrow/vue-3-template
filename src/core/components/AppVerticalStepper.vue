@@ -13,7 +13,7 @@
           >
             <component
               :is="components[index].component"
-              v-bind="attrs"
+              v-bind="{ ...attrs, ...components[index].props }"
               v-on="attrs"
               ref="componentRefs"
             />

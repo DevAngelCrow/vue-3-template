@@ -9,7 +9,7 @@ export interface RoutesResponse {
   uri: string;
   order: number;
   title: string;
-  parent_route: [] | null;
+  parent: [] | null;
   permissions: {
     id: number;
     name: string;

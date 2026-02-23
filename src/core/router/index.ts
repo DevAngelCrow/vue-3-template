@@ -19,6 +19,12 @@ const routes = [
     component: () => import('../../modules/auth/views/SignUp.vue'),
   },
   {
+    path: '/landing',
+    name: 'landing',
+    meta: { requiresAuth: false, title: 'Bienvenido' },
+    component: () => import('../../views/Landing.vue'),
+  },
+  {
     path: '/',
     name: 'layout',
     component: () => import('../layouts/Layout.vue'),
@@ -37,12 +43,6 @@ const routes = [
         name: 'dashboard',
         meta: { requiresAuth: true },
         component: () => import('@/views/Dashboard.vue'),
-      },
-      {
-        path: 'catalogs/global-status',
-        name: 'global-status',
-        component: () =>
-          import('../../modules/catalogs/global-status/views/GlobalStatus.vue'),
       },
     ],
   },

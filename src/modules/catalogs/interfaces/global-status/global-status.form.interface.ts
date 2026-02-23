@@ -1,7 +1,10 @@
 export interface GlobalStatusForm {
   id?: number;
-  table_header: string;
+  code: string;
   name: string;
   description?: string;
-  state?: boolean;
+  active?: boolean;
+  state_color?: string;
+  text_color?: string;
+  id_category_status?: number;
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-full">
     <li
-      v-for="(section, index) in mappedMenu"
+      v-for="section in mappedMenu"
       :key="section.id || section.title"
       class="flex items-start justify-center px-2 pt-3 shrink-0 flex-wrap flex-col gap-1"
     >

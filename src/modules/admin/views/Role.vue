@@ -86,11 +86,12 @@
         </template>
         <template #body-status.name="{ data }">
           <Chip
-            :class="
-              data?.status?.name === 'Activo' ? 'bg-green-600' : 'bg-red-600'
-            "
-            >{{ data?.status?.name }}</Chip
-          >
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          ></Chip>
         </template>
         <template #body-show="{ data }">
           <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
