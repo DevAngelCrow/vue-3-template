@@ -9,7 +9,7 @@ const port = parseInt(env.VITE_VUE_PORT) || 5173;
 
 export default defineConfig({
   plugins: [vue(), vueDevTools(), tailwindcss()],
-  base: './',
+  base: '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
