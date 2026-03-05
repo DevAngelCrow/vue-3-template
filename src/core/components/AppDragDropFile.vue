@@ -95,6 +95,7 @@
 
             <template v-else>
               <div
+                v-if="files[0] && headerFiles[0]"
                 class="p-8 rounded-border flex flex-col border border-surface items-center gap-4"
               >
                 <img
@@ -185,7 +186,7 @@
 
   <Message
     class="left-0 top-full mt-0 text-xs z-10"
-    v-if="errorMessages.length"
+    v-if="errorMessages.length || errors.length"
     :severity
     :size
     :variant
@@ -279,6 +280,8 @@ const onClearFiles = (clearCallback: () => void) => {
   totalSize.value = 0;
 
   totalSizePercent.value = 0;
+
+  errors.value = '';
 };
 
 const uploadEvent = (callback: () => void) => {
@@ -312,15 +315,61 @@ const onRemoveTemplatingFile = (
     totalSize.value > 0 ? (totalSize.value / 1000000) * 100 : 0;
 };
 
+const validateFileType = (file: File | undefined | null, accept: string): boolean => {
+  // Validar que el archivo existe
+  if (!file) return false;
+  
+  if (!accept || accept === '*/*') return true;
+
+  const acceptedTypes = accept.split(',').map(type => type.trim());
+
+  return acceptedTypes.some(acceptedType => {
+    if (acceptedType.startsWith('.')) {
+      // Extension-based validation
+      return file.name?.toLowerCase().endsWith(acceptedType.toLowerCase()) || false;
+    } else if (acceptedType.endsWith('/*')) {
+      // MIME type wildcard (e.g., "image/*")
+      const baseType = acceptedType.split('/')[0];
+      return file.type?.startsWith(baseType + '/') || false;
+    } else {
+      // Exact MIME type match
+      return file.type === acceptedType;
+    }
+  });
+};
+
 const onSelectedFiles = (event: FileUploadSelectEvent) => {
-  const newFiles = (
+  const selectedFiles = (
     props.multiple ? event.files : [event.files[0]]
   ) as PrimeVueFile[];
 
+  // Primero filtrar archivos válidos (no undefined o null)
+  const validFiles = selectedFiles.filter(file => file !== undefined && file !== null);
+
+  if (validFiles.length === 0) {
+    errors.value = 'No se pudieron cargar los archivos seleccionados';
+    return;
+  }
+
+  // Validar tipos de archivo
+  const invalidFiles = validFiles.filter(
+    file => !validateFileType(file, props.accept)
+  );
+
+  if (invalidFiles.length > 0) {
+    const fileNames = invalidFiles.map(f => f.name || 'archivo desconocido').join(', ');
+    const fileTypes = invalidFiles.map(f => f.type || 'tipo desconocido').join(', ');
+    errors.value = `Tipo de archivo no permitido: ${fileTypes}. Archivos: ${fileNames}. Solo se aceptan: ${props.accept}`;
+    return;
+  }
+
+  // Limpiar errores si los archivos son válidos
+  errors.value = '';
+
   if (props.multiple) {
-    files.value = [...files.value, ...newFiles];
+    files.value = [...files.value, ...validFiles];
   } else {
-    files.value = newFiles;
+    files.value = validFiles;
   }
 
   totalSize.value = files.value.reduce((acc, file) => acc + file.size, 0);
@@ -351,16 +400,17 @@ const headerFiles = computed<PrimeVueFile[]>(() =>
 );
 
 const errorMessagesClass = computed(() => {
-  if (props.errorMessages.length) {
+  if (props.errorMessages.length || errors.value.length) {
     return 'border-red-600';
   }
+  return '';
 });
 
 const messageErrorField = computed(() => {
+  // Priorizar errores del prop sobre errores internos
   if (props.errorMessages.length) {
-    errors.value = props.errorMessages;
+    return props.errorMessages;
   }
-
   return errors.value;
 });
 </script>
