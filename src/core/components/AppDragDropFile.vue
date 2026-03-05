@@ -37,7 +37,7 @@
           :showValue="false"
           class="md:w-20rem h-1 w-full md:ml-auto"
         >
-          <span class="whitespace-nowrap">{{ totalSize }}B / 1Mb</span>
+          <span class="whitespace-nowrap">{{ formatSize(totalSize) }} / {{ formatSize(maxSize) }}</span>
         </ProgressBar>
       </div>
     </template>
@@ -180,6 +180,18 @@
               : 'Arrastre y suelte la foto de perfil aquí para cargarla'
           }}
         </p>
+        
+        <div class="mt-2 text-sm text-muted-color text-center space-y-1">
+          <p v-if="showFormats" class="mb-1">
+            <strong>Formatos:</strong> {{ acceptedFormatsMessage }}
+          </p>
+          <p v-if="showMaxSize" class="mb-1">
+            <strong>Tamaño máximo:</strong> {{ formatSize(maxSize) }}
+          </p>
+          <p v-if="maxDimensions" class="mb-0">
+            <strong>Dimensiones máximas:</strong> {{ maxDimensions }}
+          </p>
+        </div>
       </div>
     </template>
   </FileUpload>
@@ -250,6 +262,26 @@ const props = defineProps({
 
     default: 'simple',
   },
+
+  maxSize: {
+    type: Number,
+    default: 1048576, // 1MB en bytes
+  },
+
+  maxDimensions: {
+    type: String,
+    default: '', // Ejemplo: "1920x1080"
+  },
+
+  showFormats: {
+    type: Boolean,
+    default: true,
+  },
+
+  showMaxSize: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits<{
@@ -312,7 +344,7 @@ const onRemoveTemplatingFile = (
   files.value = newFiles;
 
   totalSizePercent.value =
-    totalSize.value > 0 ? (totalSize.value / 1000000) * 100 : 0;
+    totalSize.value > 0 ? (totalSize.value / props.maxSize) * 100 : 0;
 };
 
 const validateFileType = (file: File | undefined | null, accept: string): boolean => {
@@ -363,6 +395,18 @@ const onSelectedFiles = (event: FileUploadSelectEvent) => {
     return;
   }
 
+  // Validar tamaño de archivo
+  const oversizedFiles = validFiles.filter(
+    file => file.size > props.maxSize
+  );
+
+  if (oversizedFiles.length > 0) {
+    const fileNames = oversizedFiles.map(f => f.name || 'archivo desconocido').join(', ');
+    const fileSizes = oversizedFiles.map(f => formatSize(f.size)).join(', ');
+    errors.value = `Archivo(s) demasiado grande(s): ${fileNames} (${fileSizes}). Tamaño máximo permitido: ${formatSize(props.maxSize)}`;
+    return;
+  }
+
   // Limpiar errores si los archivos son válidos
   errors.value = '';
 
@@ -374,7 +418,7 @@ const onSelectedFiles = (event: FileUploadSelectEvent) => {
 
   totalSize.value = files.value.reduce((acc, file) => acc + file.size, 0);
 
-  totalSizePercent.value = (totalSize.value / 1000000) * 100;
+  totalSizePercent.value = (totalSize.value / props.maxSize) * 100;
 
   uploadEvent(() => {});
 };
@@ -412,6 +456,40 @@ const messageErrorField = computed(() => {
     return props.errorMessages;
   }
   return errors.value;
+});
+
+const acceptedFormatsMessage = computed(() => {
+  if (!props.accept || props.accept === '*/*') {
+    return 'Todos los formatos';
+  }
+
+  const acceptedTypes = props.accept.split(',').map(type => type.trim());
+  const formats: string[] = [];
+
+  acceptedTypes.forEach(type => {
+    if (type.startsWith('.')) {
+      // Extension-based (e.g., ".pdf", ".docx")
+      formats.push(type.toUpperCase().replace('.', ''));
+    } else if (type.endsWith('/*')) {
+      // MIME type wildcard (e.g., "image/*", "video/*")
+      const baseType = type.split('/')[0];
+      const typeNames: Record<string, string> = {
+        'image': 'Imágenes (JPG, PNG, GIF, etc.)',
+        'video': 'Videos (MP4, AVI, etc.)',
+        'audio': 'Audio (MP3, WAV, etc.)',
+        'application': 'Documentos'
+      };
+      formats.push(typeNames[baseType] || baseType.toUpperCase());
+    } else {
+      // Exact MIME type (e.g., "application/pdf")
+      const extension = type.split('/')[1]?.toUpperCase();
+      if (extension) {
+        formats.push(extension);
+      }
+    }
+  });
+
+  return formats.length > 0 ? formats.join(', ') : 'Formatos específicos';
 });
 </script>
 
