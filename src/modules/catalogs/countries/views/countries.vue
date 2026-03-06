@@ -224,23 +224,17 @@ const CloseModalEstado = (value: boolean) => {
 };
 const confirmModal = handleSubmit(async values => {
   try {
-    console.log('values:', values);
-    console.log('isMode:', isMode.value);
-    console.log('editingCountryId:', editingCountryId.value);
     startLoading();
 
     if (isMode.value && editingCountryId.value !== null) {
       // Modo edición
       const updateForm: UpdateCountry = {
-        id: editingCountryId.value,
         name: values.name,
         abbreviation: values.abbreviation,
         code: values.code,
         active: true,
       };
-
-      console.log('Actualizando país', updateForm);
-      await updateCountry(updateForm);
+      await updateCountry(editingCountryId.value, updateForm);
     } else {
       // Modo creación
       const form: CreateCountry = {
