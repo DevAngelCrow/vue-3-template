@@ -35,8 +35,8 @@ const createCountries = async (data: CreateCountry) => {
   return response;
 };
 
-const updateCountries = async (data: UpdateCountry) => {
-  const response = await httpClient.put(`catalogs/countries/${data.id}`, data);
+const updateCountries = async (id: number, data: UpdateCountry) => {
+  const response = await httpClient.put(`catalogs/countries/${id}`, data);
   return response;
 };
 

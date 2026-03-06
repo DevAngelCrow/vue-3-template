@@ -37,9 +37,9 @@ export function useCountries() {
     }
   };
 
-  const updateCountry = async (data: UpdateCountry) => {
+  const updateCountry = async (id: number, data: UpdateCountry) => {
     try {
-      const response = await catalogServices.updateCountries(data);
+      const response = await catalogServices.updateCountries(id, data);
       if (response.status === 200) {
         const updatedCountry = response.data;
         return updatedCountry;
