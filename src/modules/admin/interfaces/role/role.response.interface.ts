@@ -13,4 +13,5 @@ export interface RoleResponse {
     active: boolean;
     category: number;
   }[];
+  code: string;
 }

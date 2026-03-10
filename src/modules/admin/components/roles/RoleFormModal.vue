@@ -1,33 +1,14 @@
 <template>
-  <AppModal
-    :title="props.modalState.title"
-    :show="props.modalState.show"
-    :title-btn-cancel="modalButtons.cancelText"
-    :title-btn-confirm="modalButtons.confirmText"
-    footer-buttons
-    show-icon-close
-    width="45rem"
-    @close-modal="closeModal"
-    @confirm-modal="onSubMit"
-    :showBtnConfirmFooter="props.modalState.mode !== 'view'"
-  >
-    <section
-      v-if="props.modalState.mode !== 'delete'"
-      id="body_modal"
-      class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5 w-full"
-    >
-      <div
-        class="flex justify-center items-center flex-wrap flex-row gap-5 w-full"
-      >
+  <AppModal :title="props.modalState.title" :show="props.modalState.show" :title-btn-cancel="modalButtons.cancelText"
+    :title-btn-confirm="modalButtons.confirmText" footer-buttons show-icon-close width="45rem" @close-modal="closeModal"
+    @confirm-modal="onSubMit" :showBtnConfirmFooter="props.modalState.mode !== 'view'">
+    <section v-if="props.modalState.mode !== 'delete'" id="body_modal"
+      class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5 w-full">
+      <div class="flex justify-center items-center flex-wrap flex-row gap-5 w-full">
         <RoleFormComponent :modal-state="modalState" />
-        <RolePermissionDataTable
-          :modal-state="props.modalState.mode"
-          @update:selected-permissions-ids="
-            value => (selectedPermissionsIds = value)
-          "
-          ref="rolePermissionDataTable"
-          :readonly="props.modalState.isReadonly"
-        />
+        <RolePermissionDataTable :modal-state="props.modalState.mode" @update:selected-permissions-ids="
+          value => (selectedPermissionsIds = value)
+        " ref="rolePermissionDataTable" :readonly="props.modalState.isReadonly" />
       </div>
     </section>
     <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
@@ -77,6 +58,7 @@ const onSubMit = handleSubmit(async values => {
       name: values.name,
       description: values.description,
       id_status: values.status.id,
+      code: values.code,
       permissions_id: [...selectedPermissionsIds.value],
     };
     let success = false;

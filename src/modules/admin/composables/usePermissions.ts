@@ -28,10 +28,12 @@ export function usePermission() {
       name: yup
         .string()
         .required('El nombre del permiso es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre debe tener al menos 3 caracteres')
+        .max(150, 'El nombre debe tener máximo 150 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(150, 'La descripción debe tener máximo 150 caracteres')
         .nullable(),
       category: yup
         .mixed<PermissionsCategory>()
