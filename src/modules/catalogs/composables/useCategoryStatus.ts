@@ -26,7 +26,8 @@ export function useCategoryStatus() {
       name: yup
         .string()
         .required('El nombre de la categoría de estado es requerido')
-        .min(3, 'El nombre debe tener al menos 3 caracteres'),
+        .min(3, 'El nombre debe tener al menos 3 caracteres')
+        .max(150, 'El nombre no puede tener más de 150 caracteres'),
       code: yup
         .string()
         .required('El código es requerido')
@@ -35,6 +36,7 @@ export function useCategoryStatus() {
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(150, 'La descripción no puede tener más de 150 caracteres')
         .nullable(),
       active: yup.boolean(),
     }),

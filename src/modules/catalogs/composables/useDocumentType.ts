@@ -26,12 +26,14 @@ export function useDocumentType() {
       name: yup
         .string()
         .required('El nombre del tipo de documento es requerido')
-        .min(3, 'El nombre debe tener al menos 3 caracteres'),
+        .min(3, 'El nombre debe tener al menos 3 caracteres')
+        .max(150, 'El nombre no puede tener más de 150 caracteres'),
       description: yup
         .string()
         .required('La descripción es requerida')
-        .min(5, 'La descripción debe tener al menos 5 caracteres'),
-      mask: yup.string().nullable(),
+        .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(150, 'La descripción no puede tener más de 150 caracteres'),
+      mask: yup.string().nullable().max(150, 'La máscara no puede tener más de 150 caracteres'),
       active: yup.boolean(),
     }),
   });

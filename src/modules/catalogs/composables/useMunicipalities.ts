@@ -27,10 +27,12 @@ export function useMunicipality() {
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre de tener al menos 3 caracteres')
+        .max(150, 'El nombre no puede tener más de 255 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(150, 'La descripción no puede tener más de 255 caracteres')
         .nullable(),
       department: yup
         .mixed<Department>()

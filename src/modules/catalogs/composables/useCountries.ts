@@ -53,7 +53,22 @@ export function useCountries() {
       });
     }
   };
-
+  const changeStatusCountry = async (id: number) => {
+    try {
+      const response = await catalogServices.changeStatusCountry(id);
+      if (response.status === 200) {
+        const updatedCountry = response.data;
+        return updatedCountry;
+      }
+    } catch (error) {
+      console.error(error);
+      alert.showAlert({
+        type: 'error',
+        title: 'Error en el cambio de estado del país',
+        content: 'Ocurrió un error al momento de cambiar el estado del país',
+      });
+    }
+  }
   const { handleSubmit, validateField, defineField, errors, resetForm } =
     useForm({
       validateOnMount: false,
@@ -68,6 +83,7 @@ export function useCountries() {
           .string()
           .required('El nombre es obligatorio')
           .min(3, 'El nombre debe tener al menos 3 caracteres')
+          .max(150, 'El nombre no puede tener más de 150 caracteres')
           .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
           .transform(
             value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
@@ -76,6 +92,7 @@ export function useCountries() {
           .string()
           .required('La abreviación es obligatoria')
           .min(2, 'La abreviación debe tener al menos 2 caracteres')
+          .max(150, 'La abreviación no puede tener más de 150 caracteres')
           .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
           .transform(
             value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
@@ -84,6 +101,7 @@ export function useCountries() {
           .string()
           .required('El código es obligatorio')
           .min(3, 'El código debe tener al menos 3 caracteres')
+          .max(150, 'El código no puede tener más de 150 caracteres')
           .matches(
             /^[a-zA-ZáÁéÉíÍóÓúÚñÑ0-9 ]*$/,
             'Solo se permiten letras, números y espacios',
@@ -102,6 +120,7 @@ export function useCountries() {
     getCountries,
     createCountry,
     updateCountry,
+    changeStatusCountry,
     handleSubmit,
     validateField,
     // Agregar los campos del formulario

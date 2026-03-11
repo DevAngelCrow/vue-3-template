@@ -39,7 +39,10 @@ const updateCountries = async (id: number, data: UpdateCountry) => {
   const response = await httpClient.put(`catalogs/countries/${id}`, data);
   return response;
 };
-
+const changeStatusCountry = async (id: number) => {
+  const response = await httpClient.delete(`catalogs/countries/${id}`);
+  return response;
+}
 const getAllDepartments = async (
   params?: paginateParams,
 ): Promise<ApiResponseGeneric<DepartmentResponse>> => {
@@ -244,6 +247,7 @@ export default {
   getAllCountries,
   createCountries,
   updateCountries,
+  changeStatusCountry,
   getAllDepartments,
   postDepartment,
   putDepartment,
