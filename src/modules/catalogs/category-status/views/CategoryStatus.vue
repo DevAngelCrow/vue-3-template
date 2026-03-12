@@ -45,7 +45,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, provide, reactive } from 'vue';
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 
 import { useCategoryStatus } from '../../composables/useCategoryStatus';
 import { CategoryStatusResponse } from '../../interfaces/category-status/category-status.response.interface';

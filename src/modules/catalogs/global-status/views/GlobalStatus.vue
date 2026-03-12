@@ -53,7 +53,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, provide, reactive } from 'vue';
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 
 import { useGlobalStatus } from '../../composables/useGlobalStatus';
 import { GlobalStatusResponse } from '../../interfaces/global-status/global-status.response.interface';

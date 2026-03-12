@@ -45,7 +45,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, provide, reactive } from 'vue';
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 
 import { useDistrict } from '../../composables/useDistrict';
 import DistrictFormModal from '../components/DistrictFormModal.vue';

@@ -46,7 +46,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 import { nextTick, onMounted, reactive, watch, provide } from 'vue';
 
 import { useAdmin } from '../composables/useAdmin';
