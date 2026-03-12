@@ -6,7 +6,7 @@
       class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5 w-full">
       <AppInputText class="w-full min-w-0" id="name" label="Nombre*" v-model="name" :error-messages="errors.name"
         v-bind="nameAttrs" :readonly="props.modalState.isReadonly" />
-      <AppInputText class="w-full min-w-0" id="description" label="Descripción" v-model="description"
+      <AppInputText class="w-full min-w-0" id="description" label="Descripción*" v-model="description"
         :error-messages="errors.description" v-bind="descriptionAttrs" :readonly="props.modalState.isReadonly" />
       <AppInputText class="w-full min-w-0" id="code" label="Código*" v-model="code" :error-messages="errors.code"
         v-bind="codeAttrs" :readonly="props.modalState.isReadonly" :disabled="code_status.includes(code) &&

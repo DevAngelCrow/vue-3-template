@@ -26,12 +26,12 @@
               @click="openModalEstado('changeStatus', data)"></Button>
           </div>
         </template>
-
         <template #body-active="{ data }">
-          <Chip :label="data?.status?.name" :style="{
+          <AppChip :label="data?.status?.name" :style="{
             backgroundColor: data?.status?.state_color,
             color: data?.status?.text_color,
-          }"></Chip>
+          }">
+          </AppChip>
         </template>
       </AppDataTable>
     </section>
@@ -46,8 +46,8 @@
           label="Ingrese la abreviación del país" v-bind="abbreviationAttrs" :error-messages="errors.abbreviation"
           :disabled="isDetailsMode" />
 
-        <AppInputText v-model="code" class="lg:w-full grow sm:max-w-[500px]" label="Ingrese el código del país"
-          v-bind="codeAttrs" :error-messages="errors.code" :disabled="isDetailsMode" />
+        <AppInputMask v-model="code" class="lg:w-full grow sm:max-w-[500px]" label="Ingrese el código del país"
+          v-bind="codeAttrs" :error-messages="errors.code" :disabled="isDetailsMode" mask="999" placeholder="000" />
       </div>
     </AppModal>
 
@@ -66,7 +66,7 @@
 <script setup lang="ts">
 /** Zona de Imports */
 import { onMounted, ref } from 'vue';
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 
 import { TableHeaders } from '@/core/interfaces';
 import AppTitle from '@/core/components/AppTitle.vue';
