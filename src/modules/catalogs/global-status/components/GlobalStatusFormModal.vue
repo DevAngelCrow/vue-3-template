@@ -75,7 +75,7 @@ const {
   handleSubmit,
   addGlobalStatus,
   editGlobalStatus,
-  deleteGlobalStatus,
+  toggleGlobalStatus,
   categoryStatuses,
 } = useGlobalStatusComposable;
 const categoryStatusFiltered = ref<unknown[]>([]);
@@ -102,7 +102,7 @@ const onSubMit = handleSubmit(async values => {
         success = (await editGlobalStatus(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deleteGlobalStatus(values.id)) ? true : false;
+        success = (await toggleGlobalStatus(values.id)) ? true : false;
         break;
     }
     if (success) {

@@ -172,10 +172,10 @@ export function useCategoryStatus() {
     }
   };
 
-  const deleteCategoryStatus = async (id: number) => {
+  const patchCategoryStatus = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteCategoryStatus(id);
+      const response = await catalogServices.patchCategoryStatus(id);
       if (response.status === 200) {
         getCategoryStatuses();
         alert.showAlert({
@@ -258,6 +258,6 @@ export function useCategoryStatus() {
     categoryStatuses,
     addCategoryStatus,
     editCategoryStatus,
-    deleteCategoryStatus,
+    patchCategoryStatus,
   };
 }

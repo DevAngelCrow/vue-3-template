@@ -168,10 +168,10 @@ export function useDocumentType() {
     }
   };
 
-  const deleteDocumentType = async (id: number) => {
+  const toggleDocumentType = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDocumentType(id);
+      const response = await catalogServices.toggleDocumentType(id);
       if (response.status === 200) {
         getDocumentTypes();
         alert.showAlert({
@@ -254,6 +254,6 @@ export function useDocumentType() {
     getDocumentTypes,
     addDocumentType,
     editDocumentType,
-    deleteDocumentType,
+    toggleDocumentType,
   };
 }

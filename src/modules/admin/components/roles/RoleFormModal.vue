@@ -44,7 +44,7 @@ const props = defineProps<{
 const emit = defineEmits(['close-modal']);
 const rol = inject<RoleType>('useRole')!;
 const { startLoading, finishLoading } = useLoaderStore();
-const { handleSubmit, addRol, deleteRol, editRole } = rol;
+const { handleSubmit, addRol, toggleRole, editRole } = rol;
 
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const rolePermissionDataTable = ref<InstanceType<
@@ -71,7 +71,7 @@ const onSubMit = handleSubmit(async values => {
         success = (await editRole(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deleteRol(values.id)) ? true : false;
+        success = (await toggleRole(values.id)) ? true : false;
         break;
     }
     if (success) {

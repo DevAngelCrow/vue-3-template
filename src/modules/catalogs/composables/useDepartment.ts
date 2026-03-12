@@ -185,10 +185,10 @@ export function useDepartment() {
     }
   };
 
-  const deleteDepartment = async (id: number) => {
+  const toggleDepartment = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDepartment(id);
+      const response = await catalogServices.toggleDepartment(id);
       if (response.status === 200) {
         getDepartments();
         alert.showAlert({
@@ -272,6 +272,6 @@ export function useDepartment() {
     deparments,
     addDepartment,
     editDepartment,
-    deleteDepartment,
+    toggleDepartment,
   };
 }

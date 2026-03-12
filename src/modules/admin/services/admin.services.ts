@@ -48,8 +48,8 @@ const editRoute = async (id: number, data: RouteForm) => {
   return response;
 };
 
-const deleteRoute = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleRoute = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `security/routes/${id}`,
   );
   return response;
@@ -87,8 +87,8 @@ const putPermission = async (id: number, data: PermissionForm) => {
   return response;
 };
 
-const deletePermission = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const togglePermission = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `security/permissions/${id}`,
   );
   return response;
@@ -119,8 +119,8 @@ const putCategoryPermission = async (
   return response;
 };
 
-const deleteCategoryPermission = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleCategoryPermission = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `security/category-permissions/${id}`,
   );
   return response;
@@ -150,8 +150,8 @@ const putRole = async (id: number, data: RoleForm) => {
   return response;
 };
 
-const deleteRole = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleRole = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `security/role/${id}`,
   );
   return response;
@@ -169,19 +169,19 @@ export default {
   getAllRoutesWithOutPaginate,
   addRoute,
   editRoute,
-  deleteRoute,
+  toggleRoute,
   getPermissions,
   postPermission,
   putPermission,
-  deletePermission,
+  togglePermission,
   getCategoryPermissions,
   postCategoryPermission,
   putCategoryPermission,
-  deleteCategoryPermission,
+  toggleCategoryPermission,
   getRole,
   postRole,
   putRole,
-  deleteRole,
+  toggleRole,
   getRoute,
   getRol,
 };

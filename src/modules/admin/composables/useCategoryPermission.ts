@@ -158,10 +158,10 @@ export function useCategoryPermission() {
     }
   };
 
-  const deleteCategoryPermission = async (id: number) => {
+  const toggleCategoryPermission = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deleteCategoryPermission(id);
+      const response = await adminServices.toggleCategoryPermission(id);
       if (response.status === 200) {
         getCategoryPermissions();
         alert.showAlert({
@@ -240,7 +240,7 @@ export function useCategoryPermission() {
     pagination,
     addCategoryPermission,
     editCategoryPermission,
-    deleteCategoryPermission,
+    toggleCategoryPermission,
     categories,
   };
 }

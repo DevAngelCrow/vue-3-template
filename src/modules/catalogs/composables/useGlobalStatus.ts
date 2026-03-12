@@ -195,10 +195,10 @@ export function useGlobalStatus() {
     }
   };
 
-  const deleteGlobalStatus = async (id: number) => {
+  const toggleGlobalStatus = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteGlobalStatus(id);
+      const response = await catalogServices.toggleGlobalStatus(id);
       if (response.status === 200) {
         getGlobalStatus();
         alert.showAlert({
@@ -308,7 +308,7 @@ export function useGlobalStatus() {
     getGlobalStatus,
     addGlobalStatus,
     editGlobalStatus,
-    deleteGlobalStatus,
+    toggleGlobalStatus,
     getCategoryStatuses,
     categoryStatuses,
   };

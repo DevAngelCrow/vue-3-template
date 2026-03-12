@@ -54,7 +54,7 @@ const {
   handleSubmit,
   addCategoryPermission,
   editCategoryPermission,
-  deleteCategoryPermission,
+  toggleCategoryPermission,
 } = categoryPermission;
 
 const onSubMit = handleSubmit(async values => {
@@ -75,7 +75,7 @@ const onSubMit = handleSubmit(async values => {
         success = (await editCategoryPermission(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deleteCategoryPermission(values.id)) ? true : false;
+        success = (await toggleCategoryPermission(values.id)) ? true : false;
         break;
     }
     if (success) {

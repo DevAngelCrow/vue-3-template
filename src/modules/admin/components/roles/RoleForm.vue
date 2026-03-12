@@ -51,6 +51,8 @@ const {
   codeAttrs,
   status,
   statusAttrs,
+  id_status,
+  idStatusAttrs,
   globalStatus,
 } = rol;
 

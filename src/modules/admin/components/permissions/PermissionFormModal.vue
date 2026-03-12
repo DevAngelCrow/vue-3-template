@@ -60,7 +60,7 @@ const {
   categoryPermissions,
   addPermission,
   editPermission,
-  deletePermission,
+  togglePermission,
 } = permission;
 
 const categoryPermissionsFiltered = ref<unknown[]>([]);
@@ -84,7 +84,7 @@ const onSubMit = handleSubmit(async values => {
         success = (await editPermission(form)) ? true : false;
         break;
       case 'delete':
-        success = (await deletePermission(values.id)) ? true : false;
+        success = (await togglePermission(values.id)) ? true : false;
         break;
     }
     if (success) {

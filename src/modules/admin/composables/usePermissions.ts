@@ -188,10 +188,10 @@ export function usePermission() {
     }
   };
 
-  const deletePermission = async (id: number) => {
+  const togglePermission = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deletePermission(id);
+      const response = await adminServices.togglePermission(id);
       if (response.status === 200) {
         getPermissions();
         alert.showAlert({
@@ -276,6 +276,6 @@ export function usePermission() {
     permissions,
     addPermission,
     editPermission,
-    deletePermission,
+    togglePermission,
   };
 }

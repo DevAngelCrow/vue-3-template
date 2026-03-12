@@ -5,7 +5,7 @@ export interface RoleResponse {
   name: string;
   description: string;
   status: RoleStatus;
-  active: boolean;
+  id_status: number;
   permissions: {
     id: number;
     name: string;

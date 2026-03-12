@@ -131,6 +131,7 @@ export function useRole() {
   const [status, statusAttrs] = defineField('status');
   const [permissions_ids, permissionsIdsAttrs] = defineField('permissions_ids');
   const [code, codeAttrs] = defineField('code');
+  const [id_status, idStatusAttrs] = defineField('id_status');
   const filter_name = ref<string | null>(null);
   const filter_permission_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
@@ -219,10 +220,10 @@ export function useRole() {
     }
   };
 
-  const deleteRol = async (id: number) => {
+  const toggleRole = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deleteRole(id);
+      const response = await adminServices.toggleRole(id);
       if (response.status === 200) {
         getRole();
         alert.showAlert({
@@ -315,6 +316,7 @@ export function useRole() {
         : [],
     );
     setFieldValue('code', value?.code);
+    setFieldValue('id_status', value?.status.id);
   };
 
   const findRole = (value: string | null) => {
@@ -351,6 +353,8 @@ export function useRole() {
     descriptionAttrs,
     status,
     statusAttrs,
+    id_status,
+    idStatusAttrs,
     code,
     codeAttrs,
     alert,
@@ -366,7 +370,7 @@ export function useRole() {
     filter_permission_name,
     addRol,
     editRole,
-    deleteRol,
+    toggleRole,
     findPermission,
     getPermissions,
     getRolById,

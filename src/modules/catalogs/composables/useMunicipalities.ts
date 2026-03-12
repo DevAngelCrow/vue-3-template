@@ -187,10 +187,10 @@ export function useMunicipality() {
     }
   };
 
-  const deleteMunicipality = async (id: number) => {
+  const toggleMunicipality = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteMunicipality(id);
+      const response = await catalogServices.toggleMunicipality(id);
       if (response.status === 200) {
         getMunicipalities();
         alert.showAlert({
@@ -274,6 +274,6 @@ export function useMunicipality() {
     getMunicipalities,
     addMunicipality,
     editMunicipality,
-    deleteMunicipality,
+    toggleMunicipality,
   };
 }

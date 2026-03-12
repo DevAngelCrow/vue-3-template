@@ -305,10 +305,10 @@ export function useAdmin() {
     }
   };
 
-  const deleteRoute = async (id: number) => {
+  const toggleRoute = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deleteRoute(id);
+      const response = await adminServices.toggleRoute(id);
       if (response.status === 200) {
         getRoutes();
         alert.showAlert({
@@ -421,7 +421,7 @@ export function useAdmin() {
     getRoutes,
     addRoute,
     editRoute,
-    deleteRoute,
+    toggleRoute,
     getRouteById,
     id,
     idAttrs,

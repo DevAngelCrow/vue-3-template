@@ -187,10 +187,10 @@ export function useDistrict() {
     }
   };
 
-  const deleteDistrict = async (id: number) => {
+  const toggleDistrict = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDistrict(id);
+      const response = await catalogServices.toggleDistrict(id);
       if (response.status === 200) {
         getDistricts();
         alert.showAlert({
@@ -274,6 +274,6 @@ export function useDistrict() {
     getDistricts,
     addDistrict,
     editDistrict,
-    deleteDistrict,
+    toggleDistrict,
   };
 }
