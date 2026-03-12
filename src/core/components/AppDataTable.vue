@@ -1,37 +1,24 @@
 <template>
   <div class="flex flex-col overflow-hidden border-1 rounded-md">
     <DataTable :value="items" :loading :loadingIcon :row-hover :rows="per_page">
-      <Column
-        :style="`width:${widthColumn(header)}; text-align: ${txtAlignItems(header)}`"
-        v-for="header in headers"
-        :key="header.field"
-        :field="header.field"
-        :sortable="header.sortable"
-        :pt="columHeader(header)"
-      >
+      <Column :style="`width:${widthColumn(header)}; text-align: ${txtAlignItems(header)}`" v-for="header in headers"
+        :key="header.field" :field="header.field" :sortable="header.sortable" :pt="columHeader(header)">
         <template #header>
           <slot :name="`header-${header.header}`" :header="header.header">
             {{ header.header }}
           </slot>
         </template>
         <template #body="slotProps">
-          <slot
-            :name="`body-${header.field}`"
-            :data="slotProps.data"
-            :index="slotProps.index"
-          >
-            {{ getNestedValue(slotProps.data, header.field) ?? '-' }}
-          </slot>
+          <div :class="['flex', 'w-full', `justify-${txtAlignItems(header)}`]">
+            <slot :name="`body-${header.field}`" :data="slotProps.data" :index="slotProps.index">
+              {{ getNestedValue(slotProps.data, header.field) ?? '-' }}
+            </slot>
+          </div>
         </template>
       </Column>
       <template #footer>
-        <AppPaginator
-          :rows="per_page"
-          :total-records="total_items"
-          v-if="paginator"
-          @page-update="updatePage"
-          :first="(page - 1) * per_page"
-        />
+        <AppPaginator :rows="per_page" :total-records="total_items" v-if="paginator" @page-update="updatePage"
+          :first="(page - 1) * per_page" />
       </template>
     </DataTable>
   </div>

@@ -32,6 +32,7 @@ export function useGlobalStatus() {
         .max(255, 'El nombre no puede tener más de 255 caracteres'),
       description: yup
         .string()
+        .required('La descripción es obligatoria')
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .max(255, 'La descripción no puede tener más de 255 caracteres')
         .nullable(),

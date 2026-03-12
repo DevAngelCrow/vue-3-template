@@ -31,6 +31,7 @@ export function useMunicipality() {
         .max(150, 'El nombre no puede tener más de 255 caracteres'),
       description: yup
         .string()
+        .required('La descripción es requerida')
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .max(150, 'La descripción no puede tener más de 255 caracteres')
         .nullable(),

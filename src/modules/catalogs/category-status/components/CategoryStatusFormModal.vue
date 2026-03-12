@@ -9,7 +9,7 @@
       <AppInputText class="w-full min-w-0" id="code" label="Código*" v-model="code" :error-messages="errors.code"
         v-bind="codeAttrs" :readonly="props.modalState.isReadonly" :disabled="code === code_category_status_strict && !props.modalState.isReadonly
           " />
-      <AppInputText class="w-full min-w-0" id="description" label="Descripción" v-model="description"
+      <AppInputText class="w-full min-w-0" id="description" label="Descripción*" v-model="description"
         :error-messages="errors.description" v-bind="descriptionAttrs" :readonly="props.modalState.isReadonly" />
     </section>
     <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">

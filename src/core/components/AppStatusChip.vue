@@ -1,5 +1,5 @@
 <template>
-  <Chip :label="statusName" :class="color" :unstyled />
+  <AppChip :label="statusName" :class="color" :unstyled />
 </template>
 
 <script setup lang="ts">
