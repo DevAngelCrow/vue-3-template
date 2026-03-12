@@ -50,7 +50,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 import { onMounted, reactive, provide } from 'vue';
 
 import { useRole } from '../composables/useRole';

@@ -45,7 +45,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, provide, reactive } from 'vue';
-import { Button, Chip } from 'primevue';
+import { Button } from 'primevue';
 
 import { usePermission } from '../composables/usePermissions';
 import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
