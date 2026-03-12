@@ -26,10 +26,12 @@ export function useCategoryPermission() {
       name: yup
         .string()
         .required('El nombre de la categoría es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre debe tener al menos 3 caracteres')
+        .max(255, 'El nombre debe tener como máximo 255 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(255, 'La descripción debe tener como máximo 255 caracteres')
         .nullable(),
       active: yup.boolean(),
     }),
@@ -156,10 +158,10 @@ export function useCategoryPermission() {
     }
   };
 
-  const deleteCategoryPermission = async (id: number) => {
+  const toggleCategoryPermission = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deleteCategoryPermission(id);
+      const response = await adminServices.toggleCategoryPermission(id);
       if (response.status === 200) {
         getCategoryPermissions();
         alert.showAlert({
@@ -238,7 +240,7 @@ export function useCategoryPermission() {
     pagination,
     addCategoryPermission,
     editCategoryPermission,
-    deleteCategoryPermission,
+    toggleCategoryPermission,
     categories,
   };
 }

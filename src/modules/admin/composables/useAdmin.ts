@@ -27,14 +27,17 @@ export function useAdmin() {
       name: yup
         .string()
         .required('El nombre de la ruta es requerido')
+        .max(150, 'El nombre no puede tener más de 150 caracteres')
         .min(4, 'El nombre debe tener al menos 3 caracteres'),
       title: yup
         .string()
         .required('El título de la ruta es requerido')
+        .max(150, 'El título no puede tener más de 150 caracteres')
         .min(3, 'El título debe tener al menos 3 caracteres'),
       uri: yup
         .string()
         .required('El campo uri es requerido')
+        .max(150, 'El uri no puede tener más de 150 caracteres')
         .min(4, 'El campo uri debe tener al menos 3 caracteres')
         .test(
           'valid_uri',
@@ -46,12 +49,12 @@ export function useAdmin() {
             return false;
           },
         ),
-      description: yup.string(),
+      description: yup.string().max(255, 'La descripción no puede tener más de 255 caracteres'),
       order: yup
         .number()
         .typeError('El campo debe ser de tipo entero')
         .required('El campo es requerido'),
-      icon: yup.string().min(2),
+      icon: yup.string().min(2).max(150, 'El icono no puede tener más de 255 caracteres'),
       child_route: yup.boolean(),
       show: yup.boolean(),
       active: yup.boolean(),
@@ -302,10 +305,10 @@ export function useAdmin() {
     }
   };
 
-  const deleteRoute = async (id: number) => {
+  const toggleRoute = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deleteRoute(id);
+      const response = await adminServices.toggleRoute(id);
       if (response.status === 200) {
         getRoutes();
         alert.showAlert({
@@ -418,7 +421,7 @@ export function useAdmin() {
     getRoutes,
     addRoute,
     editRoute,
-    deleteRoute,
+    toggleRoute,
     getRouteById,
     id,
     idAttrs,

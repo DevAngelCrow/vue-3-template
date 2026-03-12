@@ -27,11 +27,13 @@ export function useDistrict() {
       name: yup
         .string()
         .required('El nombre del distrito es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre de tener al menos 3 caracteres')
+        .max(150, 'El nombre no puede tener más de 150 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
-        .nullable(),
+        .nullable()
+        .max(150, 'La descripción no puede tener más de 150 caracteres'),
       municipality: yup
         .mixed<Municipality>()
         .required('El campo de municipio es requerido'),
@@ -185,10 +187,10 @@ export function useDistrict() {
     }
   };
 
-  const deleteDistrict = async (id: number) => {
+  const toggleDistrict = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDistrict(id);
+      const response = await catalogServices.toggleDistrict(id);
       if (response.status === 200) {
         getDistricts();
         alert.showAlert({
@@ -272,6 +274,6 @@ export function useDistrict() {
     getDistricts,
     addDistrict,
     editDistrict,
-    deleteDistrict,
+    toggleDistrict,
   };
 }

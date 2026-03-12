@@ -28,14 +28,17 @@ export function useGlobalStatus() {
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre de tener al menos 3 caracteres')
+        .max(255, 'El nombre no puede tener más de 255 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(255, 'La descripción no puede tener más de 255 caracteres')
         .nullable(),
-      state_color: yup.string().required('El color del estado es obligatorio'),
+      state_color: yup.string().max(10, 'El color del estado no puede tener más de 10 caracteres').required('El color del estado es obligatorio'),
       text_color: yup
         .string()
+        .max(10, 'El color del texto del estado no puede tener más de 10 caracteres')
         .required('El color del texto del estado es obligatorio'),
       category_status: yup
         .mixed<CategoryStatus>()
@@ -192,10 +195,10 @@ export function useGlobalStatus() {
     }
   };
 
-  const deleteGlobalStatus = async (id: number) => {
+  const toggleGlobalStatus = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteGlobalStatus(id);
+      const response = await catalogServices.toggleGlobalStatus(id);
       if (response.status === 200) {
         getGlobalStatus();
         alert.showAlert({
@@ -305,7 +308,7 @@ export function useGlobalStatus() {
     getGlobalStatus,
     addGlobalStatus,
     editGlobalStatus,
-    deleteGlobalStatus,
+    toggleGlobalStatus,
     getCategoryStatuses,
     categoryStatuses,
   };

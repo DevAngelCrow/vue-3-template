@@ -28,15 +28,22 @@ export function useRole() {
       name: yup
         .string()
         .required('El nombre del rol es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre de tener al menos 3 caracteres')
+        .max(150, 'El nombre debe tener máximo 150 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(255, 'La descripción debe tener máximo 255 caracteres')
         .nullable(),
       status: yup
         .mixed<RoleStatus>()
         .required('El campo del estado del rol es requerido'),
       permissions_ids: yup.array(),
+      code: yup
+        .string()
+        .required('El código del rol es requerido')
+        .min(3, 'El código debe tener al menos 3 caracteres')
+        .max(15, 'El código debe tener máximo 10 caracteres'),
     }),
   });
 
@@ -123,7 +130,8 @@ export function useRole() {
   const [description, descriptionAttrs] = defineField('description');
   const [status, statusAttrs] = defineField('status');
   const [permissions_ids, permissionsIdsAttrs] = defineField('permissions_ids');
-
+  const [code, codeAttrs] = defineField('code');
+  const [id_status, idStatusAttrs] = defineField('id_status');
   const filter_name = ref<string | null>(null);
   const filter_permission_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
@@ -212,10 +220,10 @@ export function useRole() {
     }
   };
 
-  const deleteRol = async (id: number) => {
+  const toggleRole = async (id: number) => {
     try {
       startLoading();
-      const response = await adminServices.deleteRole(id);
+      const response = await adminServices.toggleRole(id);
       if (response.status === 200) {
         getRole();
         alert.showAlert({
@@ -237,7 +245,6 @@ export function useRole() {
       permissionsList.value = [];
       permissionsPagination.total_items = 0;
       const response = await adminServices.getRol(id);
-      console.log(response, 'response get rol by id');
       if (response.statusCode === 200) {
         permissionsList.value = response.data.permissions
           ? response.data.permissions
@@ -308,6 +315,8 @@ export function useRole() {
         ? value.permissions.map(permission => permission.id)
         : [],
     );
+    setFieldValue('code', value?.code);
+    setFieldValue('id_status', value?.status.id);
   };
 
   const findRole = (value: string | null) => {
@@ -344,6 +353,10 @@ export function useRole() {
     descriptionAttrs,
     status,
     statusAttrs,
+    id_status,
+    idStatusAttrs,
+    code,
+    codeAttrs,
     alert,
     filter_name,
     pagination,
@@ -357,7 +370,7 @@ export function useRole() {
     filter_permission_name,
     addRol,
     editRole,
-    deleteRol,
+    toggleRole,
     findPermission,
     getPermissions,
     getRolById,

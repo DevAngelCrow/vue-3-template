@@ -27,10 +27,12 @@ export function useDepartment() {
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
-        .min(3, 'El nombre de tener al menos 3 caracteres'),
+        .min(3, 'El nombre de tener al menos 3 caracteres')
+        .max(150, 'El nombre debe tener menos de 150 caracteres'),
       description: yup
         .string()
         .min(5, 'La descripción debe tener al menos 5 caracteres')
+        .max(150, 'La descripción debe tener menos de 150 caracteres')
         .nullable(),
       country: yup.mixed<Country>().required('El campo del país es requerido'),
       active: yup.boolean(),
@@ -183,10 +185,10 @@ export function useDepartment() {
     }
   };
 
-  const deleteDepartment = async (id: number) => {
+  const toggleDepartment = async (id: number) => {
     try {
       startLoading();
-      const response = await catalogServices.deleteDepartment(id);
+      const response = await catalogServices.toggleDepartment(id);
       if (response.status === 200) {
         getDepartments();
         alert.showAlert({
@@ -270,6 +272,6 @@ export function useDepartment() {
     deparments,
     addDepartment,
     editDepartment,
-    deleteDepartment,
+    toggleDepartment,
   };
 }

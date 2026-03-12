@@ -39,7 +39,10 @@ const updateCountries = async (id: number, data: UpdateCountry) => {
   const response = await httpClient.put(`catalogs/countries/${id}`, data);
   return response;
 };
-
+const changeStatusCountry = async (id: number) => {
+  const response = await httpClient.patch(`catalogs/countries/${id}`);
+  return response;
+}
 const getAllDepartments = async (
   params?: paginateParams,
 ): Promise<ApiResponseGeneric<DepartmentResponse>> => {
@@ -66,8 +69,8 @@ const putDepartment = async (id: number, data: DepartmentForm) => {
   return response;
 };
 
-const deleteDepartment = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleDepartment = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/departments/${id}`,
   );
   return response;
@@ -97,8 +100,8 @@ const putMunicipality = async (id: number, data: MunicipalityForm) => {
   return response;
 };
 
-const deleteMunicipality = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleMunicipality = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/municipalities/${id}`,
   );
   return response;
@@ -129,8 +132,8 @@ const putDistrict = async (id: number, data: DistrictForm) => {
   return response;
 };
 
-const deleteDistrict = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleDistrict = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/districts/${id}`,
   );
   return response;
@@ -159,8 +162,8 @@ const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
   return response;
 };
 
-const deleteGlobalStatus = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleGlobalStatus = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/global-statuses/${id}`,
   );
 
@@ -192,8 +195,8 @@ const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
   return response;
 };
 
-const deleteCategoryStatus = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const patchCategoryStatus = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/categories-status/${id}`,
   );
   return response;
@@ -223,8 +226,8 @@ const putDocumentType = async (id: number, data: DocumentTypeForm) => {
   return response;
 };
 
-const deleteDocumentType = async (id: number) => {
-  const response = await httpClient.delete<ApiPostResponse>(
+const toggleDocumentType = async (id: number) => {
+  const response = await httpClient.patch<ApiPostResponse>(
     `profile/document-types/${id}`,
   );
   return response;
@@ -244,29 +247,30 @@ export default {
   getAllCountries,
   createCountries,
   updateCountries,
+  changeStatusCountry,
   getAllDepartments,
   postDepartment,
   putDepartment,
-  deleteDepartment,
+  toggleDepartment,
   getMunicipalities,
   postMunicipality,
   putMunicipality,
-  deleteMunicipality,
+  toggleMunicipality,
   getDistricts,
   postDistrict,
   putDistrict,
-  deleteDistrict,
+  toggleDistrict,
   getGlobalStatus,
   postGlobalStatus,
   putGlobalStatus,
-  deleteGlobalStatus,
+  toggleGlobalStatus,
   getAllCategoryStatuses,
   postCategoryStatus,
   putCategoryStatus,
-  deleteCategoryStatus,
+  patchCategoryStatus,
   getDocumentTypes,
   postDocumentType,
   putDocumentType,
-  deleteDocumentType,
+  toggleDocumentType,
   getGenders,
 };
