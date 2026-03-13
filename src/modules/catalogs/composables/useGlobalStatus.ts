@@ -36,10 +36,16 @@ export function useGlobalStatus() {
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .max(255, 'La descripción no puede tener más de 255 caracteres')
         .nullable(),
-      state_color: yup.string().max(10, 'El color del estado no puede tener más de 10 caracteres').required('El color del estado es obligatorio'),
+      state_color: yup
+        .string()
+        .max(10, 'El color del estado no puede tener más de 10 caracteres')
+        .required('El color del estado es obligatorio'),
       text_color: yup
         .string()
-        .max(10, 'El color del texto del estado no puede tener más de 10 caracteres')
+        .max(
+          10,
+          'El color del texto del estado no puede tener más de 10 caracteres',
+        )
         .required('El color del texto del estado es obligatorio'),
       category_status: yup
         .mixed<CategoryStatus>()
@@ -219,17 +225,16 @@ export function useGlobalStatus() {
     try {
       startLoading();
       const filter = {
-        page: pagination.page,
-        per_page: pagination.per_page,
-        filter: filter_name.value,
+        active: true,
       };
       const response = await catalogServices.getAllCategoryStatuses(filter);
 
       if (response.statusCode === 200) {
-        categoryStatuses.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+        const { data } = response;
+        categoryStatuses.value = data.data;
+        // pagination.page = response.data.current_page;
+        // pagination.per_page = response.data.per_page;
+        // pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);
