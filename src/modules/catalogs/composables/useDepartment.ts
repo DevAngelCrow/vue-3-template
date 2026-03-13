@@ -106,11 +106,12 @@ export function useDepartment() {
   const getCountries = async () => {
     try {
       startLoading();
-      const response = await catalogServices.getAllCountries();
+      const params = {
+        active: true,
+      }
+      const response = await catalogServices.getAllCountries(params);
       if (response.statusCode === 200) {
-        if (Array.isArray(response.data)) {
-          countries.value = response.data;
-        }
+          countries.value = response.data.data;
       }
     } catch (error) {
       console.error(error);

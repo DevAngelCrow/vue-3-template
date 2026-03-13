@@ -108,11 +108,12 @@ export function useDistrict() {
   const getMunicipalities = async () => {
     try {
       startLoading();
-      const response = await catalogServices.getMunicipalities();
+      const params = {
+        active: true,
+      }
+      const response = await catalogServices.getMunicipalities(params);
       if (response.statusCode === 200) {
-        if (Array.isArray(response.data)) {
-          municipalities.value = response.data;
-        }
+        municipalities.value = response.data.data;
       }
     } catch (error) {
       console.error(error);

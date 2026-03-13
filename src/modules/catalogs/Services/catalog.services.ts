@@ -20,8 +20,12 @@ import { DocumentTypeResponse } from '../interfaces/document-type/document-type.
 import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
 import { GenderResponse } from '../interfaces/gender/gender.response.interface';
 
+interface paramsFilter {
+  active: boolean;
+}
+
 const getAllCountries = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<CountryResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<CountryResponse>>(
     'catalogs/countries',
@@ -42,9 +46,9 @@ const updateCountries = async (id: number, data: UpdateCountry) => {
 const changeStatusCountry = async (id: number) => {
   const response = await httpClient.patch(`catalogs/countries/${id}`);
   return response;
-}
+};
 const getAllDepartments = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<DepartmentResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<DepartmentResponse>>(
     'catalogs/departments',
@@ -76,7 +80,7 @@ const toggleDepartment = async (id: number) => {
   return response;
 };
 
-const getMunicipalities = async (params?: paginateParams) => {
+const getMunicipalities = async (params?: paginateParams | paramsFilter) => {
   const response = await httpClient.get<
     ApiResponseGeneric<MunicipalityResponse>
   >('catalogs/municipalities', params);
@@ -171,7 +175,7 @@ const toggleGlobalStatus = async (id: number) => {
 };
 
 const getAllCategoryStatuses = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<CategoryStatusResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<CategoryStatusResponse>
