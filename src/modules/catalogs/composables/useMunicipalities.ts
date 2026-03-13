@@ -7,7 +7,6 @@ import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 import catalogServices from '../Services/catalog.services';
-import { CountryResponse } from '../interfaces/country.response.interface';
 import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
@@ -115,7 +114,7 @@ export function useMunicipality() {
       }
       const response = await catalogServices.getAllDepartments(params);
       if (response.statusCode === 200) {
-          departments.value = response.data.data;
+        departments.value = response.data.data;
       }
     } catch (error) {
       console.error(error);
