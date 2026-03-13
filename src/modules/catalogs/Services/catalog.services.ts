@@ -25,7 +25,7 @@ interface paramsFilter {
 }
 
 const getAllCountries = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<CountryResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<CountryResponse>>(
     'catalogs/countries',
@@ -48,7 +48,7 @@ const changeStatusCountry = async (id: number) => {
   return response;
 };
 const getAllDepartments = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<DepartmentResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<DepartmentResponse>>(
     'catalogs/departments',
@@ -80,7 +80,7 @@ const toggleDepartment = async (id: number) => {
   return response;
 };
 
-const getMunicipalities = async (params?: paginateParams) => {
+const getMunicipalities = async (params?: paginateParams | paramsFilter) => {
   const response = await httpClient.get<
     ApiResponseGeneric<MunicipalityResponse>
   >('catalogs/municipalities', params);

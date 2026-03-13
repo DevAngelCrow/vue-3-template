@@ -232,9 +232,6 @@ export function useGlobalStatus() {
       if (response.statusCode === 200) {
         const { data } = response;
         categoryStatuses.value = data.data;
-        // pagination.page = response.data.current_page;
-        // pagination.per_page = response.data.per_page;
-        // pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);

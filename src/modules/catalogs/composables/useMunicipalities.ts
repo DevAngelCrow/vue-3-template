@@ -11,6 +11,7 @@ import { CountryResponse } from '../interfaces/country.response.interface';
 import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
+import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
 export function useMunicipality() {
   const {
     errors,
@@ -104,16 +105,17 @@ export function useMunicipality() {
 
   const filter_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
-  const departments = ref<CountryResponse[]>([]);
+  const departments = ref<DepartmentResponse[]>([]);
 
   const getDepartments = async () => {
     try {
       startLoading();
-      const response = await catalogServices.getAllDepartments();
+      const params = {
+        active: true,
+      }
+      const response = await catalogServices.getAllDepartments(params);
       if (response.statusCode === 200) {
-        if (Array.isArray(response.data)) {
-          departments.value = response.data;
-        }
+          departments.value = response.data.data;
       }
     } catch (error) {
       console.error(error);

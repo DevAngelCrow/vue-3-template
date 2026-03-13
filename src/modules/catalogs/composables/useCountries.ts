@@ -13,7 +13,7 @@ export function useCountries() {
     try {
       const response = await catalogServices.getAllCountries();
       if (response.statusCode === 200) {
-        return response.data;
+        return response.data.data;
       }
     } catch (error) {
       console.error('Error al obtener el listado de países', error);
