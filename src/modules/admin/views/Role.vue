@@ -20,7 +20,7 @@
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-eye"
-              @click="openModal('view', data)" v-tooltip.bottom="'Ver detalle'"></Button>
+              @click="goToRoleMaintenance(data.id)" v-tooltip.bottom="'Ver detalle'"></Button>
             <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
               :disabled="data?.status?.name === 'Inactivo'" @click="openModal('edit', data)"
               v-tooltip.bottom="'Editar'"></Button>
@@ -56,9 +56,12 @@ import { onMounted, reactive, provide } from 'vue';
 import { useRole } from '../composables/useRole';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import RoleFormModal from '../components/roles/RoleFormModal.vue';
+import { useRouter } from 'vue-router';
 
 const roleInstance = useRole();
 provide('useRole', roleInstance);
+
+const router = useRouter();
 
 const {
   getRole,
@@ -92,6 +95,9 @@ const modalState = reactive<{
   selectedItem: null as number | null,
 });
 
+const goToRoleMaintenance = (id: number) => {
+  router.push({ name: 'role-maintenance', params: { id } });
+}
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
   data?: RoleResponse,

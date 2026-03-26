@@ -158,7 +158,7 @@ const toggleRole = async (id: number) => {
 };
 
 const getRol = async (id: number) => {
-  const response = await httpClient.get<ApiPostResponse<RolByIdResponse>>(
+  const response = await httpClient.get<ApiPostResponse<RoleResponse>>(
     `security/role/${id}`,
   );
   return response.data;

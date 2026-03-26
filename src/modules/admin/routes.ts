@@ -15,6 +15,11 @@ export const routesAdmin = [
     component: () => import('@/modules/admin/views/Role.vue'),
   },
   {
+    path: 'admin/role/role-maintenance/:id',
+    name: 'role-maintenance',
+    component: () => import('@/modules/admin/views/RolDetail.vue'),
+  },
+  {
     path: 'admin/routes-administration',
     name: 'routes-administration',
     component: () => import('@/modules/admin/views/Routes.vue'),

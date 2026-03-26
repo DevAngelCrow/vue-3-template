@@ -16,14 +16,14 @@
       <AppDataTable class="w-full" :headers="headers" :items="items" :paginator="true" :per_page="10" :total_pages="1">
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
-            <Button unstyled class="!outline-none">
+            <Button unstyled class="!outline-none" v-tooltip.bottom="'Ver Detalle'">
               <i class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2"
                 @click="openModal('details', data)"></i>
             </Button>
             <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
-              @click="openModal('edit', data)"></Button>
-            <Button class="rounded-full" variant="text" icon="pi pi-trash"
-              @click="openModalEstado('changeStatus', data)"></Button>
+              @click="openModal('edit', data)" v-tooltip.bottom="'Editar'"></Button>
+            <Button class="rounded-full" variant="text" :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+              @click="openModalEstado('changeStatus', data)" v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"></Button>
           </div>
         </template>
         <template #body-active="{ data }">

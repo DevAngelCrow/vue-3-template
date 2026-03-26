@@ -252,6 +252,7 @@ export function useRole() {
         permissionsPagination.per_page = 5;
         permissionsPagination.total_items = response.data.permissions.length;
       }
+      return response;
     } catch (error) {
       console.error(error);
     } finally {

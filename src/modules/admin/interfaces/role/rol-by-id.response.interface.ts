@@ -2,6 +2,7 @@ export interface RolByIdResponse {
   id: number;
   name: string;
   description: string;
+  code: string;
   status: {
     id: number;
     name: string;
