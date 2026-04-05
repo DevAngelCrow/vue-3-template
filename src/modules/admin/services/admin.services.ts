@@ -15,7 +15,7 @@ import { RoleForm } from '../interfaces/role/role.form.interface';
 import { RouteResponseById } from '../interfaces/routes/route-by-id.response.interface';
 //import { RolByIdResponse } from '../interfaces/role/rol-by-id.response.interface';
 
-interface paramsFilter {
+export interface paramsFilter {
   active: boolean;
 }
 const getAllRoutes = async (
