@@ -13,7 +13,7 @@ import { CategoryPermissionForm } from '../interfaces/category-permissions/categ
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { RouteResponseById } from '../interfaces/routes/route-by-id.response.interface';
-import { RolByIdResponse } from '../interfaces/role/rol-by-id.response.interface';
+//import { RolByIdResponse } from '../interfaces/role/rol-by-id.response.interface';
 
 interface paramsFilter {
   active: boolean;
@@ -66,7 +66,7 @@ const getRoute = async (id: number) => {
 };
 
 const getPermissions = async (
-  params: paginateParams,
+  params: paginateParams | { name: string; id_category_permissions?: number },
 ): Promise<ApiResponseGeneric<PermissionsResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsResponse>
@@ -97,7 +97,9 @@ const togglePermission = async (id: number) => {
   return response;
 };
 
-const getCategoryPermissions = async (params?: paginateParams & paramsFilter) => {
+const getCategoryPermissions = async (
+  params?: paginateParams & paramsFilter,
+) => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsCategoryResponse>
   >('security/category-permissions', params);

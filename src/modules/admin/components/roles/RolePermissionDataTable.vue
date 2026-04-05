@@ -1,38 +1,83 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex w-full gap-1 flex-wrap">
-      <AppInputText class="w-[50%] order-1" label="Buscar permiso..." v-model="filter_permission_name"
-        v-debounce:700.keydown.enter="() => searchPermission(filter_permission_name)
-          " />
-      <AppAutocomplete class="min-w-0 grow order-2" id="category" label="Categoría" v-model="categorySelected"  option-label="name" :suggestions="filterCategories" dropdown
-        @complete="findAutocomplete" :readonly="props.readonly" 
-          " />
-      <Button class="rounded_btn_search" icon="pi pi-search"
-        v-debounce:700.click="() => searchPermission(filter_permission_name)" />
-      <Button class="rounded_btn_clean" :icon="filter_permission_name?.length ? 'pi pi-filter-slash' : 'pi pi-filter'
-        " variant="outlined" v-debounce:700.click="cleanSearch" v-tooltip="filter_permission_name?.length
+    <div class="flex w-full gap-5 flex-wrap">
+      <AppInputText
+        class="order-1 md:w-[49.5%] sm:w-full"
+        label="Buscar permiso..."
+        v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
+      />
+      <AppAutocomplete
+        class="order-2 md:w-[34.5%] sm:w-full"
+        id="category"
+        label="Categoría"
+        v-model="filter_permission.category"
+        option-label="name"
+        :suggestions="filterCategories"
+        dropdown
+        @complete="findAutocomplete"
+      />
+      <Button
+        class="rounded_btn_search"
+        icon="pi pi-search"
+        v-debounce:700.click="() => searchPermission(filter_permission)"
+      />
+      <Button
+        class="rounded_btn_clean"
+        :icon="
+          filter_permission.name.length || filter_permission.category
+            ? 'pi pi-filter-slash'
+            : 'pi pi-filter'
+        "
+        variant="outlined"
+        v-debounce:700.click="cleanSearch"
+        v-tooltip="
+          filter_permission.name.length || filter_permission.category
             ? 'Quitar filtro'
             : 'Escriba para filtrar'
-          " />
+        "
+      />
       <div class="rounded_counter">
-        <AppCircularCounter class="item_justify_counter" :selected="selectedPermissionsIds.size"
-          :total="totalPermissions" color="#082f49" />
+        <AppCircularCounter
+          class="item_justify_counter"
+          :selected="selectedPermissionsIds.size"
+          :total="totalPermissions"
+          color="#082f49"
+        />
       </div>
     </div>
-    <AppDataTable class="w-full" :headers="headerPermissions" :items="permissionItemsFormated" :paginator="true"
-      :per_page="permissionsPagination.per_page" :total_items="permissionsPagination.total_items"
-      :page="permissionsPagination.page" @page-update="handlePagination">
+
+    <AppDataTable
+      class="w-full"
+      :headers="headerPermissions"
+      :items="permissionItemsFormated"
+      :paginator="true"
+      :per_page="permissionsPagination.per_page"
+      :total_items="permissionsPagination.total_items"
+      :page="permissionsPagination.page"
+      @page-update="handlePagination"
+    >
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
-          <AppCheckBox :readonly="props.readonly" binary @update:model-value="checkAll" v-model="selectAll">
+          <AppCheckBox
+            :readonly="props.readonly"
+            binary
+            @update:model-value="checkAll"
+            v-model="selectAll"
+          >
           </AppCheckBox>
           <span>Seleccion</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
         <div class="flex justify-center">
-          <AppCheckBox :readonly="props.readonly" binary :model-value="isPermissionSelected(data.id)" :id="`${index}`"
-            @update:model-value="togglePermission(data.id, $event)" />
+          <AppCheckBox
+            :readonly="props.readonly"
+            binary
+            :model-value="isPermissionSelected(data.id)"
+            :id="`${index}`"
+            @update:model-value="togglePermission(data.id, $event)"
+          />
         </div>
       </template>
     </AppDataTable>
@@ -61,7 +106,7 @@ const {
   permissionsPagination,
   permissionsList,
   permissions_ids,
-  filter_permission_name,
+  filter_permission,
   getPermissions,
   findPermission,
   categories,
@@ -81,15 +126,43 @@ let totalPermissions: number = 0;
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
-const categorySelected = ref<CategoryPermissionsResponse | null>(null);
 
-const searchPermission = async (value: string | null) => {
+const searchPermission = async (value: {
+  name: string;
+  category?: { id: number; name: string; description: string };
+}) => {
   if (!value) return;
   if (modalState.value === 'view') {
+    console.log('Filtering permissions locally with value:', value);
     let _filteredItems = [];
+
+    // Verificar si hay filtros activos
+    const hasNameFilter = value.name && value.name.trim().length > 0;
+    const hasCategoryFilter = value.category?.id && value.category.id > 0;
+
     for (let i = 0; i < permissionsItemsLocal.value.length; i++) {
       let item = permissionsItemsLocal.value[i];
-      if (item?.name?.toLowerCase().indexOf(value.toLocaleLowerCase()) === 0) {
+
+      // Si no hay filtros activos, incluir todos los items
+      if (!hasNameFilter && !hasCategoryFilter) {
+        _filteredItems.push(item);
+        continue;
+      }
+
+      // Verificar coincidencia con nombre
+      const matchesName =
+        hasNameFilter &&
+        item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
+          0;
+
+      // Verificar coincidencia con categoría
+      const matchesCategory =
+        hasCategoryFilter &&
+        item?.id_category_permissions === value.category?.id;
+
+      // Agregar si cumple AL MENOS UNO de los filtros activos
+      if (matchesName || matchesCategory) {
+        console.log('Item matches filter:', item);
         _filteredItems.push(item);
       }
     }
@@ -182,7 +255,10 @@ const closeModal = () => {
     permissionsPagination.page = 1;
     getPermissions();
   }
-  filter_permission_name.value = null;
+  filter_permission.value = {
+    name: '',
+    category: { id: 0, name: '', description: '' },
+  };
   permissionItemsFormated.value = [];
   if (modalState.value === 'view') {
     getPermissions();
@@ -192,7 +268,10 @@ const closeModal = () => {
 };
 
 const cleanSearch = () => {
-  filter_permission_name.value = null;
+  filter_permission.value = {
+    name: '',
+    category: undefined,
+  };
   if (modalState.value === 'view') {
     permissionItemsFormated.value = [...permissionsItemsLocal.value];
     totalPermissions = permissionsItemsLocal.value.length;
@@ -217,16 +296,16 @@ const localPaginationViewMode = (page: number, find?: boolean) => {
   permissionItemsFormated.value = temporalPermissionsItemFormated;
 };
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-    let query = event?.query;
-    let _filteredItems = [];
-    for (let i = 0; i < categories.value.length; i++) {
-        let item = categories.value[i];
+  let query = event?.query;
+  let _filteredItems = [];
+  for (let i = 0; i < categories.value.length; i++) {
+    let item = categories.value[i];
 
-        if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-            _filteredItems.push(item);
-        }
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
     }
-    filterCategories.value = _filteredItems;
+  }
+  filterCategories.value = _filteredItems;
 };
 watch(
   () => selectedPermissionsIds.value.size,
@@ -248,8 +327,8 @@ watch(permissionsList, newVal => {
 });
 watch(
   () => permissions_ids.value,
-  (newIds) => {
-    if (newIds && newIds.length > 0 && (modalState.value === 'view')) {
+  newIds => {
+    if (newIds && newIds.length > 0 && modalState.value === 'view') {
       selectedPermissionsIds.value.clear();
       newIds.forEach((id: number) => {
         selectedPermissionsIds.value.add(id);
@@ -257,7 +336,7 @@ watch(
       updateSelectAllState();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 onMounted(async () => {
   totalPermissions = permissionsPagination.total_items;

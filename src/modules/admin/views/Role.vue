@@ -2,43 +2,91 @@
   <div class="py-5 px-5 h-full max-h-full">
     <section id="content" class="w-full flex flex-row flex-wrap gap-5">
       <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle title="Roles" class="w-full md:w-auto flex justify-center items-center" />
-        <div id="inputs" class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0">
-          <AppInputText label="Buscar..." class="min-w-auto w-auto grow shrink-0 md:w-83.75"
-            v-model="filter_name" @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findRole(filter_name)" />
-          <Button class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRole(filter_name)">Buscar</Button>
-          <Button class="shrink-0 grow rounded-md" outlined v-debounce:700.click="cleanSearch">Limpiar</Button>
-          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"><i
+        <AppTitle
+          title="Roles"
+          class="w-full md:w-auto flex justify-center items-center"
+        />
+        <div
+          id="inputs"
+          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        >
+          <AppInputText
+            label="Buscar..."
+            class="min-w-auto w-auto grow shrink-0 md:w-83.75"
+            v-model="filter_name"
+            @update:modelValue="validateAlphaInput(filter_name)"
+            v-debounce:700.keydown.enter="() => findRole(filter_name)"
+          />
+          <Button
+            class="shrink-0 grow rounded-md"
+            v-debounce:700.click="() => findRole(filter_name)"
+            >Buscar</Button
+          >
+          <Button
+            class="shrink-0 grow rounded-md"
+            outlined
+            v-debounce:700.click="cleanSearch"
+            >Limpiar</Button
+          >
+          <Button
+            class="shrink-0 grow rounded-md"
+            @click="goToRoleMaintenance()"
+            ><i
               class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"></i><span>Agregar</span></Button>
+              style="font-size: 1.1rem; font-weight: bold"
+            ></i
+            ><span>Agregar</span></Button
+          >
         </div>
       </div>
-      <AppDataTable class="w-full" :headers="headers" :items="role" :paginator="true" :per_page="pagination.per_page"
-        :total_items="pagination.total_items" :page="pagination.page" @page-update="handlePagination">
+      <AppDataTable
+        class="w-full"
+        :headers="headers"
+        :items="role"
+        :paginator="true"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        @page-update="handlePagination"
+      >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-eye"
-              @click="goToRoleMaintenance(data.id)" v-tooltip.bottom="'Ver detalle'"></Button>
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-eye"
+              @click="goToRoleMaintenance(data.id)"
+              v-tooltip.bottom="'Ver detalle'"
+            ></Button>
+            <!-- <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
               :disabled="data?.status?.name === 'Inactivo'" @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar'"></Button>
-            <Button class="rounded-full" variant="text" :icon="data?.status?.name === 'Inactivo'
-              ? 'pi pi-check-circle'
-              : 'pi pi-trash'
-              " @click="openModal('delete', data)" v-tooltip.bottom="data?.status?.name === 'Inactivo' ? 'Activar' : 'Desactivar'
-                "></Button>
+              v-tooltip.bottom="'Editar'"></Button> -->
+            <Button
+              class="rounded-full"
+              variant="text"
+              :icon="
+                data?.status?.name === 'Inactivo'
+                  ? 'pi pi-check-circle'
+                  : 'pi pi-trash'
+              "
+              @click="openModal('delete', data)"
+              v-tooltip.bottom="
+                data?.status?.name === 'Inactivo' ? 'Activar' : 'Desactivar'
+              "
+            ></Button>
           </div>
         </template>
         <template #body-icon="{ data }">
           <i :class="data.icon"></i>
         </template>
         <template #body-status.name="{ data }">
-          <AppChip :label="data?.status?.name" :style="{
-            backgroundColor: data?.status?.state_color,
-            color: data?.status?.text_color,
-          }">
+          <AppChip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          >
           </AppChip>
         </template>
         <template #body-show="{ data }">
@@ -52,11 +100,11 @@
 <script setup lang="ts">
 import { Button } from 'primevue';
 import { onMounted, reactive, provide } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { useRole } from '../composables/useRole';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import RoleFormModal from '../components/roles/RoleFormModal.vue';
-import { useRouter } from 'vue-router';
 
 const roleInstance = useRole();
 provide('useRole', roleInstance);
@@ -95,9 +143,14 @@ const modalState = reactive<{
   selectedItem: null as number | null,
 });
 
-const goToRoleMaintenance = (id: number) => {
-  router.push({ name: 'role-maintenance', params: { id } });
-}
+const goToRoleMaintenance = (id?: number) => {
+  if (id) {
+    router.push({ name: 'role-maintenance', params: { id } });
+  } else {
+    router.push({ name: 'role-maintenance' });
+  }
+};
+
 const openModal = (
   action: 'add' | 'view' | 'edit' | 'delete',
   data?: RoleResponse,
@@ -156,4 +209,3 @@ onMounted(async () => {
   }
 });
 </script>
-<style scoped></style>

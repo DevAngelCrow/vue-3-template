@@ -11,7 +11,7 @@
         severity="primary"
       />
       <Button
-        v-if="actionMode.mode === 'edit'"
+        v-if="actionMode.mode === 'edit' || actionMode.mode === 'add'"
         class="transform animate-ease-in"
         icon="pi pi-save"
         label="Guardar"
@@ -19,11 +19,19 @@
         severity="primary"
       />
       <Button
-        v-if="actionMode.mode === 'edit'"
+        v-if="actionMode.mode === 'edit' || actionMode.mode === 'add'"
         class="transform animate-ease-in"
         icon="pi pi-times"
-        label="Cancelar"
+        :label="actionMode.mode === 'add' ? 'Volver' : 'Cancelar'"
         @click="goBack"
+        outlined
+      />
+      <Button
+        v-if="actionMode.mode !== 'add'"
+        class="transform animate-ease-in"
+        icon="pi pi-arrow-left"
+        label="Volver"
+        @click="router.push({ name: 'role' })"
         outlined
       />
     </section>
@@ -90,7 +98,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, provide } from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useLoaderStore } from '@/core/store';
 
@@ -101,6 +109,7 @@ import { RoleForm } from '../interfaces/role/role.form.interface';
 const roleInstance = useRole();
 provide('useRole', roleInstance);
 const route = useRoute();
+const router = useRouter();
 const actionMode = reactive<{
   mode: 'add' | 'view' | 'edit';
   title: string;
@@ -132,6 +141,8 @@ const {
   addRol,
   getPermissions,
   getCategoryPermissions,
+  editRole,
+  getStatus,
 } = roleInstance;
 
 const originalData = ref<unknown>(null);
@@ -161,15 +172,16 @@ const onSubMit = handleSubmit(async values => {
       code: values.code,
       permissions_id: [...selectedPermissionsIds.value],
     };
-    //let success = false;
     switch (actionMode.mode) {
       case 'add':
-        (await addRol(form)) ? true : false;
+        await addRol(form);
+        goBack();
         break;
-      //   case 'edit':
-      //     form.id = values.id;
-      //     success = (await editRole(form)) ? true : false;
-      //     break;
+      case 'edit':
+        form.id = values.id;
+        await editRole(form);
+        goBack();
+        break;
       //   case 'delete':
       //     success = (await toggleRole(values.id)) ? true : false;
       //     break;
@@ -180,45 +192,82 @@ const onSubMit = handleSubmit(async values => {
     finishLoading();
   }
 });
-const enableEditMode = () => {
+const enableEditMode = async () => {
   actionMode.mode = 'edit';
   actionMode.title = 'Editar rol';
   actionMode.isReadonly = false;
+  await getPermissions();
 };
-const goBack = () => {
+const goBack = async () => {
+  if (actionMode.mode === 'add') {
+    router.push({ name: 'role' });
+    return;
+  }
   actionMode.mode = 'view';
   actionMode.title = 'Detalle del rol';
   actionMode.isReadonly = true;
+  await getPermissions();
+  actionMode.mode = 'view';
+  actionMode.title = 'Detalle del rol';
+  actionMode.isReadonly = true;
+  const rol = await getRolById(+route.params.id);
+  if (!rol || !rol.data) {
+    console.error('No se pudo obtener el rol');
+    return;
+  }
+  const data = {
+    id: rol.data.id,
+    name: rol.data.name,
+    description: rol.data.description,
+    code: rol.data.code,
+    status: rol.data.status,
+    id_status: rol.data.status.id,
+    permissions: rol.data.permissions,
+  };
+  originalData.value = { ...data };
+  setRoleItem(data);
 };
 onMounted(async () => {
   try {
     await getPermissions();
     await getCategoryPermissions();
-    if (route.params.id) {
+    await getStatus();
+    if (route?.params?.id) {
       actionMode.mode = 'view';
       actionMode.title = 'Detalle del rol';
       actionMode.isReadonly = true;
-    }
-    const rol = await getRolById(+route.params.id);
 
-    if (!rol || !rol.data) {
-      console.error('No se pudo obtener el rol');
+      const rol = await getRolById(+route.params.id);
+
+      if (!rol || !rol.data) {
+        console.error('No se pudo obtener el rol');
+        return;
+      }
+      const data = {
+        id: rol.data.id,
+        name: rol.data.name,
+        description: rol.data.description,
+        code: rol.data.code,
+        status: rol.data.status,
+        id_status: rol.data.status.id,
+        permissions: rol.data.permissions,
+      };
+      originalData.value = { ...data };
+      setRoleItem(data);
       return;
     }
-    const data = {
-      id: rol.data.id,
-      name: rol.data.name,
-      description: rol.data.description,
-      code: rol.data.code,
-      status: rol.data.status,
-      id_status: rol.data.status.id,
-      permissions: rol.data.permissions,
-    };
-    originalData.value = { ...data };
-    setRoleItem(data);
+    actionMode.mode = 'add';
+    actionMode.title = 'Agregar rol';
+    if (actionMode.mode === 'add') {
+      status.value = globalStatus.value.find(item => {
+        return (
+          item?.name?.toLowerCase() === 'activo' &&
+          item?.code?.toLowerCase() === 'ac'
+        );
+      });
+    }
   } catch (error) {
     console.error(error);
   }
 });
 </script>
-<style lang="scss" scoped></style>

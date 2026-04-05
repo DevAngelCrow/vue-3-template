@@ -108,7 +108,7 @@ export function useRole() {
       sortable: false,
       alignHeaders: 'start',
       alignItems: 'start',
-    }
+    },
   ]);
 
   const role = ref<RoleResponse[] | undefined>([]);
@@ -141,7 +141,14 @@ export function useRole() {
   const [code, codeAttrs] = defineField('code');
   const [id_status, idStatusAttrs] = defineField('id_status');
   const filter_name = ref<string | null>(null);
-  const filter_permission_name = ref<string | null>(null);
+  const filter_permission = ref<{
+    name: string;
+    category?: {
+      id: number;
+      name: string;
+      description: string;
+    };
+  }>({ name: '' });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
   const globalStatus = ref<RoleStatus[]>([]);
   const categories = ref<CategoryPermissionsResponse[]>([]);
@@ -270,14 +277,16 @@ export function useRole() {
   const getPermissions = async () => {
     try {
       startLoading();
-      const filter = {
+      let filter = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
-        filter: filter_permission_name.value
-          ? filter_permission_name.value
-          : null,
+        name: filter_permission.value.name
+          ? filter_permission.value.name
+          : undefined,
+        id_category_permissions: filter_permission.value.category?.id,
         active: true,
       };
+      console.log(filter);
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
         permissionsList.value = response.data.data;
@@ -296,7 +305,7 @@ export function useRole() {
       startLoading();
       const filters = {
         active: true,
-      }
+      };
       const response = await adminServices.getCategoryPermissions(filters);
       if (response.statusCode === 200) {
         categories.value = response.data.data;
@@ -348,7 +357,14 @@ export function useRole() {
       getRole();
     }
   };
-  const findPermission = (value: string | null) => {
+  const findPermission = (value: {
+    name: string;
+    category?: {
+      id: number;
+      name: string;
+      description: string;
+    };
+  }) => {
     if (value) {
       getPermissions();
     }
@@ -391,7 +407,7 @@ export function useRole() {
     permissionsList,
     permissions_ids,
     permissionsIdsAttrs,
-    filter_permission_name,
+    filter_permission,
     addRol,
     editRole,
     toggleRole,
