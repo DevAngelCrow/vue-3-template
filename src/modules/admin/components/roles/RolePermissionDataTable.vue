@@ -1,28 +1,38 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex w-full gap-1 flex-wrap">
+    <div class="flex w-full gap-5 flex-wrap">
       <AppInputText
-        class="w-[65%] grow order-1"
+        class="order-1 md:w-[49.5%] sm:w-full"
         label="Buscar permiso..."
-        v-model="filter_permission_name"
-        v-debounce:700.keydown.enter="
-          () => searchPermission(filter_permission_name)
-        "
+        v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
+      />
+      <AppAutocomplete
+        class="order-2 md:w-[34.5%] sm:w-full"
+        id="category"
+        label="Categoría"
+        v-model="filter_permission.category"
+        option-label="name"
+        :suggestions="filterCategories"
+        dropdown
+        @complete="findAutocomplete"
       />
       <Button
         class="rounded_btn_search"
         icon="pi pi-search"
-        v-debounce:700.click="() => searchPermission(filter_permission_name)"
+        v-debounce:700.click="() => searchPermission(filter_permission)"
       />
       <Button
         class="rounded_btn_clean"
         :icon="
-          filter_permission_name?.length ? 'pi pi-filter-slash' : 'pi pi-filter'
+          filter_permission.name.length || filter_permission.category
+            ? 'pi pi-filter-slash'
+            : 'pi pi-filter'
         "
         variant="outlined"
         v-debounce:700.click="cleanSearch"
         v-tooltip="
-          filter_permission_name?.length
+          filter_permission.name.length || filter_permission.category
             ? 'Quitar filtro'
             : 'Escriba para filtrar'
         "
@@ -36,6 +46,7 @@
         />
       </div>
     </div>
+
     <AppDataTable
       class="w-full"
       :headers="headerPermissions"
@@ -74,9 +85,10 @@
 </template>
 <script setup lang="ts">
 import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
-import { Button } from 'primevue';
+import { AutoCompleteCompleteEvent, Button } from 'primevue';
 
 import { useRole } from '../../composables/useRole';
+import { CategoryPermissionsResponse } from '../../interfaces/role/role.category-permisions.response.interface';
 
 type RoleType = ReturnType<typeof useRole>;
 
@@ -87,16 +99,17 @@ const props = defineProps<{
   readonly: boolean;
 }>();
 const modalState = toRef(props, 'modalState');
-const emit = defineEmits(['update:selected-permissions-ids', 'close-modal']);
+const emit = defineEmits(['update:selected-permissions-ids']);
 
 const {
   headerPermissions,
   permissionsPagination,
   permissionsList,
   permissions_ids,
-  filter_permission_name,
+  filter_permission,
   getPermissions,
   findPermission,
+  categories,
 } = rol;
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const selectAll = ref<boolean>(false);
@@ -112,13 +125,44 @@ const permissionItemsFormated = ref<
 let totalPermissions: number = 0;
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
-const searchPermission = async (value: string | null) => {
+const filterCategories = ref<CategoryPermissionsResponse[]>([]);
+
+const searchPermission = async (value: {
+  name: string;
+  category?: { id: number; name: string; description: string };
+}) => {
   if (!value) return;
   if (modalState.value === 'view') {
+    console.log('Filtering permissions locally with value:', value);
     let _filteredItems = [];
+
+    // Verificar si hay filtros activos
+    const hasNameFilter = value.name && value.name.trim().length > 0;
+    const hasCategoryFilter = value.category?.id && value.category.id > 0;
+
     for (let i = 0; i < permissionsItemsLocal.value.length; i++) {
       let item = permissionsItemsLocal.value[i];
-      if (item?.name?.toLowerCase().indexOf(value.toLocaleLowerCase()) === 0) {
+
+      // Si no hay filtros activos, incluir todos los items
+      if (!hasNameFilter && !hasCategoryFilter) {
+        _filteredItems.push(item);
+        continue;
+      }
+
+      // Verificar coincidencia con nombre
+      const matchesName =
+        hasNameFilter &&
+        item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
+          0;
+
+      // Verificar coincidencia con categoría
+      const matchesCategory =
+        hasCategoryFilter &&
+        item?.id_category_permissions === value.category?.id;
+
+      // Agregar si cumple AL MENOS UNO de los filtros activos
+      if (matchesName || matchesCategory) {
+        console.log('Item matches filter:', item);
         _filteredItems.push(item);
       }
     }
@@ -211,17 +255,23 @@ const closeModal = () => {
     permissionsPagination.page = 1;
     getPermissions();
   }
-  filter_permission_name.value = null;
+  filter_permission.value = {
+    name: '',
+    category: { id: 0, name: '', description: '' },
+  };
   permissionItemsFormated.value = [];
   if (modalState.value === 'view') {
     getPermissions();
   }
-  //cleanSearch();
-  emit('close-modal');
+  cleanSearch();
+  //emit('close-modal');
 };
 
 const cleanSearch = () => {
-  filter_permission_name.value = null;
+  filter_permission.value = {
+    name: '',
+    category: undefined,
+  };
   if (modalState.value === 'view') {
     permissionItemsFormated.value = [...permissionsItemsLocal.value];
     totalPermissions = permissionsItemsLocal.value.length;
@@ -245,6 +295,18 @@ const localPaginationViewMode = (page: number, find?: boolean) => {
   );
   permissionItemsFormated.value = temporalPermissionsItemFormated;
 };
+const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
+  let query = event?.query;
+  let _filteredItems = [];
+  for (let i = 0; i < categories.value.length; i++) {
+    let item = categories.value[i];
+
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
+    }
+  }
+  filterCategories.value = _filteredItems;
+};
 watch(
   () => selectedPermissionsIds.value.size,
   () => {
@@ -252,6 +314,7 @@ watch(
   },
 );
 watch(permissionsList, newVal => {
+  console.log('permissionsList updated:', newVal);
   permissionItemsFormated.value = [];
 
   setPermissionsIds(newVal);
@@ -262,37 +325,24 @@ watch(permissionsList, newVal => {
     totalPermissions = permissionsItemsLocal.value.length;
   }
 });
-
-onMounted(() => {
+watch(
+  () => permissions_ids.value,
+  newIds => {
+    if (newIds && newIds.length > 0 && modalState.value === 'view') {
+      selectedPermissionsIds.value.clear();
+      newIds.forEach((id: number) => {
+        selectedPermissionsIds.value.add(id);
+      });
+      updateSelectAllState();
+    }
+  },
+  { immediate: true, deep: true },
+);
+onMounted(async () => {
   totalPermissions = permissionsPagination.total_items;
   setPermissionsIds(permissionsList.value);
-
-  switch (modalState.value) {
-    case 'add':
-      updateSelectAllState();
-      break;
-    case 'view':
-      permissions_ids.value?.forEach((id: number) => {
-        selectedPermissionsIds.value.add(id);
-      });
-      permissionItemsFormated.value.forEach(item => {
-        isPermissionSelected(item.id);
-      });
-      updateSelectAllState();
-      break;
-    case 'edit':
-      // if(permissionsList.value.length){
-      //   getPermissions();
-      // }
-      permissions_ids.value?.forEach((id: number) => {
-        selectedPermissionsIds.value.add(id);
-      });
-      permissionItemsFormated.value.forEach(item => {
-        isPermissionSelected(item.id);
-      });
-      updateSelectAllState();
-      break;
-  }
+  // El watcher de permissions_ids maneja la sincronización de checkboxes automáticamente
+  updateSelectAllState();
 });
 defineComponent({
   name: 'RoutePermissionDataTable',

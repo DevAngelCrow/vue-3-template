@@ -98,7 +98,8 @@ export function useCategoryPermission() {
       const filter = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        name: filter_name.value,
+        active: true,
       };
       const response = await adminServices.getCategoryPermissions(filter);
       if (response.statusCode === 200) {

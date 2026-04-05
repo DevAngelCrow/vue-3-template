@@ -10,6 +10,7 @@ import { TableHeaders } from '@/core/interfaces';
 import { RouteForm } from '../interfaces/routes/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autocomplete-obj.interface';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
+import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
 
 export function useAdmin() {
   const {
@@ -49,12 +50,17 @@ export function useAdmin() {
             return false;
           },
         ),
-      description: yup.string().max(255, 'La descripción no puede tener más de 255 caracteres'),
+      description: yup
+        .string()
+        .max(255, 'La descripción no puede tener más de 255 caracteres'),
       order: yup
         .number()
         .typeError('El campo debe ser de tipo entero')
         .required('El campo es requerido'),
-      icon: yup.string().min(2).max(150, 'El icono no puede tener más de 255 caracteres'),
+      icon: yup
+        .string()
+        .min(2)
+        .max(150, 'El icono no puede tener más de 255 caracteres'),
       child_route: yup.boolean(),
       show: yup.boolean(),
       active: yup.boolean(),
@@ -193,7 +199,15 @@ export function useAdmin() {
   const [required_auth, required_authAttrs] = defineField('required_auth');
 
   const filter_name = ref<string | null>(null);
-  const filter_permission_name = ref<string | null>(null);
+  const filter_permission = ref<{
+    name: string;
+    category?: {
+      id: number;
+      name: string;
+      description: string;
+    };
+  }>({ name: '' });
+  const categories = ref<CategoryPermissionsResponse[]>([]);
   const invalidRouteRegex = /[^A-Za-z0-9\-/]/g;
   const routeValidRegex =
     /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
@@ -325,7 +339,14 @@ export function useAdmin() {
     }
   };
 
-  const findPermission = (value: string | null) => {
+  const findPermission = (value: {
+    name: string;
+    category?: {
+      id: number;
+      name: string;
+      description: string;
+    };
+  }) => {
     if (value) {
       getPermissions();
     }
@@ -336,10 +357,11 @@ export function useAdmin() {
       const filter = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
-        filter_name: filter_permission_name.value
-          ? filter_permission_name.value
-          : null,
-        active: 1,
+        name: filter_permission.value.name
+          ? filter_permission.value.name
+          : undefined,
+        id_category_permissions: filter_permission.value.category?.id,
+        active: true,
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
@@ -347,6 +369,22 @@ export function useAdmin() {
         permissionsPagination.page = response.data.current_page;
         permissionsPagination.per_page = response.data.per_page;
         permissionsPagination.total_items = response.data.total_items;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
+  const getCategoryPermissions = async () => {
+    try {
+      startLoading();
+      const filters = {
+        active: true,
+      };
+      const response = await adminServices.getCategoryPermissions(filters);
+      if (response.statusCode === 200) {
+        categories.value = response.data.data;
       }
     } catch (error) {
       console.error(error);
@@ -470,6 +508,8 @@ export function useAdmin() {
     headerPermissions,
     permissionsPagination,
     findPermission,
-    filter_permission_name,
+    filter_permission,
+    getCategoryPermissions,
+    categories,
   };
 }
