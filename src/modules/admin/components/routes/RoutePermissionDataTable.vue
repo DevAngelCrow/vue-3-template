@@ -1,27 +1,41 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex w-full gap-1 flex-wrap">
+    <div class="flex w-full gap-5 flex-wrap">
       <AppInputText
-        class="w-[65%] grow order-1"
+        class="order-1 md:w-[49.5%] sm:w-full"
         label="Buscar permiso..."
-        v-model="filter_permission_name"
-        v-debounce:700.keydown.enter="
-          () => searchPermission(filter_permission_name)
-        "
+        v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
+      />
+      <AppAutocomplete
+        class="order-2 md:w-[34.5%] sm:w-full"
+        id="category"
+        label="Categoría"
+        v-model="filter_permission.category"
+        option-label="name"
+        :suggestions="filterCategories"
+        dropdown
+        @complete="findAutocomplete"
       />
       <Button
         class="rounded_btn_search"
         icon="pi pi-search"
-        v-debounce:700.click="() => searchPermission(filter_permission_name)"
+        v-debounce:700.click="() => searchPermission(filter_permission)"
       />
       <Button
         class="rounded_btn_clean"
         :icon="
-          filter_permission_name?.length ? 'pi pi-filter-slash' : 'pi pi-filter'
+          filter_permission.name.length || filter_permission.category
+            ? 'pi pi-filter-slash'
+            : 'pi pi-filter'
         "
         variant="outlined"
         v-debounce:700.click="cleanSearch"
-        v-tooltip="'Eliminar filtro'"
+        v-tooltip="
+          filter_permission.name.length || filter_permission.category
+            ? 'Quitar filtro'
+            : 'Escriba para filtrar'
+        "
       />
       <div class="rounded_counter">
         <AppCircularCounter
@@ -71,9 +85,10 @@
 </template>
 <script setup lang="ts">
 import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
-import { Button } from 'primevue';
+import { AutoCompleteCompleteEvent, Button } from 'primevue';
 
 import { useAdmin } from '../../composables/useAdmin';
+import { CategoryPermissionsResponse } from '../../interfaces/role/role.category-permisions.response.interface';
 
 type AdminType = ReturnType<typeof useAdmin>;
 
@@ -91,9 +106,10 @@ const {
   permissionsPagination,
   permissionsList,
   permissions_ids,
-  filter_permission_name,
+  filter_permission,
   getPermissions,
   findPermission,
+  categories,
 } = admin;
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const selectAll = ref<boolean>(false);
@@ -109,13 +125,37 @@ const permissionItemsFormated = ref<
 let totalPermissions: number = 0;
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
-const searchPermission = async (value: string | null) => {
+const filterCategories = ref<CategoryPermissionsResponse[]>([]);
+
+const searchPermission = async (value: {
+  name: string;
+  category?: { id: number; name: string; description: string };
+}) => {
   if (!value) return;
   if (modalState.value === 'view') {
     let _filteredItems = [];
+
+    const hasNameFilter = value.name && value.name.trim().length > 0;
+    const hasCategoryFilter = value.category?.id && value.category.id > 0;
+
     for (let i = 0; i < permissionsItemsLocal.value.length; i++) {
       let item = permissionsItemsLocal.value[i];
-      if (item?.name.toLowerCase().indexOf(value.toLocaleLowerCase()) === 0) {
+
+      if (!hasNameFilter && !hasCategoryFilter) {
+        _filteredItems.push(item);
+        continue;
+      }
+
+      const matchesName =
+        hasNameFilter &&
+        item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
+          0;
+
+      const matchesCategory =
+        hasCategoryFilter &&
+        item?.id_category_permissions === value.category?.id;
+
+      if (matchesName || matchesCategory) {
         _filteredItems.push(item);
       }
     }
@@ -198,18 +238,15 @@ const setPermissionsIds = (
 };
 
 const closeModal = () => {
-  // permissionItemsFormated.value = permissionsList.value.map(item => {
-  //   return {
-  //     ...item,
-  //     state: false,
-  //   };
-  // });
   selectedPermissionsIds.value.clear();
   if (permissionsPagination.page > 1) {
     permissionsPagination.page = 1;
     getPermissions();
   }
-  filter_permission_name.value = null;
+  filter_permission.value = {
+    name: '',
+    category: undefined,
+  };
   permissionItemsFormated.value = [];
   if (modalState.value === 'view') {
     getPermissions();
@@ -219,7 +256,10 @@ const closeModal = () => {
 };
 
 const cleanSearch = () => {
-  filter_permission_name.value = null;
+  filter_permission.value = {
+    name: '',
+    category: undefined,
+  };
   if (modalState.value === 'view') {
     permissionItemsFormated.value = [...permissionsItemsLocal.value];
     totalPermissions = permissionsItemsLocal.value.length;
@@ -242,6 +282,18 @@ const localPaginationViewMode = (page: number, find?: boolean) => {
     end,
   );
   permissionItemsFormated.value = temporalPermissionsItemFormated;
+};
+const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
+  let query = event?.query;
+  let _filteredItems = [];
+  for (let i = 0; i < categories.value.length; i++) {
+    let item = categories.value[i];
+
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
+    }
+  }
+  filterCategories.value = _filteredItems;
 };
 watch(
   () => selectedPermissionsIds.value.size,
