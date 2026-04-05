@@ -4,13 +4,13 @@
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle title="Roles" class="w-full md:w-auto flex justify-center items-center" />
         <div id="inputs" class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0">
-          <AppInputText label="Buscar..." class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
+          <AppInputText label="Buscar..." class="min-w-auto w-auto grow shrink-0 md:w-83.75"
             v-model="filter_name" @update:modelValue="validateAlphaInput(filter_name)"
             v-debounce:700.keydown.enter="() => findRole(filter_name)" />
-          <Button class="flex-shrink-0 grow rounded-md"
+          <Button class="shrink-0 grow rounded-md"
             v-debounce:700.click="() => findRole(filter_name)">Buscar</Button>
-          <Button class="flex-shrink-0 grow rounded-md" outlined v-debounce:700.click="cleanSearch">Limpiar</Button>
-          <Button class="flex-shrink-0 grow rounded-md" @click="openModal('add')"><i
+          <Button class="shrink-0 grow rounded-md" outlined v-debounce:700.click="cleanSearch">Limpiar</Button>
+          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"></i><span>Agregar</span></Button>
         </div>

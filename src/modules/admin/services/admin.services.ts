@@ -15,6 +15,9 @@ import { RoleForm } from '../interfaces/role/role.form.interface';
 import { RouteResponseById } from '../interfaces/routes/route-by-id.response.interface';
 import { RolByIdResponse } from '../interfaces/role/rol-by-id.response.interface';
 
+interface paramsFilter {
+  active: boolean;
+}
 const getAllRoutes = async (
   params: paginateParams,
 ): Promise<ApiResponseGeneric<RoutesResponse>> => {
@@ -94,7 +97,7 @@ const togglePermission = async (id: number) => {
   return response;
 };
 
-const getCategoryPermissions = async (params?: paginateParams) => {
+const getCategoryPermissions = async (params?: paginateParams & paramsFilter) => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsCategoryResponse>
   >('security/category-permissions', params);

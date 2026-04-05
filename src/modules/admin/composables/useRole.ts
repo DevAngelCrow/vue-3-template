@@ -11,6 +11,7 @@ import adminServices from '../services/admin.services';
 import { RoleStatus } from '../interfaces/role/role.status.response.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
+import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
 
 export function useRole() {
   const {
@@ -101,6 +102,13 @@ export function useRole() {
       alignHeaders: 'start',
       alignItems: 'start',
     },
+    {
+      field: 'description',
+      header: 'Descripción',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
+    }
   ]);
 
   const role = ref<RoleResponse[] | undefined>([]);
@@ -136,7 +144,7 @@ export function useRole() {
   const filter_permission_name = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
   const globalStatus = ref<RoleStatus[]>([]);
-
+  const categories = ref<CategoryPermissionsResponse[]>([]);
   const getStatus = async () => {
     try {
       startLoading();
@@ -268,7 +276,7 @@ export function useRole() {
         filter: filter_permission_name.value
           ? filter_permission_name.value
           : null,
-        active: 1,
+        active: true,
       };
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
@@ -283,7 +291,22 @@ export function useRole() {
       finishLoading();
     }
   };
-
+  const getCategoryPermissions = async () => {
+    try {
+      startLoading();
+      const filters = {
+        active: true,
+      }
+      const response = await adminServices.getCategoryPermissions(filters);
+      if (response.statusCode === 200) {
+        categories.value = response.data.data;
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      finishLoading();
+    }
+  };
   const validateAlphaInput = (
     value: string | null,
     regex: RegExp = findRegex,
@@ -375,5 +398,7 @@ export function useRole() {
     findPermission,
     getPermissions,
     getRolById,
+    getCategoryPermissions,
+    categories,
   };
 }
