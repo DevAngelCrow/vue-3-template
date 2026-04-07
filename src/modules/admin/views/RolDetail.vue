@@ -143,6 +143,7 @@ const {
   getCategoryPermissions,
   editRole,
   getStatus,
+  permissionsPagination,
 } = roleInstance;
 
 const originalData = ref<unknown>(null);
@@ -192,11 +193,12 @@ const onSubMit = handleSubmit(async values => {
     finishLoading();
   }
 });
-const enableEditMode = async () => {
+const enableEditMode =   () => {
   actionMode.mode = 'edit';
   actionMode.title = 'Editar rol';
   actionMode.isReadonly = false;
-  await getPermissions();
+  permissionsPagination.page = 1;
+  getPermissions();
 };
 const goBack = async () => {
   if (actionMode.mode === 'add') {

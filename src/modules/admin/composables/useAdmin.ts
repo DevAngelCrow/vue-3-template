@@ -429,7 +429,6 @@ export function useAdmin() {
   };
 
   const setRouteItem = (value: RoutesResponse) => {
-    console.log(value, 'values');
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('title', value?.title);

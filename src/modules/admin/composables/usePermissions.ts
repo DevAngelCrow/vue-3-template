@@ -234,7 +234,6 @@ export function usePermission() {
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
     setFieldValue('active', value?.active);
-    console.log('Permission', value);
     setFieldValue('category', value?.category);
   };
 

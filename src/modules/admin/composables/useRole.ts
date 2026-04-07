@@ -286,7 +286,6 @@ export function useRole() {
         id_category_permissions: filter_permission.value.category?.id,
         active: true,
       };
-      console.log(filter);
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
         permissionsList.value = response.data.data;

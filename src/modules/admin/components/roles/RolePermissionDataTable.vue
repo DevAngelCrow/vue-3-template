@@ -133,7 +133,6 @@ const searchPermission = async (value: {
 }) => {
   if (!value) return;
   if (modalState.value === 'view') {
-    console.log('Filtering permissions locally with value:', value);
     let _filteredItems = [];
 
     // Verificar si hay filtros activos
@@ -162,7 +161,6 @@ const searchPermission = async (value: {
 
       // Agregar si cumple AL MENOS UNO de los filtros activos
       if (matchesName || matchesCategory) {
-        console.log('Item matches filter:', item);
         _filteredItems.push(item);
       }
     }
@@ -314,7 +312,6 @@ watch(
   },
 );
 watch(permissionsList, newVal => {
-  console.log('permissionsList updated:', newVal);
   permissionItemsFormated.value = [];
 
   setPermissionsIds(newVal);

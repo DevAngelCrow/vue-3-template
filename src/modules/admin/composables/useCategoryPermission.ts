@@ -201,7 +201,6 @@ export function useCategoryPermission() {
   };
 
   const setCategoryPermissionItem = (value: CategoryPermissionsResponse) => {
-    console.log(value, 'values');
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
