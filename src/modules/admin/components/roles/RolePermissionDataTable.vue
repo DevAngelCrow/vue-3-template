@@ -176,6 +176,7 @@ const searchPermission = async (value: {
 
 const handlePagination = async (page: number) => {
   if (modalState.value === 'view') {
+    permissionsPagination.page = page + 1;
     localPaginationViewMode(page);
     updateSelectAllState();
     return;

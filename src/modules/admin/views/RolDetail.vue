@@ -60,7 +60,7 @@
         <AppInputText
           class="flex-1 min-w-0"
           id="description"
-          label="Descripción"
+          label="Descripción*"
           v-model="description"
           :error-messages="errors.description"
           v-bind="descriptionAttrs"
@@ -96,7 +96,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive, onMounted, provide } from 'vue';
+import { ref, reactive, onMounted, provide, watch } from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -193,12 +193,12 @@ const onSubMit = handleSubmit(async values => {
     finishLoading();
   }
 });
-const enableEditMode =   () => {
+const enableEditMode =  async () => {
   actionMode.mode = 'edit';
   actionMode.title = 'Editar rol';
   actionMode.isReadonly = false;
   permissionsPagination.page = 1;
-  getPermissions();
+  await getPermissions();
 };
 const goBack = async () => {
   if (actionMode.mode === 'add') {
@@ -229,6 +229,9 @@ const goBack = async () => {
   originalData.value = { ...data };
   setRoleItem(data);
 };
+watch(() => permissionsPagination.page, (newValue) => {
+  console.log('permissionsPagination.page changed:', newValue);
+})
 onMounted(async () => {
   try {
     await getPermissions();
