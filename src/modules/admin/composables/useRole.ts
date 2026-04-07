@@ -33,9 +33,9 @@ export function useRole() {
         .max(150, 'El nombre debe tener máximo 150 caracteres'),
       description: yup
         .string()
+        .required('La descripción del rol es requerida')
         .min(5, 'La descripción debe tener al menos 5 caracteres')
-        .max(255, 'La descripción debe tener máximo 255 caracteres')
-        .nullable(),
+        .max(255, 'La descripción debe tener máximo 255 caracteres'),
       status: yup
         .mixed<RoleStatus>()
         .required('El campo del estado del rol es requerido'),
@@ -286,7 +286,6 @@ export function useRole() {
         id_category_permissions: filter_permission.value.category?.id,
         active: true,
       };
-      console.log(filter);
       const response = await adminServices.getPermissions(filter);
       if (response.statusCode === 200) {
         permissionsList.value = response.data.data;

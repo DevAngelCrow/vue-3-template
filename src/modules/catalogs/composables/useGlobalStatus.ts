@@ -184,7 +184,6 @@ export function useGlobalStatus() {
     try {
       startLoading();
       const { id, ...body } = form;
-      console.log('body', body);
       const response = await catalogServices.putGlobalStatus(id!, body);
       if (response.status === 200) {
         getGlobalStatus();

@@ -109,7 +109,6 @@ const openModal = (
       break;
     case 'edit':
       modalState.title = 'Editar Estado Global';
-      console.log('data', data);
       setGlobalStatusItem(data!);
       break;
     case 'delete':
