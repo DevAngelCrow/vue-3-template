@@ -7,7 +7,7 @@
         class="transform animate-ease-in"
         icon="pi pi-pencil"
         label="Editar"
-        @click="enableEditMode"
+        @click="showEditConfirmModal = true"
         severity="primary"
       />
       <Button
@@ -15,7 +15,7 @@
         class="transform animate-ease-in"
         icon="pi pi-save"
         label="Guardar"
-        @click="onSubMit"
+        @click="showSaveConfirmModal = true"
         severity="primary"
       />
       <Button
@@ -93,6 +93,38 @@
         :readonly="actionMode.isReadonly"
       />
     </section>
+
+    <!-- Modal de confirmación para editar -->
+    <AppModal
+      :show="showEditConfirmModal"
+      title="Confirmar para iniciar la edición"
+      titleBtnCancel="Cancelar"
+      titleBtnConfirm="Aceptar"
+      width="30rem"
+      @close-modal="showEditConfirmModal = false"
+      @confirm-modal="confirmEdit"
+    >
+      <div class="p-4 text-center">
+        <p class="text-lg">¿Está seguro que desea iniciar la edición de este rol?</p>
+      </div>
+    </AppModal>
+
+    <!-- Modal de confirmación para guardar -->
+    <AppModal
+      :show="showSaveConfirmModal"
+      title="Confirmar guardado"
+      titleBtnCancel="Cancelar"
+      titleBtnConfirm="Guardar"
+      width="30rem"
+      @close-modal="showSaveConfirmModal = false"
+      @confirm-modal="confirmSave"
+    >
+      <div class="p-4 text-center">
+        <p class="text-lg">
+          ¿Está seguro que desea {{ actionMode.mode === 'add' ? 'crear' : 'guardar los cambios de' }} este rol?
+        </p>
+      </div>
+    </AppModal>
   </div>
 </template>
 <script setup lang="ts">
@@ -150,6 +182,8 @@ const originalData = ref<unknown>(null);
 const { startLoading, finishLoading } = useLoaderStore();
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const statusFiltered = ref<unknown[]>([]);
+const showEditConfirmModal = ref(false);
+const showSaveConfirmModal = ref(false);
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
@@ -163,7 +197,8 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   statusFiltered.value = _filteredItems;
 };
 
-const onSubMit = handleSubmit(async values => {
+const confirmSave = handleSubmit(async values => {
+  showSaveConfirmModal.value = false;
   try {
     startLoading();
     const form: RoleForm = {
@@ -183,9 +218,6 @@ const onSubMit = handleSubmit(async values => {
         await editRole(form);
         goBack();
         break;
-      //   case 'delete':
-      //     success = (await toggleRole(values.id)) ? true : false;
-      //     break;
     }
   } catch (error) {
     console.error(error);
@@ -193,13 +225,16 @@ const onSubMit = handleSubmit(async values => {
     finishLoading();
   }
 });
-const enableEditMode =  async () => {
+
+const confirmEdit = async () => {
+  showEditConfirmModal.value = false;
   actionMode.mode = 'edit';
   actionMode.title = 'Editar rol';
   actionMode.isReadonly = false;
   permissionsPagination.page = 1;
   await getPermissions();
 };
+
 const goBack = async () => {
   if (actionMode.mode === 'add') {
     router.push({ name: 'role' });
