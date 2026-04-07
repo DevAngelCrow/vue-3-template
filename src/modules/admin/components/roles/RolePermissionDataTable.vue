@@ -1,83 +1,41 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
     <div class="flex w-full gap-5 flex-wrap">
-      <AppInputText
-        class="order-1 md:w-[49.5%] sm:w-full"
-        label="Buscar permiso..."
-        v-model="filter_permission.name"
-        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
-      />
-      <AppAutocomplete
-        class="order-2 md:w-[34.5%] sm:w-full"
-        id="category"
-        label="Categoría"
-        v-model="filter_permission.category"
-        option-label="name"
-        :suggestions="filterCategories"
-        dropdown
-        @complete="findAutocomplete"
-      />
-      <Button
-        class="rounded_btn_search"
-        icon="pi pi-search"
-        v-debounce:700.click="() => searchPermission(filter_permission)"
-      />
-      <Button
-        class="rounded_btn_clean"
-        :icon="
-          filter_permission.name.length || filter_permission.category
-            ? 'pi pi-filter-slash'
-            : 'pi pi-filter'
-        "
-        variant="outlined"
-        v-debounce:700.click="cleanSearch"
-        v-tooltip="
-          filter_permission.name.length || filter_permission.category
+      <AppInputText class="order-1 grow md:w-[49.5%]" label="Buscar permiso..." v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)" />
+      <AppAutocomplete class="order-2 md:w-[34.5%] sm:w-full grow" id="category" label="Categoría"
+        v-model="filter_permission.category" option-label="name" :suggestions="filterCategories" dropdown
+        @complete="findAutocomplete" />
+      <div class="flex order-3 grow items-center gap-2">
+        <Button class="rounded_btn_search" icon="pi pi-search"
+          v-debounce:700.click="() => searchPermission(filter_permission)" />
+        <Button class="rounded_btn_clean" :icon="filter_permission.name.length || filter_permission.category
+          ? 'pi pi-filter-slash'
+          : 'pi pi-filter'
+          " variant="outlined" v-debounce:700.click="cleanSearch" v-tooltip.bottom="filter_permission.name.length || filter_permission.category
             ? 'Quitar filtro'
             : 'Escriba para filtrar'
-        "
-      />
-      <div class="rounded_counter">
-        <AppCircularCounter
-          class="item_justify_counter"
-          :selected="selectedPermissionsIds.size"
-          :total="totalPermissions"
-          color="#082f49"
-        />
+            " />
+        <div class="rounded_counter">
+            <AppCircularCounter :selected="selectedPermissionsIds.size"
+            :total="totalPermissions" color="#082f49" size="50px" />
+        </div>
       </div>
     </div>
-
-    <AppDataTable
-      class="w-full"
-      :headers="headerPermissions"
-      :items="permissionItemsFormated"
-      :paginator="true"
-      :per_page="permissionsPagination.per_page"
-      :total_items="permissionsPagination.total_items"
-      :page="permissionsPagination.page"
-      @page-update="handlePagination"
-    >
+    <AppDataTable class="w-full" :headers="headerPermissions" :items="permissionItemsFormated" :paginator="true"
+      :per_page="permissionsPagination.per_page" :total_items="permissionsPagination.total_items"
+      :page="permissionsPagination.page" @page-update="handlePagination">
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
-          <AppCheckBox
-            :readonly="props.readonly"
-            binary
-            @update:model-value="checkAll"
-            v-model="selectAll"
-          >
+          <AppCheckBox :readonly="props.readonly" binary @update:model-value="checkAll" v-model="selectAll">
           </AppCheckBox>
           <span>Seleccion</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
         <div class="flex justify-center">
-          <AppCheckBox
-            :readonly="props.readonly"
-            binary
-            :model-value="isPermissionSelected(data.id)"
-            :id="`${index}`"
-            @update:model-value="togglePermission(data.id, $event)"
-          />
+          <AppCheckBox :readonly="props.readonly" binary :model-value="isPermissionSelected(data.id)" :id="`${index}`"
+            @update:model-value="togglePermission(data.id, $event)" />
         </div>
       </template>
     </AppDataTable>
@@ -122,7 +80,7 @@ const permissionItemsFormated = ref<
     state: boolean;
   }[]
 >([]);
-let totalPermissions: number = 0;
+const totalPermissions = ref<number>(0);
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
@@ -152,7 +110,7 @@ const searchPermission = async (value: {
       const matchesName =
         hasNameFilter &&
         item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
-          0;
+        0;
 
       // Verificar coincidencia con categoría
       const matchesCategory =
@@ -243,12 +201,6 @@ const setPermissionsIds = (
 };
 
 const closeModal = () => {
-  // permissionItemsFormated.value = permissionsList.value.map(item => {
-  //   return {
-  //     ...item,
-  //     state: false,
-  //   };
-  // });
   selectedPermissionsIds.value.clear();
   if (permissionsPagination.page > 1) {
     permissionsPagination.page = 1;
@@ -263,7 +215,6 @@ const closeModal = () => {
     getPermissions();
   }
   cleanSearch();
-  //emit('close-modal');
 };
 
 const cleanSearch = () => {
@@ -273,12 +224,13 @@ const cleanSearch = () => {
   };
   if (modalState.value === 'view') {
     permissionItemsFormated.value = [...permissionsItemsLocal.value];
-    totalPermissions = permissionsItemsLocal.value.length;
-    permissionsPagination.total_items = totalPermissions;
+    totalPermissions.value = permissionsItemsLocal.value.length;
+    permissionsPagination.total_items = totalPermissions.value;
     localPaginationViewMode(0);
     return;
   }
   getPermissions();
+  totalPermissions.value = permissionsPagination.total_items;
 };
 const localPaginationViewMode = (page: number, find?: boolean) => {
   let permissionsTemporalItems = [...permissionsItemsLocal.value];
@@ -320,8 +272,9 @@ watch(permissionsList, newVal => {
   if (modalState.value === 'view') {
     permissionsItemsLocal.value = [...permissionItemsFormated.value];
     localPaginationViewMode(0);
-    totalPermissions = permissionsItemsLocal.value.length;
+    totalPermissions.value = permissionsItemsLocal.value.length;
   }
+  totalPermissions.value = permissionsPagination.total_items;
 });
 watch(
   () => permissions_ids.value,
@@ -337,7 +290,7 @@ watch(
   { immediate: true, deep: true },
 );
 onMounted(async () => {
-  totalPermissions = permissionsPagination.total_items;
+  totalPermissions.value = permissionsPagination.total_items;
   setPermissionsIds(permissionsList.value);
   // El watcher de permissions_ids maneja la sincronización de checkboxes automáticamente
   updateSelectAllState();
@@ -351,8 +304,8 @@ defineExpose({
 </script>
 <style scoped>
 .rounded_counter {
-  @apply min-w-[100px] max-w-[100px] max-h-[50px] order-4 flex justify-end;
-}
+  @apply flex grow justify-end items-center;
+} 
 
 .item_justify_counter {
   @apply flex justify-end;
@@ -360,61 +313,44 @@ defineExpose({
 
 @media (min-width: 595px) {
   .rounded_btn_search {
-    @apply min-w-[46px];
-    @apply max-w-[46px];
-    @apply grow;
-    @apply order-2;
-    /*@apply md:order-2;*/
     @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply min-w-[46px];
-    @apply max-w-[46px];
-    /*@apply xs:w-[6%];*/
-    @apply grow;
-    /*@apply order-4;*/
-    @apply order-3;
     @apply rounded-full;
   }
 
-  .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-4 flex !justify-end;
-  }
+  /* .rounded_counter {
+    @apply min-w-[100px] max-w-[100px] max-h-[45px] flex !justify-end;
+  } */
 }
 
 @media (min-width: 452px) and (max-width: 594px) {
   .rounded_btn_search {
-    @apply grow order-2;
-    @apply min-w-[46px];
-    @apply max-w-[46px];
     @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply grow order-4;
-    @apply min-w-[46px];
+    @apply rounded-full
   }
 
-  .rounded_counter {
+  /* .rounded_counter {
     @apply min-w-[100px] max-w-[100px] max-h-[45px] order-3 flex justify-end;
-  }
+  } */
 }
 
 @media (min-width: 200px) and (max-width: 451px) {
   .rounded_btn_search {
-    @apply grow order-3;
-    @apply min-w-[46px];
+    @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply grow order-4;
-    @apply min-w-[46px];
+    @apply rounded-full;
   }
 
-  .rounded_counter {
+  /* .rounded_counter {
     @apply min-w-[100px] max-w-[100px] order-2 flex justify-end;
-  }
+  } */
 }
 
 @media (max-width: 309px) {

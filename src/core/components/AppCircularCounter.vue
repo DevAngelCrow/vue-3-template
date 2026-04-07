@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full h-full flex justify-center items-center">
-    <div class="relative" :style="{ width: '50%', aspectRatio: '1' }">
+  <div class="flex" :style="{ width: size, height: size }">
+    <div class="relative w-full h-full">
       <svg class="w-full h-full" viewBox="0 0 200 200">
         <circle
           cx="100"
@@ -8,7 +8,7 @@
           r="90"
           fill="none"
           stroke="#e5e7eb"
-          stroke-width="20"
+          :stroke-width="strokeWidth"
         />
 
         <circle
@@ -17,7 +17,7 @@
           r="90"
           fill="none"
           :stroke="resolvedColor"
-          stroke-width="20"
+          :stroke-width="strokeWidth"
           :stroke-dasharray="circumference"
           :stroke-dashoffset="strokeDashoffset"
           stroke-linecap="round"
@@ -35,28 +35,31 @@
         >
           <div class="flex flex-col w-[75%] justify-center">
             <span
-              class="text-[9px] tracking-tighter font-semibold border-b text-center"
+              :class="textSizeClass"
+              class="tracking-tighter font-semibold border-b text-center"
               >{{ selected }}</span
             >
             <span
-              class="text-[9px] tracking-tighter font-semibold text-center"
+              :class="textSizeClass"
+              class="tracking-tighter font-semibold text-center"
               >{{ total }}</span
             >
           </div>
         </div>
       </div>
     </div>
-    <!-- <span class="lg:hidden text-[10px] font-semibold">{{ selected }} / {{ total }}</span> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const { total, selected, color } = defineProps<{
+const { total, selected, color, size = '50px', strokeWidth = 20 } = defineProps<{
   total: number;
   selected: number;
   color?: string;
+  size?: string;
+  strokeWidth?: number;
 }>();
 
 const radius = 90;
@@ -76,6 +79,14 @@ const resolvedColor = computed(() => {
   const varName = `--color-${col}`;
   const value = style.getPropertyValue(varName).trim();
   return value ? `rgb(${value})` : '#000000';
+});
+
+const textSizeClass = computed(() => {
+  const sizeValue = parseInt(size);
+  if (sizeValue <= 40) return 'text-[8px]';
+  if (sizeValue <= 60) return 'text-[9px]';
+  if (sizeValue <= 80) return 'text-[10px]';
+  return 'text-[12px]';
 });
 </script>
 
