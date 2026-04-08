@@ -35,7 +35,15 @@
         outlined
       />
     </section>
-    <section id="form">
+    <section
+      id="form"
+      class="flex justify-center items-center w-full rounded-lg border-2 border-primary p-5 flex-col gap-5"
+    >
+      <div class="w-full flex flex-wrap gap-5">
+        <h4 class="gap-3 flex justify-center items-center !font-bold">
+          <i class="pi pi-user !font-bold"></i>Informacion del rol
+        </h4>
+      </div>
       <div class="w-full flex flex-wrap gap-5">
         <AppInputText
           class="flex-1 min-w-0"
@@ -83,7 +91,15 @@
         />
       </div>
     </section>
-    <section id="permissions" class="w-full">
+    <section
+      id="permissions"
+      class="w-full flex justify-center items-center rounded-lg border-2 border-primary p-5 flex-col gap-5"
+    >
+      <div class="w-full flex flex-wrap gap-5">
+        <h4 class="gap-3 flex justify-center items-center !font-bold">
+          <i class="pi pi-key !font-bold"></i>Permisos
+        </h4>
+      </div>
       <RolePermissionDataTable
         :modal-state="actionMode.mode"
         @update:selected-permissions-ids="
@@ -105,7 +121,9 @@
       @confirm-modal="confirmEdit"
     >
       <div class="p-4 text-center">
-        <p class="text-lg">¿Está seguro que desea iniciar la edición de este rol?</p>
+        <p class="text-lg">
+          ¿Está seguro que desea iniciar la edición de este rol?
+        </p>
       </div>
     </AppModal>
 
@@ -121,7 +139,9 @@
     >
       <div class="p-4 text-center">
         <p class="text-lg">
-          ¿Está seguro que desea {{ actionMode.mode === 'add' ? 'crear' : 'guardar los cambios de' }} este rol?
+          ¿Está seguro que desea
+          {{ actionMode.mode === 'add' ? 'crear' : 'guardar los cambios de' }}
+          este rol?
         </p>
       </div>
     </AppModal>
@@ -264,9 +284,12 @@ const goBack = async () => {
   originalData.value = { ...data };
   setRoleItem(data);
 };
-watch(() => permissionsPagination.page, (newValue) => {
-  console.log('permissionsPagination.page changed:', newValue);
-})
+watch(
+  () => permissionsPagination.page,
+  newValue => {
+    console.log('permissionsPagination.page changed:', newValue);
+  },
+);
 onMounted(async () => {
   try {
     await getPermissions();

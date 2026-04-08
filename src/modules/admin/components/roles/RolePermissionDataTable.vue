@@ -1,14 +1,22 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex w-full gap-5 flex-wrap">
+    <div class="flex w-full flex-wrap items-center gap-5">
       <AppInputText
-        class="order-1 md:w-[49.5%] sm:w-full"
+        class="order-1 flex-1 grow"
         label="Buscar permiso..."
         v-model="filter_permission.name"
         v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
       />
+      <AppSelect
+        class="order-2 flex-1 grow"
+        label="Filtro"
+        v-model="option"
+        :options="options"
+        size="small"
+        :disabled="modalState === 'view'"
+      />
       <AppAutocomplete
-        class="order-2 md:w-[34.5%] sm:w-full"
+        class="order-3 flex-1 grow"
         id="category"
         label="Categoría"
         v-model="filter_permission.category"
@@ -17,36 +25,39 @@
         dropdown
         @complete="findAutocomplete"
       />
-      <Button
-        class="rounded_btn_search"
-        icon="pi pi-search"
-        v-debounce:700.click="() => searchPermission(filter_permission)"
-      />
-      <Button
-        class="rounded_btn_clean"
-        :icon="
-          filter_permission.name.length || filter_permission.category
-            ? 'pi pi-filter-slash'
-            : 'pi pi-filter'
-        "
-        variant="outlined"
-        v-debounce:700.click="cleanSearch"
-        v-tooltip="
-          filter_permission.name.length || filter_permission.category
-            ? 'Quitar filtro'
-            : 'Escriba para filtrar'
-        "
-      />
-      <div class="rounded_counter">
-        <AppCircularCounter
-          class="item_justify_counter"
-          :selected="selectedPermissionsIds.size"
-          :total="totalPermissions"
-          color="#082f49"
+      <div class="flex order-4 flex-1 grow items-center gap-2">
+        <Button
+          class="rounded_btn_search"
+          icon="pi pi-search"
+          v-debounce:700.click="() => searchPermission(filter_permission)"
         />
+        <Button
+          class="rounded_btn_clean"
+          :icon="
+            filter_permission.name.length || filter_permission.category
+              ? 'pi pi-filter-slash'
+              : 'pi pi-filter'
+          "
+          variant="outlined"
+          v-debounce:700.click="cleanSearch"
+          v-tooltip.bottom="
+            filter_permission.name.length || filter_permission.category
+              ? 'Quitar filtro'
+              : 'Escriba para filtrar'
+          "
+        />
+        <div class="rounded_counter">
+          <AppCircularCounter
+            :selected="selectedPermissionsIds.size"
+            :total="totalPermissions"
+            color="#082f49"
+            size="50px"
+            v-tooltip.left="{ value: tooltipContent, escape: false }"
+          />
+          <span class="text-sm">Permisos seleccionados</span>
+        </div>
       </div>
     </div>
-
     <AppDataTable
       class="w-full"
       :headers="headerPermissions"
@@ -84,7 +95,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
+import {
+  computed,
+  defineComponent,
+  inject,
+  onMounted,
+  ref,
+  toRef,
+  watch,
+} from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
 
 import { useRole } from '../../composables/useRole';
@@ -122,11 +141,12 @@ const permissionItemsFormated = ref<
     state: boolean;
   }[]
 >([]);
-let totalPermissions: number = 0;
+const totalPermissions = ref<number>(0);
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
-
+const options = ref<string[]>(['marcados', 'no marcados']);
+const option = ref<string>();
 const searchPermission = async (value: {
   name: string;
   category?: { id: number; name: string; description: string };
@@ -243,12 +263,6 @@ const setPermissionsIds = (
 };
 
 const closeModal = () => {
-  // permissionItemsFormated.value = permissionsList.value.map(item => {
-  //   return {
-  //     ...item,
-  //     state: false,
-  //   };
-  // });
   selectedPermissionsIds.value.clear();
   if (permissionsPagination.page > 1) {
     permissionsPagination.page = 1;
@@ -263,7 +277,6 @@ const closeModal = () => {
     getPermissions();
   }
   cleanSearch();
-  //emit('close-modal');
 };
 
 const cleanSearch = () => {
@@ -273,12 +286,13 @@ const cleanSearch = () => {
   };
   if (modalState.value === 'view') {
     permissionItemsFormated.value = [...permissionsItemsLocal.value];
-    totalPermissions = permissionsItemsLocal.value.length;
-    permissionsPagination.total_items = totalPermissions;
+    totalPermissions.value = permissionsItemsLocal.value.length;
+    permissionsPagination.total_items = totalPermissions.value;
     localPaginationViewMode(0);
     return;
   }
   getPermissions();
+  totalPermissions.value = permissionsPagination.total_items;
 };
 const localPaginationViewMode = (page: number, find?: boolean) => {
   let permissionsTemporalItems = [...permissionsItemsLocal.value];
@@ -306,6 +320,13 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   }
   filterCategories.value = _filteredItems;
 };
+const tooltipContent = computed(() => {
+  return `<div style='text-align: center; display: flex; flex-direction: column; gap: 5px; font-weight: 200;'>
+    <div><strong>Seleccionados</strong></div>
+    <span style='text-align: center; border-top: 1px solid;'></span>
+    <div><strong>Disponibles</strong></div>
+  </div>`;
+});
 watch(
   () => selectedPermissionsIds.value.size,
   () => {
@@ -320,8 +341,9 @@ watch(permissionsList, newVal => {
   if (modalState.value === 'view') {
     permissionsItemsLocal.value = [...permissionItemsFormated.value];
     localPaginationViewMode(0);
-    totalPermissions = permissionsItemsLocal.value.length;
+    totalPermissions.value = permissionsItemsLocal.value.length;
   }
+  totalPermissions.value = permissionsPagination.total_items;
 });
 watch(
   () => permissions_ids.value,
@@ -337,7 +359,7 @@ watch(
   { immediate: true, deep: true },
 );
 onMounted(async () => {
-  totalPermissions = permissionsPagination.total_items;
+  totalPermissions.value = permissionsPagination.total_items;
   setPermissionsIds(permissionsList.value);
   // El watcher de permissions_ids maneja la sincronización de checkboxes automáticamente
   updateSelectAllState();
@@ -351,7 +373,7 @@ defineExpose({
 </script>
 <style scoped>
 .rounded_counter {
-  @apply min-w-[100px] max-w-[100px] max-h-[50px] order-4 flex justify-end;
+  @apply flex grow justify-end items-center flex-col;
 }
 
 .item_justify_counter {
@@ -360,61 +382,44 @@ defineExpose({
 
 @media (min-width: 595px) {
   .rounded_btn_search {
-    @apply min-w-[46px];
-    @apply max-w-[46px];
-    @apply grow;
-    @apply order-2;
-    /*@apply md:order-2;*/
     @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply min-w-[46px];
-    @apply max-w-[46px];
-    /*@apply xs:w-[6%];*/
-    @apply grow;
-    /*@apply order-4;*/
-    @apply order-3;
     @apply rounded-full;
   }
 
-  .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-4 flex !justify-end;
-  }
+  /* .rounded_counter {
+    @apply min-w-[100px] max-w-[100px] max-h-[45px] flex !justify-end;
+  } */
 }
 
 @media (min-width: 452px) and (max-width: 594px) {
   .rounded_btn_search {
-    @apply grow order-2;
-    @apply min-w-[46px];
-    @apply max-w-[46px];
     @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply grow order-4;
-    @apply min-w-[46px];
+    @apply rounded-full;
   }
 
-  .rounded_counter {
+  /* .rounded_counter {
     @apply min-w-[100px] max-w-[100px] max-h-[45px] order-3 flex justify-end;
-  }
+  } */
 }
 
 @media (min-width: 200px) and (max-width: 451px) {
   .rounded_btn_search {
-    @apply grow order-3;
-    @apply min-w-[46px];
+    @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply grow order-4;
-    @apply min-w-[46px];
+    @apply rounded-full;
   }
 
-  .rounded_counter {
+  /* .rounded_counter {
     @apply min-w-[100px] max-w-[100px] order-2 flex justify-end;
-  }
+  } */
 }
 
 @media (max-width: 309px) {
