@@ -13,6 +13,7 @@
         v-model="option"
         :options="options"
         size="small"
+        :disabled="modalState === 'view'"
       />
       <AppAutocomplete
         class="order-3 flex-1 grow"
@@ -53,6 +54,7 @@
             size="50px"
             v-tooltip.left="{ value: tooltipContent, escape: false }"
           />
+          <span class="text-sm">Permisos seleccionados</span>
         </div>
       </div>
     </div>
@@ -371,7 +373,7 @@ defineExpose({
 </script>
 <style scoped>
 .rounded_counter {
-  @apply flex grow justify-end items-center;
+  @apply flex grow justify-end items-center flex-col;
 }
 
 .item_justify_counter {
