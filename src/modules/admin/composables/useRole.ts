@@ -89,11 +89,11 @@ export function useRole() {
   const headerPermissions = ref<TableHeaders[]>([
     {
       field: 'state',
-      header: 'Seleccion',
+      header: `Seleccion`,
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
-      width: 10,
+      width: 15,
     },
     {
       field: 'name',
@@ -119,7 +119,7 @@ export function useRole() {
   });
   const permissionsPagination = reactive({
     page: 1,
-    per_page: 5,
+    per_page: 10,
     total_items: 0,
   });
   const permissionsList = ref<

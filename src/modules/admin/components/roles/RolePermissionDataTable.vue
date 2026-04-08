@@ -1,94 +1,52 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
     <div class="flex w-full flex-wrap items-center gap-5">
-      <AppInputText
-        class="order-1 flex-1 grow"
-        label="Buscar permiso..."
-        v-model="filter_permission.name"
-        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
-      />
-      <AppSelect
+      <AppInputText class="order-1 flex-1 grow" label="Buscar permiso..." v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)" />
+      <!-- <AppSelect
         class="order-2 flex-1 grow"
-        label="Filtro"
+        label="Mostrar"
         v-model="option"
         :options="options"
         size="small"
         :disabled="modalState === 'view'"
-      />
-      <AppAutocomplete
-        class="order-3 flex-1 grow"
-        id="category"
-        label="Categoría"
-        v-model="filter_permission.category"
-        option-label="name"
-        :suggestions="filterCategories"
-        dropdown
-        @complete="findAutocomplete"
-      />
-      <div class="flex order-4 flex-1 grow items-center gap-2">
-        <Button
-          class="rounded_btn_search"
-          icon="pi pi-search"
-          v-debounce:700.click="() => searchPermission(filter_permission)"
-        />
-        <Button
-          class="rounded_btn_clean"
-          :icon="
-            filter_permission.name.length || filter_permission.category
-              ? 'pi pi-filter-slash'
-              : 'pi pi-filter'
-          "
-          variant="outlined"
-          v-debounce:700.click="cleanSearch"
-          v-tooltip.bottom="
-            filter_permission.name.length || filter_permission.category
+      /> -->
+      <AppAutocomplete class="order-2 flex-1 grow" id="category" label="Categoría" v-model="filter_permission.category"
+        option-label="name" :suggestions="filterCategories" dropdown @complete="findAutocomplete" />
+      <div class="flex order-3 flex-1 grow items-center gap-2">
+        <Button class="rounded_btn_search" icon="pi pi-search"
+          v-debounce:700.click="() => searchPermission(filter_permission)" />
+        <Button class="rounded_btn_clean" :icon="filter_permission.name.length || filter_permission.category
+            ? 'pi pi-filter-slash'
+            : 'pi pi-filter'
+          " variant="outlined" v-debounce:700.click="cleanSearch" v-tooltip.bottom="filter_permission.name.length || filter_permission.category
               ? 'Quitar filtro'
               : 'Escriba para filtrar'
-          "
-        />
-        <div class="rounded_counter">
-          <AppCircularCounter
-            :selected="selectedPermissionsIds.size"
-            :total="totalPermissions"
-            color="#082f49"
-            size="50px"
-            v-tooltip.left="{ value: tooltipContent, escape: false }"
-          />
-          <span class="text-sm">Permisos seleccionados</span>
+            " />
+      </div>
+      <div class="rounded_counter flex-1 order-4 opacity-65 ">
+        <div class="flex justify-end items-center flex-col ">
+          <AppCircularCounter :selected="selectedPermissionsIds.size" :total="totalPermissions" color="#082f49"
+          size="50px" v-tooltip.left="{ value: tooltipContent, escape: false }" />
+        <span class="text-sm">Seleccionados</span>
         </div>
       </div>
     </div>
-    <AppDataTable
-      class="w-full"
-      :headers="headerPermissions"
-      :items="permissionItemsFormated"
-      :paginator="true"
-      :per_page="permissionsPagination.per_page"
-      :total_items="permissionsPagination.total_items"
-      :page="permissionsPagination.page"
-      @page-update="handlePagination"
-    >
+    <AppDataTable class="w-full" :headers="headerPermissions" :items="permissionItemsFormated" :paginator="true"
+      :show-per-page-options="true" :per-page-options="[10, 20, 50, 100]" :per_page="permissionsPagination.per_page"
+      :total_items="permissionsPagination.total_items" :page="permissionsPagination.page"
+      @page-update="handlePagination" @per-page-update="handlePerPagePagination">
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
-          <AppCheckBox
-            :readonly="props.readonly"
-            binary
-            @update:model-value="checkAll"
-            v-model="selectAll"
-          >
+          <AppCheckBox :readonly="props.readonly" binary @update:model-value="checkAll" v-model="selectAll">
           </AppCheckBox>
-          <span>Seleccion</span>
+          <span>{{ `Seleccion (${permissionsPagination.per_page})` }}</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
         <div class="flex justify-center">
-          <AppCheckBox
-            :readonly="props.readonly"
-            binary
-            :model-value="isPermissionSelected(data.id)"
-            :id="`${index}`"
-            @update:model-value="togglePermission(data.id, $event)"
-          />
+          <AppCheckBox :readonly="props.readonly" binary :model-value="isPermissionSelected(data.id)" :id="`${index}`"
+            @update:model-value="togglePermission(data.id, $event)" />
         </div>
       </template>
     </AppDataTable>
@@ -172,7 +130,7 @@ const searchPermission = async (value: {
       const matchesName =
         hasNameFilter &&
         item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
-          0;
+        0;
 
       // Verificar coincidencia con categoría
       const matchesCategory =
@@ -208,7 +166,21 @@ const handlePagination = async (page: number) => {
   await getPermissions();
   updateSelectAllState();
 };
-
+const handlePerPagePagination = async (perPage: number) => {
+  if (modalState.value === 'view') {
+    permissionsPagination.per_page = perPage;
+    localPaginationViewMode(0);
+    updateSelectAllState();
+    return;
+  }
+  if (perPage === permissionsPagination.per_page) {
+    return;
+  }
+  permissionsPagination.per_page = perPage;
+  permissionsPagination.page = 1;
+  await getPermissions();
+  updateSelectAllState();
+}
 const isPermissionSelected = (permissionId: number) => {
   return selectedPermissionsIds.value.has(permissionId);
 };
@@ -373,7 +345,7 @@ defineExpose({
 </script>
 <style scoped>
 .rounded_counter {
-  @apply flex grow justify-end items-center flex-col;
+  @apply flex justify-end items-center;
 }
 
 .item_justify_counter {
