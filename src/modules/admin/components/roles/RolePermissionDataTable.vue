@@ -103,8 +103,6 @@ const totalPermissions = ref<number>(0);
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
-const options = ref<string[]>(['marcados', 'no marcados']);
-const option = ref<string>();
 const searchPermission = async (value: {
   name: string;
   category?: { id: number; name: string; description: string };

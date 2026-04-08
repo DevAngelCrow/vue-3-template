@@ -109,6 +109,13 @@ export function useRole() {
       alignHeaders: 'start',
       alignItems: 'start',
     },
+    {
+      field: 'category.name',
+      header: 'Categoría',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
   ]);
 
   const role = ref<RoleResponse[] | undefined>([]);
@@ -264,7 +271,7 @@ export function useRole() {
         permissionsList.value = response.data.permissions
           ? response.data.permissions
           : [];
-        permissionsPagination.per_page = 5;
+        permissionsPagination.per_page = 10;
         permissionsPagination.total_items = response.data.permissions.length;
       }
       return response;
