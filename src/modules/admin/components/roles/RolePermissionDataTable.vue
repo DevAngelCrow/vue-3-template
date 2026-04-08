@@ -40,7 +40,7 @@
         <div class="flex justify-center flex-row">
           <AppCheckBox :readonly="props.readonly" binary @update:model-value="checkAll" v-model="selectAll">
           </AppCheckBox>
-          <span>{{ `Seleccion (${permissionsPagination.per_page})` }}</span>
+          <span>{{ `Selección (${allSelectionsPerPage})` }}</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
@@ -296,6 +296,12 @@ const tooltipContent = computed(() => {
     <span style='text-align: center; border-top: 1px solid;'></span>
     <div><strong>Disponibles</strong></div>
   </div>`;
+});
+const allSelectionsPerPage = computed(() => {
+  if(permissionItemsFormated.value.length < permissionsPagination.per_page) {
+    return permissionItemsFormated.value.length;
+  }
+  return permissionsPagination.per_page;
 });
 watch(
   () => selectedPermissionsIds.value.size,
