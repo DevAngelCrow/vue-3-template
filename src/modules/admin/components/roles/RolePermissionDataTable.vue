@@ -1,48 +1,107 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex w-full gap-5 flex-wrap">
-      <AppInputText class="order-1 grow md:w-[49.5%]" label="Buscar permiso..." v-model="filter_permission.name"
-        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)" />
-      <AppAutocomplete class="order-2 md:w-[34.5%] sm:w-full grow" id="category" label="Categoría"
-        v-model="filter_permission.category" option-label="name" :suggestions="filterCategories" dropdown
-        @complete="findAutocomplete" />
-      <div class="flex order-3 grow items-center gap-2">
-        <Button class="rounded_btn_search" icon="pi pi-search"
-          v-debounce:700.click="() => searchPermission(filter_permission)" />
-        <Button class="rounded_btn_clean" :icon="filter_permission.name.length || filter_permission.category
-          ? 'pi pi-filter-slash'
-          : 'pi pi-filter'
-          " variant="outlined" v-debounce:700.click="cleanSearch" v-tooltip.bottom="filter_permission.name.length || filter_permission.category
-            ? 'Quitar filtro'
-            : 'Escriba para filtrar'
-            " />
+    <div class="flex w-full flex-wrap items-center gap-5">
+      <AppInputText
+        class="order-1 flex-1 grow"
+        label="Buscar permiso..."
+        v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
+      />
+      <AppSelect
+        class="order-2 flex-1 grow"
+        label="Filtro"
+        v-model="option"
+        :options="options"
+        size="small"
+      />
+      <AppAutocomplete
+        class="order-3 flex-1 grow"
+        id="category"
+        label="Categoría"
+        v-model="filter_permission.category"
+        option-label="name"
+        :suggestions="filterCategories"
+        dropdown
+        @complete="findAutocomplete"
+      />
+      <div class="flex order-4 flex-1 grow items-center gap-2">
+        <Button
+          class="rounded_btn_search"
+          icon="pi pi-search"
+          v-debounce:700.click="() => searchPermission(filter_permission)"
+        />
+        <Button
+          class="rounded_btn_clean"
+          :icon="
+            filter_permission.name.length || filter_permission.category
+              ? 'pi pi-filter-slash'
+              : 'pi pi-filter'
+          "
+          variant="outlined"
+          v-debounce:700.click="cleanSearch"
+          v-tooltip.bottom="
+            filter_permission.name.length || filter_permission.category
+              ? 'Quitar filtro'
+              : 'Escriba para filtrar'
+          "
+        />
         <div class="rounded_counter">
-            <AppCircularCounter :selected="selectedPermissionsIds.size"
-            :total="totalPermissions" color="#082f49" size="50px" />
+          <AppCircularCounter
+            :selected="selectedPermissionsIds.size"
+            :total="totalPermissions"
+            color="#082f49"
+            size="50px"
+            v-tooltip.left="{ value: tooltipContent, escape: false }"
+          />
         </div>
       </div>
     </div>
-    <AppDataTable class="w-full" :headers="headerPermissions" :items="permissionItemsFormated" :paginator="true"
-      :per_page="permissionsPagination.per_page" :total_items="permissionsPagination.total_items"
-      :page="permissionsPagination.page" @page-update="handlePagination">
+    <AppDataTable
+      class="w-full"
+      :headers="headerPermissions"
+      :items="permissionItemsFormated"
+      :paginator="true"
+      :per_page="permissionsPagination.per_page"
+      :total_items="permissionsPagination.total_items"
+      :page="permissionsPagination.page"
+      @page-update="handlePagination"
+    >
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
-          <AppCheckBox :readonly="props.readonly" binary @update:model-value="checkAll" v-model="selectAll">
+          <AppCheckBox
+            :readonly="props.readonly"
+            binary
+            @update:model-value="checkAll"
+            v-model="selectAll"
+          >
           </AppCheckBox>
           <span>Seleccion</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
         <div class="flex justify-center">
-          <AppCheckBox :readonly="props.readonly" binary :model-value="isPermissionSelected(data.id)" :id="`${index}`"
-            @update:model-value="togglePermission(data.id, $event)" />
+          <AppCheckBox
+            :readonly="props.readonly"
+            binary
+            :model-value="isPermissionSelected(data.id)"
+            :id="`${index}`"
+            @update:model-value="togglePermission(data.id, $event)"
+          />
         </div>
       </template>
     </AppDataTable>
   </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
+import {
+  computed,
+  defineComponent,
+  inject,
+  onMounted,
+  ref,
+  toRef,
+  watch,
+} from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
 
 import { useRole } from '../../composables/useRole';
@@ -84,7 +143,8 @@ const totalPermissions = ref<number>(0);
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
-
+const options = ref<string[]>(['marcados', 'no marcados']);
+const option = ref<string>();
 const searchPermission = async (value: {
   name: string;
   category?: { id: number; name: string; description: string };
@@ -110,7 +170,7 @@ const searchPermission = async (value: {
       const matchesName =
         hasNameFilter &&
         item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
-        0;
+          0;
 
       // Verificar coincidencia con categoría
       const matchesCategory =
@@ -258,6 +318,13 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   }
   filterCategories.value = _filteredItems;
 };
+const tooltipContent = computed(() => {
+  return `<div style='text-align: center; display: flex; flex-direction: column; gap: 5px; font-weight: 200;'>
+    <div><strong>Seleccionados</strong></div>
+    <span style='text-align: center; border-top: 1px solid;'></span>
+    <div><strong>Disponibles</strong></div>
+  </div>`;
+});
 watch(
   () => selectedPermissionsIds.value.size,
   () => {
@@ -305,7 +372,7 @@ defineExpose({
 <style scoped>
 .rounded_counter {
   @apply flex grow justify-end items-center;
-} 
+}
 
 .item_justify_counter {
   @apply flex justify-end;
@@ -331,7 +398,7 @@ defineExpose({
   }
 
   .rounded_btn_clean {
-    @apply rounded-full
+    @apply rounded-full;
   }
 
   /* .rounded_counter {
