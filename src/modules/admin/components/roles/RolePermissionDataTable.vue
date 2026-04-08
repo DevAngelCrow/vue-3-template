@@ -72,7 +72,7 @@ type RoleType = ReturnType<typeof useRole>;
 const rol = inject<RoleType>('useRole')!;
 
 const props = defineProps<{
-  modalState: 'add' | 'view' | 'edit' | 'delete' | 'closed';
+  modalState?: 'add' | 'view' | 'edit' | 'delete' | 'closed';
   readonly: boolean;
 }>();
 const modalState = toRef(props, 'modalState');
