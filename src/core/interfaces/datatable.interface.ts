@@ -20,6 +20,8 @@ interface PaginatorOff<T> extends BaseTableProps<T> {
   total_items?: number;
   page?: number;
   total_pages?: number;
+  showPerPageOptions?: boolean;
+  perPageOptions?: number[];
 }
 
 interface PaginatorOn<T> extends BaseTableProps<T> {
@@ -28,6 +30,8 @@ interface PaginatorOn<T> extends BaseTableProps<T> {
   total_items: number;
   page: number;
   total_pages?: number;
+  showPerPageOptions?: boolean;
+  perPageOptions?: number[];
 }
 
 export type TableProps<T> = PaginatorOff<T> | PaginatorOn<T>;

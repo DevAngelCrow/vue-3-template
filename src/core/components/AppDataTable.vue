@@ -17,8 +17,8 @@
         </template>
       </Column>
       <template #footer>
-        <AppPaginator :rows="per_page" :total-records="total_items" v-if="paginator" @page-update="updatePage"
-          :first="(page - 1) * per_page" />
+        <AppPaginator :rows="per_page" :total-records="total_items" v-if="paginator" @page-update="updatePage" @per-page-update="perPageUpdate"
+          :first="(page - 1) * per_page" :rowsPerPageOptions="perPageOptions" :showPerPageOptions="showPerPageOptions" />
       </template>
     </DataTable>
   </div>
@@ -37,16 +37,18 @@ defineOptions({ name: 'AppDataTable' });
 const {
   headers = [],
   items = [],
-  per_page = 1,
+  per_page = 10,
   total_items = 0,
   loading = false,
   loadingIcon = 'pi pi-spin pi-spinner',
   rowHover = true,
   paginator = false,
   page = 1,
+  showPerPageOptions = false,
+  perPageOptions = [10, 20, 50, 100],
 } = defineProps<TableProps<T>>();
 
-const emit = defineEmits(['pageUpdate']);
+const emit = defineEmits(['pageUpdate', 'perPageUpdate']);
 
 const getNestedValue = <T extends Record<string, any>>(
   object: T,
@@ -109,6 +111,9 @@ const txtAlignHeaders = (value: TableHeaders) => {
 
 const updatePage = (value: number) => {
   emit('pageUpdate', value);
+};
+const perPageUpdate = (value: number) => {
+  emit('perPageUpdate', value);
 };
 </script>
 <style scoped></style>

@@ -163,13 +163,12 @@ provide('useRole', roleInstance);
 const route = useRoute();
 const router = useRouter();
 const actionMode = reactive<{
-  mode: 'add' | 'view' | 'edit';
+  mode?: 'add' | 'view' | 'edit';
   title: string;
   description: string;
   isReadonly: boolean;
   selectedItem: null | number;
 }>({
-  mode: 'view',
   title: 'Crear nuevo rol',
   description: '',
   isReadonly: false,
@@ -320,7 +319,7 @@ onMounted(async () => {
       return;
     }
     actionMode.mode = 'add';
-    actionMode.title = 'Agregar rol';
+    actionMode.title = 'Crear nuevo rol';
     if (actionMode.mode === 'add') {
       status.value = globalStatus.value.find(item => {
         return (
