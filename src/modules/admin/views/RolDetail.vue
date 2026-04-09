@@ -1,10 +1,10 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full flex gap-3 flex-col">
     <AppTitle :title="actionMode.title" />
-    <section id="options" class="w-full flex justify-end gap-2">
+    <section id="options" class="w-full flex justify-center md:justify-end gap-2 flex-wrap">
       <Button
         v-if="actionMode.mode === 'view'"
-        class="transform animate-ease-in"
+        class="transform animate-ease-in min-w-25 grow md:grow-0"
         icon="pi pi-pencil"
         label="Editar"
         @click="showEditConfirmModal = true"
@@ -12,7 +12,7 @@
       />
       <Button
         v-if="actionMode.mode === 'edit' || actionMode.mode === 'add'"
-        class="transform animate-ease-in"
+        class="transform animate-ease-in min-w-25 grow md:grow-0"
         icon="pi pi-save"
         label="Guardar"
         @click="showSaveConfirmModal = true"
@@ -20,7 +20,7 @@
       />
       <Button
         v-if="actionMode.mode === 'edit' || actionMode.mode === 'add'"
-        class="transform animate-ease-in"
+        class="transform animate-ease-in min-w-25 grow md:grow-0"
         icon="pi pi-times"
         :label="actionMode.mode === 'add' ? 'Volver' : 'Cancelar'"
         @click="goBack"
@@ -28,7 +28,7 @@
       />
       <Button
         v-if="actionMode.mode !== 'add'"
-        class="transform animate-ease-in"
+        class="transform animate-ease-in min-w-25 grow md:grow-0"
         icon="pi pi-arrow-left"
         label="Volver"
         @click="router.push({ name: 'role' })"
@@ -197,6 +197,7 @@ const {
   permissionsPagination,
 } = roleInstance;
 
+const loadMounted = ref(false);
 const originalData = ref<unknown>(null);
 const { startLoading, finishLoading } = useLoaderStore();
 const selectedPermissionsIds = ref<Set<number>>(new Set());
@@ -330,6 +331,8 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error(error);
+  }finally {
+    loadMounted.value = true;
   }
 });
 </script>

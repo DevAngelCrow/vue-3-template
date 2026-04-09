@@ -1,19 +1,11 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
     <div class="flex w-full flex-wrap items-center gap-5">
-      <AppInputText class="order-1 flex-1 grow" label="Buscar permiso..." v-model="filter_permission.name"
+      <AppInputText class="order-1 md:flex-1 grow" label="Buscar permiso..." v-model="filter_permission.name"
         v-debounce:700.keydown.enter="() => searchPermission(filter_permission)" />
-      <!-- <AppSelect
-        class="order-2 flex-1 grow"
-        label="Mostrar"
-        v-model="option"
-        :options="options"
-        size="small"
-        :disabled="modalState === 'view'"
-      /> -->
-      <AppAutocomplete class="order-2 flex-1 grow" id="category" label="Categoría" v-model="filter_permission.category"
+      <AppAutocomplete class="order-2 md:flex-1 grow" id="category" label="Categoría" v-model="filter_permission.category"
         option-label="name" :suggestions="filterCategories" dropdown @complete="findAutocomplete" />
-      <div class="flex order-3 flex-1 grow items-center gap-2">
+      <div class="flex order-3 md:flex-1 grow items-center gap-2">
         <Button class="rounded_btn_search" icon="pi pi-search"
           v-debounce:700.click="() => searchPermission(filter_permission)" />
         <Button class="rounded_btn_clean" :icon="filter_permission.name.length || filter_permission.category
