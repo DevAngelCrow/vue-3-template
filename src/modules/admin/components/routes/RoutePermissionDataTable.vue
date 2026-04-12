@@ -1,14 +1,14 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
-    <div class="flex w-full gap-5 flex-wrap">
+    <div class="flex w-full flex-wrap items-center gap-5">
       <AppInputText
-        class="order-1 md:w-[49.5%] sm:w-full"
+        class="order-1 md:flex-1 grow"
         label="Buscar permiso..."
         v-model="filter_permission.name"
         v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
       />
       <AppAutocomplete
-        class="order-2 md:w-[34.5%] sm:w-full"
+        class="order-2 md:flex-1 grow"
         id="category"
         label="Categoría"
         v-model="filter_permission.category"
@@ -17,33 +17,39 @@
         dropdown
         @complete="findAutocomplete"
       />
-      <Button
-        class="rounded_btn_search"
-        icon="pi pi-search"
-        v-debounce:700.click="() => searchPermission(filter_permission)"
-      />
-      <Button
-        class="rounded_btn_clean"
-        :icon="
-          filter_permission.name.length || filter_permission.category
-            ? 'pi pi-filter-slash'
-            : 'pi pi-filter'
-        "
-        variant="outlined"
-        v-debounce:700.click="cleanSearch"
-        v-tooltip="
-          filter_permission.name.length || filter_permission.category
-            ? 'Quitar filtro'
-            : 'Escriba para filtrar'
-        "
-      />
-      <div class="rounded_counter">
-        <AppCircularCounter
-          class="item_justify_counter"
-          :selected="selectedPermissionsIds.size"
-          :total="totalPermissions"
-          color="#082f49"
+      <div class="flex order-3 md:flex-1 grow items-center gap-2">
+        <Button
+          class="rounded_btn_search"
+          icon="pi pi-search"
+          v-debounce:700.click="() => searchPermission(filter_permission)"
         />
+        <Button
+          class="rounded_btn_clean"
+          :icon="
+            filter_permission.name.length || filter_permission.category
+              ? 'pi pi-filter-slash'
+              : 'pi pi-filter'
+          "
+          variant="outlined"
+          v-debounce:700.click="cleanSearch"
+          v-tooltip.bottom="
+            filter_permission.name.length || filter_permission.category
+              ? 'Quitar filtro'
+              : 'Escriba para filtrar'
+          "
+        />
+      </div>
+      <div class="rounded_counter flex-1 order-4 opacity-65">
+        <div class="flex justify-end items-center flex-col">
+          <AppCircularCounter
+            :selected="selectedPermissionsIds.size"
+            :total="totalPermissions"
+            color="#082f49"
+            size="50px"
+            v-tooltip.left="{ value: tooltipContent, escape: false }"
+          />
+          <span class="text-sm">Seleccionados</span>
+        </div>
       </div>
     </div>
     <AppDataTable
@@ -51,10 +57,13 @@
       :headers="headerPermissions"
       :items="permissionItemsFormated"
       :paginator="true"
+      :show-per-page-options="true"
+      :per-page-options="[10, 20, 50, 100]"
       :per_page="permissionsPagination.per_page"
       :total_items="permissionsPagination.total_items"
       :page="permissionsPagination.page"
       @page-update="handlePagination"
+      @per-page-update="handlePerPagePagination"
     >
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
@@ -63,10 +72,9 @@
             binary
             @update:model-value="checkAll"
             v-model="selectAll"
-            id="select_all"
           >
           </AppCheckBox>
-          <span>Seleccion</span>
+          <span>{{ `Selección (${allSelectionsPerPage})` }}</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
@@ -84,7 +92,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, inject, onMounted, ref, toRef, watch } from 'vue';
+import {
+  computed,
+  defineComponent,
+  inject,
+  onMounted,
+  ref,
+  toRef,
+  watch,
+} from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
 
 import { useAdmin } from '../../composables/useAdmin';
@@ -111,6 +127,7 @@ const {
   findPermission,
   categories,
 } = admin;
+
 const selectedPermissionsIds = ref<Set<number>>(new Set());
 const selectAll = ref<boolean>(false);
 const permissionItemsFormated = ref<
@@ -122,7 +139,7 @@ const permissionItemsFormated = ref<
     state: boolean;
   }[]
 >([]);
-let totalPermissions: number = 0;
+const totalPermissions = ref<number>(0);
 const permissionsItemsLocal = ref<any>([]);
 const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
@@ -171,6 +188,7 @@ const searchPermission = async (value: {
 
 const handlePagination = async (page: number) => {
   if (modalState.value === 'view') {
+    permissionsPagination.page = page + 1;
     localPaginationViewMode(page);
     updateSelectAllState();
     return;
@@ -178,8 +196,23 @@ const handlePagination = async (page: number) => {
   if (page + 1 === permissionsPagination.page) {
     return;
   }
-
   permissionsPagination.page = page + 1;
+  await getPermissions();
+  updateSelectAllState();
+};
+
+const handlePerPagePagination = async (perPage: number) => {
+  if (modalState.value === 'view') {
+    permissionsPagination.per_page = perPage;
+    localPaginationViewMode(0);
+    updateSelectAllState();
+    return;
+  }
+  if (perPage === permissionsPagination.per_page) {
+    return;
+  }
+  permissionsPagination.per_page = perPage;
+  permissionsPagination.page = 1;
   await getPermissions();
   updateSelectAllState();
 };
@@ -208,6 +241,7 @@ const togglePermission = (permissionId: number, isChecked: boolean) => {
   }
   updateSelectAllState();
 };
+
 const updateSelectAllState = (): void => {
   if (permissionItemsFormated.value.length === 0) {
     selectAll.value = false;
@@ -216,9 +250,9 @@ const updateSelectAllState = (): void => {
   const allCurrentItemsSelected = permissionItemsFormated.value.every(item =>
     selectedPermissionsIds.value.has(item.id),
   );
-
   selectAll.value = allCurrentItemsSelected;
 };
+
 const setPermissionsIds = (
   value: {
     id: number;
@@ -245,7 +279,7 @@ const closeModal = () => {
   }
   filter_permission.value = {
     name: '',
-    category: undefined,
+    category: { id: 0, name: '', description: '' },
   };
   permissionItemsFormated.value = [];
   if (modalState.value === 'view') {
@@ -262,13 +296,15 @@ const cleanSearch = () => {
   };
   if (modalState.value === 'view') {
     permissionItemsFormated.value = [...permissionsItemsLocal.value];
-    totalPermissions = permissionsItemsLocal.value.length;
-    permissionsPagination.total_items = totalPermissions;
+    totalPermissions.value = permissionsItemsLocal.value.length;
+    permissionsPagination.total_items = totalPermissions.value;
     localPaginationViewMode(0);
     return;
   }
   getPermissions();
+  totalPermissions.value = permissionsPagination.total_items;
 };
+
 const localPaginationViewMode = (page: number, find?: boolean) => {
   let permissionsTemporalItems = [...permissionsItemsLocal.value];
   if (find) {
@@ -277,30 +313,43 @@ const localPaginationViewMode = (page: number, find?: boolean) => {
   const currentPage = page + 1;
   const start = (currentPage - 1) * permissionsPagination.per_page;
   const end = currentPage * permissionsPagination.per_page;
-  const temporalPermissionsItemFormated = permissionsTemporalItems.slice(
-    start,
-    end,
-  );
-  permissionItemsFormated.value = temporalPermissionsItemFormated;
+  permissionItemsFormated.value = permissionsTemporalItems.slice(start, end);
 };
+
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
   for (let i = 0; i < categories.value.length; i++) {
     let item = categories.value[i];
-
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);
     }
   }
   filterCategories.value = _filteredItems;
 };
+
+const tooltipContent = computed(() => {
+  return `<div style='text-align: center; display: flex; flex-direction: column; gap: 5px; font-weight: 200;'>
+    <div><strong>Seleccionados</strong></div>
+    <span style='text-align: center; border-top: 1px solid;'></span>
+    <div><strong>Disponibles</strong></div>
+  </div>`;
+});
+
+const allSelectionsPerPage = computed(() => {
+  if (permissionItemsFormated.value.length < permissionsPagination.per_page) {
+    return permissionItemsFormated.value.length;
+  }
+  return permissionsPagination.per_page;
+});
+
 watch(
   () => selectedPermissionsIds.value.size,
   () => {
     emit('update:selected-permissions-ids', selectedPermissionsIds.value);
   },
 );
+
 watch(permissionsList, newVal => {
   permissionItemsFormated.value = [];
   setPermissionsIds(newVal);
@@ -308,36 +357,31 @@ watch(permissionsList, newVal => {
   if (modalState.value === 'view') {
     permissionsItemsLocal.value = [...permissionItemsFormated.value];
     localPaginationViewMode(0);
-    totalPermissions = permissionsItemsLocal.value.length;
+    totalPermissions.value = permissionsItemsLocal.value.length;
   }
+  totalPermissions.value = permissionsPagination.total_items;
 });
-onMounted(() => {
-  totalPermissions = permissionsPagination.total_items;
+
+watch(
+  () => permissions_ids.value,
+  newIds => {
+    if (newIds && newIds.length > 0 && modalState.value === 'view') {
+      selectedPermissionsIds.value.clear();
+      newIds.forEach((id: number) => {
+        selectedPermissionsIds.value.add(id);
+      });
+      updateSelectAllState();
+    }
+  },
+  { immediate: true, deep: true },
+);
+
+onMounted(async () => {
+  totalPermissions.value = permissionsPagination.total_items;
   setPermissionsIds(permissionsList.value);
-  switch (modalState.value) {
-    case 'add':
-      updateSelectAllState();
-      break;
-    case 'view':
-      permissions_ids.value?.forEach((id: number) => {
-        selectedPermissionsIds.value.add(id);
-      });
-      permissionItemsFormated.value.forEach(item => {
-        isPermissionSelected(item.id);
-      });
-      updateSelectAllState();
-      break;
-    case 'edit':
-      permissions_ids.value?.forEach((id: number) => {
-        selectedPermissionsIds.value.add(id);
-      });
-      permissionItemsFormated.value.forEach(item => {
-        isPermissionSelected(item.id);
-      });
-      updateSelectAllState();
-      break;
-  }
+  updateSelectAllState();
 });
+
 defineComponent({
   name: 'RoutePermissionDataTable',
 });
@@ -347,7 +391,7 @@ defineExpose({
 </script>
 <style scoped>
 .rounded_counter {
-  @apply min-w-[100px] max-w-[100px] max-h-[50px] order-4 flex justify-end;
+  @apply flex justify-end items-center;
 }
 
 .item_justify_counter {
@@ -356,60 +400,31 @@ defineExpose({
 
 @media (min-width: 595px) {
   .rounded_btn_search {
-    @apply min-w-[46px];
-    @apply max-w-[46px];
-    @apply grow;
-    @apply order-2;
-    /*@apply md:order-2;*/
     @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply min-w-[46px];
-    @apply max-w-[46px];
-    /*@apply xs:w-[6%];*/
-    @apply grow;
-    /*@apply order-4;*/
-    @apply order-3;
     @apply rounded-full;
-  }
-
-  .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-4 flex !justify-end;
   }
 }
 
 @media (min-width: 452px) and (max-width: 594px) {
   .rounded_btn_search {
-    @apply grow order-2;
-    @apply min-w-[46px];
-    @apply max-w-[46px];
     @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply grow order-4;
-    @apply min-w-[46px];
-  }
-
-  .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-3 flex justify-end;
+    @apply rounded-full;
   }
 }
 
 @media (min-width: 200px) and (max-width: 451px) {
   .rounded_btn_search {
-    @apply grow order-3;
-    @apply min-w-[46px];
+    @apply rounded-full;
   }
 
   .rounded_btn_clean {
-    @apply grow order-4;
-    @apply min-w-[46px];
-  }
-
-  .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] order-2 flex justify-end;
+    @apply rounded-full;
   }
 }
 

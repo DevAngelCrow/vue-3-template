@@ -24,4 +24,9 @@ export const routesAdmin = [
     name: 'routes-administration',
     component: () => import('@/modules/admin/views/Routes.vue'),
   },
+  {
+    path: 'admin/routes-administration/route-maintenance/:id?',
+    name: 'route-maintenance',
+    component: () => import('@/modules/admin/views/RouteDetail.vue'),
+  },
 ];

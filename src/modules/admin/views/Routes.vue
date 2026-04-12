@@ -30,7 +30,7 @@
           >
           <Button
             class="flex-shrink-0 grow rounded-md"
-            @click="openModal('add')"
+            @click="goToRouteMaintenance()"
             ><i
               class="pi pi-plus flex justify-center items-center text-center"
               style="font-size: 1.1rem; font-weight: bold"
@@ -55,15 +55,8 @@
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-eye"
-              @click="openModal('view', data)"
+              @click="goToRouteMaintenance(data.id)"
               v-tooltip.bottom="'Ver detalle'"
-            ></Button>
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-pencil"
-              @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
@@ -98,6 +91,7 @@
 <script setup lang="ts">
 import { Button } from 'primevue';
 import { nextTick, onMounted, reactive, watch, provide } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
@@ -106,9 +100,10 @@ import RouteFormModal from '../components/routes/RouteFormModal.vue';
 const adminInstance = useAdmin();
 provide('useAdmin', adminInstance);
 
+const router = useRouter();
+
 const {
   getRoutes,
-  getRouteById,
   child_route,
   resetField,
   items,
@@ -120,9 +115,15 @@ const {
   findRoute,
   pagination,
   headers,
-  getPermissions,
-  getCategoryPermissions,
 } = adminInstance;
+
+const goToRouteMaintenance = (id?: number) => {
+  if (id) {
+    router.push({ name: 'route-maintenance', params: { id } });
+  } else {
+    router.push({ name: 'route-maintenance' });
+  }
+};
 
 const modalState = reactive<{
   show: boolean;
@@ -140,33 +141,13 @@ const modalState = reactive<{
   selectedItem: null as number | null,
 });
 
-const openModal = (
-  action: 'add' | 'view' | 'edit' | 'delete',
-  data?: RoutesResponse,
-) => {
+const openModal = (action: 'delete', data: RoutesResponse) => {
   modalState.mode = action;
-  modalState.isReadonly = action === 'view';
-
-  switch (action) {
-    case 'add':
-      modalState.title = 'Agregar Ruta';
-      break;
-    case 'view':
-      getRouteById(data!.id);
-      modalState.title = 'Ver Ruta';
-      setRouteItem(data!);
-      break;
-    case 'edit':
-      modalState.title = 'Editar Ruta';
-      setRouteItem(data!);
-      break;
-    case 'delete':
-      setRouteItem(data!);
-      modalState.title = data!.active ? 'Desactivar Ruta' : 'Activar Ruta';
-      modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data!.active ? 'inactivo' : 'activo'}?`;
-      modalState.selectedItem = data!.id;
-      break;
-  }
+  modalState.isReadonly = false;
+  setRouteItem(data);
+  modalState.title = data.active ? 'Desactivar Ruta' : 'Activar Ruta';
+  modalState.description = `¿Está seguro de cambiar el estado de la ruta a ${data.active ? 'inactivo' : 'activo'}?`;
+  modalState.selectedItem = data.id;
   modalState.show = true;
 };
 
@@ -208,8 +189,6 @@ const handlePagination = async (page: number) => {
 onMounted(async () => {
   try {
     await getRoutes();
-    await getPermissions();
-    await getCategoryPermissions();
   } catch (error) {
     console.error(error);
   }
