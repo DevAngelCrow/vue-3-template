@@ -1,44 +1,91 @@
 <template>
   <div class="w-full flex flex-wrap justify-start gap-2">
     <div class="flex w-full flex-wrap items-center gap-5">
-      <AppInputText class="order-1 md:flex-1 grow" label="Buscar permiso..." v-model="filter_permission.name"
-        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)" />
-      <AppAutocomplete class="order-2 md:flex-1 grow" id="category" label="Categoría" v-model="filter_permission.category"
-        option-label="name" :suggestions="filterCategories" dropdown @complete="findAutocomplete" />
+      <AppInputText
+        class="order-1 md:flex-1 grow"
+        label="Buscar permiso..."
+        v-model="filter_permission.name"
+        v-debounce:700.keydown.enter="() => searchPermission(filter_permission)"
+      />
+      <AppAutocomplete
+        class="order-2 md:flex-1 grow"
+        id="category"
+        label="Categoría"
+        v-model="filter_permission.category"
+        option-label="name"
+        :suggestions="filterCategories"
+        dropdown
+        @complete="findAutocomplete"
+      />
       <div class="flex order-3 md:flex-1 grow items-center gap-2">
-        <Button class="rounded_btn_search" icon="pi pi-search"
-          v-debounce:700.click="() => searchPermission(filter_permission)" />
-        <Button class="rounded_btn_clean" :icon="filter_permission.name.length || filter_permission.category
-            ? 'pi pi-filter-slash'
-            : 'pi pi-filter'
-          " variant="outlined" v-debounce:700.click="cleanSearch" v-tooltip.bottom="filter_permission.name.length || filter_permission.category
+        <Button
+          class="rounded_btn_search"
+          icon="pi pi-search"
+          v-debounce:700.click="() => searchPermission(filter_permission)"
+        />
+        <Button
+          class="rounded_btn_clean"
+          :icon="
+            filter_permission.name.length || filter_permission.category
+              ? 'pi pi-filter-slash'
+              : 'pi pi-filter'
+          "
+          variant="outlined"
+          v-debounce:700.click="cleanSearch"
+          v-tooltip.bottom="
+            filter_permission.name.length || filter_permission.category
               ? 'Quitar filtro'
               : 'Escriba para filtrar'
-            " />
+          "
+        />
       </div>
-      <div class="rounded_counter flex-1 order-4 opacity-65 ">
-        <div class="flex justify-end items-center flex-col ">
-          <AppCircularCounter :selected="selectedPermissionsIds.size" :total="totalPermissions" color="#082f49"
-          size="50px" v-tooltip.left="{ value: tooltipContent, escape: false }" />
-        <span class="text-sm">Seleccionados</span>
+      <div class="rounded_counter flex-1 order-4 opacity-65">
+        <div class="flex justify-end items-center flex-col">
+          <AppCircularCounter
+            :selected="selectedPermissionsIds.size"
+            :total="totalPermissions"
+            color="#082f49"
+            size="50px"
+            v-tooltip.left="{ value: tooltipContent, escape: false }"
+          />
+          <span class="text-sm">Seleccionados</span>
         </div>
       </div>
     </div>
-    <AppDataTable class="w-full" :headers="headerPermissions" :items="permissionItemsFormated" :paginator="true"
-      :show-per-page-options="true" :per-page-options="[10, 20, 50, 100]" :per_page="permissionsPagination.per_page"
-      :total_items="permissionsPagination.total_items" :page="permissionsPagination.page"
-      @page-update="handlePagination" @per-page-update="handlePerPagePagination">
+    <AppDataTable
+      class="w-full"
+      :headers="headerPermissions"
+      :items="permissionItemsFormated"
+      :paginator="true"
+      :show-per-page-options="true"
+      :per-page-options="[10, 20, 50, 100]"
+      :per_page="permissionsPagination.per_page"
+      :total_items="permissionsPagination.total_items"
+      :page="permissionsPagination.page"
+      @page-update="handlePagination"
+      @per-page-update="handlePerPagePagination"
+    >
       <template #header-Seleccion>
         <div class="flex justify-center flex-row">
-          <AppCheckBox :readonly="props.readonly" binary @update:model-value="checkAll" v-model="selectAll">
+          <AppCheckBox
+            :readonly="props.readonly"
+            binary
+            @update:model-value="checkAll"
+            v-model="selectAll"
+          >
           </AppCheckBox>
           <span>{{ `Selección (${allSelectionsPerPage})` }}</span>
         </div>
       </template>
       <template #body-state="{ data, index }">
         <div class="flex justify-center">
-          <AppCheckBox :readonly="props.readonly" binary :model-value="isPermissionSelected(data.id)" :id="`${index}`"
-            @update:model-value="togglePermission(data.id, $event)" />
+          <AppCheckBox
+            :readonly="props.readonly"
+            binary
+            :model-value="isPermissionSelected(data.id)"
+            :id="`${index}`"
+            @update:model-value="togglePermission(data.id, $event)"
+          />
         </div>
       </template>
     </AppDataTable>
@@ -107,9 +154,7 @@ const searchPermission = async (value: {
     const hasNameFilter = value.name && value.name.trim().length > 0;
     const hasCategoryFilter = value.category?.id && value.category.id > 0;
 
-    for (let i = 0; i < permissionsItemsLocal.value.length; i++) {
-      let item = permissionsItemsLocal.value[i];
-
+    for (let item of permissionsItemsLocal.value) {
       // Si no hay filtros activos, incluir todos los items
       if (!hasNameFilter && !hasCategoryFilter) {
         _filteredItems.push(item);
@@ -120,7 +165,7 @@ const searchPermission = async (value: {
       const matchesName =
         hasNameFilter &&
         item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
-        0;
+          0;
 
       // Verificar coincidencia con categoría
       const matchesCategory =
@@ -170,7 +215,7 @@ const handlePerPagePagination = async (perPage: number) => {
   permissionsPagination.page = 1;
   await getPermissions();
   updateSelectAllState();
-}
+};
 const isPermissionSelected = (permissionId: number) => {
   return selectedPermissionsIds.value.has(permissionId);
 };
@@ -273,9 +318,7 @@ const localPaginationViewMode = (page: number, find?: boolean) => {
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
-  for (let i = 0; i < categories.value.length; i++) {
-    let item = categories.value[i];
-
+  for (let item of categories.value) {
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
       _filteredItems.push(item);
     }
@@ -290,7 +333,7 @@ const tooltipContent = computed(() => {
   </div>`;
 });
 const allSelectionsPerPage = computed(() => {
-  if(permissionItemsFormated.value.length < permissionsPagination.per_page) {
+  if (permissionItemsFormated.value.length < permissionsPagination.per_page) {
     return permissionItemsFormated.value.length;
   }
   return permissionsPagination.per_page;
