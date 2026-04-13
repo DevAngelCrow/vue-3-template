@@ -29,4 +29,9 @@ export const routesAdmin = [
     name: 'route-maintenance',
     component: () => import('@/modules/admin/views/RouteDetail.vue'),
   },
+  {
+    path: 'admin/user-role',
+    name: 'user-role',
+    component: () => import('@/modules/admin/views/UserRole.vue'),
+  },
 ];

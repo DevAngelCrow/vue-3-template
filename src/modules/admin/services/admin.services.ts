@@ -14,6 +14,9 @@ import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { RouteResponseById } from '../interfaces/routes/route-by-id.response.interface';
 //import { RolByIdResponse } from '../interfaces/role/rol-by-id.response.interface';
+import { UsersResponse } from '../interfaces/user-role/users.response.interface';
+import { UserRoleByIdResponse } from '../interfaces/user-role/user-role-by-id.response.interface';
+import { UserRoleUpdateForm } from '../interfaces/user-role/user-role-update.form.interface';
 
 export interface paramsFilter {
   active: boolean;
@@ -169,6 +172,29 @@ const getRol = async (id: number) => {
   return response.data;
 };
 
+const getUsers = async (): Promise<ApiResponseGeneric<UsersResponse[]>> => {
+  const response =
+    await httpClient.get<ApiResponseGeneric<UsersResponse[]>>('identity/users');
+  return response.data;
+};
+
+const getUserRoleById = async (
+  id: number,
+): Promise<ApiPostResponse<UserRoleByIdResponse>> => {
+  const response = await httpClient.get<ApiPostResponse<UserRoleByIdResponse>>(
+    `security/user-role/${id}`,
+  );
+  return response.data;
+};
+
+const putUserRole = async (id: number, data: UserRoleUpdateForm) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `security/user-role/${id}`,
+    data,
+  );
+  return response;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
@@ -189,4 +215,7 @@ export default {
   toggleRole,
   getRoute,
   getRol,
+  getUsers,
+  getUserRoleById,
+  putUserRole,
 };
