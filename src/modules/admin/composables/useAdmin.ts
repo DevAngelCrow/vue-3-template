@@ -177,7 +177,7 @@ export function useAdmin() {
   });
   const permissionsPagination = reactive({
     page: 1,
-    per_page: 5,
+    per_page: 10,
     total_items: 0,
   });
   const { startLoading, finishLoading } = useLoaderStore();
@@ -267,9 +267,10 @@ export function useAdmin() {
         permissionsList.value = response.data.permissions
           ? response.data.permissions
           : [];
-        permissionsPagination.per_page = 5;
+        permissionsPagination.per_page = 10;
         permissionsPagination.total_items = response?.data?.permissions?.length;
       }
+      return response;
     } catch (error) {
       console.error(error);
     } finally {
