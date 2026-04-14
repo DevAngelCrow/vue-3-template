@@ -165,13 +165,16 @@ export function useCountries() {
     });
   };
 
-  const cleanSearch = () => {
+  const cleanSearch = async () => {
     if ((!filter.filter_name || filter.filter_name === '') && filter.status === null) {
       return;
     }
+    startLoading();
     filter.filter_name = null;
     filter.status = null;
-    return getCountries();
+    const items = await getCountries();
+    finishLoading();
+    return items;
   };
   return {
     getCountries,
