@@ -107,7 +107,7 @@ export function useDepartment() {
     try {
       startLoading();
       const params = {
-        active: true,
+        status: true,
       }
       const response = await catalogServices.getAllCountries(params);
       if (response.statusCode === 200) {
