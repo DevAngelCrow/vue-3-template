@@ -10,6 +10,7 @@ import { CategoryStatusResponse } from '../interfaces/category-status/category-s
 import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
 import catalogServices from '../Services/catalog.services';
 
+type filterType = { filter_name: string | null; status: boolean | null };
 export function useCategoryStatus() {
   const {
     errors,
@@ -102,18 +103,27 @@ export function useCategoryStatus() {
   const [description, descriptionAttrs] = defineField('description');
   const [active, activeAttrs] = defineField('active');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>({
+    filter_name: null,
+    status: null,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
   const getCategoryStatuses = async () => {
     try {
       startLoading();
-      const filter = {
+      const params: {
+        page?: number;
+        per_page?: number;
+        filter_name?: string | null;
+        status?: boolean | null;
+      } = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        filter_name: filter.filter_name,
+        status: filter.status,
       };
-      const response = await catalogServices.getAllCategoryStatuses(filter);
+      const response = await catalogServices.getAllCategoryStatuses({ ...params });
 
       if (response.statusCode === 200) {
         categoryStatuses.value = response.data.data;
@@ -193,7 +203,7 @@ export function useCategoryStatus() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | null | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -201,15 +211,16 @@ export function useCategoryStatus() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.status === null) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = null;
+    filter.status = null;
     getCategoryStatuses();
   };
 
@@ -221,8 +232,8 @@ export function useCategoryStatus() {
     setFieldValue('active', value?.active);
   };
 
-  const findCategoryStatus = (value: string | null) => {
-    if (value) {
+  const findCategoryStatus = (value: filterType) => {
+    if (value.filter_name || value.status !== null) {
       getCategoryStatuses();
     }
   };
@@ -253,7 +264,7 @@ export function useCategoryStatus() {
     active,
     activeAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     categoryStatuses,
     addCategoryStatus,

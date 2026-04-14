@@ -224,7 +224,7 @@ export function useGlobalStatus() {
     try {
       startLoading();
       const filter = {
-        active: true,
+        status: true,
       };
       const response = await catalogServices.getAllCategoryStatuses(filter);
 

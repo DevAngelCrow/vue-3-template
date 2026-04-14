@@ -19,13 +19,14 @@ import { CategoryStatusForm } from '../interfaces/category-status/category-statu
 import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
 import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
 import { GenderResponse } from '../interfaces/gender/gender.response.interface';
+import paramsGeneric from '@/core/services/interfaces/params.generic.interface';
 
 interface paramsFilter {
   active: boolean;
 }
 
 const getAllCountries = async (
-  params?: paginateParams | paramsFilter,
+  params?: paramsGeneric,
 ): Promise<ApiResponseGeneric<CountryResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<CountryResponse>>(
     'catalogs/countries',
@@ -175,7 +176,7 @@ const toggleGlobalStatus = async (id: number) => {
 };
 
 const getAllCategoryStatuses = async (
-  params?: paginateParams | paramsFilter,
+  params?: paramsGeneric,
 ): Promise<ApiResponseGeneric<CategoryStatusResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<CategoryStatusResponse>

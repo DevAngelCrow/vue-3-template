@@ -1,5 +1,5 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
+  <div :class="['min-w-37.5', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
       <Select
         class="w-full"
@@ -39,7 +39,7 @@ defineOptions({ inheritAttrs: false, name: 'AppSelect' });
 
 const props = defineProps({
   modelValue: {
-    type: [String, Number, Object],
+    type: [String, Number, Object, Boolean],
   },
   class: {
     type: String,
