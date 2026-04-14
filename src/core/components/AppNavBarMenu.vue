@@ -14,7 +14,7 @@
           custom
           class="flex items-center text-white hover:text-primary-950 group"
         >
-          <a ripple :href="href" v-bind="props.action" @click="navigate">
+          <a ripple :href="href" v-bind="props.action" @click="hasSubmenu ? $event.preventDefault() : navigate($event)">
             <i :class="`${item.icon} group-hover:text-primary-700`"></i>
             <span class="group-hover:text-primary-700">
               {{ item.label }}
