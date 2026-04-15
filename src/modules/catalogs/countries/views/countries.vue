@@ -151,7 +151,7 @@ const {
 } = useCountries();
 
 const statusOptions = ref<{ name: string, value: boolean | null | 'Todos' }[]>([{ name: 'Todos', value: 'Todos' }, { name: 'Activo', value: true }, { name: 'Inactivo', value: false },]);
-const wrapperFindCountries = async (value: { filter_name?: string; status?: boolean }) => {
+const wrapperFindCountries = async (value: { filter_name?: string; status?: boolean | 'Todos' }) => {
   items.value = await findCountries(value);
 }
 const wrapperCleanSearch = async () => {

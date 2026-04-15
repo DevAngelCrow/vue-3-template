@@ -110,7 +110,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { onMounted, reactive, provide, ref } from 'vue';
+import { onMounted, reactive, provide } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useRole } from '../composables/useRole';
