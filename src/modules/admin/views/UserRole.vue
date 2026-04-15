@@ -33,12 +33,15 @@
       <AppDataTable
         class="w-full"
         :headers="headers"
-        :items="filteredUsers"
+        :items="users"
         :paginator="true"
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
+        :show-per-page-options="true"
+        :per-page-options="[10, 2, 50, 100]"
         @page-update="handlePagination"
+        @per-page-update="handlePerPagePagination"
       >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
@@ -83,7 +86,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { computed, onMounted, reactive, provide, ref } from 'vue';
+import { onMounted, reactive, provide, ref } from 'vue';
 
 import { useUserRole } from '../composables/useUserRole';
 import { UsersResponse } from '../interfaces/user-role/users.response.interface';
@@ -123,16 +126,6 @@ const modalState = reactive<{
 });
 
 const localFilter = ref<string | null>(null);
-
-const filteredUsers = computed(() => {
-  if (!localFilter.value) return users.value;
-  const q = localFilter.value.toLowerCase();
-  return users.value.filter(
-    u =>
-      u.user_name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q),
-  );
-});
 
 const findUser = (value: string | null) => {
   localFilter.value = value;
@@ -176,14 +169,21 @@ const closeModal = () => {
   modalState.userEmail = '';
 };
 
-const handlePagination = (page: number) => {
+const handlePagination = async (page: number) => {
   if (page + 1 === pagination.page) return;
   pagination.page = page + 1;
+  await getUsers();
 };
+const handlePerPagePagination = async (perPage: number) => {
+  if(perPage === pagination.per_page) return;
 
+  pagination.per_page = perPage;
+  pagination.page = 1;
+  await getUsers();
+};
 onMounted(async () => {
   try {
-    await getUsers();
+    await Promise.all([getUsers()]);
   } catch (error) {
     console.error(error);
   }

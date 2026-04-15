@@ -9,7 +9,7 @@ import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import catalogServices from '../Services/catalog.services';
 import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
 import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
-
+type filterType = { filter_name?: string; status?: boolean | 'Todos' };
 export function useDocumentType() {
   const {
     errors,
@@ -98,18 +98,22 @@ export function useDocumentType() {
   const [mask, maskAttrs] = defineField('mask');
   const [active, activeAttrs] = defineField('active');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    status: undefined,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
   const getDocumentTypes = async () => {
     try {
       startLoading();
-      const filter = {
+      const params = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        filter_name: filter.filter_name,
+        status: filter.status === 'Todos' ? undefined : filter.status,
       };
-      const response = await catalogServices.getDocumentTypes(filter);
+      const response = await catalogServices.getDocumentTypes(params);
 
       if (response.statusCode === 200) {
         documentTypes.value = response.data.data;
@@ -189,7 +193,7 @@ export function useDocumentType() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -197,15 +201,16 @@ export function useDocumentType() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
     getDocumentTypes();
   };
 
@@ -217,7 +222,7 @@ export function useDocumentType() {
     setFieldValue('active', value?.active);
   };
 
-  const findDocumentType = (value: string | null) => {
+  const findDocumentType = (value: filterType) => {
     if (value) {
       getDocumentTypes();
     }
@@ -248,7 +253,7 @@ export function useDocumentType() {
     active,
     activeAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     documentTypes,
     getDocumentTypes,

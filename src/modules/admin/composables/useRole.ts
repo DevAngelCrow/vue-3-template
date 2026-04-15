@@ -12,6 +12,10 @@ import { RoleStatus } from '../interfaces/role/role.status.response.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
+import { CategoryStatus } from '@/types/global-status.type';
+
+
+type filterType = { filter_name?: string; id_status?: number };
 
 export function useRole() {
   const {
@@ -147,7 +151,10 @@ export function useRole() {
   const [permissions_ids, permissionsIdsAttrs] = defineField('permissions_ids');
   const [code, codeAttrs] = defineField('code');
   const [id_status, idStatusAttrs] = defineField('id_status');
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    id_status: undefined,
+  });
   const filter_permission = ref<{
     name: string;
     category?: {
@@ -165,7 +172,7 @@ export function useRole() {
       const filter = {
         page: undefined,
         per_page: undefined,
-        table_header: 'mnt_role',
+        code_category: CategoryStatus.CODE,
       };
       const response = await catalogServices.getGlobalStatus(filter);
       if (response.statusCode === 200) {
@@ -182,12 +189,13 @@ export function useRole() {
   const getRole = async () => {
     try {
       startLoading();
-      const filter = {
+      const params = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        filter_name: filter.filter_name,
+        id_status: filter.id_status,
       };
-      const response = await adminServices.getRole(filter);
+      const response = await adminServices.getRole(params);
       if (response.statusCode === 200) {
         role.value = response.data.data;
         pagination.page = response.data.current_page;
@@ -323,7 +331,7 @@ export function useRole() {
     }
   };
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -331,15 +339,16 @@ export function useRole() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.id_status === undefined) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.id_status = undefined;
     getRole();
   };
 
@@ -358,7 +367,7 @@ export function useRole() {
     setFieldValue('id_status', value?.status.id);
   };
 
-  const findRole = (value: string | null) => {
+  const findRole = (value: filterType) => {
     if (value) {
       getRole();
     }
@@ -404,7 +413,7 @@ export function useRole() {
     code,
     codeAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     globalStatus,
     role,

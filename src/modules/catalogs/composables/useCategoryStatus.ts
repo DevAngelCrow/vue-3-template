@@ -10,7 +10,7 @@ import { CategoryStatusResponse } from '../interfaces/category-status/category-s
 import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
 import catalogServices from '../Services/catalog.services';
 
-type filterType = { filter_name: string | null; status: boolean | null };
+type filterType = { filter_name?: string; status?: boolean | 'Todos' };
 export function useCategoryStatus() {
   const {
     errors,
@@ -104,8 +104,8 @@ export function useCategoryStatus() {
   const [active, activeAttrs] = defineField('active');
 
   const filter = reactive<filterType>({
-    filter_name: null,
-    status: null,
+    filter_name: undefined,
+    status: undefined,
   });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
@@ -121,7 +121,7 @@ export function useCategoryStatus() {
         page: pagination.page,
         per_page: pagination.per_page,
         filter_name: filter.filter_name,
-        status: filter.status,
+        status: filter.status === 'Todos' ? undefined : filter.status,
       };
       const response = await catalogServices.getAllCategoryStatuses({ ...params });
 
@@ -216,11 +216,11 @@ export function useCategoryStatus() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === null) {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined) {
       return;
     }
-    filter.filter_name = null;
-    filter.status = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
     getCategoryStatuses();
   };
 
@@ -233,7 +233,7 @@ export function useCategoryStatus() {
   };
 
   const findCategoryStatus = (value: filterType) => {
-    if (value.filter_name || value.status !== null) {
+    if (value.filter_name || value.status !== undefined) {
       getCategoryStatuses();
     }
   };

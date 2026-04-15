@@ -12,14 +12,22 @@
         >
           <AppInputText
             label="Buscar..."
-            class="min-w-auto w-auto grow shrink-0 md:w-83.75"
-            v-model="filter_name"
-            @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findRole(filter_name)"
+            class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75"
+            v-model="filter.filter_name"
+            @update:modelValue="validateAlphaInput(filter.filter_name)"
+            v-debounce:700.keydown.enter="() => findRole(filter)"
+          />
+          <AppSelect
+            class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto"
+            :options="globalStatus"
+            option-label="name"
+            label="Estado"
+            v-model="filter.id_status"
+            optionValue="id"
           />
           <Button
             class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRole(filter_name)"
+            v-debounce:700.click="() => findRole(filter)"
             >Buscar</Button
           >
           <Button
@@ -47,7 +55,10 @@
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
+        :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]"
         @page-update="handlePagination"
+        @per-page-update="handlePerPagePagination"
       >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
@@ -99,12 +110,13 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { onMounted, reactive, provide } from 'vue';
+import { onMounted, reactive, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useRole } from '../composables/useRole';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import RoleFormModal from '../components/roles/RoleFormModal.vue';
+import AppSelect from '@/core/components/AppSelect.vue';
 
 const roleInstance = useRole();
 provide('useRole', roleInstance);
@@ -114,7 +126,7 @@ const router = useRouter();
 const {
   getRole,
   role,
-  filter_name,
+  filter,
   resetForm,
   validateAlphaInput,
   cleanSearch,
@@ -125,6 +137,7 @@ const {
   getPermissions,
   getStatus,
   getRolById,
+  globalStatus,
 } = roleInstance;
 
 const modalState = reactive<{
@@ -197,6 +210,13 @@ const handlePagination = async (page: number) => {
     return;
   }
   pagination.page = page + 1;
+  getRole();
+};
+const handlePerPagePagination = async (perPage: number) => {
+  if(perPage === pagination.per_page) return;
+
+  pagination.per_page = perPage;
+  pagination.page = 1;
   getRole();
 };
 onMounted(async () => {
