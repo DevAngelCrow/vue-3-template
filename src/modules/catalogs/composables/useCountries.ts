@@ -9,7 +9,7 @@ import { UpdateCountry } from '../interfaces/country.update.interface';
 import { nextTick, reactive } from 'vue';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
-type filterType = { filter_name: string | null; status: boolean | null };
+type filterType = { filter_name?: string; status?: boolean | 'Todos' };
 
 export function useCountries() {
   const alert = useAlertStore();
@@ -25,7 +25,7 @@ export function useCountries() {
         page: pagination.page,
         per_page: pagination.per_page,
         filter_name: filter.filter_name,
-        status: filter.status,
+        status: filter.status === 'Todos' ? undefined : filter.status,
       };
       const response = await catalogServices.getAllCountries({...params});
       if (response.statusCode === 200) {
@@ -143,8 +143,8 @@ export function useCountries() {
   const [abbreviation, abbreviationAttrs] = defineField('abbreviation');
   const [code, codeAttrs] = defineField('code');
   const filter = reactive<filterType>({
-    filter_name: null,
-    status: null,
+    filter_name: undefined,
+    status: undefined,
   });
   const pagination = reactive({
     page: 1,
@@ -170,8 +170,8 @@ export function useCountries() {
       return;
     }
     startLoading();
-    filter.filter_name = null;
-    filter.status = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
     const items = await getCountries();
     finishLoading();
     return items;

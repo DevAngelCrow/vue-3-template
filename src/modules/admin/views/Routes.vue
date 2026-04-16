@@ -48,6 +48,9 @@
         :total_items="pagination.total_items"
         :page="pagination.page"
         @page-update="handlePagination"
+        :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]"
+        @per-page-update="handlePerPagePagination"
       >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
@@ -184,6 +187,13 @@ const handlePagination = async (page: number) => {
     return;
   }
   pagination.page = page + 1;
+  getRoutes();
+};
+const handlePerPagePagination = async (perPage: number) => {
+  if(perPage === pagination.per_page) return;
+
+  pagination.per_page = perPage;
+  pagination.page = 1;
   getRoutes();
 };
 onMounted(async () => {

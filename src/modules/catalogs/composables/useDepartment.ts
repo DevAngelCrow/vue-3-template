@@ -11,6 +11,8 @@ import { DepartmentResponse } from '../interfaces/deparments/department.response
 import catalogServices from '../Services/catalog.services';
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
+
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_country?: number };
 export function useDepartment() {
   const {
     errors,
@@ -99,7 +101,9 @@ export function useDepartment() {
   const [country, countryAttrs] = defineField('country');
   const [active, activeAttrs] = defineField('active');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>(
+    { filter_name: undefined, status: undefined, id_country: undefined },
+  );
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const countries = ref<CountryResponse[]>([]);
 
@@ -122,12 +126,20 @@ export function useDepartment() {
   const getDepartments = async () => {
     try {
       startLoading();
-      const filter = {
+      const params: {
+        page?: number;
+        per_page?: number;
+        filter_name?: string | null;
+        status?: boolean | null;
+        id_country?: number | null;
+      } = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        filter_name: filter.filter_name,
+        status: filter.status === 'Todos' ? undefined : filter.status,
+        id_country: filter.id_country,
       };
-      const response = await catalogServices.getAllDepartments(filter);
+      const response = await catalogServices.getAllDepartments(params);
 
       if (response.statusCode === 200) {
         deparments.value = response.data.data;
@@ -207,7 +219,7 @@ export function useDepartment() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -215,15 +227,17 @@ export function useDepartment() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_country === undefined) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
+    filter.id_country = undefined;
     getDepartments();
   };
 
@@ -235,8 +249,8 @@ export function useDepartment() {
     setFieldValue('country', value?.country);
   };
 
-  const findDepartment = (value: string | null) => {
-    if (value) {
+  const findDepartment = (value: filterType) => {
+    if (value.filter_name || value.status !== undefined || value.id_country !== undefined) {
       getDepartments();
     }
   };
@@ -267,7 +281,7 @@ export function useDepartment() {
     country,
     countryAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     countries,
     deparments,

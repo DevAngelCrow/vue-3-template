@@ -9,7 +9,7 @@ import { UserRoleByIdRoleItem } from '../interfaces/user-role/user-role-by-id.re
 import { UserRoleUpdateForm } from '../interfaces/user-role/user-role-update.form.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import adminServices from '../services/admin.services';
-
+type filterType = { filter_name?: string; id_status?: number;}
 export function useUserRole() {
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
@@ -92,6 +92,10 @@ export function useUserRole() {
   ]);
 
   const users = ref<UsersResponse[]>([]);
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    id_status: undefined,
+  });
   const pagination = reactive({
     page: 1,
     per_page: 10,
@@ -116,10 +120,24 @@ export function useUserRole() {
   const getUsers = async () => {
     try {
       startLoading();
-      const response = await adminServices.getUsers();
-      if (response.statusCode === 200 && Array.isArray(response.data)) {
-        users.value = response.data;
-        pagination.total_items = response.data.length;
+      const params: {
+        page?: number;
+        per_page?: number;
+        filter_name?: string | null;
+        id_status?: number | null;
+      } = {
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: filter.filter_name,
+        id_status: filter.id_status,
+      };
+      const response = await adminServices.getUsers(params);
+
+      if (response.statusCode === 200) {
+        users.value = response.data.data;
+        pagination.page = response.data.current_page;
+        pagination.per_page = response.data.per_page;
+        pagination.total_items = response.data.total_items;
       }
     } catch (error) {
       console.error(error);

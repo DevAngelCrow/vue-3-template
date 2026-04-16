@@ -11,6 +11,7 @@ import { GlobalStatusResponse } from '../interfaces/global-status/global-status.
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatus } from '../interfaces/global-status/global-status.category-status.interface';
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_category?: number };
 export function useGlobalStatus() {
   const {
     errors,
@@ -83,22 +84,29 @@ export function useGlobalStatus() {
       alignItems: 'center',
     },
     {
-      field: 'active',
-      header: 'Estado',
+      field: 'category_status.name',
+      header: 'Categoría',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
     },
     {
       field: 'state_color',
-      header: 'Color del estado',
+      header: 'Color',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
     },
     {
       field: 'text_color',
-      header: 'Color del texto del estado',
+      header: 'Color del texto',
+      sortable: false,
+      alignHeaders: 'center',
+      alignItems: 'center',
+    },
+    {
+      field: 'active',
+      header: 'Estado',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
@@ -131,18 +139,24 @@ export function useGlobalStatus() {
   const [text_color, textColorAttrs] = defineField('text_color');
   const [category_status, categoryStatusAttrs] = defineField('category_status');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    status: undefined,
+    id_category: undefined,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9_ ]/g;
 
   const getGlobalStatus = async () => {
     try {
       startLoading();
-      const filter = {
+      const params = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        filter_name: filter.filter_name,
+        status: filter.status === 'Todos' ? undefined : filter.status,
+        id_category: filter.id_category,
       };
-      const response = await catalogServices.getGlobalStatus(filter);
+      const response = await catalogServices.getGlobalStatus(params);
 
       if (response.statusCode === 200) {
         globalStatus.value = response.data.data;
@@ -239,7 +253,7 @@ export function useGlobalStatus() {
     }
   };
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -247,15 +261,17 @@ export function useGlobalStatus() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_category === undefined) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
+    filter.id_category = undefined;
     getGlobalStatus();
   };
 
@@ -270,7 +286,7 @@ export function useGlobalStatus() {
     setFieldValue('category_status', value?.category_status);
   };
 
-  const findGlobalStatus = (value: string | null) => {
+  const findGlobalStatus = (value: filterType) => {
     if (value) {
       getGlobalStatus();
     }
@@ -304,7 +320,7 @@ export function useGlobalStatus() {
     category_status,
     categoryStatusAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     globalStatus,
     getGlobalStatus,

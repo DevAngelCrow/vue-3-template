@@ -172,9 +172,9 @@ const getRol = async (id: number) => {
   return response.data;
 };
 
-const getUsers = async (): Promise<ApiResponseGeneric<UsersResponse[]>> => {
+const getUsers = async (params: paginateParams): Promise<ApiResponseGeneric<UsersResponse>> => {
   const response =
-    await httpClient.get<ApiResponseGeneric<UsersResponse[]>>('identity/users');
+    await httpClient.get<ApiResponseGeneric<UsersResponse>>('identity/users', params);
   return response.data;
 };
 

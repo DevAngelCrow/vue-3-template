@@ -11,6 +11,7 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
 import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_department?: number };
 export function useMunicipality() {
   const {
     errors,
@@ -102,7 +103,11 @@ export function useMunicipality() {
   const [department, departmentAttrs] = defineField('department');
   const [active, activeAttrs] = defineField('active');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    status: undefined,
+    id_department: undefined,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const departments = ref<DepartmentResponse[]>([]);
 
@@ -125,12 +130,14 @@ export function useMunicipality() {
   const getMunicipalities = async () => {
     try {
       startLoading();
-      const filter = {
+      const params = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        filter_name: filter.filter_name,
+        status: filter.status === 'Todos' ? undefined : filter.status,
+        id_department: filter.id_department,
       };
-      const response = await catalogServices.getMunicipalities(filter);
+      const response = await catalogServices.getMunicipalities(params);
 
       if (response.statusCode === 200) {
         municipalities.value = response.data.data;
@@ -210,7 +217,7 @@ export function useMunicipality() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -218,15 +225,17 @@ export function useMunicipality() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_department === undefined) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
+    filter.id_department = undefined;
     getMunicipalities();
   };
 
@@ -238,7 +247,7 @@ export function useMunicipality() {
     setFieldValue('department', value?.department);
   };
 
-  const findMunicipality = (value: string | null) => {
+  const findMunicipality = (value: filterType) => {
     if (value) {
       getMunicipalities();
     }
@@ -269,7 +278,7 @@ export function useMunicipality() {
     department,
     departmentAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     departments,
     municipalities,
