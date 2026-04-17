@@ -1,7 +1,7 @@
 import { Municipality } from './districts.municipality.interface';
 
 export interface DistrictResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: string;

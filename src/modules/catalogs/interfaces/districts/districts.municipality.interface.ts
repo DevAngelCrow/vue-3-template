@@ -1,5 +1,5 @@
 export interface Municipality {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: boolean;

@@ -12,7 +12,7 @@ import catalogServices from '../Services/catalog.services';
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
 
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_country?: number };
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_country?: string };
 export function useDepartment() {
   const {
     errors,
@@ -25,7 +25,7 @@ export function useDepartment() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
@@ -42,13 +42,6 @@ export function useDepartment() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -131,7 +124,7 @@ export function useDepartment() {
         per_page?: number;
         filter_name?: string | null;
         status?: boolean | null;
-        id_country?: number | null;
+        id_country?: string | null;
       } = {
         page: pagination.page,
         per_page: pagination.per_page,
@@ -198,7 +191,7 @@ export function useDepartment() {
     }
   };
 
-  const toggleDepartment = async (id: number) => {
+  const toggleDepartment = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleDepartment(id);

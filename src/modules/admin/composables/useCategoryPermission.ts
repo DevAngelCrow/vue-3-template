@@ -22,7 +22,7 @@ export function useCategoryPermission() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre de la categoría es requerido')
@@ -38,13 +38,6 @@ export function useCategoryPermission() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -167,7 +160,7 @@ export function useCategoryPermission() {
     }
   };
 
-  const toggleCategoryPermission = async (id: number) => {
+  const toggleCategoryPermission = async (id: string) => {
     try {
       startLoading();
       const response = await adminServices.toggleCategoryPermission(id);

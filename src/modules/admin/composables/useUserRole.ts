@@ -9,19 +9,12 @@ import { UserRoleByIdRoleItem } from '../interfaces/user-role/user-role-by-id.re
 import { UserRoleUpdateForm } from '../interfaces/user-role/user-role-update.form.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import adminServices from '../services/admin.services';
-type filterType = { filter_name?: string; id_status?: number;}
+type filterType = { filter_name?: string; id_status?: string;}
 export function useUserRole() {
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'user_name',
       header: 'Nombre de usuario',
@@ -110,7 +103,7 @@ export function useUserRole() {
 
   const rolesList = ref<RoleResponse[]>([]);
   const userAssignedRoles = ref<UserRoleByIdRoleItem[]>([]);
-  const roles_ids = ref<number[]>([]);
+  const roles_ids = ref<string[]>([]);
 
   const filter_name = ref<string | null>(null);
   const filter_role_name = ref<string | null>(null);
@@ -124,7 +117,7 @@ export function useUserRole() {
         page?: number;
         per_page?: number;
         filter_name?: string | null;
-        id_status?: number | null;
+        id_status?: string | null;
       } = {
         page: pagination.page,
         per_page: pagination.per_page,
@@ -146,7 +139,7 @@ export function useUserRole() {
     }
   };
 
-  const getUserRoleById = async (id: number) => {
+  const getUserRoleById = async (id: string) => {
     try {
       startLoading();
       userAssignedRoles.value = [];
@@ -185,7 +178,7 @@ export function useUserRole() {
     }
   };
 
-  const updateUserRole = async (id: number, form: UserRoleUpdateForm) => {
+  const updateUserRole = async (id: string, form: UserRoleUpdateForm) => {
     try {
       startLoading();
       const response = await adminServices.putUserRole(id, form);

@@ -112,7 +112,7 @@ const modalState = reactive<{
   mode: 'closed' | 'view' | 'edit';
   title: string;
   isReadonly: boolean;
-  selectedItem: null | number;
+  selectedItem: null | string;
   userName: string;
   userEmail: string;
 }>({

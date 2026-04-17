@@ -1,5 +1,5 @@
 export interface MenuBar {
-  id: number;
+  id: string;
   label: string;
   icon: string;
   isUser: boolean;

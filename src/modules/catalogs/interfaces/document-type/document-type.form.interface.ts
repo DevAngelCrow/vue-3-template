@@ -1,5 +1,5 @@
 export interface DocumentTypeForm {
-  id?: number;
+  id?: string;
   name: string;
   description: string;
   mask?: string;

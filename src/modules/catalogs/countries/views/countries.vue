@@ -19,8 +19,9 @@
         </div>
       </div>
       <AppDataTable class="w-full" :headers="headers" :items="items" :paginator="true" :per_page="pagination.per_page"
-        :total_items="pagination.total_items" :page="pagination.page" :show-per-page-options="true" :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination" @per-page-update="handlePerPagePagination">
+        :total_items="pagination.total_items" :page="pagination.page" :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]" @page-update="handlePagination"
+        @per-page-update="handlePerPagePagination">
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button unstyled class="!outline-none" v-tooltip.bottom="'Ver Detalle'">
@@ -87,9 +88,9 @@ import { UpdateCountry } from '../../interfaces/country.update.interface';
 const showModal = ref<boolean>(false);
 const isMode = ref<boolean>(false);
 const isDetailsMode = ref<boolean>(false);
-const editingCountryId = ref<number | null>(null);
+const editingCountryId = ref<string | null>(null);
 const showModalCambioStatus = ref<boolean>(false);
-const idCountry = ref<number>();
+const idCountry = ref<string>();
 
 /** Zona de Variables */
 const { startLoading, finishLoading } = useLoaderStore();
@@ -202,7 +203,7 @@ const confirmModal = handleSubmit(async values => {
     finishLoading();
   }
 });
-const confirmModalEstado = async (id: number) => {
+const confirmModalEstado = async (id: string) => {
   try {
     startLoading();
     await changeStatusCountry(id);
@@ -216,13 +217,6 @@ const confirmModalEstado = async (id: number) => {
 }
 /** Zona de Headers de la tabla */
 const headers = ref<TableHeaders[]>([
-  {
-    field: 'id', // ---> corresponde al vinculador del item que recibira en su columna respectiva
-    header: 'No', //---> corresponde al nombre de la cabecera de la columna
-    sortable: false, // ---> si usted require que la columna sea sorteable
-    alignHeaders: 'center', // ---> alineación de la cabecera, puede tener valores 'start', 'center' o 'end'
-    alignItems: 'center', // ---> alineación de los items bajo esa cabecera ('start', 'center', 'end')
-  },
   {
     field: 'name',
     header: 'Nombre',
@@ -286,7 +280,7 @@ const handlePagination = async (page: number) => {
   finishLoading();
 };
 const handlePerPagePagination = async (perPage: number) => {
-  if(perPage === pagination.per_page) return;
+  if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;

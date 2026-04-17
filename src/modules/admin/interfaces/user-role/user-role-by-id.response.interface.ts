@@ -1,5 +1,5 @@
 export interface UserRoleByIdRoleItem {
-  id: number;
+  id: string;
   name: string;
   description: string;
   id_status: number;
@@ -7,7 +7,7 @@ export interface UserRoleByIdRoleItem {
 }
 
 export interface UserRoleByIdResponse {
-  id: number;
+  id: string;
   user_name: string;
   email: string;
   is_validated: boolean;

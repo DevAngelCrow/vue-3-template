@@ -136,14 +136,14 @@ const modalState = reactive<{
   title: string;
   description: string;
   isReadonly: boolean;
-  selectedItem: null | number;
+  selectedItem: null | string;
 }>({
   show: false,
   mode: 'closed',
   title: '',
   description: '',
   isReadonly: false,
-  selectedItem: null as number | null,
+  selectedItem: null as string | null,
 });
 const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
   { name: 'Todos', value: 'Todos' },

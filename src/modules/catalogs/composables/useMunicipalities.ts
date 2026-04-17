@@ -11,7 +11,7 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
 import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_department?: number };
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_department?: string };
 export function useMunicipality() {
   const {
     errors,
@@ -24,7 +24,7 @@ export function useMunicipality() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
@@ -44,13 +44,6 @@ export function useMunicipality() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -196,7 +189,7 @@ export function useMunicipality() {
     }
   };
 
-  const toggleMunicipality = async (id: number) => {
+  const toggleMunicipality = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleMunicipality(id);

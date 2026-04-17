@@ -1,5 +1,5 @@
 export interface CategoryStatusForm {
-  id?: number;
+  id?: string;
   name: string;
   code: string;
   description?: string;

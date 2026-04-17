@@ -1,8 +1,8 @@
 export interface RoleForm {
-  id?: number;
+  id?: string;
   name: string;
   description: string;
-  id_status: number;
+  id_status: string;
   code: string;
-  permissions_id: number[];
+  permissions_id: string[];
 }

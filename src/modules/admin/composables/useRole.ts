@@ -15,7 +15,7 @@ import { CategoryPermissionsResponse } from '../interfaces/role/role.category-pe
 import { CategoryStatus } from '@/types/global-status.type';
 
 
-type filterType = { filter_name?: string; id_status?: number };
+type filterType = { filter_name?: string; id_status?: string };
 
 export function useRole() {
   const {
@@ -29,7 +29,7 @@ export function useRole() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del rol es requerido')
@@ -53,13 +53,6 @@ export function useRole() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -135,7 +128,7 @@ export function useRole() {
   });
   const permissionsList = ref<
     {
-      id: number;
+      id: string;
       name: string;
       description: string;
       active: boolean;
@@ -158,7 +151,7 @@ export function useRole() {
   const filter_permission = ref<{
     name: string;
     category?: {
-      id: number;
+      id: string;
       name: string;
       description: string;
     };
@@ -250,7 +243,7 @@ export function useRole() {
     }
   };
 
-  const toggleRole = async (id: number) => {
+  const toggleRole = async (id: string) => {
     try {
       startLoading();
       const response = await adminServices.toggleRole(id);
@@ -269,7 +262,7 @@ export function useRole() {
       finishLoading();
     }
   };
-  const getRolById = async (id: number) => {
+  const getRolById = async (id: string) => {
     try {
       startLoading();
       permissionsList.value = [];
@@ -375,7 +368,7 @@ export function useRole() {
   const findPermission = (value: {
     name: string;
     category?: {
-      id: number;
+      id: string;
       name: string;
       description: string;
     };

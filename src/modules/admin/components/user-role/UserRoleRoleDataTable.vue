@@ -109,11 +109,11 @@ const {
   getRoles,
 } = userRoleInstance;
 
-const selectedRolesIds = ref<Set<number>>(new Set());
+const selectedRolesIds = ref<Set<string>>(new Set());
 const selectAll = ref<boolean>(false);
 const roleItemsFormatted = ref<
   {
-    id: number;
+    id: string;
     name: string;
     description: string;
     code: string;
@@ -123,7 +123,7 @@ const roleItemsFormatted = ref<
 const totalRoles = ref<number>(0);
 const rolesItemsLocal = ref<
   {
-    id: number;
+    id: string;
     name: string;
     description: string;
     code: string;
@@ -132,7 +132,7 @@ const rolesItemsLocal = ref<
 >([]);
 const rolesItemsFindLocal = ref<
   {
-    id: number;
+    id: string;
     name: string;
     description: string;
     code: string;
@@ -186,7 +186,7 @@ const handlePerPagePagination = async (perPage: number) => {
   updateSelectAllState();
 };
 
-const isRoleSelected = (roleId: number) => {
+const isRoleSelected = (roleId: string) => {
   return selectedRolesIds.value.has(roleId);
 };
 
@@ -202,7 +202,7 @@ const checkAll = (flag: boolean) => {
   }
 };
 
-const toggleRole = (roleId: number, isChecked: boolean) => {
+const toggleRole = (roleId: string, isChecked: boolean) => {
   if (isChecked) {
     selectedRolesIds.value.add(roleId);
   } else {
@@ -223,7 +223,7 @@ const updateSelectAllState = (): void => {
 };
 
 const setRolesItems = (
-  value: { id: number; name: string; description: string; code: string }[],
+  value: { id: string; name: string; description: string; code: string }[],
 ) => {
   if (value.length) {
     roleItemsFormatted.value = value.map(item => ({
@@ -305,7 +305,7 @@ watch(
   newIds => {
     if (newIds && newIds.length > 0) {
       selectedRolesIds.value.clear();
-      newIds.forEach((id: number) => {
+      newIds.forEach((id: string) => {
         selectedRolesIds.value.add(id);
       });
       updateSelectAllState();

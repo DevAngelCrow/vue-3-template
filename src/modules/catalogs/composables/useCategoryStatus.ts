@@ -23,7 +23,7 @@ export function useCategoryStatus() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre de la categoría de estado es requerido')
@@ -44,13 +44,6 @@ export function useCategoryStatus() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -182,7 +175,7 @@ export function useCategoryStatus() {
     }
   };
 
-  const patchCategoryStatus = async (id: number) => {
+  const patchCategoryStatus = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.patchCategoryStatus(id);

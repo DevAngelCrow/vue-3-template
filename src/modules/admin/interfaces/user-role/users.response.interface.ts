@@ -1,7 +1,7 @@
 import { UserRoleStatus } from './user-role.status.response.interface';
 
 export interface UsersResponse {
-  id: number;
+  id: string;
   user_name: string;
   email: string;
   is_validated: boolean;

@@ -155,7 +155,7 @@ const {
 } = adminInstance;
 
 const { startLoading, finishLoading } = useLoaderStore();
-const selectedPermissionsIds = ref<Set<number>>(new Set());
+const selectedPermissionsIds = ref<Set<string>>(new Set());
 const showEditConfirmModal = ref(false);
 const showSaveConfirmModal = ref(false);
 
@@ -170,7 +170,7 @@ const formModalState = computed(() => ({
   title: actionMode.title,
   description: '',
   isReadonly: actionMode.isReadonly,
-  selectedItem: null as null | number,
+  selectedItem: null as null | string,
 }));
 
 const confirmSave = handleSubmit(async values => {
@@ -226,7 +226,7 @@ const goBack = async () => {
   actionMode.mode = 'view';
   actionMode.title = 'Detalle de la ruta';
   actionMode.isReadonly = true;
-  const routeData = await getRouteById(+route.params.id);
+  const routeData = await getRouteById(route.params.id as string);
   if (!routeData || !routeData.data) {
     console.error('No se pudo obtener la ruta');
     return;
@@ -272,7 +272,7 @@ onMounted(async () => {
       actionMode.mode = 'view';
       actionMode.title = 'Detalle de la ruta';
       actionMode.isReadonly = true;
-      const routeData = await getRouteById(+route.params.id);
+      const routeData = await getRouteById(route.params.id as string);
       if (!routeData || !routeData.data) {
         console.error('No se pudo obtener la ruta');
         return;

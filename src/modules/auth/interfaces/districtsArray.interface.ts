@@ -3,6 +3,6 @@ export interface DistrictsModelAutocomplete {
   id_municipality: number;
   active: boolean;
   code: string;
-  id: number;
+  id: string;
   name: string;
 }

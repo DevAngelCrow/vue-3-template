@@ -1,7 +1,7 @@
 export interface MunicipalityForm {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
   active?: boolean;
-  id_department: number;
+  id_department: string;
 }

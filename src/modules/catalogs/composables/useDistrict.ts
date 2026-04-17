@@ -11,7 +11,7 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { Municipality } from '../interfaces/districts/districts.municipality.interface';
 import { DistrictResponse } from '../interfaces/districts/district.response.interface';
 import { DistrictForm } from '../interfaces/districts/district.form.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_municipality?: number };
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_municipality?: string };
 export function useDistrict() {
   const {
     errors,
@@ -24,7 +24,7 @@ export function useDistrict() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del distrito es requerido')
@@ -43,13 +43,6 @@ export function useDistrict() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -195,7 +188,7 @@ export function useDistrict() {
     }
   };
 
-  const toggleDistrict = async (id: number) => {
+  const toggleDistrict = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleDistrict(id);

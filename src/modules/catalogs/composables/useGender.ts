@@ -10,13 +10,6 @@ import { GenderResponse } from '../interfaces/gender/gender.response.interface';
 export function useGender() {
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,

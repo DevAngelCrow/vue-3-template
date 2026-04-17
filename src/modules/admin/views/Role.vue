@@ -146,17 +146,17 @@ const modalState = reactive<{
   title: string;
   description: string;
   isReadonly: boolean;
-  selectedItem: null | number;
+  selectedItem: null | string;
 }>({
   show: false,
   mode: 'closed',
   title: '',
   description: '',
   isReadonly: false,
-  selectedItem: null as number | null,
+  selectedItem: null as string | null,
 });
 
-const goToRoleMaintenance = (id?: number) => {
+const goToRoleMaintenance = (id?: string) => {
   if (id) {
     router.push({ name: 'role-maintenance', params: { id } });
   } else {

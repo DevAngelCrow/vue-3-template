@@ -40,11 +40,11 @@ const createCountries = async (data: CreateCountry) => {
   return response;
 };
 
-const updateCountries = async (id: number, data: UpdateCountry) => {
+const updateCountries = async (id: string, data: UpdateCountry) => {
   const response = await httpClient.put(`catalogs/countries/${id}`, data);
   return response;
 };
-const changeStatusCountry = async (id: number) => {
+const changeStatusCountry = async (id: string) => {
   const response = await httpClient.patch(`catalogs/countries/${id}`);
   return response;
 };
@@ -66,7 +66,7 @@ const postDepartment = async (data: DepartmentForm) => {
   return response;
 };
 
-const putDepartment = async (id: number, data: DepartmentForm) => {
+const putDepartment = async (id: string, data: DepartmentForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/departments/${id}`,
     data,
@@ -74,7 +74,7 @@ const putDepartment = async (id: number, data: DepartmentForm) => {
   return response;
 };
 
-const toggleDepartment = async (id: number) => {
+const toggleDepartment = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/departments/${id}`,
   );
@@ -96,7 +96,7 @@ const postMunicipality = async (data: MunicipalityForm) => {
   return response;
 };
 
-const putMunicipality = async (id: number, data: MunicipalityForm) => {
+const putMunicipality = async (id: string, data: MunicipalityForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/municipalities/${id}`,
     data,
@@ -105,7 +105,7 @@ const putMunicipality = async (id: number, data: MunicipalityForm) => {
   return response;
 };
 
-const toggleMunicipality = async (id: number) => {
+const toggleMunicipality = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/municipalities/${id}`,
   );
@@ -128,7 +128,7 @@ const postDistrict = async (data: DistrictForm) => {
   return response;
 };
 
-const putDistrict = async (id: number, data: DistrictForm) => {
+const putDistrict = async (id: string, data: DistrictForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/districts/${id}`,
     data,
@@ -137,7 +137,7 @@ const putDistrict = async (id: number, data: DistrictForm) => {
   return response;
 };
 
-const toggleDistrict = async (id: number) => {
+const toggleDistrict = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/districts/${id}`,
   );
@@ -159,7 +159,7 @@ const postGlobalStatus = async (data: GlobalStatusForm) => {
   return response;
 };
 
-const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
+const putGlobalStatus = async (id: string, data: GlobalStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/global-statuses/${id}`,
     data,
@@ -167,7 +167,7 @@ const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
   return response;
 };
 
-const toggleGlobalStatus = async (id: number) => {
+const toggleGlobalStatus = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/global-statuses/${id}`,
   );
@@ -192,7 +192,7 @@ const postCategoryStatus = async (data: CategoryStatusForm) => {
   return response;
 };
 
-const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
+const putCategoryStatus = async (id: string, data: CategoryStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/categories-status/${id}`,
     data,
@@ -200,7 +200,7 @@ const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
   return response;
 };
 
-const patchCategoryStatus = async (id: number) => {
+const patchCategoryStatus = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/categories-status/${id}`,
   );
@@ -223,7 +223,7 @@ const postDocumentType = async (data: DocumentTypeForm) => {
   return response;
 };
 
-const putDocumentType = async (id: number, data: DocumentTypeForm) => {
+const putDocumentType = async (id: string, data: DocumentTypeForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `profile/document-types/${id}`,
     data,
@@ -231,7 +231,7 @@ const putDocumentType = async (id: number, data: DocumentTypeForm) => {
   return response;
 };
 
-const toggleDocumentType = async (id: number) => {
+const toggleDocumentType = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `profile/document-types/${id}`,
   );

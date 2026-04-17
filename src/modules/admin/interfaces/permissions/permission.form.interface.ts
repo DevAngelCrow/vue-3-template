@@ -1,7 +1,7 @@
 export interface PermissionForm {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
-  id_category_permissions: number;
+  id_category_permissions: string;
   active?: boolean;
 }

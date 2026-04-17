@@ -1,5 +1,5 @@
 export interface RoutesResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: boolean;
@@ -11,7 +11,7 @@ export interface RoutesResponse {
   title: string;
   parent: [] | null;
   permissions: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     active: boolean;

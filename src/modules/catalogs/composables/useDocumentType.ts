@@ -22,7 +22,7 @@ export function useDocumentType() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del tipo de documento es requerido')
@@ -39,13 +39,6 @@ export function useDocumentType() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'name',
       header: 'Nombre',
@@ -172,7 +165,7 @@ export function useDocumentType() {
     }
   };
 
-  const toggleDocumentType = async (id: number) => {
+  const toggleDocumentType = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleDocumentType(id);

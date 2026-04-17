@@ -31,7 +31,7 @@ import CardAddressInfo from '../components/CardAddressInfo.vue';
 import { useAuth } from '../composables/useAuth';
 
 interface Nationality {
-  id: number;
+  id: string;
   name: string;
 }
 

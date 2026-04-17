@@ -167,12 +167,12 @@ const actionMode = reactive<{
   title: string;
   description: string;
   isReadonly: boolean;
-  selectedItem: null | number;
+  selectedItem: null | string;
 }>({
   title: 'Crear nuevo rol',
   description: '',
   isReadonly: false,
-  selectedItem: null as number | null,
+  selectedItem: null as string | null,
 });
 
 const {
@@ -200,7 +200,7 @@ const {
 const loadMounted = ref(false);
 const originalData = ref<unknown>(null);
 const { startLoading, finishLoading } = useLoaderStore();
-const selectedPermissionsIds = ref<Set<number>>(new Set());
+const selectedPermissionsIds = ref<Set<string>>(new Set());
 const statusFiltered = ref<unknown[]>([]);
 const showEditConfirmModal = ref(false);
 const showSaveConfirmModal = ref(false);
@@ -267,7 +267,7 @@ const goBack = async () => {
   actionMode.mode = 'view';
   actionMode.title = 'Detalle del rol';
   actionMode.isReadonly = true;
-  const rol = await getRolById(+route.params.id);
+  const rol = await getRolById(route.params.id as string);
   if (!rol || !rol.data) {
     console.error('No se pudo obtener el rol');
     return;
@@ -300,7 +300,7 @@ onMounted(async () => {
       actionMode.title = 'Detalle del rol';
       actionMode.isReadonly = true;
 
-      const rol = await getRolById(+route.params.id);
+      const rol = await getRolById(route.params.id as string);
 
       if (!rol || !rol.data) {
         console.error('No se pudo obtener el rol');

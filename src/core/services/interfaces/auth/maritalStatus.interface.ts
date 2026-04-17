@@ -1,5 +1,5 @@
 export interface MaritalStatus {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: boolean;

@@ -11,7 +11,7 @@ import { GlobalStatusResponse } from '../interfaces/global-status/global-status.
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatus } from '../interfaces/global-status/global-status.category-status.interface';
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_category?: number };
+type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_category?: string };
 export function useGlobalStatus() {
   const {
     errors,
@@ -24,7 +24,7 @@ export function useGlobalStatus() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       code: yup.string().required('El campo de cabecera es obligatorio'),
       name: yup
         .string()
@@ -55,13 +55,6 @@ export function useGlobalStatus() {
   });
 
   const headers = ref<TableHeaders[]>([
-    {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
     {
       field: 'code',
       header: 'Código',
@@ -215,7 +208,7 @@ export function useGlobalStatus() {
     }
   };
 
-  const toggleGlobalStatus = async (id: number) => {
+  const toggleGlobalStatus = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleGlobalStatus(id);

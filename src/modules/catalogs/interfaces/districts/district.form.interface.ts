@@ -1,7 +1,7 @@
 export interface DistrictForm {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
   active?: boolean;
-  id_municipality: number;
+  id_municipality: string;
 }

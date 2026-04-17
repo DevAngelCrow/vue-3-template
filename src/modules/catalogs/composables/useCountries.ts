@@ -56,7 +56,7 @@ export function useCountries() {
     }
   };
 
-  const updateCountry = async (id: number, data: UpdateCountry) => {
+  const updateCountry = async (id: string, data: UpdateCountry) => {
     try {
       const response = await catalogServices.updateCountries(id, data);
       if (response.status === 200) {
@@ -72,7 +72,7 @@ export function useCountries() {
       });
     }
   };
-  const changeStatusCountry = async (id: number) => {
+  const changeStatusCountry = async (id: string) => {
     try {
       const response = await catalogServices.changeStatusCountry(id);
       if (response.status === 200) {
