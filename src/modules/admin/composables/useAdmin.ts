@@ -12,6 +12,13 @@ import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autoc
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
 
+type FilterType = {
+  filter_name?: string;
+  active?: boolean;
+  show?: boolean;
+  id_parent?: number;
+  required_auth?: boolean;
+};
 export function useAdmin() {
   const {
     errors,
@@ -198,7 +205,12 @@ export function useAdmin() {
     defineField('permissions_ids');
   const [required_auth, required_authAttrs] = defineField('required_auth');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<FilterType>({
+    active: undefined,
+    show: undefined,
+    id_parent: undefined,
+    required_auth: undefined,
+  });
   const filter_permission = ref<{
     name: string;
     category?: {
@@ -226,12 +238,20 @@ export function useAdmin() {
   const getRoutes = async () => {
     try {
       startLoading();
-      const filter = {
+      const params: {
+        page?: number;
+        per_page?: number;
+        name?: string;
+        active?: boolean;
+        show?: boolean;
+        id_parent?: number;
+        required_auth?: boolean;
+      } = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
+        ...filter,
       };
-      const response = await adminServices.getAllRoutes(filter);
+      const response = await adminServices.getAllRoutes(params);
       const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
       if (secondResponse.statusCode === 200) {
         parentRoutes.value = secondResponse.data
@@ -409,7 +429,7 @@ export function useAdmin() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -417,15 +437,25 @@ export function useAdmin() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      !filter.active &&
+      !filter.show &&
+      !filter.id_parent &&
+      !filter.required_auth
+    ) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.active = undefined;
+    filter.show = undefined;
+    filter.id_parent = undefined;
+    filter.required_auth = undefined;
     getRoutes();
   };
 
@@ -450,7 +480,7 @@ export function useAdmin() {
     setFieldValue('required_auth', value.required_auth);
   };
 
-  const findRoute = (value: string | null) => {
+  const findRoute = (value: FilterType) => {
     if (value) {
       getRoutes();
     }
@@ -496,7 +526,7 @@ export function useAdmin() {
     setFieldError,
     items,
     validateInputUri,
-    filter_name,
+    filter,
     validateAlphaInput,
     cleanSearch,
     setRouteItem,
