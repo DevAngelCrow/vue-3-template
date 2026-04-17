@@ -9,7 +9,7 @@ import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import adminServices from '../services/admin.services';
 import { CategoryPermissionsResponse } from '../interfaces/category-permissions/category-permissions-response.interface';
 import { CategoryPermissionForm } from '../interfaces/category-permissions/category-permission-form.interface';
-
+type filterType = { filter_name?: string; status?: boolean | 'Todos' };
 export function useCategoryPermission() {
   const {
     errors,
@@ -89,19 +89,27 @@ export function useCategoryPermission() {
   const [description, descriptionAttrs] = defineField('description');
   const [active, activeAttrs] = defineField('active');
 
-  const filter_name = ref<string | null>(null);
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    status: undefined,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
 
   const getCategoryPermissions = async () => {
     try {
       startLoading();
-      const filter = {
+      const params: {
+        page?: number;
+        per_page?: number;
+        name?: string;
+        active?: boolean;
+      } = {
         page: pagination.page,
         per_page: pagination.per_page,
-        name: filter_name.value,
-        active: true,
+        name: filter.filter_name,
+        active: filter.status === 'Todos' ? undefined : filter.status,
       };
-      const response = await adminServices.getCategoryPermissions(filter);
+      const response = await adminServices.getCategoryPermissions(params);
       if (response.statusCode === 200) {
         categories.value = response.data.data;
         pagination.page = response.data.current_page;
@@ -180,7 +188,7 @@ export function useCategoryPermission() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -188,15 +196,19 @@ export function useCategoryPermission() {
     }
     const sanitizedValue = sanitizedValueInput(value, regex);
     nextTick(() => {
-      filter_name.value = sanitizedValue;
+      filter.filter_name = sanitizedValue;
     });
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      (filter.status === undefined || filter.status === 'Todos')
+    ) {
       return;
     }
-    filter_name.value = null;
+    filter.filter_name = undefined;
+    filter.status = undefined;
     getCategoryPermissions();
   };
 
@@ -207,7 +219,7 @@ export function useCategoryPermission() {
     setFieldValue('active', value?.active);
   };
 
-  const findCategoryPermission = (value: string | null) => {
+  const findCategoryPermission = (value: filterType) => {
     if (value) {
       getCategoryPermissions();
     }
@@ -236,7 +248,7 @@ export function useCategoryPermission() {
     active,
     activeAttrs,
     alert,
-    filter_name,
+    filter,
     pagination,
     addCategoryPermission,
     editCategoryPermission,

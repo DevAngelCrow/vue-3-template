@@ -18,8 +18,9 @@ import { UsersResponse } from '../interfaces/user-role/users.response.interface'
 import { UserRoleByIdResponse } from '../interfaces/user-role/user-role-by-id.response.interface';
 import { UserRoleUpdateForm } from '../interfaces/user-role/user-role-update.form.interface';
 
-export interface paramsFilter {
-  active: boolean;
+export interface ParamsFilter {
+  active?: boolean;
+  name?: string;
 }
 const getAllRoutes = async (
   params: paginateParams,
@@ -101,7 +102,7 @@ const togglePermission = async (id: number) => {
 };
 
 const getCategoryPermissions = async (
-  params?: paginateParams & paramsFilter,
+  params?: paginateParams & ParamsFilter,
 ) => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsCategoryResponse>
@@ -172,9 +173,13 @@ const getRol = async (id: number) => {
   return response.data;
 };
 
-const getUsers = async (params: paginateParams): Promise<ApiResponseGeneric<UsersResponse>> => {
-  const response =
-    await httpClient.get<ApiResponseGeneric<UsersResponse>>('identity/users', params);
+const getUsers = async (
+  params: paginateParams,
+): Promise<ApiResponseGeneric<UsersResponse>> => {
+  const response = await httpClient.get<ApiResponseGeneric<UsersResponse>>(
+    'identity/users',
+    params,
+  );
   return response.data;
 };
 

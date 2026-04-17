@@ -3,6 +3,7 @@ import '../src/core/assets/style.css';
 import PrimeVue from 'primevue/config';
 import { createPinia } from 'pinia';
 import ToastService from 'primevue/toastservice';
+import { ConfirmationService } from 'primevue';
 
 import router from '../src/core/router/index';
 import App from './App.vue';
@@ -16,6 +17,7 @@ const pinia = createPinia();
 
 registerDirectives(app);
 
+app.use(ConfirmationService);
 app.use(PrimeVue, {
   ripple: true,
   locale: {

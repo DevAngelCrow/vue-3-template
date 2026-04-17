@@ -12,14 +12,29 @@
         >
           <AppInputText
             label="Buscar"
-            class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
-            v-model="filter_name"
-            @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findRoute(filter_name)"
+            class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75"
+            v-model="filter.filter_name"
+            @input="validateAlphaInput(filter.filter_name)"
+          />
+          <AppSelect
+            class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto"
+            :options="statusOptions"
+            option-label="name"
+            label="Estado"
+            v-model="filter.active"
+            optionValue="value"
+          />
+          <AppSelect
+            class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto"
+            :options="parentRoutes"
+            option-label="name"
+            label="Ruta padre"
+            v-model="filter.id_parent"
+            optionValue="id"
           />
           <Button
             class="flex-shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRoute(filter_name)"
+            v-debounce:700.click="() => findRoute(filter)"
             >Buscar</Button
           >
           <Button
@@ -93,7 +108,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { nextTick, onMounted, reactive, watch, provide } from 'vue';
+import { nextTick, onMounted, reactive, watch, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useAdmin } from '../composables/useAdmin';
@@ -110,7 +125,7 @@ const {
   child_route,
   resetField,
   items,
-  filter_name,
+  filter,
   resetForm,
   validateAlphaInput,
   cleanSearch,
@@ -118,6 +133,7 @@ const {
   findRoute,
   pagination,
   headers,
+  parentRoutes,
 } = adminInstance;
 
 const goToRouteMaintenance = (id?: number) => {
@@ -127,7 +143,6 @@ const goToRouteMaintenance = (id?: number) => {
     router.push({ name: 'route-maintenance' });
   }
 };
-
 const modalState = reactive<{
   show: boolean;
   mode: 'closed' | 'add' | 'view' | 'edit' | 'delete';
@@ -143,7 +158,11 @@ const modalState = reactive<{
   isReadonly: false,
   selectedItem: null as number | null,
 });
-
+const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
+  { name: 'Todos', value: 'Todos' },
+  { name: 'Activo', value: true },
+  { name: 'Inactivo', value: false },
+]);
 const openModal = (action: 'delete', data: RoutesResponse) => {
   modalState.mode = action;
   modalState.isReadonly = false;
@@ -190,7 +209,7 @@ const handlePagination = async (page: number) => {
   getRoutes();
 };
 const handlePerPagePagination = async (perPage: number) => {
-  if(perPage === pagination.per_page) return;
+  if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;

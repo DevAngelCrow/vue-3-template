@@ -1,13 +1,13 @@
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
+import { nextTick, reactive } from 'vue';
 
 import { useAlertStore, useLoaderStore } from '@/core/store';
+import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 import { CreateCountry } from '../interfaces/country.create.interface';
 import catalogServices from '../Services/catalog.services';
 import { UpdateCountry } from '../interfaces/country.update.interface';
-import { nextTick, reactive } from 'vue';
-import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 
 type filterType = { filter_name?: string; status?: boolean | 'Todos' };
 
@@ -27,7 +27,7 @@ export function useCountries() {
         filter_name: filter.filter_name,
         status: filter.status === 'Todos' ? undefined : filter.status,
       };
-      const response = await catalogServices.getAllCountries({...params});
+      const response = await catalogServices.getAllCountries({ ...params });
       if (response.statusCode === 200) {
         pagination.page = response.data.current_page;
         pagination.per_page = response.data.per_page;
@@ -87,7 +87,7 @@ export function useCountries() {
         content: 'Ocurrió un error al momento de cambiar el estado del país',
       });
     }
-  }
+  };
   const findCountries = async (value: filterType) => {
     if (value.filter_name || value.status !== null) {
       startLoading();
@@ -95,7 +95,7 @@ export function useCountries() {
       finishLoading();
       return items;
     }
-  }
+  };
   const { handleSubmit, validateField, defineField, errors, resetForm } =
     useForm({
       validateOnMount: false,
@@ -166,7 +166,10 @@ export function useCountries() {
   };
 
   const cleanSearch = async () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === null) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === null
+    ) {
       return;
     }
     startLoading();
