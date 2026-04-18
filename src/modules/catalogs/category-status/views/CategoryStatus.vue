@@ -1,50 +1,111 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full">
-    <section id="category_status_content" class="w-full flex flex-row flex-wrap gap-5">
+    <section
+      id="category_status_content"
+      class="w-full flex flex-row flex-wrap gap-5"
+    >
+      <AppTitle
+        title="Categorías de Estado"
+        class="w-full md:w-auto flex justify-center items-center"
+      />
       <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle title="Categorías de Estado" class="w-full md:w-auto flex justify-center items-center" />
-        <div id="inputs" class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0">
-          <AppInputText label="Buscar" class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75" v-model="filter.filter_name"
+        <div
+          id="inputs"
+          class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        >
+          <AppInputText
+            label="Buscar"
+            class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75"
+            v-model="filter.filter_name"
             @update:modelValue="validateAlphaInput(filter.filter_name)"
-            v-debounce:700.keydown.enter="() => findCategoryStatus(filter)" />
-          <AppSelect class="w-full sm:w-[40%] md:w-auto min-w-0 grow shrink-0" :options="statusOptions" option-label="name" label="Estado"
-            v-model="filter.status" optionValue="value" />
-          <Button class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findCategoryStatus(filter)">Buscar</Button>
-          <Button class="shrink-0 grow rounded-md" outlined v-debounce:700.click="cleanSearch">Limpiar</Button>
-          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"><i
+            v-debounce:700.keydown.enter="() => findCategoryStatus(filter)"
+          />
+          <AppSelect
+            class="w-full sm:w-[40%] md:w-auto min-w-0 grow shrink-0"
+            :options="statusOptions"
+            option-label="name"
+            label="Estado"
+            v-model="filter.status"
+            optionValue="value"
+          />
+          <Button
+            class="shrink-0 grow rounded-md"
+            v-debounce:700.click="() => findCategoryStatus(filter)"
+            >Buscar</Button
+          >
+          <Button
+            class="shrink-0 grow rounded-md"
+            outlined
+            v-debounce:700.click="cleanSearch"
+            >Limpiar</Button
+          >
+          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"
+            ><i
               class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"></i><span>Agregar</span></Button>
+              style="font-size: 1.1rem; font-weight: bold"
+            ></i
+            ><span>Agregar</span></Button
+          >
         </div>
       </div>
-      <AppDataTable class="w-full" :headers="headers" :items="categoryStatuses" :paginator="true"
-        :per_page="pagination.per_page" :total_items="pagination.total_items" :page="pagination.page"
-        :show-per-page-options="true" :per-page-options="[10, 20, 50, 100]"
+      <AppDataTable
+        class="w-full"
+        :headers="headers"
+        :items="categoryStatuses"
+        :paginator="true"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]"
         @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination">
+        @per-page-update="handlePerPagePagination"
+      >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-eye"
-              @click="openModal('view', data)" v-tooltip.bottom="'Ver Detalle'"></Button>
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
-              @click="openModal('edit', data)" v-tooltip.bottom="'Editar'" :disabled="!data?.active"></Button>
-            <Button class="rounded-full" variant="text" :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
-              @click="openModal('delete', data)" v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-eye"
+              @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver Detalle'"
+            ></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-pencil"
+              @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
+              :disabled="!data?.active"
+            ></Button>
+            <Button
+              class="rounded-full"
+              variant="text"
+              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+              @click="openModal('delete', data)"
+              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
+            ></Button>
           </div>
         </template>
         <template #body-icon="{ data }">
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <AppChip :label="data?.status?.name" :style="{
-            backgroundColor: data?.status?.state_color,
-            color: data?.status?.text_color,
-          }">
+          <AppChip
+            :label="data?.status?.name"
+            :style="{
+              backgroundColor: data?.status?.state_color,
+              color: data?.status?.text_color,
+            }"
+          >
           </AppChip>
         </template>
       </AppDataTable>
     </section>
-    <CategoryStatusFormModal :modal-state="modalState" @close-modal="closeModal" />
+    <CategoryStatusFormModal
+      :modal-state="modalState"
+      @close-modal="closeModal"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -118,7 +179,11 @@ const openModal = (
   modalState.show = true;
 };
 
-const statusOptions = ref<{ name: string, value: boolean | null | 'Todos' }[]>([{ name: 'Todos', value: 'Todos' }, { name: 'Activo', value: true }, { name: 'Inactivo', value: false },]);
+const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
+  { name: 'Todos', value: 'Todos' },
+  { name: 'Activo', value: true },
+  { name: 'Inactivo', value: false },
+]);
 const closeModal = () => {
   modalState.show = false;
   modalState.mode = 'closed';
@@ -137,7 +202,7 @@ const handlePagination = async (page: number) => {
   getCategoryStatuses();
 };
 const handlePerPagePagination = async (perPage: number) => {
-  if(perPage === pagination.per_page) return;
+  if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
