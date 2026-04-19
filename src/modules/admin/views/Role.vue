@@ -1,51 +1,54 @@
 <template>
-  <div class="py-5 px-5 h-full max-h-full">
-    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
-      <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle
-          title="Roles"
-          class="w-full md:w-auto flex justify-center items-center"
+  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
+    <section
+      id="content"
+      class="w-full xl:w-[80%] flex flex-row flex-wrap gap-5"
+    >
+      <AppTitle
+        title="Roles"
+        class="w-full md:w-auto flex justify-center items-center"
+      />
+      <div
+        id="inputs"
+        class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+      >
+        <AppInputText
+          label="Buscar..."
+          class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
+          v-model="filter.filter_name"
+          append-icon="pi pi-search"
+          @update:modelValue="validateAlphaInput(filter.filter_name)"
+          v-debounce:700.keydown.enter="() => findRole(filter)"
         />
-        <div
-          id="inputs"
-          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        <AppSelect
+          class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
+          :options="globalStatus"
+          option-label="name"
+          label="Estado"
+          v-model="filter.id_status"
+          optionValue="id"
+        />
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          v-debounce:700.click="() => findRole(filter)"
+          >Buscar</Button
         >
-          <AppInputText
-            label="Buscar..."
-            class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75"
-            v-model="filter.filter_name"
-            @update:modelValue="validateAlphaInput(filter.filter_name)"
-            v-debounce:700.keydown.enter="() => findRole(filter)"
-          />
-          <AppSelect
-            class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto"
-            :options="globalStatus"
-            option-label="name"
-            label="Estado"
-            v-model="filter.id_status"
-            optionValue="id"
-          />
-          <Button
-            class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRole(filter)"
-            >Buscar</Button
-          >
-          <Button
-            class="shrink-0 grow rounded-md"
-            outlined
-            v-debounce:700.click="cleanSearch"
-            >Limpiar</Button
-          >
-          <Button
-            class="shrink-0 grow rounded-md"
-            @click="goToRoleMaintenance()"
-            ><i
-              class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"
-            ></i
-            ><span>Agregar</span></Button
-          >
-        </div>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          outlined
+          v-debounce:700.click="cleanSearch"
+          label="Limpiar"
+          :icon="iconFilter"
+        ></Button>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md ml-auto"
+          @click="goToRoleMaintenance()"
+          ><i
+            class="pi pi-plus-circle flex justify-center items-center text-center"
+            style="font-size: 1.1rem; font-weight: bold"
+          ></i
+          ><span>Agregar</span></Button
+        >
       </div>
       <AppDataTable
         class="w-full"
@@ -75,6 +78,9 @@
             <Button
               class="rounded-full"
               variant="text"
+              :severity="
+                data?.status?.name === 'Inactivo' ? 'success' : 'danger'
+              "
               :icon="
                 data?.status?.name === 'Inactivo'
                   ? 'pi pi-check-circle'
@@ -108,7 +114,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { onMounted, reactive, provide } from 'vue';
+import { computed, onMounted, reactive, provide } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AppSelect from '@/core/components/AppSelect.vue';
@@ -218,6 +224,13 @@ const handlePerPagePagination = async (perPage: number) => {
   pagination.page = 1;
   getRole();
 };
+const iconFilter = computed(() => {
+  const filterValues = Object.values(filter).some(Boolean);
+  if (!filterValues) {
+    return 'pi pi-filter';
+  }
+  return 'pi pi-filter-slash';
+});
 onMounted(async () => {
   try {
     await getRole();

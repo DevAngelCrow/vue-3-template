@@ -8,48 +8,46 @@
         title="Países"
         class="w-full md:w-auto flex justify-center items-center"
       />
-      <div class="w-full flex flex-row gap-3 flex-wrap">
-        <div
-          id="inputs"
-          class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+      <div
+        id="inputs"
+        class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+      >
+        <AppInputText
+          label="Buscar..."
+          class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
+          v-model="filter.filter_name"
+          append-icon="pi pi-search"
+          @input="validateAlphaInput(filter.filter_name)"
+        />
+        <AppSelect
+          class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
+          :options="statusOptions"
+          option-label="name"
+          label="Estado"
+          v-model="filter.status"
+          optionValue="value"
+        />
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          v-debounce:700.click="() => wrapperFindCountries(filter)"
+          >Buscar</Button
         >
-          <AppInputText
-            label="Buscar..."
-            class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
-            v-model="filter.filter_name"
-            append-icon="pi pi-search"
-            @input="validateAlphaInput(filter.filter_name)"
-          />
-          <AppSelect
-            class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
-            :options="statusOptions"
-            option-label="name"
-            label="Estado"
-            v-model="filter.status"
-            optionValue="value"
-          />
-          <Button
-            class="shrink-0 grow md:grow-0 rounded-md"
-            v-debounce:700.click="() => wrapperFindCountries(filter)"
-            >Buscar</Button
-          >
-          <Button
-            class="shrink-0 grow md:grow-0 rounded-md"
-            outlined
-            v-debounce:700.click="() => wrapperCleanSearch()"
-            :icon="iconFilter"
-            label="Limpiar"
-          ></Button>
-          <Button
-            class="shrink-0 grow md:grow-0 rounded-md ml-auto"
-            @click="openModal('create')"
-            ><i
-              class="pi pi-plus-circle flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"
-            ></i
-            ><span>Agregar</span>
-          </Button>
-        </div>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          outlined
+          v-debounce:700.click="() => wrapperCleanSearch()"
+          :icon="iconFilter"
+          label="Limpiar"
+        ></Button>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md ml-auto"
+          @click="openModal('create')"
+          ><i
+            class="pi pi-plus-circle flex justify-center items-center text-center"
+            style="font-size: 1.1rem; font-weight: bold"
+          ></i
+          ><span>Agregar</span>
+        </Button>
       </div>
       <AppDataTable
         class="w-full"
@@ -67,15 +65,12 @@
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
             <Button
-              unstyled
-              class="!outline-none"
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-eye"
+              @click="openModal('details', data)"
               v-tooltip.bottom="'Ver Detalle'"
-            >
-              <i
-                class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2"
-                @click="openModal('details', data)"
-              ></i>
-            </Button>
+            ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"

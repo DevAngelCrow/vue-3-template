@@ -13,9 +13,10 @@
         class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
       >
         <AppInputText
-          label="Buscar"
-          class="min-w-auto w-full grow lg:grow-0 shrink-0 sm:w-[50%] md:w-[45] lg:w-83.75"
+          label="Buscar..."
+          class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
           v-model="filter.filter_name"
+          append-icon="pi pi-search"
           @update:modelValue="validateAlphaInput(filter.filter_name)"
           v-debounce:700.keydown.enter="() => findDistrict(filter)"
         />
@@ -41,11 +42,12 @@
           >Buscar</Button
         >
         <Button
-          class="shrink-0 grow rounded-md md:grow-0"
+          class="shrink-0 grow md:grow-0 rounded-md"
           outlined
           v-debounce:700.click="cleanSearch"
-          >Limpiar</Button
-        >
+          label="Limpiar"
+          :icon="iconFilter"
+        ></Button>
         <Button
           class="shrink-0 grow rounded-md md:grow-0 ml-auto"
           @click="openModal('add')"
@@ -113,7 +115,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, provide, reactive, ref } from 'vue';
+import { computed, onMounted, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
 import AppSelect from '@/core/components/AppSelect.vue';
@@ -216,6 +218,13 @@ const handlePerPagePagination = async (perPage: number) => {
   pagination.page = 1;
   getDistricts();
 };
+const iconFilter = computed(() => {
+  const filterValues = Object.values(filter).some(Boolean);
+  if (!filterValues) {
+    return 'pi pi-filter';
+  }
+  return 'pi pi-filter-slash';
+});
 onMounted(async () => {
   await getMunicipalities();
   await getDistricts();

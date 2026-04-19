@@ -1,34 +1,37 @@
 <template>
-  <div class="py-5 px-5 h-full max-h-full">
-    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
-      <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle
-          title="Usuarios"
-          class="w-full md:w-auto flex justify-center items-center"
+  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
+    <section
+      id="content"
+      class="w-full xl:w-[80%] flex flex-col flex-wrap gap-5"
+    >
+      <AppTitle
+        title="Usuarios"
+        class="w-full md:w-auto flex justify-start items-start"
+      />
+      <div
+        id="inputs"
+        class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+      >
+        <AppInputText
+          label="Buscar..."
+          class="min-w-auto w-auto grow lg:grow-0 shrink-0 md:w-83.75"
+          v-model="filter_name"
+          append-icon="pi pi-search"
+          @update:modelValue="validateAlphaInput(filter_name)"
+          v-debounce:700.keydown.enter="() => findUser(filter_name)"
         />
-        <div
-          id="inputs"
-          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          v-debounce:700.click="() => findUser(filter_name)"
+          >Buscar</Button
         >
-          <AppInputText
-            label="Buscar..."
-            class="min-w-auto w-auto grow shrink-0 md:w-83.75"
-            v-model="filter_name"
-            @update:modelValue="validateAlphaInput(filter_name)"
-            v-debounce:700.keydown.enter="() => findUser(filter_name)"
-          />
-          <Button
-            class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findUser(filter_name)"
-            >Buscar</Button
-          >
-          <Button
-            class="shrink-0 grow rounded-md"
-            outlined
-            v-debounce:700.click="cleanSearch"
-            >Limpiar</Button
-          >
-        </div>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          outlined
+          v-debounce:700.click="cleanSearch"
+          label="Limpiar"
+          :icon="iconFilter"
+        ></Button>
       </div>
       <AppDataTable
         class="w-full"
@@ -84,7 +87,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { onMounted, reactive, provide, ref } from 'vue';
+import { computed, onMounted, reactive, provide, ref } from 'vue';
 
 import { useUserRole } from '../composables/useUserRole';
 import { UsersResponse } from '../interfaces/user-role/users.response.interface';
@@ -179,6 +182,9 @@ const handlePerPagePagination = async (perPage: number) => {
   pagination.page = 1;
   await getUsers();
 };
+const iconFilter = computed(() => {
+  return filter_name.value ? 'pi pi-filter-slash' : 'pi pi-filter';
+});
 onMounted(async () => {
   try {
     await Promise.all([getUsers()]);

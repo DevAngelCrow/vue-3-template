@@ -1,60 +1,62 @@
 <template>
-  <div class="py-5 px-5 h-full max-h-full">
+  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
     <section
       id="global_status_content"
-      class="w-full flex flex-row flex-wrap gap-5"
+      class="w-full xl:w-[80%] flex flex-row flex-wrap gap-5"
     >
-      <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle
-          title="Estados Globales"
-          class="w-full md:w-auto flex justify-center items-center"
+      <AppTitle
+        title="Estados Globales"
+        class="w-full md:w-auto flex justify-center items-center"
+      />
+      <div
+        id="inputs"
+        class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+      >
+        <AppInputText
+          label="Buscar..."
+          class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
+          v-model="filter.filter_name"
+          append-icon="pi pi-search"
+          @update:modelValue="validateAlphaInput(filter.filter_name)"
+          v-debounce:700.keydown.enter="() => findGlobalStatus(filter)"
         />
-        <div
-          id="inputs"
-          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        <AppSelect
+          class="w-full sm:w-[20%] lg:w-auto min-w-0 grow lg:grow-0 shrink-0"
+          :options="categoryStatuses"
+          option-label="name"
+          label="Categoría"
+          v-model="filter.id_category"
+          optionValue="id"
+        />
+        <AppSelect
+          class="w-full sm:w-[20%] lg:w-auto min-w-0 grow lg:grow-0 shrink-0"
+          :options="statusOptions"
+          option-label="name"
+          label="Estado"
+          v-model="filter.status"
+          optionValue="value"
+        />
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          v-debounce:700.click="() => findGlobalStatus(filter)"
+          >Buscar</Button
         >
-          <AppInputText
-            label="Buscar"
-            class="min-w-auto w-full grow shrink-0 sm:w-[50%] md:w-[45] lg:w-83.75"
-            v-model="filter.filter_name"
-            @update:modelValue="validateAlphaInput(filter.filter_name)"
-            v-debounce:700.keydown.enter="() => findGlobalStatus(filter)"
-          />
-          <AppSelect
-            class="w-full sm:w-[20%] lg:w-auto min-w-0 grow shrink-0"
-            :options="categoryStatuses"
-            option-label="name"
-            label="Categoría"
-            v-model="filter.id_category"
-            optionValue="id"
-          />
-          <AppSelect
-            class="w-full sm:w-[20%] lg:w-auto min-w-0 grow shrink-0"
-            :options="statusOptions"
-            option-label="name"
-            label="Estado"
-            v-model="filter.status"
-            optionValue="value"
-          />
-          <Button
-            class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findGlobalStatus(filter)"
-            >Buscar</Button
-          >
-          <Button
-            class="shrink-0 grow rounded-md"
-            outlined
-            v-debounce:700.click="cleanSearch"
-            >Limpiar</Button
-          >
-          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"
-            ><i
-              class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"
-            ></i
-            ><span>Agregar</span></Button
-          >
-        </div>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          outlined
+          v-debounce:700.click="cleanSearch"
+          label="Limpiar"
+          :icon="iconFilter"
+        ></Button>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md ml-auto"
+          @click="openModal('add')"
+          ><i
+            class="pi pi-plus-circle flex justify-center items-center text-center"
+            style="font-size: 1.1rem; font-weight: bold"
+          ></i
+          ><span>Agregar</span></Button
+        >
       </div>
       <AppDataTable
         class="w-full"
@@ -76,18 +78,23 @@
               variant="text"
               icon="pi pi-eye"
               @click="openModal('view', data)"
+              v-tooltip.bottom="'Ver Detalle'"
             ></Button>
             <Button
               class="rounded-full mx-0 my-0 px-0 py-0"
               variant="text"
               icon="pi pi-pencil"
               @click="openModal('edit', data)"
+              :disabled="!data?.active"
+              v-tooltip.bottom="'Editar'"
             ></Button>
             <Button
               class="rounded-full"
               variant="text"
+              :severity="data?.active ? 'danger' : 'success'"
               :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
               @click="openModal('delete', data)"
+              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
             ></Button>
           </div>
         </template>
@@ -125,7 +132,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, provide, reactive, ref } from 'vue';
+import { computed, onMounted, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
 import { useGlobalStatus } from '../../composables/useGlobalStatus';
@@ -225,6 +232,13 @@ const handlePerPagePagination = async (perPage: number) => {
   pagination.page = 1;
   getGlobalStatus();
 };
+const iconFilter = computed(() => {
+  const filterValues = Object.values(filter).some(Boolean);
+  if (!filterValues) {
+    return 'pi pi-filter';
+  }
+  return 'pi pi-filter-slash';
+});
 onMounted(async () => {
   await getGlobalStatus();
   await getCategoryStatuses();
