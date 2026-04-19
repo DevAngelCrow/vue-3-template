@@ -1,67 +1,165 @@
 <template>
-  <div class="py-5 px-5 h-full">
-    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
+  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
+    <section
+      id="content"
+      class="w-full xl:w-[80%] flex flex-row flex-wrap gap-5"
+    >
+      <AppTitle
+        title="Países"
+        class="w-full md:w-auto flex justify-center items-center"
+      />
       <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle title="Países" class="w-full md:w-auto flex justify-center items-center" />
-        <div id="inputs" class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0">
-          <AppInputText label="Buscar" class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75"
-            v-model="filter.filter_name" @input="validateAlphaInput(filter.filter_name)" />
-          <AppSelect class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto" :options="statusOptions"
-            option-label="name" label="Estado" v-model="filter.status" optionValue="value" />
-          <Button class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => wrapperFindCountries(filter)">Buscar</Button>
-          <Button class="shrink-0 grow rounded-md" outlined
-            v-debounce:700.click="() => wrapperCleanSearch()">Limpiar</Button>
-          <Button class="shrink-0 grow rounded-md" @click="openModal('create')"><i
-              class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"></i><span>Agregar</span>
+        <div
+          id="inputs"
+          class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+        >
+          <AppInputText
+            label="Buscar..."
+            class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
+            v-model="filter.filter_name"
+            append-icon="pi pi-search"
+            @input="validateAlphaInput(filter.filter_name)"
+          />
+          <AppSelect
+            class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
+            :options="statusOptions"
+            option-label="name"
+            label="Estado"
+            v-model="filter.status"
+            optionValue="value"
+          />
+          <Button
+            class="shrink-0 grow md:grow-0 rounded-md"
+            v-debounce:700.click="() => wrapperFindCountries(filter)"
+            >Buscar</Button
+          >
+          <Button
+            class="shrink-0 grow md:grow-0 rounded-md"
+            outlined
+            v-debounce:700.click="() => wrapperCleanSearch()"
+            :icon="iconFilter"
+            label="Limpiar"
+          ></Button>
+          <Button
+            class="shrink-0 grow md:grow-0 rounded-md ml-auto"
+            @click="openModal('create')"
+            ><i
+              class="pi pi-plus-circle flex justify-center items-center text-center"
+              style="font-size: 1.1rem; font-weight: bold"
+            ></i
+            ><span>Agregar</span>
           </Button>
         </div>
       </div>
-      <AppDataTable class="w-full" :headers="headers" :items="items" :paginator="true" :per_page="pagination.per_page"
-        :total_items="pagination.total_items" :page="pagination.page" :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]" @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination">
+      <AppDataTable
+        class="w-full"
+        :headers="headers"
+        :items="items"
+        :paginator="true"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]"
+        @page-update="handlePagination"
+        @per-page-update="handlePerPagePagination"
+      >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
-            <Button unstyled class="!outline-none" v-tooltip.bottom="'Ver Detalle'">
-              <i class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2"
-                @click="openModal('details', data)"></i>
+            <Button
+              unstyled
+              class="!outline-none"
+              v-tooltip.bottom="'Ver Detalle'"
+            >
+              <i
+                class="pi pi-eye cursor-pointer hover:text-blue-500 transition-colors p-2"
+                @click="openModal('details', data)"
+              ></i>
             </Button>
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
-              @click="openModal('edit', data)" v-tooltip.bottom="'Editar'"></Button>
-            <Button class="rounded-full" variant="text" :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-pencil"
+              @click="openModal('edit', data)"
+              v-tooltip.bottom="'Editar'"
+            ></Button>
+            <Button
+              class="rounded-full"
+              variant="text"
+              :severity="data?.active ? 'danger' : 'success'"
+              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
               @click="openModalEstado('changeStatus', data)"
-              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"></Button>
+              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
+            ></Button>
           </div>
         </template>
         <template #body-active="{ data }">
-          <AppChip :label="data?.status?.name" :style="{
-            backgroundColor: data?.status?.state_color,
-            color: data?.status?.text_color,
-          }">
-          </AppChip>
+          <AppChipStatus
+            :label="data?.status?.name"
+            :background-color="data?.status?.state_color"
+            :textColor="data?.status?.text_color"
+          >
+          </AppChipStatus>
         </template>
       </AppDataTable>
     </section>
-    <AppModal :show="showModal" show-icon-close :title="isDetailsMode ? 'Detalle País' : isMode ? 'Editar País' : 'Agregar País'
-      " :show-btn-confirm-footer="isDetailsMode ? false : true" :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
-      :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'" :show-buttons="!isDetailsMode"
-      @close-modal="closeModalCreate" @confirm-modal="confirmModal" width="350px">
+    <AppModal
+      :show="showModal"
+      show-icon-close
+      :title="
+        isDetailsMode ? 'Detalle País' : isMode ? 'Editar País' : 'Agregar País'
+      "
+      :show-btn-confirm-footer="isDetailsMode ? false : true"
+      :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
+      :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
+      :show-buttons="!isDetailsMode"
+      @close-modal="closeModalCreate"
+      @confirm-modal="confirmModal"
+      width="350px"
+    >
       <div class="flex flex-col gap-6 py-5 w-62.5">
-        <AppInputText v-model="name" class="lg:w-full grow sm:max-w-125" label="Ingrese el nombre del país"
-          v-bind="nameAttrs" :error-messages="errors.name" :disabled="isDetailsMode" />
-        <AppInputText v-model="abbreviation" class="lg:w-full grow sm:max-w-125" label="Ingrese la abreviación del país"
-          v-bind="abbreviationAttrs" :error-messages="errors.abbreviation" :disabled="isDetailsMode" />
+        <AppInputText
+          v-model="name"
+          class="lg:w-full grow sm:max-w-125"
+          label="Ingrese el nombre del país"
+          v-bind="nameAttrs"
+          :error-messages="errors.name"
+          :disabled="isDetailsMode"
+        />
+        <AppInputText
+          v-model="abbreviation"
+          class="lg:w-full grow sm:max-w-125"
+          label="Ingrese la abreviación del país"
+          v-bind="abbreviationAttrs"
+          :error-messages="errors.abbreviation"
+          :disabled="isDetailsMode"
+        />
 
-        <AppInputMask v-model="code" class="lg:w-full grow sm:max-w-125" label="Ingrese el código del país"
-          v-bind="codeAttrs" :error-messages="errors.code" :disabled="isDetailsMode" mask="999" placeholder="000" />
+        <AppInputMask
+          v-model="code"
+          class="lg:w-full grow sm:max-w-125"
+          label="Ingrese el código del país"
+          v-bind="codeAttrs"
+          :error-messages="errors.code"
+          :disabled="isDetailsMode"
+          mask="999"
+          placeholder="000"
+        />
       </div>
     </AppModal>
 
-    <AppModal :show="showModalCambioStatus" show-icon-close title="Cambiar estado" :show-btn-confirm-footer="true"
-      :title-btn-confirm="'Confirmar'" :title-btn-cancel="'Cancelar'" :show-buttons="true"
-      @close-modal="CloseModalEstado" @confirm-modal="confirmModalEstado(idCountry!)" width="450px">
+    <AppModal
+      :show="showModalCambioStatus"
+      show-icon-close
+      title="Cambiar estado"
+      :show-btn-confirm-footer="true"
+      :title-btn-confirm="'Confirmar'"
+      :title-btn-cancel="'Cancelar'"
+      :show-buttons="true"
+      @close-modal="CloseModalEstado"
+      @confirm-modal="confirmModalEstado(idCountry!)"
+      width="450px"
+    >
       <div class="flex flex-col gap-6 py-5 w-full">
         <p class="text-center">
           ¿Está seguro que desea cambiar el estado del país?
@@ -73,7 +171,7 @@
 
 <script setup lang="ts">
 /** Zona de Imports */
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { Button } from 'primevue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -151,13 +249,20 @@ const {
   pagination,
 } = useCountries();
 
-const statusOptions = ref<{ name: string, value: boolean | null | 'Todos' }[]>([{ name: 'Todos', value: 'Todos' }, { name: 'Activo', value: true }, { name: 'Inactivo', value: false },]);
-const wrapperFindCountries = async (value: { filter_name?: string; status?: boolean | 'Todos' }) => {
+const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
+  { name: 'Todos', value: 'Todos' },
+  { name: 'Activo', value: true },
+  { name: 'Inactivo', value: false },
+]);
+const wrapperFindCountries = async (value: {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+}) => {
   items.value = await findCountries(value);
-}
+};
 const wrapperCleanSearch = async () => {
   items.value = await cleanSearch();
-}
+};
 const closeModalCreate = (value: boolean) => {
   showModal.value = value;
   if (!value) {
@@ -210,11 +315,11 @@ const confirmModalEstado = async (id: string) => {
     CloseModalEstado(false);
     items.value = await getCountries();
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
     finishLoading();
   }
-}
+};
 /** Zona de Headers de la tabla */
 const headers = ref<TableHeaders[]>([
   {
@@ -288,6 +393,13 @@ const handlePerPagePagination = async (perPage: number) => {
   items.value = await getCountries();
   finishLoading();
 };
+const iconFilter = computed(() => {
+  const filterValues = Object.values(filter).some(v => v);
+  if (!filterValues) {
+    return 'pi pi-filter';
+  }
+  return 'pi pi-filter-slash';
+});
 /** Zona de Métodos */
 onMounted(async () => {
   try {

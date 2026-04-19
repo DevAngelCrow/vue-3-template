@@ -89,14 +89,12 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <AppChip
+          <AppChipStatus
             :label="data?.status?.name"
-            :style="{
-              backgroundColor: data?.status?.state_color,
-              color: data?.status?.text_color,
-            }"
+            :background-color="data?.status?.state_color"
+            :color="data?.status?.text_color"
           >
-          </AppChip>
+          </AppChipStatus>
         </template>
       </AppDataTable>
     </section>

@@ -1,8 +1,14 @@
 <template>
   <div class="flex flex-col overflow-hidden border-1 rounded-md">
     <DataTable :value="items" :loading :loadingIcon :row-hover :rows="per_page">
-      <Column :style="`width:${widthColumn(header)}; text-align: ${txtAlignItems(header)}`" v-for="header in headers"
-        :key="header.field" :field="header.field" :sortable="header.sortable" :pt="columHeader(header)">
+      <Column
+        :style="`width:${widthColumn(header)}; text-align: ${txtAlignItems(header)}`"
+        v-for="header in headers"
+        :key="header.field"
+        :field="header.field"
+        :sortable="header.sortable"
+        :pt="columHeader(header)"
+      >
         <template #header>
           <slot :name="`header-${header.header}`" :header="header.header">
             {{ header.header }}
@@ -10,15 +16,27 @@
         </template>
         <template #body="slotProps">
           <div :class="['flex', 'w-full', `justify-${txtAlignItems(header)}`]">
-            <slot :name="`body-${header.field}`" :data="slotProps.data" :index="slotProps.index">
+            <slot
+              :name="`body-${header.field}`"
+              :data="slotProps.data"
+              :index="slotProps.index"
+            >
               {{ getNestedValue(slotProps.data, header.field) ?? '-' }}
             </slot>
           </div>
         </template>
       </Column>
       <template #footer>
-        <AppPaginator :rows="per_page" :total-records="total_items" v-if="paginator" @page-update="updatePage" @per-page-update="perPageUpdate"
-          :first="(page - 1) * per_page" :rowsPerPageOptions="perPageOptions" :showPerPageOptions="showPerPageOptions" />
+        <AppPaginator
+          :rows="per_page"
+          :total-records="total_items"
+          v-if="paginator"
+          @page-update="updatePage"
+          @per-page-update="perPageUpdate"
+          :first="(page - 1) * per_page"
+          :rowsPerPageOptions="perPageOptions"
+          :showPerPageOptions="showPerPageOptions"
+        />
       </template>
     </DataTable>
   </div>
@@ -71,14 +89,14 @@ const columHeader = computed(() => {
     if (value.alignHeaders?.length) {
       return {
         ColumnHeaderContent: {
-          class: `${txtAlignHeaders(value)} font-bold`,
+          class: `${txtAlignHeaders(value)} font-extrabold`,
           mergeProps: true,
         },
       };
     }
     return {
       ColumnHeaderContent: {
-        class: `text-start justify-start font-bold`,
+        class: `text-start justify-start font-extrabold`,
         mergeProps: true,
       },
     };

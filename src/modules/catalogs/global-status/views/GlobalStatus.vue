@@ -1,60 +1,127 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full">
-    <section id="global_status_content" class="w-full flex flex-row flex-wrap gap-5">
+    <section
+      id="global_status_content"
+      class="w-full flex flex-row flex-wrap gap-5"
+    >
       <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle title="Estados Globales" class="w-full md:w-auto flex justify-center items-center" />
-        <div id="inputs" class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0">
-          <AppInputText label="Buscar" class="min-w-auto w-full grow shrink-0 sm:w-[50%] md:w-[45] lg:w-83.75" v-model="filter.filter_name"
+        <AppTitle
+          title="Estados Globales"
+          class="w-full md:w-auto flex justify-center items-center"
+        />
+        <div
+          id="inputs"
+          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        >
+          <AppInputText
+            label="Buscar"
+            class="min-w-auto w-full grow shrink-0 sm:w-[50%] md:w-[45] lg:w-83.75"
+            v-model="filter.filter_name"
             @update:modelValue="validateAlphaInput(filter.filter_name)"
-            v-debounce:700.keydown.enter="() => findGlobalStatus(filter)" />
-          <AppSelect class="w-full sm:w-[20%] lg:w-auto min-w-0 grow shrink-0" :options="categoryStatuses" option-label="name" label="Categoría"
-            v-model="filter.id_category" optionValue="id" />
-           <AppSelect class="w-full sm:w-[20%] lg:w-auto min-w-0 grow shrink-0" :options="statusOptions" option-label="name" label="Estado"
-            v-model="filter.status" optionValue="value" />
-          <Button class="shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findGlobalStatus(filter)">Buscar</Button>
-          <Button class="shrink-0 grow rounded-md" outlined v-debounce:700.click="cleanSearch">Limpiar</Button>
-          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"><i
+            v-debounce:700.keydown.enter="() => findGlobalStatus(filter)"
+          />
+          <AppSelect
+            class="w-full sm:w-[20%] lg:w-auto min-w-0 grow shrink-0"
+            :options="categoryStatuses"
+            option-label="name"
+            label="Categoría"
+            v-model="filter.id_category"
+            optionValue="id"
+          />
+          <AppSelect
+            class="w-full sm:w-[20%] lg:w-auto min-w-0 grow shrink-0"
+            :options="statusOptions"
+            option-label="name"
+            label="Estado"
+            v-model="filter.status"
+            optionValue="value"
+          />
+          <Button
+            class="shrink-0 grow rounded-md"
+            v-debounce:700.click="() => findGlobalStatus(filter)"
+            >Buscar</Button
+          >
+          <Button
+            class="shrink-0 grow rounded-md"
+            outlined
+            v-debounce:700.click="cleanSearch"
+            >Limpiar</Button
+          >
+          <Button class="shrink-0 grow rounded-md" @click="openModal('add')"
+            ><i
               class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"></i><span>Agregar</span></Button>
+              style="font-size: 1.1rem; font-weight: bold"
+            ></i
+            ><span>Agregar</span></Button
+          >
         </div>
       </div>
-      <AppDataTable class="w-full" :headers="headers" :items="globalStatus" :paginator="true"
-        :per_page="pagination.per_page" :total_items="pagination.total_items" :page="pagination.page"
-        :show-per-page-options="true" :per-page-options="[10, 20, 50, 100]"
+      <AppDataTable
+        class="w-full"
+        :headers="headers"
+        :items="globalStatus"
+        :paginator="true"
+        :per_page="pagination.per_page"
+        :total_items="pagination.total_items"
+        :page="pagination.page"
+        :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]"
         @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination">
+        @per-page-update="handlePerPagePagination"
+      >
         <template #body-acciones="{ data }">
           <div class="flex gap-0 justify-center">
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-eye"
-              @click="openModal('view', data)"></Button>
-            <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
-              @click="openModal('edit', data)"></Button>
-            <Button class="rounded-full" variant="text" :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
-              @click="openModal('delete', data)"></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-eye"
+              @click="openModal('view', data)"
+            ></Button>
+            <Button
+              class="rounded-full mx-0 my-0 px-0 py-0"
+              variant="text"
+              icon="pi pi-pencil"
+              @click="openModal('edit', data)"
+            ></Button>
+            <Button
+              class="rounded-full"
+              variant="text"
+              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+              @click="openModal('delete', data)"
+            ></Button>
           </div>
         </template>
         <template #body-active="{ data }">
-          <AppChip :label="data?.status?.name" :style="{
-            backgroundColor: data?.status?.state_color,
-            color: data?.status?.text_color,
-          }"></AppChip>
+          <AppChipStatus
+            :label="data?.status?.name"
+            :background-color="data?.status?.state_color"
+            :color="data?.status?.text_color"
+          ></AppChipStatus>
         </template>
         <template #body-state_color="{ data }">
           <div class="flex justify-center items-center gap-2 w-full h-full">
-            <div :class="`rounded-xl border-1 h-5 w-[20px]`" :style="{ backgroundColor: data.state_color }"></div>
+            <div
+              :class="`rounded-xl border-1 h-5 w-[20px]`"
+              :style="{ backgroundColor: data.state_color }"
+            ></div>
             <span>{{ data.state_color }}</span>
           </div>
         </template>
         <template #body-text_color="{ data }">
           <div class="flex justify-center items-center gap-2 w-full h-full">
-            <div :class="`rounded-xl border-1 h-5 w-[20px]`" :style="{ backgroundColor: data.text_color }"></div>
+            <div
+              :class="`rounded-xl border-1 h-5 w-[20px]`"
+              :style="{ backgroundColor: data.text_color }"
+            ></div>
             <span>{{ data.text_color }}</span>
           </div>
         </template>
       </AppDataTable>
     </section>
-    <GlobalStatusFormModal :modal-state="modalState" @close-modal="closeModal" />
+    <GlobalStatusFormModal
+      :modal-state="modalState"
+      @close-modal="closeModal"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -129,7 +196,11 @@ const openModal = (
   }
   modalState.show = true;
 };
-const statusOptions = ref<{ name: string, value: boolean | null | 'Todos' }[]>([{ name: 'Todos', value: 'Todos' }, { name: 'Activo', value: true }, { name: 'Inactivo', value: false },]);
+const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
+  { name: 'Todos', value: 'Todos' },
+  { name: 'Activo', value: true },
+  { name: 'Inactivo', value: false },
+]);
 const closeModal = () => {
   modalState.show = false;
   modalState.mode = 'closed';
@@ -148,7 +219,7 @@ const handlePagination = async (page: number) => {
   getGlobalStatus();
 };
 const handlePerPagePagination = async (perPage: number) => {
-  if(perPage === pagination.per_page) return;
+  if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;

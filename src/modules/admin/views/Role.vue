@@ -91,14 +91,12 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-status.name="{ data }">
-          <AppChip
+          <AppChipStatus
             :label="data?.status?.name"
-            :style="{
-              backgroundColor: data?.status?.state_color,
-              color: data?.status?.text_color,
-            }"
+            :background-color="data?.status?.state_color"
+            :color="data?.status?.text_color"
           >
-          </AppChip>
+          </AppChipStatus>
         </template>
         <template #body-show="{ data }">
           <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
@@ -113,10 +111,11 @@ import { Button } from 'primevue';
 import { onMounted, reactive, provide } from 'vue';
 import { useRouter } from 'vue-router';
 
+import AppSelect from '@/core/components/AppSelect.vue';
+
 import { useRole } from '../composables/useRole';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import RoleFormModal from '../components/roles/RoleFormModal.vue';
-import AppSelect from '@/core/components/AppSelect.vue';
 
 const roleInstance = useRole();
 provide('useRole', roleInstance);
@@ -213,7 +212,7 @@ const handlePagination = async (page: number) => {
   getRole();
 };
 const handlePerPagePagination = async (perPage: number) => {
-  if(perPage === pagination.per_page) return;
+  if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;

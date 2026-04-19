@@ -89,14 +89,12 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <AppChip
+          <AppChipStatus
             :label="data?.status?.name"
-            :style="{
-              backgroundColor: data?.status?.state_color,
-              color: data?.status?.text_color,
-            }"
+            :background-color="data?.status?.state_color"
+            :color="data?.status?.text_color"
           >
-          </AppChip>
+          </AppChipStatus>
         </template>
         <template #body-show="{ data }">
           <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
@@ -110,6 +108,8 @@
 import { Button } from 'primevue';
 import { nextTick, onMounted, reactive, watch, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+import AppChipStatus from '@/core/components/AppChipStatus.vue';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';

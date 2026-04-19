@@ -1,5 +1,7 @@
 <template>
-  <div class="flex justify-between items-center gap-2">
+  <div
+    class="flex justify-center md:justify-between items-center gap-2 flex-wrap"
+  >
     <span class="text-xs"
       >Mostrando <span class="font-bold">{{ first + 1 }}</span> a
       <span class="font-bold">{{ first + rows }}</span> de

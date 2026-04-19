@@ -71,12 +71,10 @@
           />
         </template>
         <template #body-status.name="{ data }">
-          <AppChip
+          <AppChipStatus
             :label="data?.status?.name"
-            :style="{
-              backgroundColor: data?.status?.state_color,
-              color: data?.status?.text_color,
-            }"
+            :background-color="data?.status?.state_color"
+            :color="data?.status?.text_color"
           />
         </template>
       </AppDataTable>
@@ -175,7 +173,7 @@ const handlePagination = async (page: number) => {
   await getUsers();
 };
 const handlePerPagePagination = async (perPage: number) => {
-  if(perPage === pagination.per_page) return;
+  if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
