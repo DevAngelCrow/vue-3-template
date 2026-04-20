@@ -19,8 +19,9 @@ import { getToday, FormatDateToISO } from '@/core/utils/dates';
 import { useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import type { Country } from '@/core/services/interfaces/auth/country.interface';
-import type { District } from '@/core/services/interfaces/auth/district.interface';
 import type { Gender } from '@/core/services/interfaces/auth/gender.interface';
+import type { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
+import catalogServices from '@/modules/catalogs/Services/catalog.services';
 import type { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
 import type { MaritalStatus } from '@/core/services/interfaces/auth/maritalStatus.interface';
 
@@ -39,7 +40,7 @@ const { startLoading, finishLoading } = useLoaderStore();
 
 // Refs para los catálogos
 const countries = ref<Country[]>([]);
-const districts = ref<District[]>([]);
+const geographicDivisions = ref<GeographicDivisionResponse[]>([]);
 const genders = ref<Gender[]>([]);
 const documentTypes = ref<DocumentType[]>([]);
 const maritalStatuses = ref<MaritalStatus[]>([]);
@@ -60,7 +61,7 @@ const components = reactive<StepperVerticalInterface[]>([
     header: 'Dirección',
     ref: 'info_direccion_ref',
     props: {
-      districts: districts,
+      geographicDivisions: geographicDivisions,
     },
   },
   {
@@ -96,7 +97,7 @@ const addressInfoFieldNames = [
   'street',
   'streetNumber',
   'neighborhood',
-  'district',
+  'geographic_divisions',
   'houseNumber',
   'block',
   'pathway',
@@ -113,13 +114,21 @@ const { validateField, handleSubmit, registerUser } = useAuth();
 const loadCatalogs = async () => {
   try {
     startLoading();
-    const response = await authServices.getCatalogs();
-    if (response.statusCode === 200) {
-      countries.value = response.data.countries;
-      districts.value = response.data.districts;
-      genders.value = response.data.genders;
-      documentTypes.value = response.data.documentTypes;
-      maritalStatuses.value = response.data.maritalStatuses;
+    const [catalogsResponse, divisionsResponse] = await Promise.all([
+      authServices.getCatalogs(),
+      catalogServices.getAllGeographicDivisions({
+        active: true,
+        per_page: 1000,
+      }),
+    ]);
+    if (catalogsResponse.statusCode === 200) {
+      countries.value = catalogsResponse.data.countries;
+      genders.value = catalogsResponse.data.genders;
+      documentTypes.value = catalogsResponse.data.documentTypes;
+      maritalStatuses.value = catalogsResponse.data.maritalStatuses;
+    }
+    if (divisionsResponse.statusCode === 200) {
+      geographicDivisions.value = divisionsResponse.data.data;
     }
   } catch (error: unknown) {
     console.error('Error loading catalogs:', error);
@@ -196,7 +205,7 @@ const onSubmitStepPersonalInfo = handleSubmit(async values => {
     form.append('street', values.street);
     form.append('street_number', values.streetNumber);
     form.append('neighborhood', values.neighborhood);
-    form.append('id_district', values.district.id);
+    form.append('id_geographic_division', values.geographic_divisions.id);
     form.append('house_number', values.houseNumber);
     form.append('block', values.block);
     form.append('pathway', values.pathway);
@@ -213,4 +222,3 @@ const onSubmitStepPersonalInfo = handleSubmit(async values => {
   }
 });
 </script>
-<style scoped></style>

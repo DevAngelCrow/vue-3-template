@@ -17,14 +17,14 @@
         @update:modelValue="validationInputAlphanumeric(street, 'street')"
       />
       <AppAutocomplete
-        v-model="district"
+        v-model="geographicDivisions"
         class="flex-1"
-        label="Distrito*"
-        id="district"
-        v-bind="districtAttrs"
-        :error-messages="errors.district"
+        label="División Geográfica*"
+        id="geographic_divisions"
+        v-bind="geographicDivisionsAttrs"
+        :error-messages="errors.geographic_divisions"
         option-label="name"
-        :suggestions="districtsFiltered"
+        :suggestions="geographicDivisionsFiltered"
         dropdown
         @complete="findAutocomplete"
       />
@@ -107,16 +107,16 @@
 import { AutoCompleteCompleteEvent, Checkbox } from 'primevue';
 import { ref, toRefs } from 'vue';
 
-import { District } from '@/core/services/interfaces/auth/district.interface';
+import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
 
 import { useAuth } from '../composables/useAuth';
 
 interface Props {
-  districts: District[];
+  geographicDivisions: GeographicDivisionResponse[];
 }
 
 const props = defineProps<Props>();
-const { districts } = toRefs(props);
+const { geographicDivisions: geographicDivisionsProp } = toRefs(props);
 
 const {
   street,
@@ -125,8 +125,8 @@ const {
   streetNumberAttrs,
   neighborhood,
   neighborhoodAttrs,
-  district,
-  districtAttrs,
+  geographicDivisions,
+  geographicDivisionsAttrs,
   houseNumber,
   houseNumberAttrs,
   block,
@@ -139,21 +139,17 @@ const {
   validationInputAlphanumeric,
 } = useAuth();
 
-const districtsFiltered = ref<District[]>([]);
+const geographicDivisionsFiltered = ref<GeographicDivisionResponse[]>([]);
 
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-  let query = event?.query;
-  let _filteredItems = [];
-
-  for (let i = 0; i < districts.value.length; i++) {
-    let item = districts.value[i];
-
+  const query = event?.query;
+  const filtered: GeographicDivisionResponse[] = [];
+  for (const item of geographicDivisionsProp.value) {
     if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-      _filteredItems.push(item);
+      filtered.push(item);
     }
   }
-
-  districtsFiltered.value = _filteredItems;
+  geographicDivisionsFiltered.value = filtered;
 };
 
 defineExpose({
@@ -163,8 +159,8 @@ defineExpose({
   streetNumberAttrs,
   neighborhood,
   neighborhoodAttrs,
-  district,
-  districtAttrs,
+  geographicDivisions,
+  geographicDivisionsAttrs,
   houseNumber,
   houseNumberAttrs,
   block,
@@ -176,4 +172,3 @@ defineExpose({
   errors,
 });
 </script>
-<style scoped></style>
