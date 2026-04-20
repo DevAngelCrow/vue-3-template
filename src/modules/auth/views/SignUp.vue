@@ -21,7 +21,6 @@ import authServices from '@/core/services/auth.services';
 import type { Country } from '@/core/services/interfaces/auth/country.interface';
 import type { Gender } from '@/core/services/interfaces/auth/gender.interface';
 import type { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
-import catalogServices from '@/modules/catalogs/Services/catalog.services';
 import type { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
 import type { MaritalStatus } from '@/core/services/interfaces/auth/maritalStatus.interface';
 
@@ -114,21 +113,13 @@ const { validateField, handleSubmit, registerUser } = useAuth();
 const loadCatalogs = async () => {
   try {
     startLoading();
-    const [catalogsResponse, divisionsResponse] = await Promise.all([
-      authServices.getCatalogs(),
-      catalogServices.getAllGeographicDivisions({
-        active: true,
-        per_page: 1000,
-      }),
-    ]);
+    const catalogsResponse = await authServices.getCatalogs();
     if (catalogsResponse.statusCode === 200) {
       countries.value = catalogsResponse.data.countries;
+      geographicDivisions.value = catalogsResponse.data.geographic_divisions;
       genders.value = catalogsResponse.data.genders;
       documentTypes.value = catalogsResponse.data.documentTypes;
       maritalStatuses.value = catalogsResponse.data.maritalStatuses;
-    }
-    if (divisionsResponse.statusCode === 200) {
-      geographicDivisions.value = divisionsResponse.data.data;
     }
   } catch (error: unknown) {
     console.error('Error loading catalogs:', error);
