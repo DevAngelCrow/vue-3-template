@@ -44,4 +44,20 @@ export const routesCatalogs = [
     name: 'genders',
     component: () => import('@/modules/catalogs/gender/views/Genders.vue'),
   },
+  {
+    path: 'catalogs/geographic-division-types',
+    name: 'geographic-division-types',
+    component: () =>
+      import(
+        '@/modules/catalogs/geographic-division-type/views/GeographicDivisionTypes.vue'
+      ),
+  },
+  {
+    path: 'catalogs/geographic-divisions',
+    name: 'geographic-divisions',
+    component: () =>
+      import(
+        '@/modules/catalogs/geographic-division/views/GeographicDivisions.vue'
+      ),
+  },
 ];
