@@ -82,6 +82,7 @@
             <Button
               class="rounded-full"
               variant="text"
+              :severity="data.active ? 'danger' : 'success'"
               icon="pi pi-trash"
               @click="openModal('delete', data)"
               v-tooltip.bottom="'Eliminar'"
@@ -95,7 +96,7 @@
           <AppChipStatus
             :label="data?.status?.name"
             :background-color="data?.status?.state_color"
-            :color="data?.status?.text_color"
+            :text-color="data?.status?.text_color"
           >
           </AppChipStatus>
         </template>

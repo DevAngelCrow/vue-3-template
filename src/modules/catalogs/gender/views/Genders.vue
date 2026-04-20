@@ -1,6 +1,9 @@
 <template>
-  <div class="py-5 px-5 h-full max-h-full">
-    <section id="gender_content" class="w-full flex flex-row flex-wrap gap-5">
+  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
+    <section
+      id="gender_content"
+      class="w-full xl:w-[80%] flex flex-col flex-wrap gap-5"
+    >
       <div class="w-full flex flex-row gap-3 flex-wrap">
         <AppTitle
           title="Géneros"
@@ -8,22 +11,22 @@
         />
         <div
           id="inputs"
-          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+          class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
         >
           <AppInputText
             label="Buscar"
-            class="min-w-auto w-auto grow flex-shrink-0 md:w-[335px]"
+            class="min-w-auto w-auto grow lg:grow-0 flex-shrink-0 md:w-[335px]"
             v-model="filter_name"
             @update:modelValue="validateAlphaInput(filter_name)"
             v-debounce:700.keydown.enter="() => findGender(filter_name)"
           />
           <Button
-            class="flex-shrink-0 grow rounded-md"
+            class="flex-shrink-0 grow md:grow-0 rounded-md"
             v-debounce:700.click="() => findGender(filter_name)"
             >Buscar</Button
           >
           <Button
-            class="flex-shrink-0 grow rounded-md"
+            class="flex-shrink-0 grow md:grow-0 rounded-md"
             outlined
             v-debounce:700.click="cleanSearch"
             >Limpiar</Button

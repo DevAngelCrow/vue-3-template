@@ -33,7 +33,10 @@ export function useDocumentType() {
         .required('La descripción es requerida')
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .max(150, 'La descripción no puede tener más de 150 caracteres'),
-      mask: yup.string().nullable().max(150, 'La máscara no puede tener más de 150 caracteres'),
+      mask: yup
+        .string()
+        .nullable()
+        .max(150, 'La máscara no puede tener más de 150 caracteres'),
       active: yup.boolean(),
     }),
   });
@@ -43,15 +46,15 @@ export function useDocumentType() {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'mask',
@@ -199,7 +202,10 @@ export function useDocumentType() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

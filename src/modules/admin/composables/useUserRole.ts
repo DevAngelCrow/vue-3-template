@@ -9,7 +9,7 @@ import { UserRoleByIdRoleItem } from '../interfaces/user-role/user-role-by-id.re
 import { UserRoleUpdateForm } from '../interfaces/user-role/user-role-update.form.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import adminServices from '../services/admin.services';
-type filterType = { filter_name?: string; id_status?: string;}
+type filterType = { filter_name?: string; id_status?: string };
 export function useUserRole() {
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
@@ -19,15 +19,15 @@ export function useUserRole() {
       field: 'user_name',
       header: 'Nombre de usuario',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'email',
       header: 'Correo Electrónico',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'is_validated',

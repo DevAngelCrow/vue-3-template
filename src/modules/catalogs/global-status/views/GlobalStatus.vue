@@ -102,7 +102,7 @@
           <AppChipStatus
             :label="data?.status?.name"
             :background-color="data?.status?.state_color"
-            :color="data?.status?.text_color"
+            :text-color="data?.status?.text_color"
           ></AppChipStatus>
         </template>
         <template #body-state_color="{ data }">

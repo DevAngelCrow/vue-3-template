@@ -72,9 +72,6 @@
               @click="goToRoleMaintenance(data.id)"
               v-tooltip.bottom="'Ver detalle'"
             ></Button>
-            <!-- <Button class="rounded-full mx-0 my-0 px-0 py-0" variant="text" icon="pi pi-pencil"
-              :disabled="data?.status?.name === 'Inactivo'" @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar'"></Button> -->
             <Button
               class="rounded-full"
               variant="text"
@@ -100,7 +97,7 @@
           <AppChipStatus
             :label="data?.status?.name"
             :background-color="data?.status?.state_color"
-            :color="data?.status?.text_color"
+            :text-color="data?.status?.text_color"
           >
           </AppChipStatus>
         </template>

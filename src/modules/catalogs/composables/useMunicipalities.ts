@@ -11,7 +11,11 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
 import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_department?: string };
+type filterType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+  id_department?: string;
+};
 export function useMunicipality() {
   const {
     errors,
@@ -48,22 +52,22 @@ export function useMunicipality() {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'department.name',
       header: 'Departamento',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'active',
@@ -71,6 +75,7 @@ export function useMunicipality() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 10,
     },
     {
       field: 'acciones',
@@ -109,7 +114,7 @@ export function useMunicipality() {
       startLoading();
       const params = {
         active: true,
-      }
+      };
       const response = await catalogServices.getAllDepartments(params);
       if (response.statusCode === 200) {
         departments.value = response.data.data;
@@ -223,7 +228,11 @@ export function useMunicipality() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_department === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined &&
+      filter.id_department === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

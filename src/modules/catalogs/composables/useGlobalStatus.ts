@@ -11,7 +11,11 @@ import { GlobalStatusResponse } from '../interfaces/global-status/global-status.
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatus } from '../interfaces/global-status/global-status.category-status.interface';
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_category?: string };
+type filterType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+  id_category?: string;
+};
 export function useGlobalStatus() {
   const {
     errors,
@@ -59,29 +63,29 @@ export function useGlobalStatus() {
       field: 'code',
       header: 'Código',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'category_status.name',
       header: 'Categoría',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'state_color',
@@ -92,10 +96,11 @@ export function useGlobalStatus() {
     },
     {
       field: 'text_color',
-      header: 'Color del texto',
+      header: 'Color de texto',
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 12,
     },
     {
       field: 'active',
@@ -103,6 +108,7 @@ export function useGlobalStatus() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 10,
     },
     {
       field: 'acciones',
@@ -259,7 +265,11 @@ export function useGlobalStatus() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_category === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined &&
+      filter.id_category === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

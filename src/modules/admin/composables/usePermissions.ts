@@ -11,7 +11,11 @@ import { PermissionsResponse } from '../interfaces/permissions/permissions.respo
 import { PermissionsCategory } from '../interfaces/permissions/permission.category.interface';
 import { PermissionsCategoryResponse } from '../interfaces/permissions/permission.category.response.interface';
 import { PermissionForm } from '../interfaces/permissions/permission.form.interface';
-type filterType = { filter_name?: string; active?: boolean | 'Todos'; category_permission_id?: string };
+type filterType = {
+  filter_name?: string;
+  active?: boolean | 'Todos';
+  category_permission_id?: string;
+};
 export function usePermission() {
   const {
     errors,
@@ -47,22 +51,22 @@ export function usePermission() {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'category.name',
       header: 'Categoria',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'active',
@@ -108,7 +112,7 @@ export function usePermission() {
       startLoading();
       const response = await adminServices.getCategoryPermissions();
       if (response.statusCode === 200) {
-          categoryPermissions.value = response.data.data;
+        categoryPermissions.value = response.data.data;
       }
     } catch (error) {
       console.error(error);
@@ -119,7 +123,7 @@ export function usePermission() {
   const getPermissions = async () => {
     try {
       startLoading();
-      const params : {
+      const params: {
         page?: number;
         per_page?: number;
         filter_name?: string;
@@ -225,7 +229,11 @@ export function usePermission() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.active === undefined && filter.category_permission_id === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.active === undefined &&
+      filter.category_permission_id === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

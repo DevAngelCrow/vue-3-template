@@ -6,14 +6,13 @@ import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import catalogServices from '@/modules/catalogs/Services/catalog.services';
+import { CategoryStatus } from '@/types/global-status.type';
 
 import adminServices from '../services/admin.services';
 import { RoleStatus } from '../interfaces/role/role.status.response.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
-import { CategoryStatus } from '@/types/global-status.type';
-
 
 type filterType = { filter_name?: string; id_status?: string };
 
@@ -57,15 +56,15 @@ export function useRole() {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'status.name',
@@ -337,7 +336,10 @@ export function useRole() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.id_status === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.id_status === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

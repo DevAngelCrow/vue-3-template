@@ -12,7 +12,11 @@ import catalogServices from '../Services/catalog.services';
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
 
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_country?: string };
+type filterType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+  id_country?: string;
+};
 export function useDepartment() {
   const {
     errors,
@@ -46,22 +50,22 @@ export function useDepartment() {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'country.name',
       header: 'País',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'active',
@@ -69,6 +73,7 @@ export function useDepartment() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 10,
     },
     {
       field: 'acciones',
@@ -94,9 +99,11 @@ export function useDepartment() {
   const [country, countryAttrs] = defineField('country');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>(
-    { filter_name: undefined, status: undefined, id_country: undefined },
-  );
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    status: undefined,
+    id_country: undefined,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const countries = ref<CountryResponse[]>([]);
 
@@ -105,10 +112,10 @@ export function useDepartment() {
       startLoading();
       const params = {
         status: true,
-      }
+      };
       const response = await catalogServices.getAllCountries(params);
       if (response.statusCode === 200) {
-          countries.value = response.data.data;
+        countries.value = response.data.data;
       }
     } catch (error) {
       console.error(error);
@@ -225,7 +232,11 @@ export function useDepartment() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_country === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined &&
+      filter.id_country === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;
@@ -243,7 +254,11 @@ export function useDepartment() {
   };
 
   const findDepartment = (value: filterType) => {
-    if (value.filter_name || value.status !== undefined || value.id_country !== undefined) {
+    if (
+      value.filter_name ||
+      value.status !== undefined ||
+      value.id_country !== undefined
+    ) {
       getDepartments();
     }
   };

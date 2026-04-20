@@ -86,15 +86,29 @@ export function useAdmin() {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
+    {
+      field: 'uri',
+      header: 'Uri',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
+    {
+      field: 'parent.uri',
+      header: 'Ruta padre',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'icon',
@@ -103,13 +117,7 @@ export function useAdmin() {
       alignHeaders: 'center',
       alignItems: 'center',
     },
-    {
-      field: 'uri',
-      header: 'Uri',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
+
     {
       field: 'show',
       header: 'Mostrar en menú',
@@ -124,13 +132,7 @@ export function useAdmin() {
       alignHeaders: 'center',
       alignItems: 'center',
     },
-    {
-      field: 'parent.uri',
-      header: 'Ruta padre',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
+
     {
       field: 'active',
       header: 'Estado',
