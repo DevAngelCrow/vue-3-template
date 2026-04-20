@@ -3,7 +3,7 @@ export interface ApiResponseLogin {
     access_token: string;
     token_type: string;
     user: {
-      id: number;
+      id: string;
       id_people: number;
       user_name: string;
       id_status: number;

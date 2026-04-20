@@ -1,7 +1,7 @@
 export interface RouteParentAutocomplete {
   data: {
     title: string;
-    id: number;
+    id: string;
     uri: string;
     parent: object;
     name: string;

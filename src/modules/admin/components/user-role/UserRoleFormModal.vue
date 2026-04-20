@@ -50,7 +50,7 @@ const props = defineProps<{
     mode: 'closed' | 'view' | 'edit';
     title: string;
     isReadonly: boolean;
-    selectedItem: null | number;
+    selectedItem: null | string;
     userName: string;
     userEmail: string;
   };
@@ -61,7 +61,7 @@ const userRoleInstance = inject<UserRoleType>('useUserRole')!;
 const { startLoading, finishLoading } = useLoaderStore();
 const { updateUserRole } = userRoleInstance;
 
-const selectedRolesIds = ref<Set<number>>(new Set());
+const selectedRolesIds = ref<Set<string>>(new Set());
 const userRoleRoleDataTable = ref<InstanceType<
   typeof UserRoleRoleDataTable
 > | null>(null);

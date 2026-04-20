@@ -2,6 +2,6 @@ export interface NationalitiesArray {
   abbreviation: string;
   active: boolean;
   code: string;
-  id: number;
+  id: string;
   name: string;
 }

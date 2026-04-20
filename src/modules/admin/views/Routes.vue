@@ -1,58 +1,61 @@
 <template>
-  <div class="py-5 px-5 h-full max-h-full">
-    <section id="content" class="w-full flex flex-row flex-wrap gap-5">
-      <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle
-          title="Rutas"
-          class="w-full md:w-auto flex justify-center items-center"
+  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
+    <section
+      id="content"
+      class="w-full xl:w-[80%] flex flex-row flex-wrap gap-5"
+    >
+      <AppTitle
+        title="Rutas"
+        class="w-full md:w-auto flex justify-center items-center"
+      />
+      <div
+        id="inputs"
+        class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
+      >
+        <AppInputText
+          label="Buscar..."
+          class="min-w-auto w-full sm:w-[50%] grow lg:grow-0 shrink-0 md:w-45 lg:w-83.75"
+          v-model="filter.filter_name"
+          append-icon="pi pi-search"
+          @input="validateAlphaInput(filter.filter_name)"
         />
-        <div
-          id="inputs"
-          class="flex rounded-lg border-2 border-primary py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0"
+        <AppSelect
+          class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
+          :options="statusOptions"
+          option-label="name"
+          label="Estado"
+          v-model="filter.active"
+          optionValue="value"
+        />
+        <AppSelect
+          class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
+          :options="parentRoutes"
+          option-label="name"
+          label="Ruta padre"
+          v-model="filter.id_parent"
+          optionValue="id"
+        />
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          v-debounce:700.click="() => findRoute(filter)"
+          >Buscar</Button
         >
-          <AppInputText
-            label="Buscar"
-            class="min-w-auto w-full sm:w-[50%] grow shrink-0 md:w-45 lg:w-83.75"
-            v-model="filter.filter_name"
-            @input="validateAlphaInput(filter.filter_name)"
-          />
-          <AppSelect
-            class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto"
-            :options="statusOptions"
-            option-label="name"
-            label="Estado"
-            v-model="filter.active"
-            optionValue="value"
-          />
-          <AppSelect
-            class="min-w-0 grow shrink-0 w-full sm:w-[40%] md:w-auto"
-            :options="parentRoutes"
-            option-label="name"
-            label="Ruta padre"
-            v-model="filter.id_parent"
-            optionValue="id"
-          />
-          <Button
-            class="flex-shrink-0 grow rounded-md"
-            v-debounce:700.click="() => findRoute(filter)"
-            >Buscar</Button
-          >
-          <Button
-            class="flex-shrink-0 grow rounded-md"
-            outlined
-            v-debounce:700.click="cleanSearch"
-            >Limpiar</Button
-          >
-          <Button
-            class="flex-shrink-0 grow rounded-md"
-            @click="goToRouteMaintenance()"
-            ><i
-              class="pi pi-plus flex justify-center items-center text-center"
-              style="font-size: 1.1rem; font-weight: bold"
-            ></i
-            ><span>Agregar</span></Button
-          >
-        </div>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md"
+          outlined
+          v-debounce:700.click="cleanSearch"
+          label="Limpiar"
+          :icon="iconFilter"
+        ></Button>
+        <Button
+          class="shrink-0 grow md:grow-0 rounded-md ml-auto"
+          @click="goToRouteMaintenance()"
+          ><i
+            class="pi pi-plus-circle flex justify-center items-center text-center"
+            style="font-size: 1.1rem; font-weight: bold"
+          ></i
+          ><span>Agregar</span></Button
+        >
       </div>
       <AppDataTable
         class="w-full"
@@ -79,6 +82,7 @@
             <Button
               class="rounded-full"
               variant="text"
+              :severity="data.active ? 'danger' : 'success'"
               icon="pi pi-trash"
               @click="openModal('delete', data)"
               v-tooltip.bottom="'Eliminar'"
@@ -89,14 +93,12 @@
           <i :class="data.icon"></i>
         </template>
         <template #body-active="{ data }">
-          <AppChip
+          <AppChipStatus
             :label="data?.status?.name"
-            :style="{
-              backgroundColor: data?.status?.state_color,
-              color: data?.status?.text_color,
-            }"
+            :background-color="data?.status?.state_color"
+            :text-color="data?.status?.text_color"
           >
-          </AppChip>
+          </AppChipStatus>
         </template>
         <template #body-show="{ data }">
           <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
@@ -108,8 +110,18 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { nextTick, onMounted, reactive, watch, provide, ref } from 'vue';
+import {
+  computed,
+  nextTick,
+  onMounted,
+  reactive,
+  watch,
+  provide,
+  ref,
+} from 'vue';
 import { useRouter } from 'vue-router';
+
+import AppChipStatus from '@/core/components/AppChipStatus.vue';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
@@ -136,7 +148,7 @@ const {
   parentRoutes,
 } = adminInstance;
 
-const goToRouteMaintenance = (id?: number) => {
+const goToRouteMaintenance = (id?: string) => {
   if (id) {
     router.push({ name: 'route-maintenance', params: { id } });
   } else {
@@ -149,14 +161,14 @@ const modalState = reactive<{
   title: string;
   description: string;
   isReadonly: boolean;
-  selectedItem: null | number;
+  selectedItem: null | string;
 }>({
   show: false,
   mode: 'closed',
   title: '',
   description: '',
   isReadonly: false,
-  selectedItem: null as number | null,
+  selectedItem: null as string | null,
 });
 const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
   { name: 'Todos', value: 'Todos' },
@@ -215,6 +227,13 @@ const handlePerPagePagination = async (perPage: number) => {
   pagination.page = 1;
   getRoutes();
 };
+const iconFilter = computed(() => {
+  const filterValues = Object.values(filter).some(Boolean);
+  if (!filterValues) {
+    return 'pi pi-filter';
+  }
+  return 'pi pi-filter-slash';
+});
 onMounted(async () => {
   try {
     await getRoutes();

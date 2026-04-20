@@ -127,11 +127,11 @@ const {
   findPermission,
   categories,
 } = rol;
-const selectedPermissionsIds = ref<Set<number>>(new Set());
+const selectedPermissionsIds = ref<Set<string>>(new Set());
 const selectAll = ref<boolean>(false);
 const permissionItemsFormated = ref<
   {
-    id: number;
+    id: string;
     name: string;
     description: string;
     active: boolean;
@@ -144,7 +144,7 @@ const permissionsItemsFindLocal = ref<any>([]);
 const filterCategories = ref<CategoryPermissionsResponse[]>([]);
 const searchPermission = async (value: {
   name: string;
-  category?: { id: number; name: string; description: string };
+  category?: { id: string; name: string; description: string };
 }) => {
   if (!value) return;
   if (modalState.value === 'view') {
@@ -152,7 +152,7 @@ const searchPermission = async (value: {
 
     // Verificar si hay filtros activos
     const hasNameFilter = value.name && value.name.trim().length > 0;
-    const hasCategoryFilter = value.category?.id && value.category.id > 0;
+    const hasCategoryFilter = value.category?.id && value.category.id !== '';
 
     for (let item of permissionsItemsLocal.value) {
       // Si no hay filtros activos, incluir todos los items
@@ -216,7 +216,7 @@ const handlePerPagePagination = async (perPage: number) => {
   await getPermissions();
   updateSelectAllState();
 };
-const isPermissionSelected = (permissionId: number) => {
+const isPermissionSelected = (permissionId: string) => {
   return selectedPermissionsIds.value.has(permissionId);
 };
 
@@ -232,7 +232,7 @@ const checkAll = (flag: boolean) => {
   }
 };
 
-const togglePermission = (permissionId: number, isChecked: boolean) => {
+const togglePermission = (permissionId: string, isChecked: boolean) => {
   if (isChecked) {
     selectedPermissionsIds.value.add(permissionId);
   } else {
@@ -253,7 +253,7 @@ const updateSelectAllState = (): void => {
 };
 const setPermissionsIds = (
   value: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     active: boolean;
@@ -277,7 +277,7 @@ const closeModal = () => {
   }
   filter_permission.value = {
     name: '',
-    category: { id: 0, name: '', description: '' },
+    category: { id: '', name: '', description: '' },
   };
   permissionItemsFormated.value = [];
   if (modalState.value === 'view') {
@@ -361,7 +361,7 @@ watch(
   newIds => {
     if (newIds && newIds.length > 0 && modalState.value === 'view') {
       selectedPermissionsIds.value.clear();
-      newIds.forEach((id: number) => {
+      newIds.forEach((id: string) => {
         selectedPermissionsIds.value.add(id);
       });
       updateSelectAllState();

@@ -1,4 +1,4 @@
 export interface GenderResponse {
-  id: number;
+  id: string;
   name: string;
 }

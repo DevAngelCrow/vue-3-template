@@ -23,7 +23,7 @@ export function useCategoryStatus() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre de la categoría de estado es requerido')
@@ -45,32 +45,26 @@ export function useCategoryStatus() {
 
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'code',
       header: 'Código',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
+      width: 25,
     },
     {
       field: 'active',
@@ -78,6 +72,7 @@ export function useCategoryStatus() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 5,
     },
     {
       field: 'acciones',
@@ -123,7 +118,9 @@ export function useCategoryStatus() {
         filter_name: filter.filter_name,
         status: filter.status === 'Todos' ? undefined : filter.status,
       };
-      const response = await catalogServices.getAllCategoryStatuses({ ...params });
+      const response = await catalogServices.getAllCategoryStatuses({
+        ...params,
+      });
 
       if (response.statusCode === 200) {
         categoryStatuses.value = response.data.data;
@@ -182,7 +179,7 @@ export function useCategoryStatus() {
     }
   };
 
-  const patchCategoryStatus = async (id: number) => {
+  const patchCategoryStatus = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.patchCategoryStatus(id);
@@ -216,7 +213,10 @@ export function useCategoryStatus() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

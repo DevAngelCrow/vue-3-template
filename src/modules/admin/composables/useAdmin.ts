@@ -16,7 +16,7 @@ type FilterType = {
   filter_name?: string;
   active?: boolean;
   show?: boolean;
-  id_parent?: number;
+  id_parent?: string;
   required_auth?: boolean;
 };
 export function useAdmin() {
@@ -31,7 +31,7 @@ export function useAdmin() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre de la ruta es requerido')
@@ -83,25 +83,32 @@ export function useAdmin() {
 
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
+    {
+      field: 'uri',
+      header: 'Uri',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
+    },
+    {
+      field: 'parent.uri',
+      header: 'Ruta padre',
+      sortable: false,
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'icon',
@@ -110,13 +117,7 @@ export function useAdmin() {
       alignHeaders: 'center',
       alignItems: 'center',
     },
-    {
-      field: 'uri',
-      header: 'Uri',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
+
     {
       field: 'show',
       header: 'Mostrar en menú',
@@ -131,13 +132,7 @@ export function useAdmin() {
       alignHeaders: 'center',
       alignItems: 'center',
     },
-    {
-      field: 'parent.uri',
-      header: 'Ruta padre',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
+
     {
       field: 'active',
       header: 'Estado',
@@ -173,7 +168,7 @@ export function useAdmin() {
   ]);
 
   const parentRoutes = ref<
-    { title: string; id: number; uri: string; name: string }[]
+    { title: string; id: string; uri: string; name: string }[]
   >([]);
 
   const items = ref<RoutesResponse[] | undefined>([]);
@@ -214,7 +209,7 @@ export function useAdmin() {
   const filter_permission = ref<{
     name: string;
     category?: {
-      id: number;
+      id: string;
       name: string;
       description: string;
     };
@@ -228,7 +223,7 @@ export function useAdmin() {
 
   const permissionsList = ref<
     {
-      id: number;
+      id: string;
       name: string;
       description: string;
       active: boolean;
@@ -244,7 +239,7 @@ export function useAdmin() {
         name?: string;
         active?: boolean;
         show?: boolean;
-        id_parent?: number;
+        id_parent?: string;
         required_auth?: boolean;
       } = {
         page: pagination.page,
@@ -276,7 +271,7 @@ export function useAdmin() {
       finishLoading();
     }
   };
-  const getRouteById = async (id: number) => {
+  const getRouteById = async (id: string) => {
     try {
       startLoading();
       permissionsList.value = [];
@@ -340,7 +335,7 @@ export function useAdmin() {
     }
   };
 
-  const toggleRoute = async (id: number) => {
+  const toggleRoute = async (id: string) => {
     try {
       startLoading();
       const response = await adminServices.toggleRoute(id);
@@ -363,7 +358,7 @@ export function useAdmin() {
   const findPermission = (value: {
     name: string;
     category?: {
-      id: number;
+      id: string;
       name: string;
       description: string;
     };

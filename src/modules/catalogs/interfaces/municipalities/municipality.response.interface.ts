@@ -1,7 +1,7 @@
 import { Department } from './municipality.department.interface';
 
 export interface MunicipalityResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: string;

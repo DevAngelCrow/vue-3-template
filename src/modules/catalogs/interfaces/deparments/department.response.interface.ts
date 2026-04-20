@@ -1,7 +1,7 @@
 import { Country } from './deparment.country.interface';
 
 export interface DepartmentResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: string;

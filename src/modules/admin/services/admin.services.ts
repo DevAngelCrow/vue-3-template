@@ -47,7 +47,7 @@ const addRoute = async (data: RouteForm) => {
   return response;
 };
 
-const editRoute = async (id: number, data: RouteForm) => {
+const editRoute = async (id: string, data: RouteForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `security/routes/${id}`,
     data,
@@ -55,14 +55,14 @@ const editRoute = async (id: number, data: RouteForm) => {
   return response;
 };
 
-const toggleRoute = async (id: number) => {
+const toggleRoute = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `security/routes/${id}`,
   );
   return response;
 };
 
-const getRoute = async (id: number) => {
+const getRoute = async (id: string) => {
   const response = await httpClient.get<ApiPostResponse<RouteResponseById>>(
     `security/routes/${id}`,
   );
@@ -70,7 +70,7 @@ const getRoute = async (id: number) => {
 };
 
 const getPermissions = async (
-  params: paginateParams | { name: string; id_category_permissions?: number },
+  params: paginateParams | { name: string; id_category_permissions?: string },
 ): Promise<ApiResponseGeneric<PermissionsResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<PermissionsResponse>
@@ -86,7 +86,7 @@ const postPermission = async (data: PermissionForm) => {
   return response;
 };
 
-const putPermission = async (id: number, data: PermissionForm) => {
+const putPermission = async (id: string, data: PermissionForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `security/permissions/${id}`,
     data,
@@ -94,7 +94,7 @@ const putPermission = async (id: number, data: PermissionForm) => {
   return response;
 };
 
-const togglePermission = async (id: number) => {
+const togglePermission = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `security/permissions/${id}`,
   );
@@ -118,7 +118,7 @@ const postCategoryPermission = async (data: CategoryPermissionForm) => {
   return response;
 };
 const putCategoryPermission = async (
-  id: number,
+  id: string,
   data: CategoryPermissionForm,
 ) => {
   const response = await httpClient.put<ApiPostResponse>(
@@ -128,7 +128,7 @@ const putCategoryPermission = async (
   return response;
 };
 
-const toggleCategoryPermission = async (id: number) => {
+const toggleCategoryPermission = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `security/category-permissions/${id}`,
   );
@@ -151,7 +151,7 @@ const postRole = async (data: RoleForm) => {
   return response;
 };
 
-const putRole = async (id: number, data: RoleForm) => {
+const putRole = async (id: string, data: RoleForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `security/role/${id}`,
     data,
@@ -159,14 +159,14 @@ const putRole = async (id: number, data: RoleForm) => {
   return response;
 };
 
-const toggleRole = async (id: number) => {
+const toggleRole = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `security/role/${id}`,
   );
   return response;
 };
 
-const getRol = async (id: number) => {
+const getRol = async (id: string) => {
   const response = await httpClient.get<ApiPostResponse<RoleResponse>>(
     `security/role/${id}`,
   );
@@ -184,7 +184,7 @@ const getUsers = async (
 };
 
 const getUserRoleById = async (
-  id: number,
+  id: string,
 ): Promise<ApiPostResponse<UserRoleByIdResponse>> => {
   const response = await httpClient.get<ApiPostResponse<UserRoleByIdResponse>>(
     `security/user-role/${id}`,
@@ -192,7 +192,7 @@ const getUserRoleById = async (
   return response.data;
 };
 
-const putUserRole = async (id: number, data: UserRoleUpdateForm) => {
+const putUserRole = async (id: string, data: UserRoleUpdateForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `security/user-role/${id}`,
     data,

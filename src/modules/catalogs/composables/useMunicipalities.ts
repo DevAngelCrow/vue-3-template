@@ -11,7 +11,11 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
 import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_department?: number };
+type filterType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+  id_department?: string;
+};
 export function useMunicipality() {
   const {
     errors,
@@ -24,7 +28,7 @@ export function useMunicipality() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
@@ -45,32 +49,25 @@ export function useMunicipality() {
 
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'department.name',
       header: 'Departamento',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'active',
@@ -78,6 +75,7 @@ export function useMunicipality() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 10,
     },
     {
       field: 'acciones',
@@ -116,7 +114,7 @@ export function useMunicipality() {
       startLoading();
       const params = {
         active: true,
-      }
+      };
       const response = await catalogServices.getAllDepartments(params);
       if (response.statusCode === 200) {
         departments.value = response.data.data;
@@ -196,7 +194,7 @@ export function useMunicipality() {
     }
   };
 
-  const toggleMunicipality = async (id: number) => {
+  const toggleMunicipality = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleMunicipality(id);
@@ -230,7 +228,11 @@ export function useMunicipality() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_department === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined &&
+      filter.id_department === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

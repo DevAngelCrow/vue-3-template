@@ -1,15 +1,15 @@
 export interface RolByIdResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   code: string;
   status: {
-    id: number;
+    id: string;
     name: string;
     description: string;
   };
   permissions: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     active: boolean;

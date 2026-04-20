@@ -1,7 +1,7 @@
 export interface DepartmentForm {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
   active?: boolean;
-  id_country: number;
+  id_country: string;
 }

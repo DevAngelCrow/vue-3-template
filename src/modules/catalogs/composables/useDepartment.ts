@@ -12,7 +12,11 @@ import catalogServices from '../Services/catalog.services';
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
 
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_country?: number };
+type filterType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+  id_country?: string;
+};
 export function useDepartment() {
   const {
     errors,
@@ -25,7 +29,7 @@ export function useDepartment() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del departamento es requerido')
@@ -43,32 +47,25 @@ export function useDepartment() {
 
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'country.name',
       header: 'País',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'active',
@@ -76,6 +73,7 @@ export function useDepartment() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 10,
     },
     {
       field: 'acciones',
@@ -101,9 +99,11 @@ export function useDepartment() {
   const [country, countryAttrs] = defineField('country');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>(
-    { filter_name: undefined, status: undefined, id_country: undefined },
-  );
+  const filter = reactive<filterType>({
+    filter_name: undefined,
+    status: undefined,
+    id_country: undefined,
+  });
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const countries = ref<CountryResponse[]>([]);
 
@@ -112,10 +112,10 @@ export function useDepartment() {
       startLoading();
       const params = {
         status: true,
-      }
+      };
       const response = await catalogServices.getAllCountries(params);
       if (response.statusCode === 200) {
-          countries.value = response.data.data;
+        countries.value = response.data.data;
       }
     } catch (error) {
       console.error(error);
@@ -131,7 +131,7 @@ export function useDepartment() {
         per_page?: number;
         filter_name?: string | null;
         status?: boolean | null;
-        id_country?: number | null;
+        id_country?: string | null;
       } = {
         page: pagination.page,
         per_page: pagination.per_page,
@@ -198,7 +198,7 @@ export function useDepartment() {
     }
   };
 
-  const toggleDepartment = async (id: number) => {
+  const toggleDepartment = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleDepartment(id);
@@ -232,7 +232,11 @@ export function useDepartment() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_country === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined &&
+      filter.id_country === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;
@@ -250,7 +254,11 @@ export function useDepartment() {
   };
 
   const findDepartment = (value: filterType) => {
-    if (value.filter_name || value.status !== undefined || value.id_country !== undefined) {
+    if (
+      value.filter_name ||
+      value.status !== undefined ||
+      value.id_country !== undefined
+    ) {
       getDepartments();
     }
   };

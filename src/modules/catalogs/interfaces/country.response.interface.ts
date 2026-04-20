@@ -1,5 +1,5 @@
 export interface CountryResponse {
-  id: number;
+  id: string;
   name: string;
   abbreviation: string;
   code: string;

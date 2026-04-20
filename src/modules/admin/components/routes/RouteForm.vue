@@ -126,7 +126,7 @@ const props = defineProps<{
     title: string;
     description: string;
     isReadonly: boolean;
-    selectedItem: null | number;
+    selectedItem: null | string;
   };
 }>();
 

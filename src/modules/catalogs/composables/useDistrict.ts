@@ -11,7 +11,11 @@ import { MunicipalityResponse } from '../interfaces/municipalities/municipality.
 import { Municipality } from '../interfaces/districts/districts.municipality.interface';
 import { DistrictResponse } from '../interfaces/districts/district.response.interface';
 import { DistrictForm } from '../interfaces/districts/district.form.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos'; id_municipality?: number };
+type filterType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+  id_municipality?: string;
+};
 export function useDistrict() {
   const {
     errors,
@@ -24,7 +28,7 @@ export function useDistrict() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del distrito es requerido')
@@ -44,32 +48,25 @@ export function useDistrict() {
 
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'municipality.name',
       header: 'Municipio',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'active',
@@ -77,6 +74,7 @@ export function useDistrict() {
       sortable: false,
       alignHeaders: 'center',
       alignItems: 'center',
+      width: 10,
     },
     {
       field: 'acciones',
@@ -115,7 +113,7 @@ export function useDistrict() {
       startLoading();
       const params = {
         active: true,
-      }
+      };
       const response = await catalogServices.getMunicipalities(params);
       if (response.statusCode === 200) {
         municipalities.value = response.data.data;
@@ -195,7 +193,7 @@ export function useDistrict() {
     }
   };
 
-  const toggleDistrict = async (id: number) => {
+  const toggleDistrict = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleDistrict(id);
@@ -229,7 +227,11 @@ export function useDistrict() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined && filter.id_municipality === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined &&
+      filter.id_municipality === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

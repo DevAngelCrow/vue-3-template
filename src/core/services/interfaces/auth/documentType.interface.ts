@@ -1,5 +1,5 @@
 export interface DocumentType {
-  id: number;
+  id: string;
   name: string;
   description: string;
   active: boolean;

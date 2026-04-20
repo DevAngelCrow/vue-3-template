@@ -1,5 +1,5 @@
 export interface UpdateCountry {
-  id?: number;
+  id?: string;
   name: string;
   abbreviation: string;
   code: string;

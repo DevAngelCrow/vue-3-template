@@ -2,6 +2,7 @@ import { ApiResponseGeneric } from '@/core/services/interfaces/apiResponseGeneri
 import { httpClient } from '@/core/utils/httpClient';
 import { paginateParams } from '@/core/services/interfaces/params.paginate.interface';
 import { ApiPostResponse } from '@/core/services/apiPostResponse.interface';
+import paramsGeneric from '@/core/services/interfaces/params.generic.interface';
 
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { CreateCountry } from '../interfaces/country.create.interface';
@@ -19,7 +20,10 @@ import { CategoryStatusForm } from '../interfaces/category-status/category-statu
 import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
 import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
 import { GenderResponse } from '../interfaces/gender/gender.response.interface';
-import paramsGeneric from '@/core/services/interfaces/params.generic.interface';
+import { GeographicDivisionTypeResponse } from '../interfaces/geographic-division-type/geographic-division-type.response.interface';
+import { GeographicDivisionTypeForm } from '../interfaces/geographic-division-type/geographic-division-type.form.interface';
+import { GeographicDivisionResponse } from '../interfaces/geographic-division/geographic-division.response.interface';
+import { GeographicDivisionForm } from '../interfaces/geographic-division/geographic-division.form.interface';
 
 interface paramsFilter {
   active: boolean;
@@ -40,11 +44,11 @@ const createCountries = async (data: CreateCountry) => {
   return response;
 };
 
-const updateCountries = async (id: number, data: UpdateCountry) => {
+const updateCountries = async (id: string, data: UpdateCountry) => {
   const response = await httpClient.put(`catalogs/countries/${id}`, data);
   return response;
 };
-const changeStatusCountry = async (id: number) => {
+const changeStatusCountry = async (id: string) => {
   const response = await httpClient.patch(`catalogs/countries/${id}`);
   return response;
 };
@@ -66,7 +70,7 @@ const postDepartment = async (data: DepartmentForm) => {
   return response;
 };
 
-const putDepartment = async (id: number, data: DepartmentForm) => {
+const putDepartment = async (id: string, data: DepartmentForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/departments/${id}`,
     data,
@@ -74,7 +78,7 @@ const putDepartment = async (id: number, data: DepartmentForm) => {
   return response;
 };
 
-const toggleDepartment = async (id: number) => {
+const toggleDepartment = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/departments/${id}`,
   );
@@ -96,7 +100,7 @@ const postMunicipality = async (data: MunicipalityForm) => {
   return response;
 };
 
-const putMunicipality = async (id: number, data: MunicipalityForm) => {
+const putMunicipality = async (id: string, data: MunicipalityForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/municipalities/${id}`,
     data,
@@ -105,7 +109,7 @@ const putMunicipality = async (id: number, data: MunicipalityForm) => {
   return response;
 };
 
-const toggleMunicipality = async (id: number) => {
+const toggleMunicipality = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/municipalities/${id}`,
   );
@@ -128,7 +132,7 @@ const postDistrict = async (data: DistrictForm) => {
   return response;
 };
 
-const putDistrict = async (id: number, data: DistrictForm) => {
+const putDistrict = async (id: string, data: DistrictForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/districts/${id}`,
     data,
@@ -137,7 +141,7 @@ const putDistrict = async (id: number, data: DistrictForm) => {
   return response;
 };
 
-const toggleDistrict = async (id: number) => {
+const toggleDistrict = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/districts/${id}`,
   );
@@ -159,7 +163,7 @@ const postGlobalStatus = async (data: GlobalStatusForm) => {
   return response;
 };
 
-const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
+const putGlobalStatus = async (id: string, data: GlobalStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/global-statuses/${id}`,
     data,
@@ -167,7 +171,7 @@ const putGlobalStatus = async (id: number, data: GlobalStatusForm) => {
   return response;
 };
 
-const toggleGlobalStatus = async (id: number) => {
+const toggleGlobalStatus = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/global-statuses/${id}`,
   );
@@ -192,7 +196,7 @@ const postCategoryStatus = async (data: CategoryStatusForm) => {
   return response;
 };
 
-const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
+const putCategoryStatus = async (id: string, data: CategoryStatusForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `catalogs/categories-status/${id}`,
     data,
@@ -200,7 +204,7 @@ const putCategoryStatus = async (id: number, data: CategoryStatusForm) => {
   return response;
 };
 
-const patchCategoryStatus = async (id: number) => {
+const patchCategoryStatus = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `catalogs/categories-status/${id}`,
   );
@@ -223,7 +227,7 @@ const postDocumentType = async (data: DocumentTypeForm) => {
   return response;
 };
 
-const putDocumentType = async (id: number, data: DocumentTypeForm) => {
+const putDocumentType = async (id: string, data: DocumentTypeForm) => {
   const response = await httpClient.put<ApiPostResponse>(
     `profile/document-types/${id}`,
     data,
@@ -231,7 +235,7 @@ const putDocumentType = async (id: number, data: DocumentTypeForm) => {
   return response;
 };
 
-const toggleDocumentType = async (id: number) => {
+const toggleDocumentType = async (id: string) => {
   const response = await httpClient.patch<ApiPostResponse>(
     `profile/document-types/${id}`,
   );
@@ -246,6 +250,124 @@ const getGenders = async (
     params,
   );
   return response.data;
+};
+
+interface GeographicDivisionTypeParams {
+  page?: number;
+  per_page?: number;
+  filter?: string | null;
+  active?: boolean | null;
+  id_country?: string | null;
+}
+
+const getAllGeographicDivisionTypes = async (
+  params?: GeographicDivisionTypeParams,
+): Promise<ApiResponseGeneric<GeographicDivisionTypeResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<GeographicDivisionTypeResponse>
+  >('catalogs/geographic-division-types', params);
+  return response.data;
+};
+
+const getGeographicDivisionTypeById = async (
+  id: string,
+): Promise<{
+  data: GeographicDivisionTypeResponse;
+  statusCode: number;
+  message: string;
+}> => {
+  const response = await httpClient.get<{
+    data: GeographicDivisionTypeResponse;
+    statusCode: number;
+    message: string;
+  }>(`catalogs/geographic-division-types/${id}`);
+  return response.data;
+};
+
+const postGeographicDivisionType = async (data: GeographicDivisionTypeForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'catalogs/geographic-division-types',
+    data,
+  );
+  return response;
+};
+
+const putGeographicDivisionType = async (
+  id: string,
+  data: GeographicDivisionTypeForm,
+) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `catalogs/geographic-division-types/${id}`,
+    data,
+  );
+  return response;
+};
+
+const patchGeographicDivisionType = async (id: string) => {
+  const response = await httpClient.patch<ApiPostResponse>(
+    `catalogs/geographic-division-types/${id}`,
+  );
+  return response;
+};
+
+interface GeographicDivisionParams {
+  page?: number;
+  per_page?: number;
+  filter?: string | null;
+  active?: boolean | null;
+  id_country?: string | null;
+  id_parent?: string | null;
+  id_type?: string | null;
+}
+
+const getAllGeographicDivisions = async (
+  params?: GeographicDivisionParams,
+): Promise<ApiResponseGeneric<GeographicDivisionResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<GeographicDivisionResponse>
+  >('catalogs/geographic-divisions', params);
+  return response.data;
+};
+
+const getGeographicDivisionById = async (
+  id: string,
+): Promise<{
+  data: GeographicDivisionResponse;
+  statusCode: number;
+  message: string;
+}> => {
+  const response = await httpClient.get<{
+    data: GeographicDivisionResponse;
+    statusCode: number;
+    message: string;
+  }>(`catalogs/geographic-divisions/${id}`);
+  return response.data;
+};
+
+const postGeographicDivision = async (data: GeographicDivisionForm) => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'catalogs/geographic-divisions',
+    data,
+  );
+  return response;
+};
+
+const putGeographicDivision = async (
+  id: string,
+  data: GeographicDivisionForm,
+) => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `catalogs/geographic-divisions/${id}`,
+    data,
+  );
+  return response;
+};
+
+const patchGeographicDivision = async (id: string) => {
+  const response = await httpClient.patch<ApiPostResponse>(
+    `catalogs/geographic-divisions/${id}`,
+  );
+  return response;
 };
 
 export default {
@@ -278,4 +400,14 @@ export default {
   putDocumentType,
   toggleDocumentType,
   getGenders,
+  getAllGeographicDivisionTypes,
+  getGeographicDivisionTypeById,
+  postGeographicDivisionType,
+  putGeographicDivisionType,
+  patchGeographicDivisionType,
+  getAllGeographicDivisions,
+  getGeographicDivisionById,
+  postGeographicDivision,
+  putGeographicDivision,
+  patchGeographicDivision,
 };

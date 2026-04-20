@@ -47,8 +47,8 @@ function createForm() {
             }
             return false;
           }),
-        gender: yup.number().required('El género es requerido'),
-        maritalStatus: yup.number().required('El estado civil es requerido'),
+        gender: yup.string().required('El género es requerido'),
+        maritalStatus: yup.string().required('El estado civil es requerido'),
         phoneNumber: yup
           .string()
           .required('El número de teléfono es requerido')
@@ -89,7 +89,7 @@ function createForm() {
           .string()
           .required('El campo de colonia/reparto es requerido')
           .min(3),
-        district: yup
+        geographic_divisions: yup
           .mixed<DistrictsModelAutocomplete>()
           .required('El campo de distrito es requerido'),
         houseNumber: yup
@@ -150,8 +150,8 @@ function createForm() {
     streetNumberAttrs: defineField('streetNumber')[1],
     neighborhood: defineField('neighborhood')[0],
     neighborhoodAttrs: defineField('neighborhood')[1],
-    district: defineField('district')[0],
-    districtAttrs: defineField('district')[1],
+    geographicDivisions: defineField('geographic_divisions')[0],
+    geographicDivisionsAttrs: defineField('geographic_divisions')[1],
     houseNumber: defineField('houseNumber')[0],
     houseNumberAttrs: defineField('houseNumber')[1],
     block: defineField('block')[0],

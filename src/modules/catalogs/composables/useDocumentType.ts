@@ -22,7 +22,7 @@ export function useDocumentType() {
     setFieldValue,
   } = useForm({
     validationSchema: yup.object({
-      id: yup.number().typeError('El campo id debe ser de tipo entero'),
+      id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
         .required('El nombre del tipo de documento es requerido')
@@ -33,32 +33,28 @@ export function useDocumentType() {
         .required('La descripción es requerida')
         .min(5, 'La descripción debe tener al menos 5 caracteres')
         .max(150, 'La descripción no puede tener más de 150 caracteres'),
-      mask: yup.string().nullable().max(150, 'La máscara no puede tener más de 150 caracteres'),
+      mask: yup
+        .string()
+        .nullable()
+        .max(150, 'La máscara no puede tener más de 150 caracteres'),
       active: yup.boolean(),
     }),
   });
 
   const headers = ref<TableHeaders[]>([
     {
-      field: 'id',
-      header: 'No.',
-      sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
-    },
-    {
       field: 'name',
       header: 'Nombre',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'description',
       header: 'Descripción',
       sortable: false,
-      alignHeaders: 'center',
-      alignItems: 'center',
+      alignHeaders: 'start',
+      alignItems: 'start',
     },
     {
       field: 'mask',
@@ -172,7 +168,7 @@ export function useDocumentType() {
     }
   };
 
-  const toggleDocumentType = async (id: number) => {
+  const toggleDocumentType = async (id: string) => {
     try {
       startLoading();
       const response = await catalogServices.toggleDocumentType(id);
@@ -206,7 +202,10 @@ export function useDocumentType() {
   };
 
   const cleanSearch = () => {
-    if ((!filter.filter_name || filter.filter_name === '') && filter.status === undefined) {
+    if (
+      (!filter.filter_name || filter.filter_name === '') &&
+      filter.status === undefined
+    ) {
       return;
     }
     filter.filter_name = undefined;

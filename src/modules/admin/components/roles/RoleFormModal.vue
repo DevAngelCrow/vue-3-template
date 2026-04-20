@@ -37,7 +37,7 @@ const props = defineProps<{
     title: string;
     description: string;
     isReadonly: boolean;
-    selectedItem: null | number;
+    selectedItem: null | string;
   };
 }>();
 
@@ -46,7 +46,7 @@ const rol = inject<RoleType>('useRole')!;
 const { startLoading, finishLoading } = useLoaderStore();
 const { handleSubmit, addRol, toggleRole, editRole } = rol;
 
-const selectedPermissionsIds = ref<Set<number>>(new Set());
+const selectedPermissionsIds = ref<Set<string>>(new Set());
 const rolePermissionDataTable = ref<InstanceType<
   typeof RolePermissionDataTable
 > | null>(null);

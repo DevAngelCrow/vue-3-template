@@ -1,5 +1,5 @@
 export interface UserStateStore {
-  id: number;
+  id: string;
   id_people: number;
   user_name: string;
   id_status: number;
@@ -15,7 +15,7 @@ export interface RefreshToken {
 }
 
 export interface Menu {
-  id: number;
+  id: string;
   name: string;
   description: string;
   icon: string;

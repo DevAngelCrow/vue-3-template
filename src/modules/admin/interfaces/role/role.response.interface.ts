@@ -1,17 +1,17 @@
 import { RoleStatus } from './role.status.response.interface';
 
 export interface RoleResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   status: RoleStatus;
-  id_status: number;
+  id_status: string;
   permissions: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     active: boolean;
-    category: number;
+    category: string;
   }[];
   code: string;
 }

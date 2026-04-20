@@ -1,5 +1,5 @@
 export interface DocumentTypeResponse {
-  id: number;
+  id: string;
   name: string;
   description: string;
   mask?: string;
