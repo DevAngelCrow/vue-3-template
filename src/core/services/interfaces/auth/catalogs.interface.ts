@@ -1,12 +1,13 @@
+import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
+
 import { Country } from './country.interface';
-import { District } from './district.interface';
 import { DocumentType } from './documentType.interface';
 import { Gender } from './gender.interface';
 import { MaritalStatus } from './maritalStatus.interface';
 
 export interface CatalogsData {
   countries: Country[];
-  districts: District[];
+  geographic_divisions: GeographicDivisionResponse[];
   genders: Gender[];
   documentTypes: DocumentType[];
   maritalStatuses: MaritalStatus[];
