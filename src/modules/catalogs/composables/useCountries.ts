@@ -103,6 +103,8 @@ export function useCountries() {
         name: '',
         abbreviation: '',
         code: '',
+        iso2: '',
+        phone_code: '',
       },
       validationSchema: yup.object({
         // Validación para los campos del formulario
@@ -136,12 +138,25 @@ export function useCountries() {
           .transform(
             value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ0-9 ]/g, '') || '',
           ),
+        iso2: yup
+          .string()
+          .required('El código ISO2 es obligatorio')
+          .length(2, 'El código ISO2 debe tener 2 caracteres')
+          .matches(/^[A-Z]{2}$/i, 'Solo se permiten 2 letras'),
+        phone_code: yup
+          .string()
+          .required('El código de teléfono es obligatorio')
+          .min(1, 'El código de teléfono debe tener al menos 1 dígito')
+          .max(10, 'El código de teléfono no puede tener más de 10 dígitos')
+          .matches(/^\d+$/, 'Solo se permiten números'),
       }),
     });
   // Definir los campos del formulario
   const [name, nameAttrs] = defineField('name');
   const [abbreviation, abbreviationAttrs] = defineField('abbreviation');
   const [code, codeAttrs] = defineField('code');
+  const [iso2, iso2Attrs] = defineField('iso2');
+  const [phone_code, phoneCodeAttrs] = defineField('phone_code');
   const filter = reactive<filterType>({
     filter_name: undefined,
     status: undefined,
@@ -179,6 +194,11 @@ export function useCountries() {
     finishLoading();
     return items;
   };
+  const flagFromISO2 = (iso2: string) => {
+    return iso2.trim().toUpperCase().replace(/./g, char =>
+      String.fromCharCode(127397 + char.charCodeAt(0))
+    );
+  }
   return {
     getCountries,
     createCountry,
@@ -196,9 +216,14 @@ export function useCountries() {
     abbreviationAttrs,
     code,
     codeAttrs,
+    iso2,
+    iso2Attrs,
+    phone_code,
+    phoneCodeAttrs,
     errors,
     resetForm,
     filter,
     pagination,
+    flagFromISO2,
   };
 }
