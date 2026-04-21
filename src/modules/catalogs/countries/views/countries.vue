@@ -275,7 +275,6 @@ const {
   validateAlphaInput,
   cleanSearch,
   pagination,
-  flagFromISO2,
 } = useCountries();
 
 const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([

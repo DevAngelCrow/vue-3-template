@@ -194,11 +194,6 @@ export function useCountries() {
     finishLoading();
     return items;
   };
-  const flagFromISO2 = (iso2: string) => {
-    return iso2.trim().toUpperCase().replace(/./g, char =>
-      String.fromCharCode(127397 + char.charCodeAt(0))
-    );
-  }
   return {
     getCountries,
     createCountry,
@@ -224,6 +219,5 @@ export function useCountries() {
     resetForm,
     filter,
     pagination,
-    flagFromISO2,
   };
 }
