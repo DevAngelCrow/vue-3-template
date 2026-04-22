@@ -1,8 +1,8 @@
 <template>
   <Chip
-    class="flex justify-center items-center max-w-[100px] min-w-[100px]"
+    class="flex justify-center items-center max-w-25 min-w-25"
     :style="{
-      backgroundColor: `color-mix(in srgb, ${props.backgroundColor} 20%, transparent)`,
+      backgroundColor: `color-mix(in srgb, ${props.backgroundColor} 40%, transparent)`,
       color: props.textColor,
       '--p-chip-icon-color': props.backgroundColor,
     }"

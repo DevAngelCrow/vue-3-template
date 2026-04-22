@@ -96,6 +96,14 @@
           >
           </AppChipStatus>
         </template>
+        <template #body-name="{data}">
+          <div class="flex items-center gap-2">
+            <span v-if="data.iso2" class="text-lg">
+              <span :class="`fi fi-${data.iso2.toLowerCase()}`"  style="width: 1.5em; height: 1.1em; display: inline-block; border-radius: 2px;"></span>
+            </span>
+            <span>{{ data.name }}</span>
+          </div>
+        </template>
       </AppDataTable>
     </section>
     <AppModal
@@ -129,7 +137,6 @@
           :error-messages="errors.abbreviation"
           :disabled="isDetailsMode"
         />
-
         <AppInputMask
           v-model="code"
           class="lg:w-full grow sm:max-w-125"
@@ -139,6 +146,24 @@
           :disabled="isDetailsMode"
           mask="999"
           placeholder="000"
+        />
+        <AppInputText
+          v-model="iso2"
+          class="lg:w-full grow sm:max-w-125"
+          label="Ingrese el código ISO2"
+          v-bind="iso2Attrs"
+          :error-messages="errors.iso2"
+          :disabled="isDetailsMode"
+          maxlength="2"
+        />
+        <AppInputText
+          v-model="phone_code"
+          class="lg:w-full grow sm:max-w-125"
+          label="Ingrese el código de teléfono"
+          v-bind="phoneCodeAttrs"
+          :error-messages="errors.phone_code"
+          :disabled="isDetailsMode"
+          maxlength="10"
         />
       </div>
     </AppModal>
@@ -204,12 +229,16 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     name.value = country.name || '';
     abbreviation.value = country.abbreviation || '';
     code.value = country.code || '';
+    iso2.value = country.iso2 || '';
+    phone_code.value = country.phone_code || '';
   } else if (type === 'details') {
     isDetailsMode.value = true;
     // Rellena con los datos del país a ver
     name.value = country.name || '';
     abbreviation.value = country.abbreviation || '';
     code.value = country.code || '';
+    iso2.value = country.iso2 || '';
+    phone_code.value = country.phone_code || '';
   }
 
   showModal.value = true;
@@ -233,6 +262,10 @@ const {
   abbreviationAttrs,
   code,
   codeAttrs,
+  iso2,
+  iso2Attrs,
+  phone_code,
+  phoneCodeAttrs,
   errors,
   resetForm,
   updateCountry,
@@ -281,6 +314,8 @@ const confirmModal = handleSubmit(async values => {
         name: values.name,
         abbreviation: values.abbreviation,
         code: values.code,
+        iso2: values.iso2,
+        phone_code: values.phone_code,
         active: true,
       };
       await updateCountry(editingCountryId.value, updateForm);
@@ -290,6 +325,8 @@ const confirmModal = handleSubmit(async values => {
         name: values.name,
         abbreviation: values.abbreviation,
         code: values.code,
+        iso2: values.iso2,
+        phone_code: values.phone_code,
         active: true,
       };
       await createCountry(form);
@@ -335,8 +372,15 @@ const headers = ref<TableHeaders[]>([
     field: 'code',
     header: 'Código',
     sortable: false,
-    alignHeaders: 'start',
-    alignItems: 'start',
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+  {
+    field: 'phone_code',
+    header: 'Código de Teléfono',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
   },
   {
     field: 'active',

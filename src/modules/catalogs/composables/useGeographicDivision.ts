@@ -143,12 +143,13 @@ export function useGeographicDivision() {
     }
   };
 
-  const getDivisionTypesList = async () => {
+  const getDivisionTypesList = async (params?: { id_country?: string }) => {
     try {
       startLoading();
       const response = await catalogServices.getAllGeographicDivisionTypes({
         active: true,
         per_page: 100,
+        ...(params?.id_country ? { id_country: params.id_country } : {}),
       });
       if (response.statusCode === 200) {
         divisionTypesList.value = response.data.data;
@@ -160,12 +161,13 @@ export function useGeographicDivision() {
     }
   };
 
-  const getParentDivisionsList = async () => {
+  const getParentDivisionsList = async (params?: { id_country?: string }) => {
     try {
       startLoading();
       const response = await catalogServices.getAllGeographicDivisions({
         active: true,
         per_page: 1000,
+        ...(params?.id_country ? { id_country: params.id_country } : {}),
       });
       if (response.statusCode === 200) {
         parentDivisionsList.value = response.data.data;

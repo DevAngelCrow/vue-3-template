@@ -162,7 +162,7 @@ const checkWrapMenu = () => {
 };
 
 const addFunctionItemMenuUser = (item: string) => {
-  const itemsMenuUser = ['Cerrar sesion'];
+  const itemsMenuUser = ['Cerrar sesión', 'Mi perfil'];
   if (item === itemsMenuUser[0]) {
     console.log('cerrando sesion');
     logout();
