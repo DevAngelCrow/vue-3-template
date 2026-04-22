@@ -173,12 +173,9 @@ function createForm() {
   };
 }
 
-let form: ReturnType<typeof createForm> | null = null;
+let form: ReturnType<typeof createForm> = createForm();
 
 export function useAuth() {
-  if (!form) {
-    form = createForm();
-  }
   const { setMenu } = useAuthStore();
   const alert = useAlertStore();
   const router = useRouter();
@@ -308,26 +305,56 @@ export function useAuth() {
     return token ? `${tokenType} ${token}` : null;
   };
 
-  const registerUser = async (data: FormData) => {
+
+// Eliminar duplicado y dejar solo una función useAuth y registerUser
+
+
+  const registerUser = async (data: { email: string; password: string }) => {
     try {
-      const response = await authServices.signUp(data);
+      // Crear FormData y agregar solo email y password
+      const form = new FormData();
+      form.append('email', data.email);
+      form.append('password', data.password);
+      const response = await authServices.signUp(form);
+      // Manejar respuesta genérica
       if (response.status === 201) {
-        const email = data.get('email');
-        if (typeof email === 'string') {
-          router.push({
-            name: 'pending-verification-email',
-            state: { email },
-          });
+        alert.showAlert({
+          type: 'success',
+          title: 'Registro exitoso',
+          content: 'El usuario ha sido registrado correctamente',
+        });
+        router.push('/login');
+      } else {
+        let errorMsg = 'No se pudo registrar el usuario';
+        if (response.data && typeof response.data === 'object' && 'message' in response.data) {
+          errorMsg = (response.data as any).message || errorMsg;
         }
+        alert.showAlert({
+          type: 'error',
+          title: 'Error en el registro',
+          content: errorMsg,
+        });
       }
     } catch (error) {
       console.error(error);
       alert.showAlert({
         type: 'error',
         title: `Error en el registro del usuario`,
-        content: 'Ocurrio un error al momento del registro del usuario',
+        content: 'Ocurrió un error al momento del registro del usuario',
       });
     }
+  };
+
+  // Declarar validationInputEmail para evitar error de propiedad no encontrada
+  const validationInputEmail = (
+    value: string,
+    input: string,
+    regex: RegExp = /[^a-zA-Z0-9._%+\-@]/g,
+  ) => {
+    const sanitizedValue = sanitizedValueInput(value, regex);
+    nextTick(() => {
+      form?.setFieldValue(input, sanitizedValue);
+    });
   };
 
   const validationInputAlphanumeric = (
@@ -336,19 +363,6 @@ export function useAuth() {
     regex: RegExp = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ@.0-9 ]/g,
   ) => {
     const sanitizedValue = sanitizedValueInput(value, regex);
-    nextTick(() => {
-      form?.setFieldValue(input, sanitizedValue);
-    });
-  };
-
-  const validationInputEmail = (
-    value: string,
-    input: string,
-    regex: RegExp = /[^a-zA-Z0-9._%+\-@]/g,
-  ) => {
-    const sanitizedValue = sanitizedValueInput(value, regex);
-    // const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(sanitizedValue);
-
     nextTick(() => {
       form?.setFieldValue(input, sanitizedValue);
     });
@@ -366,6 +380,7 @@ export function useAuth() {
   };
 
   return {
+    ...form,
     login,
     logout,
     isAuthenticated,
@@ -374,7 +389,6 @@ export function useAuth() {
     getAuthHeader,
     isLoading,
     error,
-    ...form,
     registerUser,
     validationInputAlphanumeric,
     validationInputEmail,
