@@ -152,6 +152,7 @@ const {
   getRouteById,
   setRouteItem,
   permissionsPagination,
+  loadParentRoutes,
 } = adminInstance;
 
 const { startLoading, finishLoading } = useLoaderStore();
@@ -266,6 +267,7 @@ watch(
 
 onMounted(async () => {
   try {
+    await loadParentRoutes();
     await getPermissions();
     await getCategoryPermissions();
     if (route?.params?.id) {
@@ -277,7 +279,7 @@ onMounted(async () => {
         console.error('No se pudo obtener la ruta');
         return;
       }
-      console.log('Route data:', routeData.data);
+      // console.log('Route data:', routeData.data);
       const data = {
         id: routeData.data.id,
         name: routeData.data.name,

@@ -4,7 +4,7 @@
       class="flex items-start justify-center px-2 py-1.5 shrink-0 flex-wrap flex-col gap-1">
       <!--Si tiene hijos, no usamos router-link -->
       <div v-if="isChildren(section.children)" :class="[
-        'flex flex-row justify-start items-center flex-wrap w-full overflow-hidden hover:bg-sky-200 hover:rounded-md hover:outline',
+        'flex flex-row justify-start items-center flex-wrap w-full overflow-hidden hover:bg-primary-200 hover:rounded-md hover:outline',
       ]" :id="section.title">
         <div v-ripple class="flex w-full items-center">
           <i :class="`${section.icon} w-[10%] pl-2`"></i>
@@ -15,7 +15,7 @@
         </div>
         <Transition name="slide-accordion">
           <ul v-if="section.is_open" class="w-full overflow-hidden">
-            <AppMenuItemSideBar :mapped-menu="section.children" class="bg-sky-200 rounded-md" />
+            <AppMenuItemSideBar :mapped-menu="section.children" class="bg-primary-200 rounded-md" />
           </ul>
         </Transition>
       </div>

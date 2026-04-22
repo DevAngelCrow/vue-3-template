@@ -146,6 +146,7 @@ const {
   pagination,
   headers,
   parentRoutes,
+  loadParentRoutes,
 } = adminInstance;
 
 const goToRouteMaintenance = (id?: string) => {
@@ -237,6 +238,7 @@ const iconFilter = computed(() => {
 onMounted(async () => {
   try {
     await getRoutes();
+    await loadParentRoutes();
   } catch (error) {
     console.error(error);
   }

@@ -247,17 +247,6 @@ export function useAdmin() {
         ...filter,
       };
       const response = await adminServices.getAllRoutes(params);
-      const secondResponse = await adminServices.getAllRoutesWithOutPaginate();
-      if (secondResponse.statusCode === 200) {
-        parentRoutes.value = secondResponse.data
-          .filter(item => item.parent === null || item.parent === undefined)
-          .map(item => ({
-            title: item.title,
-            id: item.id,
-            uri: item.uri,
-            name: item.name,
-          }));
-      }
       if (response.statusCode === 200) {
         pagination.page = response.data.current_page;
         pagination.per_page = response.data.per_page;
@@ -267,6 +256,28 @@ export function useAdmin() {
       return [];
     } catch (error) {
       console.error('Error al obtener el listado de rutas', error);
+    } finally {
+      finishLoading();
+    }
+  };
+
+  // Nueva función para cargar solo rutas padre
+  const loadParentRoutes = async () => {
+    try {
+      startLoading();
+      const response = await adminServices.getAllRoutesWithOutPaginate();
+      if (response.statusCode === 200) {
+        parentRoutes.value = response.data
+          .filter(item => item.parent === null || item.parent === undefined)
+          .map(item => ({
+            title: item.title,
+            id: item.id,
+            uri: item.uri,
+            name: item.name,
+          }));
+      }
+    } catch (error) {
+      console.error('Error al cargar rutas padre', error);
     } finally {
       finishLoading();
     }
@@ -376,7 +387,7 @@ export function useAdmin() {
         name: filter_permission.value.name
           ? filter_permission.value.name
           : undefined,
-        id_category_permissions: filter_permission.value.category?.id,
+        category_permission_id: filter_permission.value.category?.id,
         active: true,
       };
       const response = await adminServices.getPermissions(filter);
@@ -482,6 +493,7 @@ export function useAdmin() {
   };
   return {
     getRoutes,
+    loadParentRoutes,
     addRoute,
     editRoute,
     toggleRoute,
