@@ -387,7 +387,7 @@ export function useAdmin() {
         name: filter_permission.value.name
           ? filter_permission.value.name
           : undefined,
-        id_category_permissions: filter_permission.value.category?.id,
+        category_permission_id: filter_permission.value.category?.id,
         active: true,
       };
       const response = await adminServices.getPermissions(filter);
