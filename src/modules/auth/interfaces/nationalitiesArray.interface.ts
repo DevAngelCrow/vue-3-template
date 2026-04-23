@@ -4,4 +4,5 @@ export interface NationalitiesArray {
   code: string;
   id: string;
   name: string;
+  phone_code: string;
 }

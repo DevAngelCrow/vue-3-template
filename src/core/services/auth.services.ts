@@ -13,6 +13,8 @@ import { Login } from './interfaces/auth/login.interface';
 import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
 import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
 import { ApiResponseCatalogs } from './interfaces/auth/catalogs.interface';
+import { GeographicDivisionTypeResponse } from '@/modules/catalogs/interfaces/geographic-division-type/geographic-division-type.response.interface';
+import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
 
 const getMaritalStatus = async (): Promise<
   ApiResponseGeneric<MaritalStatus>
@@ -35,11 +37,23 @@ const getCountriesNationalities = async (): Promise<
   ApiResponseGeneric<Country>
 > => {
   const response = await httpClient.get<ApiResponseGeneric<Country>>(
-    'catalogs/countries?page=1&per_page=10',
+    'catalogs/countries',
   );
   return response.data;
 };
 
+const getGeographicalDivisions = async (params?: string): Promise<ApiResponseGeneric<GeographicDivisionResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<GeographicDivisionResponse>
+  >('catalogs/geographic-divisions', params);
+  return response.data;
+}
+const getGeographicalDivisionsTypes = async (params: object): Promise<ApiResponseGeneric<GeographicDivisionTypeResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<GeographicDivisionTypeResponse>
+  >('catalogs/geographic-division-types', params);
+  return response.data;
+}
 const getDistricts = async (): Promise<ApiResponseGeneric<District>> => {
   const response = await httpClient.get<ApiResponseGeneric<District>>(
     'catalogs/districts?page=1&per_page=10',
@@ -51,7 +65,7 @@ const getDocumentTypes = async (): Promise<
   ApiResponseGeneric<DocumentType>
 > => {
   const response = await httpClient.get<ApiResponseGeneric<DocumentType>>(
-    'profile/document-types?page=1&per_page=10',
+    'profile/document-types',
   );
   return response.data;
 };
@@ -109,4 +123,6 @@ export default {
   login,
   logout,
   getCatalogs,
+  getGeographicalDivisions,
+  getGeographicalDivisionsTypes,
 };
