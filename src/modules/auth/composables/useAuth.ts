@@ -5,192 +5,32 @@ import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
-import { PrimeVueFile } from '@/types/PrimeVueFile';
-import { CreateDateFromFormat } from '@/core/utils/dates';
 import { useAlertStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { useAuthStore } from '@/core/store/useAuthStore';
 
-import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
-import { DistrictsModelAutocomplete } from '../interfaces/districtsArray.interface';
-import { DocumentTypeObject } from '../interfaces/documentType.interface';
-
-function createForm() {
-  const { errors, defineField, handleSubmit, validateField, setFieldValue } =
-    useForm({
-      validationSchema: yup.object({
-        //personal info
-        firstName: yup
-          .string()
-          .required('El primer nombre es requerido')
-          .min(3, 'El nombre debe tener al menos 3 caracteres')
-          .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
-          .transform(
-            value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
-          ),
-        middleName: yup
-          .string()
-          .min(3, 'El segundo nombre debe tener al menos 3 caracteres'),
-        lastName: yup
-          .string()
-          .required('El apellido es requerido')
-          .min(3, 'El apellido debe tener al menos 3 caracteres'),
-        birthDate: yup
-          .string()
-          .required('La fecha de nacimiento es requerida')
-          .test('is-date', 'Formato inválido, usa DD/MM/YYYY', value => {
-            if (!value) return false;
-            const parsed = CreateDateFromFormat(value, 'DD/MM/YYYY');
-            if (parsed instanceof Date) {
-              return true;
-            }
-            return false;
-          }),
-        gender: yup.string().required('El género es requerido'),
-        maritalStatus: yup.string().required('El estado civil es requerido'),
-        phoneNumber: yup
-          .string()
-          .required('El número de teléfono es requerido')
-          .min(9)
-          .max(9),
-        status: yup.number() /*.required('El campo de estado es requerido')*/,
-        nationalities: yup
-          .array<NationalitiesArray>()
-          .required('El campo de nacionalidades es requerido')
-          .min(1, 'Debes agregar al menos una nacionalidad'),
-        file_img: yup
-          .mixed<PrimeVueFile[]>()
-          .test(
-            'required',
-            'La imágen del perfil es requerida',
-            value => Array.isArray(value) && value.length > 0,
-          )
-          .required('La imágen del perfil es requerida')
-          .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
-            if (!value || value.length === 0) return true;
-            return value.every(file => file.size <= 1000000);
-          })
-          .test('fileType', 'Formato no permitido', value => {
-            if (!value || value.length === 0) return true;
-            return value.every(file =>
-              ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
-            );
-          }),
-        street: yup
-          .string()
-          .required('El campo de nombre de calle es requerido')
-          .min(3),
-        streetNumber: yup
-          .string()
-          .required('El campo de número de calle es requerido')
-          .min(1),
-        neighborhood: yup
-          .string()
-          .required('El campo de colonia/reparto es requerido')
-          .min(3),
-        geographic_divisions: yup
-          .mixed<DistrictsModelAutocomplete>()
-          .required('El campo de distrito es requerido'),
-        houseNumber: yup
-          .string()
-          .required('El campo de numero de casa es requerido')
-          .min(1),
-        block: yup.string().required('El campo del block es requerido').min(1),
-        pathway: yup
-          .string()
-          .required('El campo de pasaje es requerido')
-          .min(1),
-        current: yup.boolean(),
-
-        //personal document info
-
-        documentType: yup
-          .object<DocumentTypeObject>()
-          .required('El tipo del documento es requerido'),
-        documentNumber: yup
-          .string()
-          .required('El número del documento es requerido')
-          .min(1),
-        //user info
-        email: emailFormat(undefined, true, undefined),
-        password: passwordValidation(),
-        userName: yup.string().required('El nombre del usuario es requerido'),
-      }),
-    });
-
-  return {
-    errors,
-    handleSubmit,
-    validateField,
-    setFieldValue,
-    firstName: defineField('firstName')[0],
-    firstNameAttrs: defineField('firstName')[1],
-    middleName: defineField('middleName')[0],
-    middleNameAttrs: defineField('middleName')[1],
-    lastName: defineField('lastName')[0],
-    lastNameAttrs: defineField('lastName')[1],
-    birthDate: defineField('birthDate')[0],
-    birthDateAttrs: defineField('birthDate')[1],
-    gender: defineField('gender')[0],
-    genderAttrs: defineField('gender')[1],
-    maritalStatus: defineField('maritalStatus')[0],
-    maritalStatusAttrs: defineField('maritalStatus')[1],
-    phoneNumber: defineField('phoneNumber')[0],
-    phoneNumberAttrs: defineField('phoneNumber')[1],
-    status: defineField('status')[0],
-    statusAttrs: defineField('status')[1],
-    nationalities: defineField('nationalities')[0],
-    nationalitiesAttrs: defineField('nationalities')[1],
-    file_img: defineField('file_img')[0],
-    file_imgAttrs: defineField('file_img')[1],
-    street: defineField('street')[0],
-    streetAttrs: defineField('street')[1],
-    streetNumber: defineField('streetNumber')[0],
-    streetNumberAttrs: defineField('streetNumber')[1],
-    neighborhood: defineField('neighborhood')[0],
-    neighborhoodAttrs: defineField('neighborhood')[1],
-    geographicDivisions: defineField('geographic_divisions')[0],
-    geographicDivisionsAttrs: defineField('geographic_divisions')[1],
-    houseNumber: defineField('houseNumber')[0],
-    houseNumberAttrs: defineField('houseNumber')[1],
-    block: defineField('block')[0],
-    blockAttrs: defineField('block')[1],
-    pathway: defineField('pathway')[0],
-    pathwayAttrs: defineField('pathway')[1],
-    current: defineField('current')[0],
-    currentAttrs: defineField('current')[1],
-    documentType: defineField('documentType')[0],
-    documentTypeAttrs: defineField('documentType')[1],
-    documentNumber: defineField('documentNumber')[0],
-    documentNumberAttrs: defineField('documentNumber')[1],
-    email: defineField('email')[0],
-    emailAttrs: defineField('email')[1],
-    password: defineField('password')[0],
-    passwordAttrs: defineField('password')[1],
-    userName: defineField('userName')[0],
-    userNameAttrs: defineField('userName')[1],
-  };
-}
-
-let form: ReturnType<typeof createForm> | null = null;
-
 export function useAuth() {
-  if (!form) {
-    form = createForm();
-  }
-  const { setMenu } = useAuthStore();
+  const { setToken, setUserInfo, setTokenType, setRefreshToken, setMenu } =
+    useAuthStore();
   const alert = useAlertStore();
   const router = useRouter();
   const route = useRoute();
   const isLoading = ref(false);
-  const isLoggingOut = ref();
+  const isLoggingOut = ref(false);
   const error = ref<string | null>(null);
   const API_URL =
     import.meta.env.VITE_VUE_APP_API_URL || 'http://127.0.0.1:8000';
 
-  const { setToken, setUserInfo, setTokenType, setRefreshToken } =
-    useAuthStore();
+  const form = useForm({
+    validationSchema: yup.object({
+      email: emailFormat(undefined, true, undefined),
+      password: passwordValidation(),
+    }),
+  });
+
+  const [email, emailAttrs] = form.defineField('email');
+  const [password, passwordAttrs] = form.defineField('password');
 
   const login = async (user: string, password: string) => {
     isLoading.value = true;
@@ -308,26 +148,58 @@ export function useAuth() {
     return token ? `${tokenType} ${token}` : null;
   };
 
-  const registerUser = async (data: FormData) => {
+  // Eliminar duplicado y dejar solo una función useAuth y registerUser
+
+  const registerUser = async (data: { email: string; password: string }) => {
     try {
-      const response = await authServices.signUp(data);
+      // Crear FormData y agregar solo email y password
+      const form = new FormData();
+      form.append('email', data.email);
+      form.append('password', data.password);
+      const response = await authServices.signUp(form);
+      // Manejar respuesta genérica
       if (response.status === 201) {
-        const email = data.get('email');
-        if (typeof email === 'string') {
-          router.push({
-            name: 'pending-verification-email',
-            state: { email },
-          });
+        alert.showAlert({
+          type: 'success',
+          title: 'Registro exitoso',
+          content: 'El usuario ha sido registrado correctamente',
+        });
+        router.push('/login');
+      } else {
+        let errorMsg = 'No se pudo registrar el usuario';
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'message' in response.data
+        ) {
+          errorMsg = (response.data as any).message || errorMsg;
         }
+        alert.showAlert({
+          type: 'error',
+          title: 'Error en el registro',
+          content: errorMsg,
+        });
       }
     } catch (error) {
       console.error(error);
       alert.showAlert({
         type: 'error',
         title: `Error en el registro del usuario`,
-        content: 'Ocurrio un error al momento del registro del usuario',
+        content: 'Ocurrió un error al momento del registro del usuario',
       });
     }
+  };
+
+  // Declarar validationInputEmail para evitar error de propiedad no encontrada
+  const validationInputEmail = (
+    value: string,
+    input: string,
+    regex: RegExp = /[^a-zA-Z0-9._%+\-@]/g,
+  ) => {
+    const sanitizedValue = sanitizedValueInput(value, regex);
+    nextTick(() => {
+      form?.setFieldValue(input, sanitizedValue);
+    });
   };
 
   const validationInputAlphanumeric = (
@@ -336,19 +208,6 @@ export function useAuth() {
     regex: RegExp = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ@.0-9 ]/g,
   ) => {
     const sanitizedValue = sanitizedValueInput(value, regex);
-    nextTick(() => {
-      form?.setFieldValue(input, sanitizedValue);
-    });
-  };
-
-  const validationInputEmail = (
-    value: string,
-    input: string,
-    regex: RegExp = /[^a-zA-Z0-9._%+\-@]/g,
-  ) => {
-    const sanitizedValue = sanitizedValueInput(value, regex);
-    // const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(sanitizedValue);
-
     nextTick(() => {
       form?.setFieldValue(input, sanitizedValue);
     });
@@ -366,6 +225,7 @@ export function useAuth() {
   };
 
   return {
+    ...form,
     login,
     logout,
     isAuthenticated,
@@ -374,10 +234,13 @@ export function useAuth() {
     getAuthHeader,
     isLoading,
     error,
-    ...form,
     registerUser,
     validationInputAlphanumeric,
     validationInputEmail,
     validationInputPassword,
+    email,
+    emailAttrs,
+    password,
+    passwordAttrs,
   };
 }

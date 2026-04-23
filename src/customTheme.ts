@@ -3,43 +3,43 @@ import Aura from '@primeuix/themes/aura';
 export const CustomTheme = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '{sky.50}',
-      100: '{sky.100}',
-      200: '{sky.200}',
-      300: '{sky.300}',
-      400: '{sky.400}',
-      500: '{sky.500}',
-      600: '{sky.600}',
-      700: '{sky.700}',
-      800: '{sky.800}',
-      900: '{sky.900}',
-      950: '{sky.950}',
+      50: '{emerald.50}',
+      100: '{emerald.100}',
+      200: '{emerald.200}',
+      300: '{emerald.300}',
+      400: '{emerald.400}',
+      500: '{emerald.500}',
+      600: '{emerald.600}',
+      700: '{emerald.700}',
+      800: '{emerald.800}',
+      900: '{emerald.900}',
+      950: '{emerald.950}',
     },
     surface: {
-      50: '{blue.50}',
-      100: '{blue.100}',
-      200: '{blue.200}',
-      300: '{blue.300}',
-      400: '{blue.400}',
-      500: '{blue.500}',
-      600: '{blue.600}',
-      700: '{blue.700}',
-      800: '{blue.800}',
-      900: '{blue.900}',
-      950: '{blue.950}',
+      50: '{indigo.50}',
+      100: '{indigo.100}',
+      200: '{indigo.200}',
+      300: '{indigo.300}',
+      400: '{indigo.400}',
+      500: '{indigo.500}',
+      600: '{indigo.600}',
+      700: '{indigo.700}',
+      800: '{indigo.800}',
+      900: '{indigo.900}',
+      950: '{indigo.950}',
     },
     colorScheme: {
       light: {
         primary: {
-          color: '{sky.950}',
+          color: '{emerald.950}',
           inverseColor: '#FFFFFF',
-          hoverColor: '{sky.900}',
-          //activeColor: '{sky.800}',
-          //outlined: '{sky.950}'
+          hoverColor: '{emerald.900}',
+          //activeColor: '{emerald.800}',
+          //outlined: '{emerald.950}'
         },
         // highlight: {
-        //   background: '{sky.700}',
-        //   focusBackground: '{sky.600}',
+        //   background: '{emerald.700}',
+        //   focusBackground: '{emerald.600}',
         //   color: '#FFFFFF',
         //   focusColor: '#FFFFFF',
         // },
@@ -52,8 +52,8 @@ export const CustomTheme = definePreset(Aura, {
         light: {
           outlined: {
             primary: {
-              color: '{sky.950}',
-              borderColor: '{sky.950}',
+              color: '{emerald.950}',
+              borderColor: '{emerald.950}',
             },
           },
         },
@@ -61,7 +61,7 @@ export const CustomTheme = definePreset(Aura, {
     },
     dialog: {
       root: {
-        borderColor: '{sky.950}',
+        borderColor: '{emerald.950}',
       },
     },
   },
