@@ -44,32 +44,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
-  background-size: 400% 400%;
-  animation: gradientMove 15s ease infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Arial, sans-serif;
-}
-
-@keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
+/* El fondo del loader es neutro, el color lo da el overlay del contenedor */
 
 /* Contenedor principal con fondo semi-transparente */
 .loader-container {
@@ -118,13 +93,15 @@ body {
   animation-duration: 1.8s;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
-  filter: drop-shadow(0 0 7px rgba(12, 74, 110, 0.75));
+  /* Usar sombra con el color primario */
+  filter: drop-shadow(0 0 7px var(--p-primary-color));
 }
 
 .Loader:before {
   width: 100%;
   height: 100%;
-  box-shadow: inset 0 0 0 17px #0c4a6e;
+  /* Usar el color primario de PrimeVue/Tailwind */
+  box-shadow: inset 0 0 0 17px var(--p-primary-color);
   animation-name: pulsA;
 }
 
@@ -133,19 +110,19 @@ body {
   height: calc(100% - 34px);
   top: 17px;
   left: 17px;
-  box-shadow: 0 0 0 0 #0c4a6e;
+  /* Usar el color surface de PrimeVue/Tailwind */
+  box-shadow: 0 0 0 0 var(--p-surface-color);
   animation-name: pulsB;
 }
 
 @keyframes pulsA {
   0% {
-    box-shadow: inset 0 0 0 17px #0c4a6e;
+    box-shadow: inset 0 0 0 17px var(--p-primary-color);
     opacity: 1;
   }
-
   50%,
   100% {
-    box-shadow: inset 0 0 0 0 #0c4a6e;
+    box-shadow: inset 0 0 0 0 var(--p-primary-color);
     opacity: 0;
   }
 }
@@ -153,12 +130,11 @@ body {
 @keyframes pulsB {
   0%,
   50% {
-    box-shadow: 0 0 0 0 #0c4a6e;
+    box-shadow: 0 0 0 0 var(--p-surface-color);
     opacity: 0;
   }
-
   100% {
-    box-shadow: 0 0 0 17px #0c4a6e;
+    box-shadow: 0 0 0 17px var(--p-surface-color);
     opacity: 1;
   }
 }
