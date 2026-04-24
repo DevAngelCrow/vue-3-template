@@ -15,6 +15,7 @@
           option-label="name"
           :options="documentTypesOptions"
           :readonly="!editMode"
+          option-value="id"
         />
         <AppInputMask
           class="flex-1"

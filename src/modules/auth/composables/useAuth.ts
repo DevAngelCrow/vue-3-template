@@ -22,7 +22,7 @@ import { DocumentTypeObject } from '../interfaces/documentType.interface';
 import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
 
 export function useAuth() {
-  const { setToken, setUserInfo, setTokenType, setRefreshToken, setMenu } =
+  const { setToken, setUserInfo, setTokenType, setRefreshToken, setMenu, userInfo } =
     useAuthStore();
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
@@ -247,6 +247,42 @@ export function useAuth() {
       console.error('Error al obtener las divisiones geográficas:', error);
     }
   };
+  const getDetailsProfile = async () => {
+    try {
+      if(userInfo && typeof userInfo === 'object' && 'id' in userInfo) {
+        const idUser = userInfo.id;
+        const response = await authServices.getProfileDetails(idUser);
+      if (response.statusCode === 200) {
+         email.value = response.data.email;
+         userName.value = response.data.user_name;
+         firstName.value = response.data.first_name;
+         middleName.value = response.data.middle_name;
+         lastName.value = response.data.last_name;
+         maritalStatus.value = response.data.id_marital_status;
+         birthDate.value = response.data.birth_date;
+         nationalities.value = response.data.nationalities;
+         gender.value = response.data.id_gender;
+         phoneNumber.value = response.data.phone_number;
+         status.value = response.data.id_status;
+         documentType.value = response.data.document_type;
+         documentNumber.value = response.data.document_number;
+         country.value = response.data.id_country;
+         geographic_divisions_type.value = response.data.geographic_division_type;
+         geographic_divisions.value = response.data.id_geographic_division;
+         street.value = response.data.street;
+         streetNumber.value = response.data.street_number;
+         houseNumber.value = response.data.house_number;
+         neighborhood.value = response.data.neighborhood;
+         block.value = response.data.block;
+         pathway.value = response.data.pathway;
+         current.value = response.data.current;
+      }
+      }
+      console.warn('No se pudo obtener el ID del usuario para cargar los detalles del perfil');
+    } catch (error) {
+      console.error('Error al obtener los detalles del perfil:', error);
+    }
+  };
   const login = async (user: string, password: string) => {
     isLoading.value = true;
     error.value = null;
@@ -285,7 +321,7 @@ export function useAuth() {
           setRefreshToken(data.data);
         }
         if (data.data.user) {
-          setUserInfo(data.data.user);
+          setUserInfo(data.data);
         }
 
         if (data.data.token_type) {
@@ -461,6 +497,7 @@ export function useAuth() {
     getGeographicalDivisionsTypes,
     startLoading,
     finishLoading,
+    getDetailsProfile,
     email,
     emailAttrs,
     password,
