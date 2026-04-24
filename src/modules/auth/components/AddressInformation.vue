@@ -1,152 +1,277 @@
 <template>
-    <div class="w-full flex flex-col justify-start gap-5">
-        <section name="title">
-            <span class="text-2xl font-extrabold">Información de ubicación</span>
-        </section>
-        <section name="content" class="w-full gap-3 flex flex-col flex-wrap">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <AppAutocomplete v-model="country" class="flex-1" label="País*" id="countries" v-bind="countryAttrs"
-                    :error-messages="errors.country" option-label="name" :suggestions="countriesFiltered"
-                    :options="countriesOptions" dropdown @complete="findAutocompleteCountries" @change="wrappedGetGeographicalDivisionsTypesByCountry"
-                     />
-                <AppAutocomplete v-model="geographic_division_types" class="flex-1" label="Tipo de división*" id="geographic_division_types"
-                    v-bind="geographicDivisionTypesAttrs" :error-messages="errors.geographic_division_types"
-                    option-label="name" :suggestions="geographicDivisionsTypesFiltered" :options="geographicDivisionsTypesOptions" dropdown
-                    @complete="findAutocompleteDivisionTypes" />
-                <AppAutocomplete v-model="geographic_divisions" class="flex-1" label="División Geográfica*"
-                    id="geographic_divisions" v-bind="geographicDivisionsAttrs"
-                    :error-messages="errors.geographic_divisions" option-label="name"
-                    :suggestions="geographicDivisionsFiltered" :options="geographicDivisionsOptions" dropdown
-                    @complete="findAutocomplete" />
-                <AppInputText v-model="street" class="flex-1" label="Calle*" id="street" v-bind="streetAttrs"
-                    :error-messages="errors.street"
-                    @update:modelValue="validationInputAlphanumeric(street, 'street')" />
-                <AppInputText v-model="streetNumber" class="flex-1" label="No. de calle*" id="street_number"
-                    v-bind="streetNumberAttrs" :error-messages="errors.streetNumber" @update:modelValue="
-                        validationInputAlphanumeric(streetNumber, 'streetNumber')
-                        " />
-                <AppInputText v-model="houseNumber" class="flex-1" label="No. de casa*" id="house_number"
-                    v-bind="houseNumberAttrs" :error-messages="errors.houseNumber" @update:modelValue="
-                        validationInputAlphanumeric(houseNumber, 'houseNumber')
-                        " />
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <AppInputText v-model="neighborhood" class="flex-1" label="Colonia/Reparto*" id="neighborhood"
-                    v-bind="neighborhoodAttrs" :error-messages="errors.neighborhood" @update:modelValue="
-                        validationInputAlphanumeric(neighborhood, 'neighborhood')
-                        " />
-                <AppInputText v-model="block" class="flex-1" label="Block*" id="block" v-bind="blockAttrs"
-                    :error-messages="errors.block" @update:modelValue="
-                        validationInputAlphanumeric(streetNumber, 'streetNumber')
-                        " />
-                <AppInputText v-model="pathway" class="flex-1" label="Pasaje" id="pathway" v-bind="pathwayAttrs"
-                    :error-messages="errors.pathway"
-                    @update:modelValue="validationInputAlphanumeric(pathway, 'pathway')" />
-                <div class="flex items-center gap-2 flex-1">
-                    <Checkbox v-model="current" id="current" binary name="Actual" value="Actual" input-id="actual"
-                        v-bind="currentAttrs" :error-messages="errors.current" />
-                    <label for="actual">Actual</label>
-                </div>
-            </div>
-        </section>
-    </div>
+  <div class="w-full flex flex-col justify-start gap-5">
+    <section name="title">
+      <span class="text-2xl font-extrabold">Información de ubicación</span>
+    </section>
+    <section name="content" class="w-full gap-3 flex flex-col flex-wrap">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <AppAutocomplete
+          v-model="country"
+          class="flex-1"
+          label="País*"
+          id="countries"
+          v-bind="countryAttrs"
+          :error-messages="errors.country"
+          option-label="name"
+          :suggestions="countriesFiltered"
+          :options="countriesOptions"
+          dropdown
+          @complete="findAutocompleteCountries"
+          @change="wrappedGetGeographicalDivisionsTypesByCountry"
+          :readonly="!editMode"
+        />
+        <AppAutocomplete
+          v-model="geographic_divisions_type"
+          class="flex-1"
+          label="Tipo de división*"
+          id="geographic_divisions_type"
+          v-bind="geographicDivisionTypesAttrs"
+          :error-messages="errors.geographic_division_types"
+          option-label="name"
+          :suggestions="geographicDivisionsTypesFiltered"
+          :options="geographicDivisionsTypesOptions"
+          dropdown
+          @complete="findAutocompleteDivisionTypes"
+          @change="wrappedGetGeographicalDivisions"
+          :disabled="disableGeographicDivisionTypes"
+          :readonly="!editMode"
+        />
+        <AppAutocomplete
+          v-model="geographic_divisions"
+          class="flex-1"
+          label="División Geográfica*"
+          id="geographic_divisions"
+          v-bind="geographicDivisionsAttrs"
+          :error-messages="errors.geographic_divisions"
+          option-label="name"
+          :suggestions="geographicDivisionsFiltered"
+          :options="geographicDivisionsOptions"
+          dropdown
+          @complete="findAutocomplete"
+          :disabled="disableGeographicDivisions"
+          :readonly="!editMode"
+        />
+        <AppInputText
+          v-model="street"
+          class="flex-1"
+          label="Calle*"
+          id="street"
+          v-bind="streetAttrs"
+          :error-messages="errors.street"
+          @update:modelValue="validationInputAlphanumeric(street, 'street')"
+          :readonly="!editMode"
+        />
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <AppInputText
+          v-model="streetNumber"
+          class="flex-1"
+          label="No. de calle*"
+          id="street_number"
+          v-bind="streetNumberAttrs"
+          :error-messages="errors.streetNumber"
+          @update:modelValue="
+            validationInputAlphanumeric(streetNumber, 'streetNumber')
+          "
+          :readonly="!editMode"
+        />
+        <AppInputText
+          v-model="houseNumber"
+          class="flex-1"
+          label="No. de casa*"
+          id="house_number"
+          v-bind="houseNumberAttrs"
+          :error-messages="errors.houseNumber"
+          @update:modelValue="
+            validationInputAlphanumeric(houseNumber, 'houseNumber')
+          "
+          :readonly="!editMode"
+        />
+        <AppInputText
+          v-model="neighborhood"
+          class="flex-1"
+          label="Colonia/Reparto*"
+          id="neighborhood"
+          v-bind="neighborhoodAttrs"
+          :error-messages="errors.neighborhood"
+          @update:modelValue="
+            validationInputAlphanumeric(neighborhood, 'neighborhood')
+          "
+          :readonly="!editMode"
+        />
+        <AppInputText
+          v-model="block"
+          class="flex-1"
+          label="Block*"
+          id="block"
+          v-bind="blockAttrs"
+          :error-messages="errors.block"
+          @update:modelValue="
+            validationInputAlphanumeric(streetNumber, 'streetNumber')
+          "
+          :readonly="!editMode"
+        />
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <AppInputText
+          v-model="pathway"
+          class="flex-1"
+          label="Pasaje"
+          id="pathway"
+          v-bind="pathwayAttrs"
+          :error-messages="errors.pathway"
+          @update:modelValue="validationInputAlphanumeric(pathway, 'pathway')"
+          :readonly="!editMode"
+        />
+        <div class="flex items-center gap-2 flex-1">
+          <Checkbox
+            v-model="current"
+            id="current"
+            binary
+            name="Actual"
+            value="Actual"
+            input-id="actual"
+            v-bind="currentAttrs"
+            :error-messages="errors.current"
+            :readonly="!editMode"
+          />
+          <label for="actual">Actual</label>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
 <script setup lang="ts">
-import { inject, ref } from 'vue';
-import { useAuth } from '../composables/useAuth';
-import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
-import { AutoCompleteChangeEvent, AutoCompleteCompleteEvent, Checkbox } from 'primevue';
+import { computed, inject, ref } from 'vue';
+import {
+  AutoCompleteChangeEvent,
+  AutoCompleteCompleteEvent,
+  Checkbox,
+} from 'primevue';
+
 import { Country } from '@/core/services/interfaces/auth/country.interface';
-import * as yup from 'yup';
-import { useForm } from 'vee-validate';
+import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
 import { GeographicDivisionTypeResponse } from '@/modules/catalogs/interfaces/geographic-division-type/geographic-division-type.response.interface';
+
+import { useAuth } from '../composables/useAuth';
 type useAuthType = ReturnType<typeof useAuth>;
 const useAuthInstance = inject<useAuthType>('useAuthInstance')!;
 const {
-    street,
-    streetAttrs,
-    streetNumber,
-    streetNumberAttrs,
-    neighborhood,
-    neighborhoodAttrs,
-    geographic_divisions,
-    geographicDivisionsAttrs,
-    houseNumber,
-    houseNumberAttrs,
-    block,
-    blockAttrs,
-    pathway,
-    pathwayAttrs,
-    current,
-    currentAttrs,
-    errors,
-    geographicDivisionsOptions,
-    countriesOptions,
-    geographicDivisionsTypesOptions,
-    validationInputAlphanumeric,
-    getGeographicalDivisions,
-    getGeographicalDivisionsTypes,
+  street,
+  streetAttrs,
+  streetNumber,
+  streetNumberAttrs,
+  neighborhood,
+  neighborhoodAttrs,
+  geographic_divisions,
+  geographicDivisionsAttrs,
+  houseNumber,
+  houseNumberAttrs,
+  block,
+  blockAttrs,
+  pathway,
+  pathwayAttrs,
+  current,
+  currentAttrs,
+  country,
+  countryAttrs,
+  geographic_divisions_type,
+  geographicDivisionTypesAttrs,
+  errors,
+  geographicDivisionsOptions,
+  countriesOptions,
+  geographicDivisionsTypesOptions,
+  validationInputAlphanumeric,
+  getGeographicalDivisions,
+  getGeographicalDivisionsTypes,
+  form,
+  editMode,
 } = useAuthInstance;
 
 const geographicDivisionsFiltered = ref<GeographicDivisionResponse[]>([]);
 const countriesFiltered = ref<Country[]>([]);
-const geographicDivisionsTypesFiltered = ref<GeographicDivisionTypeResponse[]>([]);
-const form = useForm({
-    validationSchema: yup.object({
-        country: yup.string().required('El país es requerido'),
-        geographic_divisions_type: yup.string().required('El tipo de división geográfica es requerida'),
-    })
-});
+const geographicDivisionsTypesFiltered = ref<GeographicDivisionTypeResponse[]>(
+  [],
+);
 
-const [country, countryAttrs] = form.defineField('country');
-const [geographic_division_types, geographicDivisionTypesAttrs] = form.defineField('geographic_divisions_type');
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
-    const query = event?.query;
-    const filtered: GeographicDivisionResponse[] = [];
-    for (const item of geographicDivisionsOptions.value) {
-        if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-            filtered.push(item);
-        }
+  const query = event?.query;
+  const filtered: GeographicDivisionResponse[] = [];
+  for (const item of geographicDivisionsOptions.value) {
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      filtered.push(item);
     }
-    geographicDivisionsFiltered.value = filtered;
+  }
+  geographicDivisionsFiltered.value = filtered;
 };
 
 const findAutocompleteDivisionTypes = (event: AutoCompleteCompleteEvent) => {
-    let query = event?.query;
-    let _filteredItems = [];
+  let query = event?.query;
+  let _filteredItems = [];
 
-    for (let i = 0; i < geographicDivisionsTypesOptions.value.length; i++) {
-        let item = geographicDivisionsTypesOptions.value[i];
+  for (let i = 0; i < geographicDivisionsTypesOptions.value.length; i++) {
+    let item = geographicDivisionsTypesOptions.value[i];
 
-        if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-            _filteredItems.push(item);
-        }
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
     }
-    geographicDivisionsTypesFiltered.value = _filteredItems;
+  }
+  geographicDivisionsTypesFiltered.value = _filteredItems;
 };
 const findAutocompleteCountries = (event: AutoCompleteCompleteEvent) => {
-    let query = event?.query;
-    let _filteredItems = [];
+  let query = event?.query;
+  let _filteredItems = [];
 
-    for (let i = 0; i < countriesOptions.value.length; i++) {
-        let item = countriesOptions.value[i];
+  for (let i = 0; i < countriesOptions.value.length; i++) {
+    let item = countriesOptions.value[i];
 
-        if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-            _filteredItems.push(item);
-        }
+    if (item?.name?.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      _filteredItems.push(item);
     }
-    countriesFiltered.value = _filteredItems;
+  }
+  countriesFiltered.value = _filteredItems;
 };
 
-const wrappedGetGeographicalDivisions = async (event: AutoCompleteChangeEvent) => {
-    const params = event?.value.id as string;
-    await getGeographicalDivisions(params);
-    geographicDivisionsFiltered.value = geographicDivisionsOptions.value;
+const wrappedGetGeographicalDivisions = async (
+  event: AutoCompleteChangeEvent,
+) => {
+  const params = event?.value.id as string;
+  await getGeographicalDivisions(params);
 };
-const wrappedGetGeographicalDivisionsTypesByCountry = async (event: AutoCompleteChangeEvent) => {
-    console.log('Evento de cambio en país:', event);
+const wrappedGetGeographicalDivisionsTypesByCountry = async (
+  event: AutoCompleteChangeEvent,
+) => {
+  try {
+    form.resetField('geographic_divisions_type');
+    form.resetField('geographic_divisions');
+    geographicDivisionsOptions.value = [];
+    geographicDivisionsTypesOptions.value = [];
     const params = event.value.id as string;
-    console.log('ID del país seleccionado:', params);
     await getGeographicalDivisionsTypes(params);
+  } catch (error) {
+    console.error(
+      'Error al obtener los tipos de divisiones geográficas:',
+      error,
+    );
+  }
 };
+
+const disableGeographicDivisionTypes = computed(() => {
+  if (!country.value || !country.value.id) {
+    return true;
+  }
+  return false;
+});
+
+const disableGeographicDivisions = computed(() => {
+  if (
+    !geographic_divisions_type.value ||
+    !geographic_divisions_type.value.id ||
+    !country.value ||
+    !country.value.id
+  ) {
+    return true;
+  }
+  return false;
+});
 </script>
