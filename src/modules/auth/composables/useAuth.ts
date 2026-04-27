@@ -46,7 +46,11 @@ export function useAuth() {
       password: passwordValidation(),
       firstName: yup
         .string()
-        .required('El primer nombre es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El primer nombre es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(3, 'El nombre debe tener al menos 3 caracteres')
         .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
         .transform(
@@ -57,7 +61,12 @@ export function useAuth() {
         .min(3, 'El segundo nombre debe tener al menos 3 caracteres'),
       lastName: yup
         .string()
-        .required('El apellido es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El apellido es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
         .min(3, 'El apellido debe tener al menos 3 caracteres'),
       birthDate: yup
         .string()
@@ -70,26 +79,46 @@ export function useAuth() {
           }
           return false;
         }),
-      gender: yup.string().required('El género es requerido'),
-      maritalStatus: yup.string().required('El estado civil es requerido'),
+      gender: yup.string()
+      .when('$editMode', {
+        is: true,
+        then: schema => schema.required('El género es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
+      maritalStatus: yup.string()
+      .when('$editMode', {
+        is: true,
+        then: schema => schema.required('El estado civil es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
       phoneNumber: yup
         .string()
-        .required('El número de teléfono es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El número de teléfono es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(9)
         .max(9),
       status: yup.number() /*.required('El campo de estado es requerido')*/,
       nationalities: yup
         .array<NationalitiesArray>()
-        .required('El campo de nacionalidades es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de nacionalidades es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(1, 'Debes agregar al menos una nacionalidad'),
       file_img: yup
         .mixed<PrimeVueFile[]>()
-        .test(
+        .when('$editMode', {
+          is: true,
+          then: schema => schema
+          .test(
           'required',
           'La imágen del perfil es requerida',
           value => Array.isArray(value) && value.length > 0,
         )
-        .required('La imágen del perfil es requerida')
         .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
           if (!value || value.length === 0) return true;
           return value.every(file => file.size <= 1000000);
@@ -99,53 +128,110 @@ export function useAuth() {
           return value.every(file =>
             ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
           );
+        })
+        .required('La imágen del perfil es requerida'),
+          otherwise: schema => schema.notRequired(),
         }),
       street: yup
         .string()
-        .required('El campo de nombre de calle es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de nombre de calle es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(3),
       streetNumber: yup
         .string()
-        .required('El campo de número de calle es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de número de calle es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(1),
       neighborhood: yup
         .string()
-        .required('El campo de colonia/reparto es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de colonia/reparto es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(3),
       geographic_divisions: yup
         .object({
           id: yup.string(),
         })
-        .required('El campo de division geografica es requerido'),
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de division geografica es requerido'),
+          otherwise: schema => schema.notRequired(),
+        }),
       houseNumber: yup
         .string()
-        .required('El campo de numero de casa es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de numero de casa es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(1),
-      block: yup.string().required('El campo del block es requerido').min(1),
-      pathway: yup.string().required('El campo de pasaje es requerido').min(1),
+      block: yup.string().when('$editMode', {
+        is: true,
+        then: schema => schema.required('El campo del block es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }).min(1, 'El campo del block debe tener al menos 1 caracter'),
+      pathway: yup.string().when('$editMode', {
+        is: true,
+        then: schema => schema.required('El campo de pasaje es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }).min(1),
       current: yup.boolean(),
 
       //personal document info
 
       documentType: yup
         .object<DocumentTypeObject>()
-        .required('El tipo del documento es requerido'),
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El tipo del documento es requerido'),
+          otherwise: schema => schema.notRequired(),
+        }),
       documentNumber: yup
         .string()
-        .required('El número del documento es requerido')
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El número del documento es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
         .min(1),
       //user info
-      userName: yup.string().required('El nombre del usuario es requerido'),
+      userName: yup.string()
+      .when('$editMode', {
+        is: true,
+        then: schema => schema.required('El nombre del usuario es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
       country: yup.object({
-        id: yup.string().required('El país es requerido'),
+        id: yup.string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El país es requerido'),
+          otherwise: schema => schema.notRequired(),
+        }),
       }),
       geographic_divisions_type: yup
         .object({
           id: yup
             .string()
+            .when('$editMode', {
+              is: true,
+              then: schema => schema.required('El tipo de división geográfica es requerido'),
+              otherwise: schema => schema.notRequired(),
+            }),
+        })
+        .when('$editMode', {
+          is: true,
+          then: schema => schema
             .required('El tipo de división geográfica es requerido'),
         })
-        .required('El tipo de división geográfica es requerida'),
     }),
   });
 
