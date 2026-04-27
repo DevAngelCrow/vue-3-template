@@ -142,7 +142,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import {
   AutoCompleteChangeEvent,
   AutoCompleteCompleteEvent,
@@ -273,5 +273,11 @@ const disableGeographicDivisions = computed(() => {
     return true;
   }
   return false;
+});
+watch(editMode, async newValue => {
+  if (newValue) {
+    await getGeographicalDivisionsTypes(country.value.id);
+    await getGeographicalDivisions(geographic_divisions_type.value.id);
+  }
 });
 </script>

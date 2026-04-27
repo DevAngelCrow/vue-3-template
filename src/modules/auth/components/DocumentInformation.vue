@@ -9,7 +9,7 @@
           class="flex-1"
           id="document_type"
           label="Tipo de documento*"
-          v-model="documentType"
+          v-model="documentTypeId"
           v-bind="documentTypeAttrs"
           :error-messages="errors.documentType"
           option-label="name"
@@ -39,12 +39,12 @@ import { useAuth } from '../composables/useAuth';
 
 type useAuthType = ReturnType<typeof useAuth>;
 const useAuthInstance = inject<useAuthType>('useAuthInstance')!;
-
 const {
   documentType,
   documentTypeAttrs,
   documentNumber,
   documentNumberAttrs,
+  documentTypeId,
   errors,
   documentTypesOptions,
   editMode,

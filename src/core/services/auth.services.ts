@@ -17,7 +17,6 @@ import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
 import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
 import { ApiResponseCatalogs } from './interfaces/auth/catalogs.interface';
 import { ProfileDetails } from './interfaces/auth/profileDetails.interface';
-import { ApiPostResponse } from './apiPostResponse.interface';
 import { ApiResponseGenericSingle } from './interfaces/apiResponseGenericSingle.interface';
 
 const getMaritalStatus = async (): Promise<
@@ -118,12 +117,12 @@ const getCatalogs = async (): Promise<ApiResponseCatalogs> => {
   return response.data;
 };
 
-const getProfileDetails = async (params?: string): Promise<
-  ApiResponseGenericSingle<ProfileDetails>
-> => {
-  const response = await httpClient.get<ApiResponseGenericSingle<ProfileDetails>>(
-    `profile/people/detail/${params}`,
-  );
+const getProfileDetails = async (
+  params?: string,
+): Promise<ApiResponseGenericSingle<ProfileDetails>> => {
+  const response = await httpClient.get<
+    ApiResponseGenericSingle<ProfileDetails>
+  >(`profile/people/detail/${params}`);
   return response.data;
 };
 export default {

@@ -9,7 +9,7 @@ import { useAlertStore, useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { useAuthStore } from '@/core/store/useAuthStore';
-import { CreateDateFromFormat } from '@/core/utils/dates';
+import { CreateDateFromFormat, FormatDate } from '@/core/utils/dates';
 import { PrimeVueFile } from '@/types/PrimeVueFile';
 import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
 import { Gender } from '@/core/services/interfaces/auth/gender.interface';
@@ -22,8 +22,14 @@ import { DocumentTypeObject } from '../interfaces/documentType.interface';
 import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
 
 export function useAuth() {
-  const { setToken, setUserInfo, setTokenType, setRefreshToken, setMenu, userInfo } =
-    useAuthStore();
+  const {
+    setToken,
+    setUserInfo,
+    setTokenType,
+    setRefreshToken,
+    setMenu,
+    userInfo,
+  } = useAuthStore();
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
   const router = useRouter();
@@ -181,6 +187,7 @@ export function useAuth() {
   const geographicDivisionsTypesOptions = ref<GeographicDivisionTypeResponse[]>(
     [],
   );
+  const documentTypeId = ref<string>('');
   const editMode = ref<boolean>(false);
   const getNationalities = async () => {
     try {
@@ -249,36 +256,44 @@ export function useAuth() {
   };
   const getDetailsProfile = async () => {
     try {
-      if(userInfo && typeof userInfo === 'object' && 'id' in userInfo) {
+      if (userInfo && typeof userInfo === 'object' && 'id' in userInfo) {
         const idUser = userInfo.id;
         const response = await authServices.getProfileDetails(idUser);
-      if (response.statusCode === 200) {
-         email.value = response.data.email;
-         userName.value = response.data.user_name;
-         firstName.value = response.data.first_name;
-         middleName.value = response.data.middle_name;
-         lastName.value = response.data.last_name;
-         maritalStatus.value = response.data.id_marital_status;
-         birthDate.value = response.data.birth_date;
-         nationalities.value = response.data.nationalities;
-         gender.value = response.data.id_gender;
-         phoneNumber.value = response.data.phone_number;
-         status.value = response.data.id_status;
-         documentType.value = response.data.document_type;
-         documentNumber.value = response.data.document_number;
-         country.value = response.data.id_country;
-         geographic_divisions_type.value = response.data.geographic_division_type;
-         geographic_divisions.value = response.data.id_geographic_division;
-         street.value = response.data.street;
-         streetNumber.value = response.data.street_number;
-         houseNumber.value = response.data.house_number;
-         neighborhood.value = response.data.neighborhood;
-         block.value = response.data.block;
-         pathway.value = response.data.pathway;
-         current.value = response.data.current;
+        if (response.statusCode === 200) {
+          email.value = response.data.email;
+          userName.value = response.data.user_name;
+          firstName.value = response.data.first_name;
+          middleName.value = response.data.middle_name;
+          lastName.value = response.data.last_name;
+          maritalStatus.value = response.data.id_marital_status;
+          birthDate.value = FormatDate(
+            response.data.birth_date ?? '',
+            'DD/MM/YYYY',
+          );
+          nationalities.value = response.data.nationalities;
+          gender.value = response.data.id_gender;
+          phoneNumber.value = response.data.phone_number;
+          status.value = response.data.id_status;
+          documentType.value = response.data.document_type; // Direct assignment
+          documentTypeId.value = response.data.document_type.id;
+          documentNumber.value = response.data.document_number;
+          country.value = response.data.country || null; // Direct assignment
+          geographic_divisions_type.value =
+            response.data.geographic_division_type || null; // Direct assignment
+          geographic_divisions.value =
+            response.data.geographic_division || null; // Direct assignment
+          street.value = response.data.street;
+          streetNumber.value = response.data.street_number;
+          houseNumber.value = response.data.house_number;
+          neighborhood.value = response.data.neighborhood;
+          block.value = response.data.block;
+          pathway.value = response.data.pathway;
+          current.value = response.data.current;
+        }
       }
-      }
-      console.warn('No se pudo obtener el ID del usuario para cargar los detalles del perfil');
+      console.warn(
+        'No se pudo obtener el ID del usuario para cargar los detalles del perfil',
+      );
     } catch (error) {
       console.error('Error al obtener los detalles del perfil:', error);
     }
@@ -548,6 +563,7 @@ export function useAuth() {
     countryAttrs,
     geographic_divisions_type,
     geographicDivisionTypesAttrs,
+    documentTypeId,
     nationalitiesOptions,
     documentTypesOptions,
     gendersOptions,
