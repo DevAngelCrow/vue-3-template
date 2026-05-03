@@ -14,7 +14,12 @@
           custom
           class="flex items-center text-white hover:text-primary-950 group"
         >
-          <a ripple :href="href" v-bind="props.action" @click="hasSubmenu ? $event.preventDefault() : navigate($event)">
+          <a
+            ripple
+            :href="href"
+            v-bind="props.action"
+            @click="hasSubmenu ? $event.preventDefault() : navigate($event)"
+          >
             <i :class="`${item.icon} group-hover:text-primary-700`"></i>
             <span class="group-hover:text-primary-700">
               {{ item.label }}
@@ -79,6 +84,7 @@ import {
 } from 'vue';
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
+import { useRouter } from 'vue-router';
 
 import { useAuth } from '@/modules/auth/composables/useAuth';
 
@@ -92,6 +98,8 @@ const { menu } = defineProps({
     default: () => [],
   },
 });
+
+const router = useRouter();
 
 const emit = defineEmits(['update:menu-sidebar']);
 
@@ -163,9 +171,12 @@ const checkWrapMenu = () => {
 
 const addFunctionItemMenuUser = (item: string) => {
   const itemsMenuUser = ['Cerrar sesión', 'Mi perfil'];
+
   if (item === itemsMenuUser[0]) {
-    console.log('cerrando sesion');
     logout();
+  }
+  if (item === itemsMenuUser[1]) {
+    router.push('/profile');
   }
   return undefined;
 };
