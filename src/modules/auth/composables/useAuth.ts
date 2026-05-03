@@ -5,14 +5,32 @@ import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
-import { useAlertStore } from '@/core/store';
+import { useAlertStore, useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { useAuthStore } from '@/core/store/useAuthStore';
+import { CreateDateFromFormat, FormatDate } from '@/core/utils/dates';
+import { PrimeVueFile } from '@/types/PrimeVueFile';
+import { DocumentType } from '@/core/services/interfaces/auth/documentType.interface';
+import { Gender } from '@/core/services/interfaces/auth/gender.interface';
+import { MaritalStatus } from '@/core/services/interfaces/auth/maritalStatus.interface';
+import { Country } from '@/core/services/interfaces/auth/country.interface';
+import { GeographicDivisionTypeResponse } from '@/modules/catalogs/interfaces/geographic-division-type/geographic-division-type.response.interface';
+import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
+
+import { DocumentTypeObject } from '../interfaces/documentType.interface';
+import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
 
 export function useAuth() {
-  const { setToken, setUserInfo, setTokenType, setRefreshToken, setMenu } =
-    useAuthStore();
+  const {
+    setToken,
+    setUserInfo,
+    setTokenType,
+    setRefreshToken,
+    setMenu,
+    userInfo,
+  } = useAuthStore();
+  const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
   const router = useRouter();
   const route = useRoute();
@@ -26,12 +44,346 @@ export function useAuth() {
     validationSchema: yup.object({
       email: emailFormat(undefined, true, undefined),
       password: passwordValidation(),
+      firstName: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El primer nombre es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(3, 'El nombre debe tener al menos 3 caracteres')
+        .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
+        .transform(
+          value => value?.replace(/[^a-zA-ZáÁéÉíÍóÓúÚñÑ ]/g, '') || '',
+        ),
+      middleName: yup
+        .string()
+        .min(3, 'El segundo nombre debe tener al menos 3 caracteres'),
+      lastName: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El apellido es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .matches(/^[a-zA-ZáÁéÉíÍóÓúÚñÑ ]*$/, 'No caracteres invalidos')
+        .min(3, 'El apellido debe tener al menos 3 caracteres'),
+      birthDate: yup
+        .string()
+        .required('La fecha de nacimiento es requerida')
+        .test('is-date', 'Formato inválido, usa DD/MM/YYYY', value => {
+          if (!value) return false;
+          const parsed = CreateDateFromFormat(value, 'DD/MM/YYYY');
+          if (parsed instanceof Date) {
+            return true;
+          }
+          return false;
+        }),
+      gender: yup.string()
+      .when('$editMode', {
+        is: true,
+        then: schema => schema.required('El género es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
+      maritalStatus: yup.string()
+      .when('$editMode', {
+        is: true,
+        then: schema => schema.required('El estado civil es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
+      phoneNumber: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El número de teléfono es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(9)
+        .max(9),
+      status: yup.number() /*.required('El campo de estado es requerido')*/,
+      nationalities: yup
+        .array<NationalitiesArray>()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de nacionalidades es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(1, 'Debes agregar al menos una nacionalidad'),
+      file_img: yup
+        .mixed<PrimeVueFile[]>()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema
+          .test(
+          'required',
+          'La imágen del perfil es requerida',
+          value => Array.isArray(value) && value.length > 0,
+        )
+        .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
+          if (!value || value.length === 0) return true;
+          return value.every(file => file.size <= 1000000);
+        })
+        .test('fileType', 'Formato no permitido', value => {
+          if (!value || value.length === 0) return true;
+          return value.every(file =>
+            ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
+          );
+        })
+        .required('La imágen del perfil es requerida'),
+          otherwise: schema => schema.notRequired(),
+        }),
+      street: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de nombre de calle es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(3),
+      streetNumber: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de número de calle es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(1),
+      neighborhood: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de colonia/reparto es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(3),
+      geographic_divisions: yup
+        .object({
+          id: yup.string(),
+        })
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de division geografica es requerido'),
+          otherwise: schema => schema.notRequired(),
+        }),
+      houseNumber: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de numero de casa es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(1),
+      block: yup.string().when('$editMode', {
+        is: true,
+        then: schema => schema.required('El campo del block es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }).min(1, 'El campo del block debe tener al menos 1 caracter'),
+      pathway: yup.string().when('$editMode', {
+        is: true,
+        then: schema => schema.required('El campo de pasaje es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }).min(1),
+      current: yup.boolean(),
+
+      //personal document info
+
+      documentType: yup
+        .object<DocumentTypeObject>()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El tipo del documento es requerido'),
+          otherwise: schema => schema.notRequired(),
+        }),
+      documentNumber: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El número del documento es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(1),
+      //user info
+      userName: yup.string()
+      .when('$editMode', {
+        is: true,
+        then: schema => schema.required('El nombre del usuario es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
+      country: yup.object({
+        id: yup.string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El país es requerido'),
+          otherwise: schema => schema.notRequired(),
+        }),
+      }),
+      geographic_divisions_type: yup
+        .object({
+          id: yup
+            .string()
+            .when('$editMode', {
+              is: true,
+              then: schema => schema.required('El tipo de división geográfica es requerido'),
+              otherwise: schema => schema.notRequired(),
+            }),
+        })
+        .when('$editMode', {
+          is: true,
+          then: schema => schema
+            .required('El tipo de división geográfica es requerido'),
+        })
     }),
   });
 
   const [email, emailAttrs] = form.defineField('email');
   const [password, passwordAttrs] = form.defineField('password');
-
+  const [firstName, firstNameAttrs] = form.defineField('firstName');
+  const [middleName, middleNameAttrs] = form.defineField('middleName');
+  const [lastName, lastNameAttrs] = form.defineField('lastName');
+  const [birthDate, birthDateAttrs] = form.defineField('birthDate');
+  const [gender, genderAttrs] = form.defineField('gender');
+  const [maritalStatus, maritalStatusAttrs] = form.defineField('maritalStatus');
+  const [phoneNumber, phoneNumberAttrs] = form.defineField('phoneNumber');
+  const [status, statusAttrs] = form.defineField('status');
+  const [nationalities, nationalitiesAttrs] = form.defineField('nationalities');
+  const [file_img, fileImgAttrs] = form.defineField('file_img');
+  const [street, streetAttrs] = form.defineField('street');
+  const [streetNumber, streetNumberAttrs] = form.defineField('streetNumber');
+  const [neighborhood, neighborhoodAttrs] = form.defineField('neighborhood');
+  const [geographic_divisions, geographicDivisionsAttrs] = form.defineField(
+    'geographic_divisions',
+  );
+  const [houseNumber, houseNumberAttrs] = form.defineField('houseNumber');
+  const [block, blockAttrs] = form.defineField('block');
+  const [pathway, pathwayAttrs] = form.defineField('pathway');
+  const [current, currentAttrs] = form.defineField('current');
+  const [documentType, documentTypeAttrs] = form.defineField('documentType');
+  const [documentNumber, documentNumberAttrs] =
+    form.defineField('documentNumber');
+  const [userName, userNameAttrs] = form.defineField('userName');
+  const [country, countryAttrs] = form.defineField('country');
+  const [geographic_divisions_type, geographicDivisionTypesAttrs] =
+    form.defineField('geographic_divisions_type');
+  const nationalitiesOptions = ref<NationalitiesArray[]>([]);
+  const documentTypesOptions = ref<DocumentType[]>([]);
+  const gendersOptions = ref<Gender[]>([]);
+  const maritalStatusesOptions = ref<MaritalStatus[]>([]);
+  const countriesOptions = ref<Country[]>([]);
+  const geographicDivisionsOptions = ref<GeographicDivisionResponse[]>([]);
+  const geographicDivisionsTypesOptions = ref<GeographicDivisionTypeResponse[]>(
+    [],
+  );
+  const documentTypeId = ref<string>('');
+  const editMode = ref<boolean>(false);
+  const getNationalities = async () => {
+    try {
+      const response = await authServices.getCountriesNationalities();
+      if (response.statusCode === 200) {
+        nationalitiesOptions.value = response.data.data;
+        countriesOptions.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('Error al obtener las nacionalidades:', error);
+    }
+  };
+  const getDocumentTypes = async () => {
+    try {
+      const response = await authServices.getDocumentTypes();
+      if (response.statusCode === 200) {
+        documentTypesOptions.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('Error al obtener los tipos de documento:', error);
+    }
+  };
+  const getGenders = async () => {
+    try {
+      const response = await authServices.getGenders();
+      if (response.statusCode === 200) {
+        gendersOptions.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('Error al obtener los géneros:', error);
+    }
+  };
+  const getMaritalStatuses = async () => {
+    try {
+      const response = await authServices.getMaritalStatus();
+      if (response.statusCode === 200) {
+        maritalStatusesOptions.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('Error al obtener los estados civiles:', error);
+    }
+  };
+  const getGeographicalDivisions = async (params: string) => {
+    try {
+      const response = await authServices.getGeographicalDivisions({
+        id_type: params,
+      });
+      if (response.statusCode === 200) {
+        geographicDivisionsOptions.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('Error al obtener las divisiones geográficas:', error);
+    }
+  };
+  const getGeographicalDivisionsTypes = async (params: string) => {
+    try {
+      const response = await authServices.getGeographicalDivisionsTypes({
+        id_country: params,
+      });
+      if (response.statusCode === 200) {
+        geographicDivisionsTypesOptions.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('Error al obtener las divisiones geográficas:', error);
+    }
+  };
+  const getDetailsProfile = async () => {
+    try {
+      if (userInfo && typeof userInfo === 'object' && 'id' in userInfo) {
+        const idUser = userInfo.id;
+        const response = await authServices.getProfileDetails(idUser);
+        if (response.statusCode === 200) {
+          email.value = response.data.email;
+          userName.value = response.data.user_name;
+          firstName.value = response.data.first_name;
+          middleName.value = response.data.middle_name;
+          lastName.value = response.data.last_name;
+          maritalStatus.value = response.data.id_marital_status;
+          birthDate.value = FormatDate(
+            response.data.birth_date ?? '',
+            'DD/MM/YYYY',
+          );
+          nationalities.value = response.data.nationalities;
+          gender.value = response.data.id_gender;
+          phoneNumber.value = response.data.phone_number;
+          status.value = response.data.id_status;
+          documentType.value = response.data.document_type; // Direct assignment
+          documentTypeId.value = response.data.document_type.id;
+          documentNumber.value = response.data.document_number;
+          country.value = response.data.country || null; // Direct assignment
+          geographic_divisions_type.value =
+            response.data.geographic_division_type || null; // Direct assignment
+          geographic_divisions.value =
+            response.data.geographic_division || null; // Direct assignment
+          street.value = response.data.street;
+          streetNumber.value = response.data.street_number;
+          houseNumber.value = response.data.house_number;
+          neighborhood.value = response.data.neighborhood;
+          block.value = response.data.block;
+          pathway.value = response.data.pathway;
+          current.value = response.data.current;
+        }
+      }
+      console.warn(
+        'No se pudo obtener el ID del usuario para cargar los detalles del perfil',
+      );
+    } catch (error) {
+      console.error('Error al obtener los detalles del perfil:', error);
+    }
+  };
   const login = async (user: string, password: string) => {
     isLoading.value = true;
     error.value = null;
@@ -70,7 +422,7 @@ export function useAuth() {
           setRefreshToken(data.data);
         }
         if (data.data.user) {
-          setUserInfo(data.data.user);
+          setUserInfo(data.data);
         }
 
         if (data.data.token_type) {
@@ -238,9 +590,74 @@ export function useAuth() {
     validationInputAlphanumeric,
     validationInputEmail,
     validationInputPassword,
+    getNationalities,
+    getDocumentTypes,
+    getGenders,
+    getMaritalStatuses,
+    getGeographicalDivisions,
+    getGeographicalDivisionsTypes,
+    startLoading,
+    finishLoading,
+    getDetailsProfile,
     email,
     emailAttrs,
     password,
     passwordAttrs,
+    firstName,
+    firstNameAttrs,
+    middleName,
+    middleNameAttrs,
+    lastName,
+    lastNameAttrs,
+    birthDate,
+    birthDateAttrs,
+    gender,
+    genderAttrs,
+    maritalStatus,
+    maritalStatusAttrs,
+    phoneNumber,
+    phoneNumberAttrs,
+    status,
+    statusAttrs,
+    nationalities,
+    nationalitiesAttrs,
+    file_img,
+    fileImgAttrs,
+    street,
+    streetAttrs,
+    streetNumber,
+    streetNumberAttrs,
+    neighborhood,
+    neighborhoodAttrs,
+    geographic_divisions,
+    geographicDivisionsAttrs,
+    houseNumber,
+    houseNumberAttrs,
+    block,
+    blockAttrs,
+    pathway,
+    pathwayAttrs,
+    current,
+    currentAttrs,
+    documentType,
+    documentTypeAttrs,
+    documentNumber,
+    documentNumberAttrs,
+    userName,
+    userNameAttrs,
+    country,
+    countryAttrs,
+    geographic_divisions_type,
+    geographicDivisionTypesAttrs,
+    documentTypeId,
+    nationalitiesOptions,
+    documentTypesOptions,
+    gendersOptions,
+    maritalStatusesOptions,
+    countriesOptions,
+    geographicDivisionsOptions,
+    geographicDivisionsTypesOptions,
+    form,
+    editMode,
   };
 }

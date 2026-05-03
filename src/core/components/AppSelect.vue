@@ -2,10 +2,10 @@
   <div :class="['min-w-37.5', 'relative', props.class || 'w-auto']">
     <FloatLabel :variant="labelVariant">
       <Select
-        class="w-full"
+        :class="['w-full', { 'pointer-events-none': readonly }]"
         :inputId="inputId"
         :model-value="modelValue"
-        @update:model-value="onUpdate"
+        @update:model-value="onUpdateReadonly"
         :invalid="invalid"
         v-bind="$attrs"
         :autocomplete
@@ -92,6 +92,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -100,8 +104,10 @@ const invalid = ref<boolean>(false);
 const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
-const onUpdate = (value: string | number | object | undefined) => {
-  emit('update:modelValue', value ?? '');
+const onUpdateReadonly = (value: string | number | object | undefined) => {
+  if (!props.readonly) {
+    emit('update:modelValue', value ?? '');
+  }
 };
 
 const displayPlaceholder = computed(() => {
