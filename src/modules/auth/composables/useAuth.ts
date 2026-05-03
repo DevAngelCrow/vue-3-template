@@ -43,7 +43,11 @@ export function useAuth() {
   const form = useForm({
     validationSchema: yup.object({
       email: emailFormat(undefined, true, undefined),
-      password: passwordValidation(),
+      password: passwordValidation().when('$editMode', {
+        is: true,
+        then: schema => schema.required('La contraseña es requerida'),
+        otherwise: schema => schema.notRequired(),
+      }),
       firstName: yup
         .string()
         .when('$editMode', {
@@ -79,14 +83,12 @@ export function useAuth() {
           }
           return false;
         }),
-      gender: yup.string()
-      .when('$editMode', {
+      gender: yup.string().when('$editMode', {
         is: true,
         then: schema => schema.required('El género es requerido'),
         otherwise: schema => schema.notRequired(),
       }),
-      maritalStatus: yup.string()
-      .when('$editMode', {
+      maritalStatus: yup.string().when('$editMode', {
         is: true,
         then: schema => schema.required('El estado civil es requerido'),
         otherwise: schema => schema.notRequired(),
@@ -100,43 +102,44 @@ export function useAuth() {
         })
         .min(9)
         .max(9),
-      status: yup.number() /*.required('El campo de estado es requerido')*/,
+      status: yup.string() /*.required('El campo de estado es requerido')*/,
       nationalities: yup
         .array<NationalitiesArray>()
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El campo de nacionalidades es requerido'),
+          then: schema =>
+            schema.required('El campo de nacionalidades es requerido'),
           otherwise: schema => schema.notRequired(),
         })
         .min(1, 'Debes agregar al menos una nacionalidad'),
-      file_img: yup
-        .mixed<PrimeVueFile[]>()
-        .when('$editMode', {
-          is: true,
-          then: schema => schema
-          .test(
-          'required',
-          'La imágen del perfil es requerida',
-          value => Array.isArray(value) && value.length > 0,
-        )
-        .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
-          if (!value || value.length === 0) return true;
-          return value.every(file => file.size <= 1000000);
-        })
-        .test('fileType', 'Formato no permitido', value => {
-          if (!value || value.length === 0) return true;
-          return value.every(file =>
-            ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
-          );
-        })
-        .required('La imágen del perfil es requerida'),
-          otherwise: schema => schema.notRequired(),
-        }),
+      file_img: yup.mixed<PrimeVueFile[]>().when('$editMode', {
+        is: true,
+        then: schema =>
+          schema
+            .test(
+              'required',
+              'La imágen del perfil es requerida',
+              value => Array.isArray(value) && value.length > 0,
+            )
+            .test('fileSize', 'El tamaño de la imágen es muy grande', value => {
+              if (!value || value.length === 0) return true;
+              return value.every(file => file.size <= 1000000);
+            })
+            .test('fileType', 'Formato no permitido', value => {
+              if (!value || value.length === 0) return true;
+              return value.every(file =>
+                ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
+              );
+            })
+            .required('La imágen del perfil es requerida'),
+        otherwise: schema => schema.notRequired(),
+      }),
       street: yup
         .string()
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El campo de nombre de calle es requerido'),
+          then: schema =>
+            schema.required('El campo de nombre de calle es requerido'),
           otherwise: schema => schema.notRequired(),
         })
         .min(3),
@@ -144,7 +147,8 @@ export function useAuth() {
         .string()
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El campo de número de calle es requerido'),
+          then: schema =>
+            schema.required('El campo de número de calle es requerido'),
           otherwise: schema => schema.notRequired(),
         })
         .min(1),
@@ -152,7 +156,8 @@ export function useAuth() {
         .string()
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El campo de colonia/reparto es requerido'),
+          then: schema =>
+            schema.required('El campo de colonia/reparto es requerido'),
           otherwise: schema => schema.notRequired(),
         })
         .min(3),
@@ -162,56 +167,61 @@ export function useAuth() {
         })
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El campo de division geografica es requerido'),
+          then: schema =>
+            schema.required('El campo de division geografica es requerido'),
           otherwise: schema => schema.notRequired(),
         }),
       houseNumber: yup
         .string()
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El campo de numero de casa es requerido'),
+          then: schema =>
+            schema.required('El campo de numero de casa es requerido'),
           otherwise: schema => schema.notRequired(),
         })
         .min(1),
-      block: yup.string().when('$editMode', {
-        is: true,
-        then: schema => schema.required('El campo del block es requerido'),
-        otherwise: schema => schema.notRequired(),
-      }).min(1, 'El campo del block debe tener al menos 1 caracter'),
-      pathway: yup.string().when('$editMode', {
-        is: true,
-        then: schema => schema.required('El campo de pasaje es requerido'),
-        otherwise: schema => schema.notRequired(),
-      }).min(1),
+      block: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo del block es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(1, 'El campo del block debe tener al menos 1 caracter'),
+      pathway: yup
+        .string()
+        .when('$editMode', {
+          is: true,
+          then: schema => schema.required('El campo de pasaje es requerido'),
+          otherwise: schema => schema.notRequired(),
+        })
+        .min(1),
       current: yup.boolean(),
 
       //personal document info
 
-      documentType: yup
-        .object<DocumentTypeObject>()
-        .when('$editMode', {
-          is: true,
-          then: schema => schema.required('El tipo del documento es requerido'),
-          otherwise: schema => schema.notRequired(),
-        }),
+      documentType: yup.object<DocumentTypeObject>().when('$editMode', {
+        is: true,
+        then: schema => schema.required('El tipo del documento es requerido'),
+        otherwise: schema => schema.notRequired(),
+      }),
       documentNumber: yup
         .string()
         .when('$editMode', {
           is: true,
-          then: schema => schema.required('El número del documento es requerido'),
+          then: schema =>
+            schema.required('El número del documento es requerido'),
           otherwise: schema => schema.notRequired(),
         })
         .min(1),
       //user info
-      userName: yup.string()
-      .when('$editMode', {
+      userName: yup.string().when('$editMode', {
         is: true,
         then: schema => schema.required('El nombre del usuario es requerido'),
         otherwise: schema => schema.notRequired(),
       }),
       country: yup.object({
-        id: yup.string()
-        .when('$editMode', {
+        id: yup.string().when('$editMode', {
           is: true,
           then: schema => schema.required('El país es requerido'),
           otherwise: schema => schema.notRequired(),
@@ -219,19 +229,18 @@ export function useAuth() {
       }),
       geographic_divisions_type: yup
         .object({
-          id: yup
-            .string()
-            .when('$editMode', {
-              is: true,
-              then: schema => schema.required('El tipo de división geográfica es requerido'),
-              otherwise: schema => schema.notRequired(),
-            }),
+          id: yup.string().when('$editMode', {
+            is: true,
+            then: schema =>
+              schema.required('El tipo de división geográfica es requerido'),
+            otherwise: schema => schema.notRequired(),
+          }),
         })
         .when('$editMode', {
           is: true,
-          then: schema => schema
-            .required('El tipo de división geográfica es requerido'),
-        })
+          then: schema =>
+            schema.required('El tipo de división geográfica es requerido'),
+        }),
     }),
   });
 
@@ -275,6 +284,10 @@ export function useAuth() {
   );
   const documentTypeId = ref<string>('');
   const editMode = ref<boolean>(false);
+  const idPeople = ref<string>('');
+  const idAddress = ref<string>('');
+  const idDocument = ref<string>('');
+
   const getNationalities = async () => {
     try {
       const response = await authServices.getCountriesNationalities();
@@ -362,7 +375,7 @@ export function useAuth() {
           status.value = response.data.id_status;
           documentType.value = response.data.document_type; // Direct assignment
           documentTypeId.value = response.data.document_type.id;
-          documentNumber.value = response.data.document_number;
+          documentNumber.value = response.data.document.document_number;
           country.value = response.data.country || null; // Direct assignment
           geographic_divisions_type.value =
             response.data.geographic_division_type || null; // Direct assignment
@@ -375,6 +388,9 @@ export function useAuth() {
           block.value = response.data.block;
           pathway.value = response.data.pathway;
           current.value = response.data.current;
+          idPeople.value = response.data.id_people || '';
+          idAddress.value = response.data.id_address || '';
+          idDocument.value = response.data.document?.id || '';
         }
       }
       console.warn(
@@ -576,6 +592,86 @@ export function useAuth() {
     });
   };
 
+  const updateProfile = form.handleSubmit(async values => {
+    console.log(values);
+    try {
+      startLoading();
+      if (!userInfo || typeof userInfo !== 'object' || !('id' in userInfo)) {
+        throw new Error('User info is missing');
+      }
+
+      const formData = new FormData();
+      formData.append('id_people', idPeople.value);
+      formData.append('id_address', idAddress.value);
+      formData.append('id_document', idDocument.value);
+      formData.append('first_name', values.firstName || '');
+      formData.append('middle_name', values.middleName || '');
+      formData.append('last_name', values.lastName || '');
+
+      if (values.birthDate) {
+        const parsed = CreateDateFromFormat(values.birthDate, 'DD/MM/YYYY');
+        if (parsed instanceof Date) {
+          formData.append('birthdate', parsed.toISOString().split('T')[0]);
+        }
+      }
+      formData.append('email', values.email || '');
+      formData.append('id_gender', values.gender || '');
+      formData.append('id_marital_status', values.maritalStatus || '');
+      formData.append('phone', values.phoneNumber || '');
+      formData.append('id_status', values.status?.toString() || '');
+      formData.append('user_name', values.userName || '');
+      formData.append('street', values.street || '');
+      formData.append('street_number', values.streetNumber || '');
+      formData.append('neighborhood', values.neighborhood || '');
+      formData.append(
+        'id_geographic_division',
+        values.geographic_divisions?.id || '',
+      );
+      formData.append('house_number', values.houseNumber || '');
+      formData.append('block', values.block || '');
+      formData.append('pathway', values.pathway || '');
+      formData.append('current', String(values.current === true));
+      formData.append('active_address', 'true');
+      formData.append(
+        'id_type_document',
+        values.documentType?.id || documentTypeId.value || '',
+      );
+      formData.append('document_number', values.documentNumber || '');
+      formData.append('description', 'Documento principal');
+      formData.append('active', 'true');
+
+      if (values.nationalities && values.nationalities.length > 0) {
+        values.nationalities.forEach((nat: any) => {
+          formData.append('nationalities[]', nat.id || nat);
+        });
+      }
+
+      if (values.file_img && values.file_img.length > 0) {
+        formData.append('file_img', values.file_img[0] as unknown as Blob);
+      }
+
+      const response = await authServices.updateProfile(userInfo.id, formData);
+      if (response.statusCode === 200) {
+        alert.showAlert({
+          type: 'success',
+          title: 'Perfil actualizado',
+          content: 'El perfil se actualizó correctamente',
+        });
+        editMode.value = false;
+        await getDetailsProfile();
+      }
+    } catch (err: any) {
+      console.error('Error al actualizar el perfil:', err);
+      alert.showAlert({
+        type: 'error',
+        title: 'Error',
+        content: err.message || 'Error al actualizar el perfil',
+      });
+    } finally {
+      finishLoading();
+    }
+  });
+
   return {
     ...form,
     login,
@@ -659,5 +755,9 @@ export function useAuth() {
     geographicDivisionsTypesOptions,
     form,
     editMode,
+    updateProfile,
+    idPeople,
+    idAddress,
+    idDocument,
   };
 }

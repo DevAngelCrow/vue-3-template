@@ -7,26 +7,32 @@
       <template #header>
         <div class="w-full flex justify-end items-center">
           <Button
-            :class="['mx-1 my-1 transition-opacity duration-500 ease-in-out', editMode ? 'opacity-0 pointer-events-none absolute' : 'opacity-100']"
+            :class="[
+              'mx-1 my-1 transition-opacity duration-500 ease-in-out',
+              editMode
+                ? 'opacity-0 pointer-events-none absolute'
+                : 'opacity-100',
+            ]"
             icon="pi pi-pencil"
             rounded
             @click="toggleEditionMode(true)"
           />
           <div :class="[classActions]">
             <Button
-            label="Guardar"
-            :class="['mx-1 my-1']"
-            icon="pi pi-check"
-            rounded
-          />
-          <Button
-            label="Cancelar"
-            :class="['mx-1 my-1']"
-            outlined
-            icon="pi pi-times"
-            @click="toggleEditionMode(false)"
-            rounded
-          />
+              label="Guardar"
+              :class="['mx-1 my-1']"
+              icon="pi pi-check"
+              rounded
+              @click="updateProfile()"
+            />
+            <Button
+              label="Cancelar"
+              :class="['mx-1 my-1']"
+              outlined
+              icon="pi pi-times"
+              @click="toggleEditionMode(false)"
+              rounded
+            />
           </div>
         </div>
       </template>
@@ -78,6 +84,7 @@ const {
   startLoading,
   finishLoading,
   editMode,
+  updateProfile,
 } = useAuthInstance;
 onMounted(async () => {
   startLoading();
@@ -95,6 +102,8 @@ const toggleEditionMode = (flag: boolean) => {
   editMode.value = flag;
 };
 const classActions = computed(() => {
-  return editMode.value ? 'flex justify-end items-center gap-1 transition-opacity duration-500 ease-in-out opacity-100' : 'opacity-0 pointer-events-none absolute';
+  return editMode.value
+    ? 'flex justify-end items-center gap-1 transition-opacity duration-500 ease-in-out opacity-100'
+    : 'opacity-0 pointer-events-none absolute';
 });
 </script>

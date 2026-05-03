@@ -125,6 +125,22 @@ const getProfileDetails = async (
   >(`profile/people/detail/${params}`);
   return response.data;
 };
+
+const updateProfile = async (
+  id: string,
+  data: FormData,
+): Promise<ApiResponseGenericSingle<null>> => {
+  const response = await httpClient.put<ApiResponseGenericSingle<null>>(
+    `auth/update-profile/${id}`,
+    data,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+  return response.data;
+};
 export default {
   getMaritalStatus,
   getGenders,
@@ -140,4 +156,5 @@ export default {
   getGeographicalDivisions,
   getGeographicalDivisionsTypes,
   getProfileDetails,
+  updateProfile,
 };

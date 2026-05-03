@@ -17,7 +17,12 @@ export interface ProfileDetails {
     mask: string;
     active: boolean;
   };
-  document_number: string | null;
+  document: {
+    document_number: string;
+    description: string;
+    active: string;
+    id: string;
+  };
   country: {
     id: string;
     name: string;
@@ -46,4 +51,6 @@ export interface ProfileDetails {
   pathway: string | null;
   current: string | null;
   id_profile: string;
+  id_people: string;
+  id_address: string;
 }
