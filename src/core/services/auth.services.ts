@@ -91,7 +91,7 @@ const logout = async () => {
   return response.data;
 };
 
-const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
+const verifyEmail = async (url: LocationQueryValue[] | undefined | string, id: string, token: string) => {
   let urlFormatedString = url?.toString();
   let response;
   if (url === null || url === undefined) {
@@ -101,7 +101,7 @@ const verifyEmail = async (url: LocationQueryValue[] | undefined | string) => {
     urlFormatedString = url.find(value => value !== null) || '';
   }
   if (urlFormatedString) {
-    response = await httpClient.get(urlFormatedString);
+    response = await httpClient.get(urlFormatedString + `?id=${id}&token=${token}`);
   }
   return response;
 };

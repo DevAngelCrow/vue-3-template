@@ -19,6 +19,12 @@ const routes = [
     component: () => import('../../modules/auth/views/SignUp.vue'),
   },
   {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    meta: { requiresAuth: false, title: 'Recuperar contraseña' },
+    component: () => import('../../modules/auth/views/ForgotPassword.vue'),
+  },
+  {
     path: '/landing',
     name: 'landing',
     meta: { requiresAuth: false, title: 'Bienvenido' },
