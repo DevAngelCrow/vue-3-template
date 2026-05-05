@@ -28,7 +28,7 @@
         shape="circle" alt="prueba" size="xlarge" />
       <MenuPrime class="mt-2" ref="popUp" id="overlay_menu" :popup="true" :model="menuUser">
         <template #item="{ item }">
-          <div class="flex items-center w-full px-3 primary">
+          <div class="flex items-center w-full px-3 primary hover:cursor-pointer">
             <div class="flex items-center gap-2 primary" @click="addFunctionItemMenuUser(`${item.label}`)">
               <i :class="`${item.icon} primary`"></i>
               <span class="primary">{{ item.label }}</span>
@@ -133,13 +133,12 @@ const checkWrapMenu = () => {
 };
 
 const addFunctionItemMenuUser = (item: string) => {
-  const itemsMenuUser = ['Cerrar sesión', 'Mi perfil'];
-
+  const itemsMenuUser = ['Mi perfil', 'Cerrar sesión'];
   if (item === itemsMenuUser[0]) {
-    logout();
+    router.push('/profile');
   }
   if (item === itemsMenuUser[1]) {
-    router.push('/profile');
+    logout();
   }
   return undefined;
 };
