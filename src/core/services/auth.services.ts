@@ -127,6 +127,22 @@ const getProfileDetails = async (
   return response.data;
 };
 
+const updateProfile = async (
+  id: string,
+  data: FormData,
+): Promise<ApiResponseGenericSingle<null>> => {
+  const response = await httpClient.put<ApiResponseGenericSingle<null>>(
+    `auth/update-profile/${id}`,
+    data,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+  return response.data;
+};
+
 const generateLinkResetPassword = async (email: string): Promise<ApiPostResponse> => {
   const response = await httpClient.post<ApiPostResponse>('auth/forgot-password', { email });
   return response.data;
@@ -151,6 +167,7 @@ export default {
   getGeographicalDivisions,
   getGeographicalDivisionsTypes,
   getProfileDetails,
+  updateProfile,
   generateLinkResetPassword,
   resetPassword
 };

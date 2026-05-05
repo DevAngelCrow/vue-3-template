@@ -50,9 +50,7 @@ import {
 } from 'vue';
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
-
 import { useAuth } from '@/modules/auth/composables/useAuth';
-
 import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
 import { useRouter } from 'vue-router';
 
@@ -136,12 +134,12 @@ const checkWrapMenu = () => {
 
 const addFunctionItemMenuUser = (item: string) => {
   const itemsMenuUser = ['Cerrar sesión', 'Mi perfil'];
+
   if (item === itemsMenuUser[0]) {
-    console.log('cerrando sesion');
     logout();
   }
   if (item === itemsMenuUser[1]) {
-    router.push({ name: 'profile' })
+    router.push('/profile');
   }
   return undefined;
 };
