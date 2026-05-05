@@ -2,7 +2,8 @@
   <div class="relative w-full h-screen flex justify-center items-center overflow-hidden">
     <!-- Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-primary-950 z-0" />
-    <div class="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,rgba(var(--p-primary-500-rgb),0.15),transparent)]" />
+    <div
+      class="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,rgba(var(--p-primary-500-rgb),0.15),transparent)]" />
 
     <!-- Card -->
     <Transition name="fade-up" appear>
@@ -12,8 +13,7 @@
           root: { class: 'bg-zinc-900/80 backdrop-blur-md' },
           body: { class: 'flex flex-col gap-0 p-0' },
           content: { class: 'p-0' },
-        }"
-      >
+        }">
         <!-- Header -->
         <template #header>
           <div class="flex flex-col items-center pt-8 pb-2 px-8 gap-3">
@@ -29,16 +29,11 @@
 
         <!-- Content -->
         <template #content>
-          <form
-            class="flex flex-col gap-5 px-8 pb-8 pt-4"
-            @submit.prevent="onSubmit"
-          >
+          <form class="flex flex-col gap-5 px-8 pb-8 pt-4" @submit.prevent="onSubmit">
             <!-- Error alert -->
             <Transition name="fade">
-              <div
-                v-if="authError"
-                class="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
-              >
+              <div v-if="authError"
+                class="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                 <i class="pi pi-exclamation-circle mt-0.5 shrink-0" />
                 <span>{{ authError }}</span>
               </div>
@@ -46,10 +41,8 @@
 
             <!-- Success alert -->
             <Transition name="fade">
-              <div
-                v-if="successMessage"
-                class="flex items-start gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm"
-              >
+              <div v-if="successMessage"
+                class="flex items-start gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
                 <i class="pi pi-check-circle mt-0.5 shrink-0" />
                 <span>{{ successMessage }}</span>
               </div>
@@ -57,28 +50,15 @@
 
             <!-- Inputs -->
             <div class="flex flex-col gap-4">
-              <AppInputText
-                placeholder="Correo electrónico"
-                v-model="email"
-                show-icon
-                prepend-inner-icon="pi pi-envelope"
-                :error-messages="errors.email"
-                v-bind="emailAttrs"
-                label="Correo electrónico"
-                class="w-full"
-                :disabled="isLoading || isSuccess"
-                @update:modelValue="validationInputEmail(email, 'email')"
-              />
+              <AppInputText placeholder="Correo electrónico" v-model="email" show-icon
+                prepend-inner-icon="pi pi-envelope" :error-messages="errors.email" v-bind="emailAttrs"
+                label="Correo electrónico" class="w-full" :disabled="isLoading || isSuccess"
+                @update:modelValue="validationInputEmail(email, 'email')" />
             </div>
 
             <!-- Submit -->
-            <Button
-              type="submit"
-              :loading="isLoading"
-              :disabled="isLoading || isSuccess"
-              class="w-full mt-1"
-              size="large"
-            >
+            <Button type="submit" :loading="isLoading" :disabled="isLoading || isSuccess" class="w-full mt-1"
+              size="large">
               <template #default>
                 <span class="flex items-center justify-center gap-2">
                   <i v-if="!isLoading" class="pi pi-send" />
@@ -89,10 +69,7 @@
 
             <!-- Back to Login link -->
             <p class="text-center text-sm text-zinc-400">
-              <router-link
-                to="/login"
-                class="text-primary-400 hover:text-primary-300 transition-colors ml-1"
-              >
+              <router-link to="/login" class="text-primary-400 hover:text-primary-300 transition-colors ml-1">
                 Volver al inicio de sesión
               </router-link>
             </p>
@@ -112,6 +89,7 @@ import * as yup from 'yup';
 import AppInputText from '@/core/components/AppInputText.vue';
 import { emailFormat } from '@/core/utils/validationRules';
 import { useAuth } from '../composables/useAuth';
+import authServices from '@/core/services/auth.services';
 
 const { validationInputEmail } = useAuth();
 
@@ -136,10 +114,10 @@ const onSubmit = handleSubmit(async values => {
   try {
     // Aquí se conectaría la llamada real a la API para enviar el enlace de recuperación
     // await authServices.forgotPassword({ email: values.email });
-    
+    await authServices.generateLinkResetPassword(values.email);
     // Simulación de carga
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     successMessage.value = 'Se ha enviado un enlace de recuperación a tu correo electrónico.';
     isSuccess.value = true;
   } catch (error: any) {
@@ -154,6 +132,7 @@ const onSubmit = handleSubmit(async values => {
 .fade-up-enter-active {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .fade-up-enter-from {
   opacity: 0;
   transform: translateY(16px);
@@ -163,6 +142,7 @@ const onSubmit = handleSubmit(async values => {
 .fade-leave-active {
   transition: opacity 0.2s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

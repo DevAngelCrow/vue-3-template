@@ -77,6 +77,12 @@ const routes = [
     component: () =>
       import('../../modules/auth/views/PendingVerificationEmail.vue'),
   },
+  {
+    path: '/reset-forgotten-password',
+    name: 'reset-forgotten-password',
+    meta: { requiresAuth: false, title: 'Restablecer contraseña' },
+    component: () => import('../../modules/auth/views/ResetForgotPassword.vue'),
+  },
 ];
 
 const router = createRouter({

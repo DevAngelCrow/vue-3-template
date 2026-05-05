@@ -18,6 +18,7 @@ import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface
 import { ApiResponseCatalogs } from './interfaces/auth/catalogs.interface';
 import { ProfileDetails } from './interfaces/auth/profileDetails.interface';
 import { ApiResponseGenericSingle } from './interfaces/apiResponseGenericSingle.interface';
+import { ApiPostResponse } from './apiPostResponse.interface';
 
 const getMaritalStatus = async (): Promise<
   ApiResponseGeneric<MaritalStatus>
@@ -125,6 +126,16 @@ const getProfileDetails = async (
   >(`profile/people/detail/${params}`);
   return response.data;
 };
+
+const generateLinkResetPassword = async (email: string): Promise<ApiPostResponse> => {
+  const response = await httpClient.post<ApiPostResponse>('auth/forgot-password', { email });
+  return response.data;
+}
+
+const resetPassword = async (data: object, params: object): Promise<ApiPostResponse> => {
+  const response = await httpClient.put<ApiPostResponse>(`auth/reset-password`, data, { params });
+  return response.data;
+}
 export default {
   getMaritalStatus,
   getGenders,
@@ -140,4 +151,6 @@ export default {
   getGeographicalDivisions,
   getGeographicalDivisionsTypes,
   getProfileDetails,
+  generateLinkResetPassword,
+  resetPassword
 };
