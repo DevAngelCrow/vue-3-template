@@ -23,7 +23,7 @@ export interface ParamsFilter {
   name?: string;
 }
 const getAllRoutes = async (
-  params: paginateParams,
+  params: paginateParams & ParamsFilter,
 ): Promise<ApiResponseGeneric<RoutesResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<RoutesResponse>>(
     'security/routes/',

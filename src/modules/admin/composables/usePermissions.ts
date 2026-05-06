@@ -126,13 +126,13 @@ export function usePermission() {
       const params: {
         page?: number;
         per_page?: number;
-        filter_name?: string;
+        name?: string;
         active?: boolean;
         category_permission_id?: string;
       } = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
+        name: filter.filter_name,
         active: filter.active === 'Todos' ? undefined : filter.active,
         category_permission_id: filter.category_permission_id,
       };
