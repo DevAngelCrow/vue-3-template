@@ -19,6 +19,12 @@ const routes = [
     component: () => import('../../modules/auth/views/SignUp.vue'),
   },
   {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    meta: { requiresAuth: false, title: 'Recuperar contraseña' },
+    component: () => import('../../modules/auth/views/ForgotPassword.vue'),
+  },
+  {
     path: '/landing',
     name: 'landing',
     meta: { requiresAuth: false, title: 'Bienvenido' },
@@ -44,6 +50,12 @@ const routes = [
         meta: { requiresAuth: true },
         component: () => import('@/views/Dashboard.vue'),
       },
+      {
+        path: '/profile',
+        name: 'profile',
+        meta: { requiresAuth: true },
+        component: () => import('../../modules/auth/views/Profile.vue'),
+      },
     ],
   },
   {
@@ -64,6 +76,12 @@ const routes = [
     meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },
     component: () =>
       import('../../modules/auth/views/PendingVerificationEmail.vue'),
+  },
+  {
+    path: '/reset-forgotten-password',
+    name: 'reset-forgotten-password',
+    meta: { requiresAuth: false, title: 'Restablecer contraseña' },
+    component: () => import('../../modules/auth/views/ResetForgotPassword.vue'),
   },
 ];
 

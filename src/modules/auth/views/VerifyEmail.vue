@@ -24,8 +24,8 @@ const stateVerified = ref<boolean | null>(null);
 const verifyEmail = async () => {
   try {
     useLoader.startLoading();
-    if (query.url) {
-      const response = await authServices.verifyEmail(query.url);
+    if (query.url && query.id && query.token) {
+      const response = await authServices.verifyEmail(query.url, query.id.toString(), query.token.toString());
       if (response?.status === 200) {
         stateVerified.value = true;
         router.push({ name: 'login' });

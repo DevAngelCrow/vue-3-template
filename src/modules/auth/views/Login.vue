@@ -80,12 +80,12 @@
                   Recordar dispositivo
                 </label>
               </div>
-              <a
-                href="/forgot-password"
+              <router-link
+                to="/forgot-password"
                 class="text-sm text-primary-400 hover:text-primary-300 transition-colors"
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </router-link>
             </div>
 
             <!-- Submit -->

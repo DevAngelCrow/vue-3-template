@@ -244,6 +244,7 @@ export function useAdmin() {
       } = {
         page: pagination.page,
         per_page: pagination.per_page,
+        name: filter.filter_name,
         ...filter,
       };
       const response = await adminServices.getAllRoutes(params);

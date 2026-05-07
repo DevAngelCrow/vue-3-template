@@ -1,64 +1,35 @@
 <template>
   <div class="w-full xs:mr-2 md:w-full h-full border-none rounded-none">
-    <Menubar
-      class="rounded-none bg-primary border-none h-full hidden md:flex"
-      breakpoint="767px"
-      :model="menuMapped"
-      ref="menuBar"
-    >
+    <Menubar class="rounded-none bg-primary border-none h-full hidden md:flex" breakpoint="767px" :model="menuMapped"
+      ref="menuBar">
       <template #item="{ item, props, hasSubmenu, root }">
-        <router-link
-          v-if="item.uri"
-          v-slot="{ href, navigate }"
-          :to="root && item.items?.length ? '' : item.uri"
-          custom
-          class="flex items-center text-white hover:text-primary-950 group"
-        >
+        <router-link v-if="item.uri" v-slot="{ href, navigate }" :to="root && item.items?.length ? '' : item.uri" custom
+          class="flex items-center text-white hover:text-primary-950 group">
           <a ripple :href="href" v-bind="props.action" @click="hasSubmenu ? $event.preventDefault() : navigate($event)">
             <i :class="`${item.icon} group-hover:text-primary-700`"></i>
             <span class="group-hover:text-primary-700">
               {{ item.label }}
             </span>
-            <i
-              v-if="hasSubmenu"
-              :class="[
-                'pi pi-angle-down ml-auto',
-                { 'pi-angle-down': root, 'pi-angle-right': !root },
-                'group-focus:text-primary-700',
-                'group-active:text-primary-700',
-                'group-hover:text-primary-700',
-              ]"
-            ></i>
+            <i v-if="hasSubmenu" :class="[
+              'pi pi-angle-down ml-auto',
+              { 'pi-angle-down': root, 'pi-angle-right': !root },
+              'group-focus:text-primary-700',
+              'group-active:text-primary-700',
+              'group-hover:text-primary-700',
+            ]"></i>
           </a>
         </router-link>
       </template>
     </Menubar>
     <div
       class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full aspect-square"
-      @click="toggle"
-      aria-haspopup="true"
-      aria-controls="overlay_menu"
-    >
-      <Avatar
-        class="hover:scale-110 hover:px-1 hover:py-1 transform transition-all"
-        image="https://i.pravatar.cc/150"
-        shape="circle"
-        alt="prueba"
-        size="xlarge"
-      />
-      <MenuPrime
-        class="mt-2"
-        ref="popUp"
-        id="overlay_menu"
-        :popup="true"
-        :model="menuUser"
-      >
+      @click="toggle" aria-haspopup="true" aria-controls="overlay_menu">
+      <Avatar class="hover:scale-110 hover:px-1 hover:py-1 transform transition-all" image="https://i.pravatar.cc/150"
+        shape="circle" alt="prueba" size="xlarge" />
+      <MenuPrime class="mt-2" ref="popUp" id="overlay_menu" :popup="true" :model="menuUser">
         <template #item="{ item }">
-          <div class="flex items-center w-full px-3 primary">
-            <div
-              class="flex items-center gap-2 primary"
-              @click="addFunctionItemMenuUser(`${item.label}`)"
-            >
+          <div class="flex items-center w-full px-3 primary hover:cursor-pointer">
+            <div class="flex items-center gap-2 primary" @click="addFunctionItemMenuUser(`${item.label}`)">
               <i :class="`${item.icon} primary`"></i>
               <span class="primary">{{ item.label }}</span>
             </div>
@@ -79,10 +50,9 @@ import {
 } from 'vue';
 import { ref } from 'vue';
 import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
-
 import { useAuth } from '@/modules/auth/composables/useAuth';
-
 import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
+import { useRouter } from 'vue-router';
 
 defineOptions({ name: 'AppNavBarMenu' });
 
@@ -93,6 +63,7 @@ const { menu } = defineProps({
   },
 });
 
+const router = useRouter();
 const emit = defineEmits(['update:menu-sidebar']);
 
 const logout = useAuth().logout;
@@ -162,9 +133,11 @@ const checkWrapMenu = () => {
 };
 
 const addFunctionItemMenuUser = (item: string) => {
-  const itemsMenuUser = ['Cerrar sesión', 'Mi perfil'];
+  const itemsMenuUser = ['Mi perfil', 'Cerrar sesión'];
   if (item === itemsMenuUser[0]) {
-    console.log('cerrando sesion');
+    router.push('/profile');
+  }
+  if (item === itemsMenuUser[1]) {
     logout();
   }
   return undefined;
@@ -220,9 +193,7 @@ onBeforeUnmount(() => {
   @apply text-primary transform transition-all;
 }
 
-:deep(
-  .p-menubar-item.p-focus > .p-menubar-item-content > .p-menubar-item-link
-) {
+:deep(.p-menubar-item.p-focus > .p-menubar-item-content > .p-menubar-item-link) {
   @apply text-primary transform transition-all;
 }
 

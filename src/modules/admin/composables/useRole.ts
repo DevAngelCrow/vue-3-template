@@ -184,7 +184,7 @@ export function useRole() {
       const params = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
+        name: filter.filter_name,
         id_status: filter.id_status,
       };
       const response = await adminServices.getRole(params);
