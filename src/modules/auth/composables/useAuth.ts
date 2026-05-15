@@ -469,14 +469,13 @@ export function useAuth() {
     isLoggingOut.value = true;
     try {
       const token = localStorage.getItem('access_token');
-      const refreshToken = localStorage.getItem('refresh_token');
+      //const refreshToken = localStorage.getItem('refresh_token');
       const tokenType = localStorage.getItem('token_type') || 'Bearer';
-
       if (token) {
         await fetch(`${API_URL}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
-            Authorization: `${tokenType} ${refreshToken}`,
+            Authorization: `${tokenType} ${token}`,
             Accept: 'application/json',
             'Content-Type': 'application/json',
           },
