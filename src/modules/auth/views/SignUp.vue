@@ -95,7 +95,6 @@
               :disabled="isLoading"
               class="w-full mt-1"
               size="large"
-              @click="registerUser({ email, password })"
             >
               <template #default>
                 <span class="flex items-center justify-center gap-2">
