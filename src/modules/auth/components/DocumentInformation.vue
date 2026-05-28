@@ -9,13 +9,12 @@
           class="flex-1"
           id="document_type"
           label="Tipo de documento*"
-          v-model="documentTypeId"
+          v-model="documentType"
           v-bind="documentTypeAttrs"
           :error-messages="errors.documentType"
           option-label="name"
           :options="documentTypesOptions"
           :readonly="!editMode"
-          option-value="id"
         />
         <AppInputMask
           class="flex-1"
@@ -44,7 +43,6 @@ const {
   documentTypeAttrs,
   documentNumber,
   documentNumberAttrs,
-  documentTypeId,
   errors,
   documentTypesOptions,
   editMode,

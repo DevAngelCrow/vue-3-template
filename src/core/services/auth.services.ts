@@ -149,7 +149,7 @@ const generateLinkResetPassword = async (email: string): Promise<ApiPostResponse
 }
 
 const resetPassword = async (data: object, params: object): Promise<ApiPostResponse> => {
-  const response = await httpClient.put<ApiPostResponse>(`auth/reset-password`, data, { params });
+  const response = await httpClient.put<ApiPostResponse>(`auth/reset-password`, { ...data, ...params });
   return response.data;
 }
 export default {

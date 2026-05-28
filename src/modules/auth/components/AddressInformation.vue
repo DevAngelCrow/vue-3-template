@@ -276,8 +276,8 @@ const disableGeographicDivisions = computed(() => {
 });
 watch(editMode, async newValue => {
   if (newValue) {
-    await getGeographicalDivisionsTypes(country.value.id);
-    await getGeographicalDivisions(geographic_divisions_type.value.id);
+    await getGeographicalDivisionsTypes(country.value?.id);
+    await getGeographicalDivisions(geographic_divisions_type.value?.id);
   }
 });
 </script>
