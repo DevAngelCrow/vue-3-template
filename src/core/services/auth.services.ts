@@ -10,8 +10,10 @@ import { District } from './interfaces/auth/district.interface';
 import { DocumentType } from './interfaces/auth/documentType.interface';
 import { Gender } from './interfaces/auth/gender.interface';
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
-import { ApiResponseMenu } from './interfaces/auth/apiResponseMenu.interface';
-import { Menu } from '../interfaces/userState.store.interface';
+import {
+  ApiResponseMenu,
+  MenuResponseData,
+} from './interfaces/auth/apiResponseMenu.interface';
 import { Login } from './interfaces/auth/login.interface';
 import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
 import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
@@ -92,7 +94,11 @@ const logout = async () => {
   return response.data;
 };
 
-const verifyEmail = async (url: LocationQueryValue[] | undefined | string, id: string, token: string) => {
+const verifyEmail = async (
+  url: LocationQueryValue[] | undefined | string,
+  id: string,
+  token: string,
+) => {
   let urlFormatedString = url?.toString();
   let response;
   if (url === null || url === undefined) {
@@ -102,14 +108,16 @@ const verifyEmail = async (url: LocationQueryValue[] | undefined | string, id: s
     urlFormatedString = url.find(value => value !== null) || '';
   }
   if (urlFormatedString) {
-    response = await httpClient.get(urlFormatedString + `?id=${id}&token=${token}`);
+    response = await httpClient.get(
+      urlFormatedString + `?id=${id}&token=${token}`,
+    );
   }
   return response;
 };
 
-const getMenu = async (): Promise<ApiResponseMenu<Menu[]>> => {
+const getMenu = async (): Promise<ApiResponseMenu<MenuResponseData>> => {
   const response =
-    await httpClient.get<ApiResponseMenu<Menu[]>>('security/menus/');
+    await httpClient.get<ApiResponseMenu<MenuResponseData>>('security/menus/');
   return response.data;
 };
 
@@ -143,15 +151,26 @@ const updateProfile = async (
   return response.data;
 };
 
-const generateLinkResetPassword = async (email: string): Promise<ApiPostResponse> => {
-  const response = await httpClient.post<ApiPostResponse>('auth/forgot-password', { email });
+const generateLinkResetPassword = async (
+  email: string,
+): Promise<ApiPostResponse> => {
+  const response = await httpClient.post<ApiPostResponse>(
+    'auth/forgot-password',
+    { email },
+  );
   return response.data;
-}
+};
 
-const resetPassword = async (data: object, params: object): Promise<ApiPostResponse> => {
-  const response = await httpClient.put<ApiPostResponse>(`auth/reset-password`, { ...data, ...params });
+const resetPassword = async (
+  data: object,
+  params: object,
+): Promise<ApiPostResponse> => {
+  const response = await httpClient.put<ApiPostResponse>(
+    `auth/reset-password`,
+    { ...data, ...params },
+  );
   return response.data;
-}
+};
 export default {
   getMaritalStatus,
   getGenders,
@@ -169,5 +188,5 @@ export default {
   getProfileDetails,
   updateProfile,
   generateLinkResetPassword,
-  resetPassword
+  resetPassword,
 };

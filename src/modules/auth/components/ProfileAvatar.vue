@@ -2,7 +2,7 @@
   <div class="w-full h-full flex flex-col justify-center items-center">
     <div class="relative w-max">
       <img
-        src="https://i.pravatar.cc/150"
+        :src="avatarImage"
         alt="prueba"
         class="rounded-full object-cover cursor-pointer"
         style="width: 225px; height: 225px"
@@ -11,6 +11,7 @@
         class="absolute bottom-10 left-40"
         icon="pi pi-camera"
         rounded
+        :disabled="!editMode"
         @click="toggleImgProfile"
       />
     </div>
@@ -29,12 +30,19 @@
 import { Button } from 'primevue';
 import { computed, inject, ref } from 'vue';
 
+import { useAuthStore } from '@/core/store/useAuthStore';
+
 import { useAuth } from '../composables/useAuth';
 
 type UseAuthType = ReturnType<typeof useAuth>;
 const useAuthInstance = inject<UseAuthType>('useAuthInstance')!;
 
-const { file_img, fileImgAttrs, errors } = useAuthInstance;
+const { file_img, fileImgAttrs, errors, editMode } = useAuthInstance;
+
+const authStore = useAuthStore();
+const avatarImage = computed(
+  () => authStore.profileImg ?? 'https://i.pravatar.cc/150',
+);
 
 const showDragDrop = ref<boolean>(false);
 

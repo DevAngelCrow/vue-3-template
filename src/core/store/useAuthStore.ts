@@ -15,6 +15,7 @@ interface State {
   menu: Menu[];
   menuSideBar: Menu[];
   refresh_token: RefreshToken | null | string;
+  profile_img: string | null;
 }
 
 const getFromLocalStorage = (key: string) => {
@@ -56,6 +57,7 @@ export const useAuthStore = defineStore('authStore', {
       : null,
     menu: getFromLocalStorage('menu') || [],
     menuSideBar: [],
+    profile_img: localStorage.getItem('profile_img') || null,
   }),
   getters: {
     userInfo(): UserStateStore | null | string {
@@ -88,6 +90,9 @@ export const useAuthStore = defineStore('authStore', {
     menuSideBarInfo(): Menu[] {
       return this.menuSideBar;
     },
+    profileImg(): string | null {
+      return this.profile_img;
+    },
   },
   actions: {
     setUserInfo(payload: UserStateStore) {
@@ -112,6 +117,14 @@ export const useAuthStore = defineStore('authStore', {
     },
     setMenuSideBar(payload: Menu[]) {
       this.menuSideBar = payload;
+    },
+    setProfileImg(payload: string | null) {
+      this.profile_img = payload;
+      if (payload) {
+        localStorage.setItem('profile_img', payload);
+      } else {
+        localStorage.removeItem('profile_img');
+      }
     },
     isTokenExpired(): boolean {
       if (!this.token) return true;
@@ -138,12 +151,14 @@ export const useAuthStore = defineStore('authStore', {
       this.refresh_token = null;
       this.token_type = null;
       this.menu = [];
+      this.profile_img = null;
       removeAllFromLocalStorage([
         'access_token',
         'user',
         'menu',
         'token_type',
         'refresh_token',
+        'profile_img',
       ]);
     },
   },
