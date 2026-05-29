@@ -53,4 +53,5 @@ export interface ProfileDetails {
   id_profile: string;
   id_people: string;
   id_address: string;
+  profile_img: string | null;
 }

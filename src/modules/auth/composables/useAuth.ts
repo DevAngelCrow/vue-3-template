@@ -28,6 +28,7 @@ export function useAuth() {
     setTokenType,
     setRefreshToken,
     setMenu,
+    setProfileImg,
     userInfo,
   } = useAuthStore();
   const { startLoading, finishLoading } = useLoaderStore();
@@ -73,9 +74,7 @@ export function useAuth() {
       maritalStatus: yup.string().optional(),
       phoneNumber: yup.string().optional().min(9).max(9),
       status: yup.string().optional(),
-      nationalities: yup
-        .array<NationalitiesArray>()
-        .optional(),
+      nationalities: yup.array<NationalitiesArray>().optional(),
       file_img: yup
         .mixed<PrimeVueFile[]>()
         .optional()
@@ -96,7 +95,8 @@ export function useAuth() {
         .object({
           id: yup.string(),
         })
-        .optional().nullable(),
+        .optional()
+        .nullable(),
       houseNumber: yup.string().optional().min(1),
       block: yup
         .string()
@@ -109,14 +109,18 @@ export function useAuth() {
       documentNumber: yup.string().optional().nullable(),
       //user info
       userName: yup.string().optional(),
-      country: yup.object({
-        id: yup.string().optional(),
-      }).optional().nullable(),
+      country: yup
+        .object({
+          id: yup.string().optional(),
+        })
+        .optional()
+        .nullable(),
       geographic_divisions_type: yup
         .object({
           id: yup.string().optional().nullable(),
         })
-        .optional().nullable(),
+        .optional()
+        .nullable(),
     }),
   });
 
@@ -267,6 +271,7 @@ export function useAuth() {
           idPeople.value = response.data.id_people || '';
           idAddress.value = response.data.id_address || '';
           idDocument.value = response.data.document?.id || '';
+          setProfileImg(response.data.profile_img ?? null);
         }
       }
       console.warn(
@@ -324,8 +329,9 @@ export function useAuth() {
         const menu = await authServices.getMenu();
 
         if (menu.statusCode === 200) {
-          setMenu(menu.data);
-          localStorage.setItem('menu', JSON.stringify(menu.data));
+          setMenu(menu.data.menus);
+          setProfileImg(menu.data.profile_img);
+          localStorage.setItem('menu', JSON.stringify(menu.data.menus));
         }
 
         const redirectTo = (route.query.redirect as string) || '/';
