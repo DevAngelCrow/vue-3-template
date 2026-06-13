@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 
 import { useAuthStore } from '@/core/store/useAuthStore';
 
@@ -55,4 +55,8 @@ const dragDropContainerClasses = computed(() => {
 const toggleImgProfile = () => {
   showDragDrop.value = !showDragDrop.value;
 };
+
+watch(editMode, newVal => {
+  if (!newVal) showDragDrop.value = false;
+});
 </script>

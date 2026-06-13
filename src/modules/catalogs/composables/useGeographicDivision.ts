@@ -164,9 +164,9 @@ export function useGeographicDivision() {
   const getParentDivisionsList = async (params?: { id_country?: string }) => {
     try {
       startLoading();
-      const response = await catalogServices.getAllGeographicDivisions({
+      const response = await catalogServices.getAllGeographicDivisionsCursor({
         active: true,
-        per_page: 1000,
+        limit: 100,
         ...(params?.id_country ? { id_country: params.id_country } : {}),
       });
       if (response.statusCode === 200) {
