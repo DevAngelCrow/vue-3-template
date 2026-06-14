@@ -3,7 +3,7 @@
     class="py-3 px-3 h-full max-h-full flex flex-col items-start justify-center"
   >
     <AppTitle title="Perfil" />
-    <Card class="w-full h-full">
+    <Card class="w-full h-full" v-if="!loading">
       <template #header>
         <div class="w-full flex justify-end items-center">
           <Button
@@ -62,7 +62,7 @@
 </template>
 <script setup lang="ts">
 import { Card, Divider, Button } from 'primevue';
-import { computed, onMounted, provide } from 'vue';
+import { computed, onMounted, provide, ref } from 'vue';
 
 import AppTitle from '@/core/components/AppTitle.vue';
 
@@ -86,16 +86,19 @@ const {
   editMode,
   updateProfile,
 } = useAuthInstance;
+const loading = ref<boolean>(false);
 onMounted(async () => {
   startLoading();
+  loading.value = true;
   await Promise.all([
+    getDocumentTypes(),
+    getDetailsProfile(),
     getNationalities(),
     getMaritalStatuses(),
     getGenders(),
-    getDocumentTypes(),
-    getDetailsProfile(),
   ]);
   finishLoading();
+  loading.value = false;
 });
 
 const toggleEditionMode = (flag: boolean) => {

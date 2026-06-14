@@ -32,7 +32,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { inject } from 'vue';
+import { inject, onMounted } from 'vue';
 
 import { useAuth } from '../composables/useAuth';
 
@@ -47,4 +47,9 @@ const {
   documentTypesOptions,
   editMode,
 } = useAuthInstance;
+
+onMounted(() => {
+  console.log('DocumentInformation component mounted', documentType.value);
+  console.log('Document types options:', documentTypesOptions.value);
+});
 </script>

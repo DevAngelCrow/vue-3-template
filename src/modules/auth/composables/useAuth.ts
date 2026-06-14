@@ -183,7 +183,15 @@ export function useAuth() {
     try {
       const response = await authServices.getDocumentTypes();
       if (response.statusCode === 200) {
-        documentTypesOptions.value = response.data.data;
+        documentTypesOptions.value = response.data.data.map(
+          (item: DocumentType) => ({
+            active: item.active,
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            mask: item.mask,
+          }),
+        );
       }
     } catch (error) {
       console.error('Error al obtener los tipos de documento:', error);
@@ -479,7 +487,6 @@ export function useAuth() {
       if (!userInfo || typeof userInfo !== 'object' || !('id' in userInfo)) {
         throw new Error('User info is missing');
       }
-
       const formData = new FormData();
       formData.append('id_people', idPeople.value);
       formData.append('id_address', idAddress.value);
@@ -487,7 +494,6 @@ export function useAuth() {
       formData.append('first_name', values.firstName || '');
       formData.append('middle_name', values.middleName || '');
       formData.append('last_name', values.lastName || '');
-
       if (values.birthDate) {
         const parsed = CreateDateFromFormat(values.birthDate, 'DD/MM/YYYY');
         if (parsed instanceof Date) {
@@ -529,7 +535,6 @@ export function useAuth() {
       if (values.file_img && values.file_img.length > 0) {
         formData.append('file_img', values.file_img[0] as unknown as Blob);
       }
-
       const response = await authServices.updateProfile(userInfo.id, formData);
       if (response.statusCode === 200) {
         alert.showAlert({

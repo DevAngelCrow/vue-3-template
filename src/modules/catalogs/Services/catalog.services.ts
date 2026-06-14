@@ -318,6 +318,7 @@ interface GeographicDivisionParams {
   id_country?: string | null;
   id_parent?: string | null;
   id_type?: string | null;
+  limit?: number;
 }
 
 const getAllGeographicDivisions = async (
@@ -326,6 +327,15 @@ const getAllGeographicDivisions = async (
   const response = await httpClient.get<
     ApiResponseGeneric<GeographicDivisionResponse>
   >('catalogs/geographic-divisions', params);
+  return response.data;
+};
+
+const getAllGeographicDivisionsCursor = async (
+  params?: GeographicDivisionParams,
+): Promise<ApiResponseGeneric<GeographicDivisionResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<GeographicDivisionResponse>
+  >('catalogs/geographic-divisions/cursor', params);
   return response.data;
 };
 
@@ -406,6 +416,7 @@ export default {
   putGeographicDivisionType,
   patchGeographicDivisionType,
   getAllGeographicDivisions,
+  getAllGeographicDivisionsCursor,
   getGeographicDivisionById,
   postGeographicDivision,
   putGeographicDivision,
