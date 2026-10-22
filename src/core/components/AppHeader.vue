@@ -1,74 +1,73 @@
 <template>
-  <section class="w-full h-full bg-primary">
-    <div
-      class="w-full h-full bg-transparent flex justify-start items-center align-baseline"
-    >
+  <header class="w-full h-full max-h-[70px] bg-primary flex items-center justify-between px-4 shadow-sm overflow-hidden flex-nowrap">
+    <!-- Izquierda: Botón Hamburguesa (si hay overflow o en móvil) y Brand -->
+    <div class="flex items-center gap-3 shrink-0">
       <Button
-        v-if="menuSideBar?.length"
-        class="bg-transparent border-none flex"
-        @click="sideBar.showSideBar(!sideBar.sideBar)"
+        v-if="showHamburger"
+        id="btn-toggle-sidebar"
+        type="button"
+        class="bg-transparent border-none text-white hover:text-white/80 p-2 flex items-center justify-center cursor-pointer"
+        aria-label="Abrir menú de navegación"
+        @click="toggleSidebar"
       >
-        <i class="pi pi-bars"></i>
+        <i class="pi pi-bars text-xl"></i>
       </Button>
-      <AppNavBarMenu
-        class="flex justify-end align-baseline content-center"
-        :menu="items"
-        @update:menu-sidebar="toggleMenu"
-      />
+
+      <slot name="brand">
+        <span class="font-bold text-white text-lg tracking-wide hidden sm:inline-block">
+          Template App
+        </span>
+      </slot>
     </div>
-  </section>
+
+    <!-- Centro / Derecha: Menú horizontal de navegación principal (Desktop) -->
+    <div class="flex-1 flex justify-end items-center mr-3 overflow-hidden">
+      <AppNavBarMenu />
+    </div>
+
+    <!-- Extremo Derecho: Avatar y menú de usuario -->
+    <div class="flex items-center shrink-0">
+      <AppUserMenu />
+    </div>
+  </header>
 </template>
+
 <script setup lang="ts">
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { Button } from 'primevue';
-import { computed, ref } from 'vue';
-import { storeToRefs } from 'pinia';
 
 import { useLayoutStore } from '../store/useLayoutStore';
 import AppNavBarMenu from './AppNavBarMenu.vue';
-import { useAuthStore } from '../store/useAuthStore';
-import { MenuBar } from '../interfaces/menu.bar.dinamic.interface';
+import AppUserMenu from './AppUserMenu.vue';
 
 defineOptions({ name: 'AppHeader' });
-const emit = defineEmits(['update:menu-sidebar']);
 
-const sideBar = useLayoutStore();
-const { menuInfo } = storeToRefs(useAuthStore());
-const menuSideBar = ref<MenuBar[]>();
+const layoutStore = useLayoutStore();
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
-const toggleMenu = (value: MenuBar[]) => {
-  menuSideBar.value = value;
-  emit('update:menu-sidebar', menuSideBar.value);
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
 };
-const items = computed<MenuBar[]>(() => {
-  return menuInfo.value
-    .filter(
-      item =>
-        (item.show && item.children.length > 0 && item.title) ||
-        (item.show && item.children.length === 0 && item.parent === null),
-    )
-    .map(m => {
-      const menuItem: MenuBar = {
-        ...m,
-        label: m.title,
-        icon: m.icon,
-        uri: m.uri,
-        isUser: false,
-      };
-      if (m.title === 'Usuario') {
-        menuItem.isUser = true;
-      }
 
-      if (m.children && m.children.length > 0) {
-        menuItem.items = m.children.map(c => ({
-          ...c,
-          label: c.title,
-          icon: c.icon,
-          url: c.uri,
-        }));
-      }
-
-      return menuItem;
-    });
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
 });
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+const isMobile = computed(() => windowWidth.value < 768);
+
+const showHamburger = computed(() => {
+  return isMobile.value || layoutStore.hasOverflow;
+});
+
+const toggleSidebar = () => {
+  layoutStore.showSideBar(!layoutStore.sideBar);
+};
 </script>
-<style scoped></style>
+
+<style scoped>
+@reference "@/core/assets/style.css";
+</style>

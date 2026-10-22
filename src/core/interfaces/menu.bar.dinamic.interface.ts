@@ -1,20 +1,8 @@
-export interface MenuBar {
-  id: string;
-  label: string;
-  icon: string;
-  isUser: boolean;
-  uri: string;
-  name: string;
-  description: string;
-  show: boolean;
-  order: number;
-  parent: MenuBar[];
-  children: MenuBar[];
-  required_auth: boolean;
-  title: string;
-  active: boolean;
-  is_open: boolean;
-  items?: MenuBar[]; //esto es porque el componente de primevue MenuBar espera una propiedad items
+import type { NavigationItem } from './navigation.interface';
+
+export interface MenuBar extends NavigationItem {
+  isUser?: boolean;
+  is_open?: boolean;
 }
 
 export interface SubMenu {

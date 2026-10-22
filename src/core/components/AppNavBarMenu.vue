@@ -1,10 +1,10 @@
 <template>
-  <div class="w-full xs:mr-2 md:w-full h-full border-none rounded-none">
+  <nav class="h-full max-h-[70px] overflow-hidden flex items-center">
     <Menubar
-      class="rounded-none bg-primary border-none h-full hidden md:flex"
+      ref="menuBarRef"
+      class="bg-transparent border-none p-0 h-full hidden md:flex items-center flex-nowrap"
       breakpoint="767px"
-      :model="menuMapped"
-      ref="menuBar"
+      :model="visibleItems"
     >
       <template #item="{ item, props, hasSubmenu, root }">
         <router-link
@@ -12,7 +12,7 @@
           v-slot="{ href, navigate }"
           :to="root && item.items?.length ? '' : item.uri"
           custom
-          class="flex items-center text-white hover:text-primary-950 group"
+          class="flex items-center text-white hover:text-primary-950 group whitespace-nowrap"
         >
           <a
             ripple
@@ -20,218 +20,136 @@
             v-bind="props.action"
             @click="hasSubmenu ? $event.preventDefault() : navigate($event)"
           >
-            <i :class="`${item.icon} group-hover:text-primary-700`"></i>
-            <span class="group-hover:text-primary-700">
+            <i v-if="item.icon" :class="`${item.icon} group-hover:text-primary-700 mr-2`"></i>
+            <span class="group-hover:text-primary-700 font-medium">
               {{ item.label }}
             </span>
             <i
               v-if="hasSubmenu"
               :class="[
-                'pi pi-angle-down ml-auto',
-                { 'pi-angle-down': root, 'pi-angle-right': !root },
-                'group-focus:text-primary-700',
-                'group-active:text-primary-700',
+                'pi ml-2 text-xs',
+                root ? 'pi-angle-down' : 'pi-angle-right',
                 'group-hover:text-primary-700',
               ]"
             ></i>
           </a>
         </router-link>
+        <span
+          v-else
+          class="flex items-center text-white/90 px-3 py-2 cursor-default font-medium whitespace-nowrap"
+        >
+          <i v-if="item.icon" :class="`${item.icon} mr-2`"></i>
+          {{ item.label }}
+        </span>
       </template>
     </Menubar>
-    <div
-      class="hover:bg-surface-400 hover:scale-90 transform transition-all flex justify-center items-center rounded-full aspect-square"
-      @click="toggle"
-      aria-haspopup="true"
-      aria-controls="overlay_menu"
-    >
-      <Avatar
-        class="hover:scale-110 hover:px-1 hover:py-1 transform transition-all"
-        :image="avatarImage"
-        shape="circle"
-        alt="prueba"
-        size="xlarge"
-      />
-      <MenuPrime
-        class="mt-2"
-        ref="popUp"
-        id="overlay_menu"
-        :popup="true"
-        :model="menuUser"
-      >
-        <template #item="{ item }">
-          <div
-            class="flex items-center w-full px-3 primary hover:cursor-pointer"
-          >
-            <div
-              class="flex items-center gap-2 primary"
-              @click="addFunctionItemMenuUser(`${item.label}`)"
-            >
-              <i :class="`${item.icon} primary`"></i>
-              <span class="primary">{{ item.label }}</span>
-            </div>
-          </div>
-        </template>
-      </MenuPrime>
-    </div>
-  </div>
+  </nav>
 </template>
+
 <script setup lang="ts">
 import {
-  ComponentPublicInstance,
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
+  ref,
   watch,
-  type PropType,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  type ComponentPublicInstance,
 } from 'vue';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { Menubar, Avatar, Menu as MenuPrime } from 'primevue';
+import { Menubar } from 'primevue';
 
-import { useAuth } from '@/modules/auth/composables/useAuth';
-import { useAuthStore } from '@/core/store/useAuthStore';
-
-import type { MenuBar as MenuModel } from '../interfaces/menu.bar.dinamic.interface';
+import type { NavigationItem } from '../interfaces/navigation.interface';
+import { useNavigationMenu } from '../composables/useNavigationMenu';
+import { useLayoutStore } from '../store/useLayoutStore';
 
 defineOptions({ name: 'AppNavBarMenu' });
 
-const { menu } = defineProps({
-  menu: {
-    type: Array as PropType<MenuModel[]>,
-    default: () => [],
-  },
-});
+const { systemRoutes } = useNavigationMenu();
+const layoutStore = useLayoutStore();
 
-const router = useRouter();
-const emit = defineEmits(['update:menu-sidebar']);
-
-const authStore = useAuthStore();
-const avatarImage = computed(
-  () => authStore.profileImg ?? 'https://i.pravatar.cc/150',
-);
-
-const logout = useAuth().logout;
-const menuMapped = ref<MenuModel[]>();
-const menuAppsideBar = ref<MenuModel[]>();
-const menuUser = ref<MenuModel[]>();
-const popUp = ref<InstanceType<typeof MenuPrime>>();
-const menuBar = ref<ComponentPublicInstance>();
-
-const menuCopy = ref<MenuModel[]>([]);
-const widthNavBarMenu = ref<number>(0);
-
-const toggle = (event: MouseEvent | KeyboardEvent) => {
-  popUp.value?.toggle(event);
-};
-
-const mapperMenuUser = () => {
-  const cleanMenu = JSON.parse(JSON.stringify(menu));
-  menuCopy.value = structuredClone(cleanMenu);
-  if (menuCopy.value.length) {
-    menuUser.value = menuCopy.value.filter(item => item.isUser);
-    menuMapped.value = menuCopy.value.filter(item => !item.isUser);
-  }
-};
+const menuBarRef = ref<ComponentPublicInstance>();
+const visibleItems = ref<NavigationItem[]>([]);
 
 const checkWrapMenu = () => {
-  menuMapped.value = menuCopy.value.filter(item => !item.isUser);
+  if (window.innerWidth < 768) {
+    visibleItems.value = [];
+    layoutStore.setOverflowMenuItems(systemRoutes.value);
+    return;
+  }
 
-  //isMenuVisible.value = true;
+  // Primero probamos cargando todas las rutas principales
+  visibleItems.value = [...systemRoutes.value];
+
   nextTick(() => {
-    // Ahora que el menú está completo, verificamos si hay desbordamiento (wrap)
     window.requestAnimationFrame(() => {
-      const root = menuBar.value?.$el?.querySelector?.(
+      const root = menuBarRef.value?.$el?.querySelector?.(
         '.p-menubar-root-list',
-      ) as HTMLElement;
-      if (!root) return;
+      ) as HTMLElement | null;
+
+      if (!root) {
+        layoutStore.setOverflowMenuItems([]);
+        return;
+      }
 
       const children = Array.from(root.children) as HTMLElement[];
       let wrapIndex: number | null = null;
 
-      if (children.length > 0) {
+      if (children.length > 1) {
         const firstTop = children[0].offsetTop;
-        for (let i = 0; i < children.length; i++) {
+
+        for (let i = 1; i < children.length; i++) {
           if (children[i].offsetTop > firstTop) {
-            wrapIndex = i; // Encontramos el primer elemento que saltó de línea
+            wrapIndex = i; // Encontramos el primer elemento que saltó de fila
             break;
           }
         }
       }
 
       if (wrapIndex !== null) {
-        // Si hay desbordamiento, cortamos el menú visible y emitimos el resto
-        const menuAppSideBarWithoutUser = menuCopy.value.slice(wrapIndex);
-
-        menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
-          item => !item.isUser,
-        );
-        menuMapped.value = menuCopy.value.slice(0, wrapIndex);
+        // Cortamos el menú visible para mantener estrictamente una sola fila
+        visibleItems.value = systemRoutes.value.slice(0, wrapIndex);
+        layoutStore.setOverflowMenuItems(systemRoutes.value.slice(wrapIndex));
       } else {
-        // Si no hay desbordamiento, nos aseguramos de que el sidebar esté vacío
-        menuAppsideBar.value = [];
-        menuMapped.value = menuCopy.value.filter(item => !item.isUser);
+        visibleItems.value = [...systemRoutes.value];
+        layoutStore.setOverflowMenuItems([]);
       }
-      emit('update:menu-sidebar', menuAppsideBar.value);
     });
   });
 };
 
-const addFunctionItemMenuUser = (item: string) => {
-  const itemsMenuUser = ['Mi perfil', 'Cerrar sesión'];
-  if (item === itemsMenuUser[0]) {
-    router.push('/profile');
-  }
-  if (item === itemsMenuUser[1]) {
-    logout();
-  }
-  return undefined;
-};
-watch(widthNavBarMenu, new_value => {
-  if (new_value <= 769) {
-    const menuAppSideBarWithoutUser = [...menuCopy.value];
-    menuAppsideBar.value = menuAppSideBarWithoutUser.filter(
-      item => !item.isUser,
-    );
-    emit('update:menu-sidebar', menuAppsideBar.value);
-  } else {
+watch(
+  () => systemRoutes.value,
+  () => {
     checkWrapMenu();
-  }
-});
+  },
+  { immediate: true, deep: true },
+);
 
 const handleResize = () => {
-  widthNavBarMenu.value = window.innerWidth;
+  checkWrapMenu();
 };
 
-onMounted(async () => {
-  await mapperMenuUser();
-
+onMounted(() => {
   window.addEventListener('resize', handleResize);
-
-  // Disparamos una comprobación inicial
-
-  widthNavBarMenu.value = window.innerWidth;
+  checkWrapMenu();
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize);
 });
 </script>
+
 <style scoped>
 @reference "@/core/assets/style.css";
 
-/* Evitamos que los ítems del menubar se estiren */
+/* Evita que los ítems del menubar se estiren */
 :deep(.p-menubar-root-list > li),
 :deep(.p-menubar-root-list > .p-menuitem),
 :deep(.p-menubar-root-list > .p-menubar-item) {
   flex: 0 0 auto !important;
 }
 
-/* Aseguramos que el end slot no crezca */
-:deep(.app-navbar-end) {
-  flex: 0 0 auto !important;
-  width: auto !important;
-  height: auto !important;
+:deep(.p-menubar-root-list) {
+  flex-wrap: wrap !important;
 }
 
 :deep(.p-menubar-item-active > .p-menubar-item-content > .p-menubar-item-link) {

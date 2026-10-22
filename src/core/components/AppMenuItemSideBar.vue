@@ -1,31 +1,62 @@
 <template>
-  <ul class="flex flex-col h-full overflow-y-auto m-0 p-0 list-none">
-    <li v-for="section in mappedMenu" :key="section.id || section.title"
-      class="flex items-start justify-center px-2 py-1.5 shrink-0 flex-wrap flex-col gap-1">
-      <!--Si tiene hijos, no usamos router-link -->
-      <div v-if="isChildren(section.children)" :class="[
-        'flex flex-row justify-start items-center flex-wrap w-full overflow-hidden hover:bg-primary-200 hover:rounded-md hover:outline',
-      ]" :id="section.title">
-        <div v-ripple class="flex w-full items-center">
-          <i :class="`${section.icon} w-[10%] pl-2`"></i>
-          <span class="w-[80%]">{{ section.title }}</span>
-          <Button icon="pi pi-chevron-down" variant="text" rounded
-            class="bg-transparent border-none text-primary-950 w-[10%] transform transition rounded-full no-ripple"
-            :class="section.is_open ? 'rotate-180' : 'rotate-0'" @click="() => (section.is_open = !section.is_open)" />
+  <ul class="flex flex-col m-0 p-0 list-none w-full gap-1">
+    <li
+      v-for="section in mappedMenu"
+      :key="section.id || section.title || section.name"
+      class="flex flex-col w-full"
+    >
+      <!-- Si tiene hijos: Acordeón desplegable -->
+      <div v-if="hasChildren(section.children)" class="w-full flex flex-col">
+        <div
+          v-ripple
+          class="flex items-center justify-between w-full px-3 py-2 rounded-lg cursor-pointer transition-colors hover:bg-primary-200/70 select-none"
+          @click="toggleItem(section.id)"
+        >
+          <div class="flex items-center gap-3 overflow-hidden">
+            <i
+              v-if="section.icon"
+              :class="[section.icon, 'text-primary-800 text-base shrink-0']"
+            ></i>
+            <span class="font-medium text-neutral-800 truncate text-sm">
+              {{ section.title || section.label }}
+            </span>
+          </div>
+          <Button
+            type="button"
+            icon="pi pi-chevron-down"
+            variant="text"
+            rounded
+            class="bg-transparent border-none text-primary-950 p-1 w-7 h-7 transform transition-transform duration-200 shrink-0"
+            :class="isOpen(section.id) ? 'rotate-180' : 'rotate-0'"
+            @click.stop="toggleItem(section.id)"
+          />
         </div>
+
         <Transition name="slide-accordion">
-          <ul v-if="section.is_open" class="w-full overflow-hidden">
-            <AppMenuItemSideBar :mapped-menu="section.children" class="bg-primary-200 rounded-md" />
-          </ul>
+          <div v-if="isOpen(section.id)" class="w-full pl-3 mt-1">
+            <AppMenuItemSideBar
+              :mapped-menu="section.children || []"
+              class="border-l-2 border-primary-300 pl-1"
+            />
+          </div>
         </Transition>
       </div>
 
-      <!--Si NO tiene hijos, sí usamos router-link -->
-      <router-link v-else :to="section.uri" :id="section.title"
-        class="flex flex-row justify-start items-center flex-wrap w-full overflow-hidden hover:border-dashed hover:border hover:rounded-md hover:cursor-pointer">
-        <div v-ripple class="flex w-full items-center">
-          <i :class="`${section.icon} w-[10%] pl-2`"></i>
-          <span class="w-[90%]">{{ section.title }}</span>
+      <!-- Si NO tiene hijos: Enlace de navegación -->
+      <router-link
+        v-else-if="section.uri || section.to"
+        :to="section.uri || section.to || '/'"
+        class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-neutral-800 hover:bg-primary-200/70 transition-colors"
+        @click="handleNavigation"
+      >
+        <div v-ripple class="flex items-center gap-3 w-full">
+          <i
+            v-if="section.icon"
+            :class="[section.icon, 'text-primary-800 text-base shrink-0']"
+          ></i>
+          <span class="font-medium text-sm truncate">
+            {{ section.title || section.label }}
+          </span>
         </div>
       </router-link>
     </li>
@@ -33,33 +64,43 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Button } from 'primevue';
 
-import { Menu } from '../interfaces/userState.store.interface';
+import type { NavigationItem } from '../interfaces/navigation.interface';
+import { useLayoutStore } from '../store/useLayoutStore';
 
-const { mappedMenu } = defineProps<{
-  mappedMenu: Menu[];
+defineOptions({ name: 'AppMenuItemSideBar' });
+
+defineProps<{
+  mappedMenu: NavigationItem[];
 }>();
 
-const isChildren = (value: Menu[]) => value && value.length > 0;
+const layoutStore = useLayoutStore();
+const openItems = ref<Record<string, boolean>>({});
+
+const isOpen = (id: string) => Boolean(openItems.value[id]);
+
+const toggleItem = (id: string) => {
+  openItems.value[id] = !openItems.value[id];
+};
+
+const hasChildren = (children?: NavigationItem[]) =>
+  Boolean(children && children.length > 0);
+
+const handleNavigation = () => {
+  // Cierra el sidebar al navegar para mejorar la experiencia en móviles
+  layoutStore.showSideBar(false);
+};
 </script>
 
 <style scoped>
-.no-ripple :deep(.p-ink) {
-  display: none !important;
-}
-
 .slide-accordion-enter-active,
 .slide-accordion-leave-active {
   transition:
-    max-height 0.5s ease-in-out,
-    opacity 0.4s ease-in-out;
-}
-
-.slide-accordion-leave-active {
-  transition:
-    max-height 0.3s ease-in,
-    opacity 0.3s ease-in;
+    max-height 0.3s ease-in-out,
+    opacity 0.25s ease-in-out;
+  overflow: hidden;
 }
 
 .slide-accordion-enter-from,
