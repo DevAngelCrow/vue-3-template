@@ -60,6 +60,7 @@
         :page="pagination.page"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
+        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -111,7 +112,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { computed, onMounted, reactive, provide } from 'vue';
+import { computed, reactive, provide } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AppSelect from '@/core/components/AppSelect.vue';
@@ -126,7 +127,6 @@ provide('useRole', roleInstance);
 const router = useRouter();
 
 const {
-  getRole,
   role,
   filter,
   resetForm,
@@ -136,10 +136,10 @@ const {
   findRole,
   pagination,
   headers,
-  getPermissions,
-  getStatus,
   getRolById,
   globalStatus,
+  isPending,
+  isFetching,
 } = roleInstance;
 
 const modalState = reactive<{
@@ -207,19 +207,17 @@ const closeModal = () => {
   resetForm();
 };
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getRole();
 };
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
-  getRole();
 };
 const iconFilter = computed(() => {
   const filterValues = Object.values(filter).some(Boolean);
@@ -227,14 +225,5 @@ const iconFilter = computed(() => {
     return 'pi pi-filter';
   }
   return 'pi pi-filter-slash';
-});
-onMounted(async () => {
-  try {
-    await getRole();
-    await getPermissions();
-    await getStatus();
-  } catch (error) {
-    console.error(error);
-  }
 });
 </script>

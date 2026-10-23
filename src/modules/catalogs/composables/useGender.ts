@@ -1,11 +1,18 @@
-import { ref, reactive, nextTick } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useLoaderStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import catalogServices from '../Services/catalog.services';
 import { GenderResponse } from '../interfaces/gender/gender.response.interface';
+
+export const gendersKeys = createQueryKeys<{
+  page?: number;
+  per_page?: number;
+  filter?: string | null;
+}>('genders');
 
 export function useGender() {
   const headers = ref<TableHeaders[]>([
@@ -25,38 +32,58 @@ export function useGender() {
     },
   ]);
 
-  const genders = ref<GenderResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
 
   const filter_name = ref<string | null>(null);
+  const appliedFilterName = ref<string | null>(null);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
-  const getGenders = async () => {
-    try {
-      startLoading();
-      const filter = {
+  // Consulta paginada y reactiva de géneros
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      gendersKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter_name.value,
-      };
-      const response = await catalogServices.getGenders(filter);
+        filter: appliedFilterName.value || undefined,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getGenders({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter: appliedFilterName.value || undefined,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      if (response.statusCode === 200) {
-        genders.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    },
+    { immediate: true },
+  );
+
+  const genders = computed<GenderResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  const getGenders = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
   };
 
   const validateAlphaInput = (
@@ -73,17 +100,14 @@ export function useGender() {
   };
 
   const cleanSearch = () => {
-    if (!filter_name.value || filter_name.value === '') {
-      return;
-    }
     filter_name.value = null;
-    getGenders();
+    appliedFilterName.value = null;
+    pagination.page = 1;
   };
 
   const findGender = (value: string | null) => {
-    if (value) {
-      getGenders();
-    }
+    pagination.page = 1;
+    appliedFilterName.value = value || null;
   };
 
   return {
@@ -91,9 +115,13 @@ export function useGender() {
     genders,
     pagination,
     filter_name,
+    isPending,
+    isFetching,
     getGenders,
     validateAlphaInput,
     cleanSearch,
     findGender,
   };
 }
+
+export default useGender;

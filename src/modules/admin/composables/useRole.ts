@@ -1,10 +1,17 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 import catalogServices from '@/modules/catalogs/Services/catalog.services';
 import { CategoryStatus } from '@/types/global-status.type';
 
@@ -14,9 +21,26 @@ import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
 
-type filterType = { filter_name?: string; id_status?: string };
+export type FilterRoleType = { filter_name?: string; id_status?: string };
+
+export const roleKeys = createQueryKeys<
+  FilterRoleType & { page?: number; per_page?: number }
+>('admin-roles');
+
+export const roleStatusKeys = createQueryKeys('admin-role-status');
+
+export const roleDetailKeys = createQueryKeys<{ id: string }>(
+  'admin-role-detail',
+);
+
+export const roleCategoryPermissionsKeys = createQueryKeys<{
+  active?: boolean;
+}>('admin-category-permissions');
 
 export function useRole() {
+  const queryClient = useQueryClient();
+  const alert = useAlertStore();
+
   const {
     errors,
     defineField,
@@ -114,27 +138,17 @@ export function useRole() {
     },
   ]);
 
-  const role = ref<RoleResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
+
   const permissionsPagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const permissionsList = ref<
-    {
-      id: string;
-      name: string;
-      description: string;
-      active: boolean;
-    }[]
-  >([]);
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -143,10 +157,17 @@ export function useRole() {
   const [permissions_ids, permissionsIdsAttrs] = defineField('permissions_ids');
   const [code, codeAttrs] = defineField('code');
   const [id_status, idStatusAttrs] = defineField('id_status');
-  const filter = reactive<filterType>({
+
+  const filter = reactive<FilterRoleType>({
     filter_name: undefined,
     id_status: undefined,
   });
+
+  const appliedFilter = reactive<FilterRoleType>({
+    filter_name: undefined,
+    id_status: undefined,
+  });
+
   const filter_permission = ref<{
     name: string;
     category?: {
@@ -155,115 +176,214 @@ export function useRole() {
       description: string;
     };
   }>({ name: '' });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
-  const globalStatus = ref<RoleStatus[]>([]);
-  const categories = ref<CategoryPermissionsResponse[]>([]);
-  const getStatus = async () => {
-    try {
-      startLoading();
-      const filter = {
+
+  const permissionsList = ref<
+    {
+      id: string;
+      name: string;
+      description: string;
+      active: boolean;
+    }[]
+  >([]);
+
+  // Query de Roles paginada
+  const {
+    data: roleQueryResult,
+    isPending,
+    isFetching,
+    refetch: refetchRoles,
+  } = useQuery({
+    queryKey: computed(() =>
+      roleKeys.list({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        id_status: appliedFilter.id_status || undefined,
+      }),
+    ),
+    queryFn: async () => {
+      const params = {
+        page: pagination.page,
+        per_page: pagination.per_page,
+        name: appliedFilter.filter_name || undefined,
+        id_status: appliedFilter.id_status,
+      };
+      const response = await adminServices.getRole(params);
+      if (response.statusCode === 200) {
+        return response.data;
+      }
+      return null;
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  watch(
+    () => roleQueryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
+      }
+    },
+    { immediate: true },
+  );
+
+  const role = computed<RoleResponse[]>(
+    () => roleQueryResult.value?.data ?? [],
+  );
+
+  // Query de Estados Globales para roles
+  const { data: globalStatusData, refetch: refetchStatus } = useQuery({
+    queryKey: computed(() => roleStatusKeys.all),
+    queryFn: async () => {
+      const filterParams = {
         page: undefined,
         per_page: undefined,
         code_category: CategoryStatus.CODE,
       };
-      const response = await catalogServices.getGlobalStatus(filter);
+      const response = await catalogServices.getGlobalStatus(filterParams);
       if (response.statusCode === 200) {
         if (Array.isArray(response.data)) {
-          globalStatus.value = response.data;
+          return response.data;
+        }
+        if (response.data && Array.isArray(response.data.data)) {
+          return response.data.data;
         }
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const getRole = async () => {
-    try {
-      startLoading();
-      const params = {
-        page: pagination.page,
-        per_page: pagination.per_page,
-        name: filter.filter_name,
-        id_status: filter.id_status,
-      };
-      const response = await adminServices.getRole(params);
-      if (response.statusCode === 200) {
-        role.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+      return [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
-  const addRol = async (form: RoleForm) => {
-    try {
-      startLoading();
-      const response = await adminServices.postRole(form);
+  const globalStatus = computed<RoleStatus[]>(
+    () => globalStatusData.value || [],
+  );
+
+  // Query de Categorías de Permisos
+  const { data: categoriesData, refetch: refetchCategories } = useQuery({
+    queryKey: computed(() => roleCategoryPermissionsKeys.list({ active: true })),
+    queryFn: async () => {
+      const response = await adminServices.getCategoryPermissions({
+        active: true,
+      });
+      if (response.statusCode === 200 && response.data) {
+        return response.data.data;
+      }
+      return [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categories = computed<CategoryPermissionsResponse[]>(
+    () => categoriesData.value ?? [],
+  );
+
+  // Mutaciones TanStack Query
+  const addRoleMutation = useMutation({
+    mutationFn: (form: RoleForm) => adminServices.postRole(form),
+    onSuccess: response => {
       if (response.status === 201) {
-        getRole();
+        queryClient.invalidateQueries({ queryKey: roleKeys.all });
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
           show: true,
         });
-        return response.data;
       }
+    },
+    onError: error => {
+      console.error('Error al agregar rol:', error);
+    },
+  });
+
+  const editRoleMutation = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Omit<RoleForm, 'id'>;
+    }) => adminServices.putRole(id, body),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: roleKeys.all });
+        queryClient.invalidateQueries({ queryKey: roleDetailKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al editar rol:', error);
+    },
+  });
+
+  const toggleRoleMutation = useMutation({
+    mutationFn: (id: string) => adminServices.toggleRole(id),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: roleKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al alternar estado del rol:', error);
+    },
+  });
+
+  const addRol = async (form: RoleForm) => {
+    try {
+      const response = await addRoleMutation.mutateAsync(form);
+      return response.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
   };
 
   const editRole = async (form: RoleForm) => {
     try {
-      startLoading();
       const { id, ...body } = form;
-      const response = await adminServices.putRole(id!, body);
-      if (response.status === 200) {
-        getRole();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
+      const response = await editRoleMutation.mutateAsync({
+        id: id!,
+        body,
+      });
+      return response.data;
     } catch (error) {
-      console.log(error);
-    } finally {
-      finishLoading();
+      console.error(error);
+      return undefined;
     }
   };
 
   const toggleRole = async (id: string) => {
     try {
-      startLoading();
-      const response = await adminServices.toggleRole(id);
-      if (response.status === 200) {
-        getRole();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
+      const response = await toggleRoleMutation.mutateAsync(id);
+      return response.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
   };
+
+  const getStatus = async () => {
+    const result = await refetchStatus();
+    return result.data || [];
+  };
+
+  const getRole = async () => {
+    const result = await refetchRoles();
+    return result.data?.data || [];
+  };
+
   const getRolById = async (id: string) => {
     try {
-      startLoading();
       permissionsList.value = [];
       permissionsPagination.total_items = 0;
       const response = await adminServices.getRol(id);
@@ -276,15 +396,14 @@ export function useRole() {
       }
       return response;
     } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
+      console.error('Error al obtener rol por ID:', error);
+      return null;
     }
   };
+
   const getPermissions = async () => {
     try {
-      startLoading();
-      let filter = {
+      const filterParams = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
         name: filter_permission.value.name
@@ -293,7 +412,7 @@ export function useRole() {
         category_permission_id: filter_permission.value.category?.id,
         active: true,
       };
-      const response = await adminServices.getPermissions(filter);
+      const response = await adminServices.getPermissions(filterParams);
       if (response.statusCode === 200) {
         permissionsList.value = response.data.data;
         permissionsPagination.page = response.data.current_page;
@@ -301,27 +420,15 @@ export function useRole() {
         permissionsPagination.total_items = response.data.total_items;
       }
     } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
+      console.error('Error al obtener permisos:', error);
     }
   };
+
   const getCategoryPermissions = async () => {
-    try {
-      startLoading();
-      const filters = {
-        active: true,
-      };
-      const response = await adminServices.getCategoryPermissions(filters);
-      if (response.statusCode === 200) {
-        categories.value = response.data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    const result = await refetchCategories();
+    return result.data || [];
   };
+
   const validateAlphaInput = (
     value: string | undefined,
     regex: RegExp = findRegex,
@@ -344,7 +451,9 @@ export function useRole() {
     }
     filter.filter_name = undefined;
     filter.id_status = undefined;
-    getRole();
+    pagination.page = 1;
+    appliedFilter.filter_name = undefined;
+    appliedFilter.id_status = undefined;
   };
 
   const setRoleItem = (value: RoleResponse) => {
@@ -359,14 +468,16 @@ export function useRole() {
         : [],
     );
     setFieldValue('code', value?.code);
-    setFieldValue('id_status', value?.status.id);
+    setFieldValue('id_status', value?.status?.id);
   };
 
-  const findRole = (value: filterType) => {
-    if (value) {
-      getRole();
-    }
+  const findRole = (value: FilterRoleType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.id_status = value.id_status ?? filter.id_status;
   };
+
   const findPermission = (value: {
     name: string;
     category?: {
@@ -379,6 +490,7 @@ export function useRole() {
       getPermissions();
     }
   };
+
   return {
     headers,
     errors,
@@ -409,6 +521,7 @@ export function useRole() {
     codeAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     globalStatus,
     role,
@@ -426,5 +539,12 @@ export function useRole() {
     getRolById,
     getCategoryPermissions,
     categories,
+    isPending,
+    isFetching,
+    addRoleMutation,
+    editRoleMutation,
+    toggleRoleMutation,
   };
 }
+
+export default useRole;

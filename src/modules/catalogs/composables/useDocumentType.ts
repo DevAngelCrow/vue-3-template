@@ -1,16 +1,35 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import catalogServices from '../Services/catalog.services';
 import { DocumentTypeResponse } from '../interfaces/document-type/document-type.response.interface';
 import { DocumentTypeForm } from '../interfaces/document-type/document-type.form.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos' };
+
+export type FilterDocumentType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+};
+
+export const documentTypesKeys = createQueryKeys<
+  FilterDocumentType & { page?: number; per_page?: number }
+>('document-types');
+
 export function useDocumentType() {
+  const alert = useAlertStore();
+  const queryClient = useQueryClient();
+
   const {
     errors,
     defineField,
@@ -79,14 +98,11 @@ export function useDocumentType() {
     },
   ]);
 
-  const documentTypes = ref<DocumentTypeResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -94,98 +110,137 @@ export function useDocumentType() {
   const [mask, maskAttrs] = defineField('mask');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterDocumentType>({
     filter_name: undefined,
     status: undefined,
   });
+
+  const appliedFilter = reactive<FilterDocumentType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
-  const getDocumentTypes = async () => {
-    try {
-      startLoading();
-      const params = {
+  // Consulta paginada y reactiva de tipos de documento
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      documentTypesKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
-        status: filter.status === 'Todos' ? undefined : filter.status,
-      };
-      const response = await catalogServices.getDocumentTypes(params);
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getDocumentTypes({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      if (response.statusCode === 200) {
-        documentTypes.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+    },
+    { immediate: true },
+  );
 
-  const addDocumentType = async (form: DocumentTypeForm) => {
-    try {
-      startLoading();
+  const documentTypes = computed<DocumentTypeResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar Tipo de Documento
+  const addMutation = useMutation({
+    mutationFn: async (form: DocumentTypeForm) => {
       const response = await catalogServices.postDocumentType({
         ...form,
         active: true,
       });
-      if (response.status === 201) {
-        getDocumentTypes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: documentTypesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Tipo de documento registrado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar tipo de documento:', err);
+    },
+  });
+
+  // Mutación: Editar Tipo de Documento
+  const editMutation = useMutation({
+    mutationFn: async (form: DocumentTypeForm) => {
+      const { id: docId, ...body } = form;
+      const response = await catalogServices.putDocumentType(docId!, body);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: documentTypesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Tipo de documento actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al editar tipo de documento:', err);
+    },
+  });
+
+  // Mutación: Alternar Estado
+  const toggleMutation = useMutation({
+    mutationFn: async (docId: string) => {
+      const response = await catalogServices.toggleDocumentType(docId);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: documentTypesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Estado actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado de tipo de documento:', err);
+    },
+  });
+
+  const addDocumentType = async (form: DocumentTypeForm) => {
+    return await addMutation.mutateAsync(form);
   };
 
   const editDocumentType = async (form: DocumentTypeForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      const response = await catalogServices.putDocumentType(id!, body);
-      if (response.status === 200) {
-        getDocumentTypes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    return await editMutation.mutateAsync(form);
   };
 
-  const toggleDocumentType = async (id: string) => {
-    try {
-      startLoading();
-      const response = await catalogServices.toggleDocumentType(id);
-      if (response.status === 200) {
-        getDocumentTypes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const toggleDocumentType = async (docId: string) => {
+    return await toggleMutation.mutateAsync(docId);
+  };
+
+  const getDocumentTypes = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
   };
 
   const validateAlphaInput = (
@@ -202,15 +257,11 @@ export function useDocumentType() {
   };
 
   const cleanSearch = () => {
-    if (
-      (!filter.filter_name || filter.filter_name === '') &&
-      filter.status === undefined
-    ) {
-      return;
-    }
     filter.filter_name = undefined;
     filter.status = undefined;
-    getDocumentTypes();
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    pagination.page = 1;
   };
 
   const setDocumentTypeItem = (value: DocumentTypeResponse) => {
@@ -221,10 +272,11 @@ export function useDocumentType() {
     setFieldValue('active', value?.active);
   };
 
-  const findDocumentType = (value: filterType) => {
-    if (value) {
-      getDocumentTypes();
-    }
+  const findDocumentType = (value: FilterDocumentType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value?.status ?? filter.status;
   };
 
   return {
@@ -253,11 +305,19 @@ export function useDocumentType() {
     activeAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     documentTypes,
+    isPending,
+    isFetching,
     getDocumentTypes,
     addDocumentType,
     editDocumentType,
     toggleDocumentType,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useDocumentType;

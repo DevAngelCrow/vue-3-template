@@ -1,17 +1,35 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
 import { CategoryStatusForm } from '../interfaces/category-status/category-status.form.interface';
 import catalogServices from '../Services/catalog.services';
 
-type filterType = { filter_name?: string; status?: boolean | 'Todos' };
+export type FilterCategoryStatusType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+};
+
+export const categoryStatusKeys = createQueryKeys<
+  FilterCategoryStatusType & { page?: number; per_page?: number }
+>('category-status');
+
 export function useCategoryStatus() {
+  const alert = useAlertStore();
+  const queryClient = useQueryClient();
+
   const {
     errors,
     defineField,
@@ -83,14 +101,11 @@ export function useCategoryStatus() {
     },
   ]);
 
-  const categoryStatuses = ref<CategoryStatusResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -98,105 +113,137 @@ export function useCategoryStatus() {
   const [description, descriptionAttrs] = defineField('description');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterCategoryStatusType>({
     filter_name: undefined,
     status: undefined,
   });
+
+  const appliedFilter = reactive<FilterCategoryStatusType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
-  const getCategoryStatuses = async () => {
-    try {
-      startLoading();
-      const params: {
-        page?: number;
-        per_page?: number;
-        filter_name?: string | null;
-        status?: boolean | null;
-      } = {
+  // Consulta paginada y reactiva de categorías de estado
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      categoryStatusKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
-        status: filter.status === 'Todos' ? undefined : filter.status,
-      };
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+      }),
+    ),
+    queryFn: async () => {
       const response = await catalogServices.getAllCategoryStatuses({
-        ...params,
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      if (response.statusCode === 200) {
-        categoryStatuses.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+    },
+    { immediate: true },
+  );
 
-  const addCategoryStatus = async (form: CategoryStatusForm) => {
-    try {
-      startLoading();
+  const categoryStatuses = computed<CategoryStatusResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar Categoría de Estado
+  const addMutation = useMutation({
+    mutationFn: async (form: CategoryStatusForm) => {
       const response = await catalogServices.postCategoryStatus({
         ...form,
         active: true,
       });
-      if (response.status === 201) {
-        getCategoryStatuses();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: categoryStatusKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Categoría registrada'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar categoría de estado:', err);
+    },
+  });
+
+  // Mutación: Editar Categoría de Estado
+  const editMutation = useMutation({
+    mutationFn: async (form: CategoryStatusForm) => {
+      const { id: catId, ...body } = form;
+      const response = await catalogServices.putCategoryStatus(catId!, body);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: categoryStatusKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Categoría actualizada'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al editar categoría de estado:', err);
+    },
+  });
+
+  // Mutación: Alternar Estado
+  const patchMutation = useMutation({
+    mutationFn: async (catId: string) => {
+      const response = await catalogServices.patchCategoryStatus(catId);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: categoryStatusKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Estado actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado de categoría:', err);
+    },
+  });
+
+  const addCategoryStatus = async (form: CategoryStatusForm) => {
+    return await addMutation.mutateAsync(form);
   };
 
   const editCategoryStatus = async (form: CategoryStatusForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      const response = await catalogServices.putCategoryStatus(id!, body);
-      if (response.status === 200) {
-        getCategoryStatuses();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    return await editMutation.mutateAsync(form);
   };
 
-  const patchCategoryStatus = async (id: string) => {
-    try {
-      startLoading();
-      const response = await catalogServices.patchCategoryStatus(id);
-      if (response.status === 200) {
-        getCategoryStatuses();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const patchCategoryStatus = async (catId: string) => {
+    return await patchMutation.mutateAsync(catId);
+  };
+
+  const getCategoryStatuses = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
   };
 
   const validateAlphaInput = (
@@ -213,15 +260,11 @@ export function useCategoryStatus() {
   };
 
   const cleanSearch = () => {
-    if (
-      (!filter.filter_name || filter.filter_name === '') &&
-      filter.status === undefined
-    ) {
-      return;
-    }
     filter.filter_name = undefined;
     filter.status = undefined;
-    getCategoryStatuses();
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    pagination.page = 1;
   };
 
   const setCategoryStatusItem = (value: CategoryStatusResponse) => {
@@ -232,10 +275,11 @@ export function useCategoryStatus() {
     setFieldValue('active', value?.active);
   };
 
-  const findCategoryStatus = (value: filterType) => {
-    if (value.filter_name || value.status !== undefined) {
-      getCategoryStatuses();
-    }
+  const findCategoryStatus = (value: FilterCategoryStatusType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value.status ?? filter.status;
   };
 
   return {
@@ -265,10 +309,18 @@ export function useCategoryStatus() {
     activeAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     categoryStatuses,
+    isPending,
+    isFetching,
     addCategoryStatus,
     editCategoryStatus,
     patchCategoryStatus,
+    addMutation,
+    editMutation,
+    patchMutation,
   };
 }
+
+export default useCategoryStatus;

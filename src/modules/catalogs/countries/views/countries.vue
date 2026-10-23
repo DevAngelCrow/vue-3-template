@@ -59,6 +59,7 @@
         :page="pagination.page"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
+        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -191,7 +192,7 @@
 
 <script setup lang="ts">
 /** Zona de Imports */
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Button } from 'primevue';
 
 import { TableHeaders } from '@/core/interfaces';
@@ -200,7 +201,6 @@ import AppModal from '@/core/components/AppModal.vue';
 import { useLoaderStore } from '@/core/store';
 
 import { useCountries } from '../../composables/useCountries';
-import { CountryResponse } from '../../interfaces/country.response.interface';
 import { CreateCountry } from '../../interfaces/country.create.interface';
 import { UpdateCountry } from '../../interfaces/country.update.interface';
 const showModal = ref<boolean>(false);
@@ -212,7 +212,6 @@ const idCountry = ref<string>();
 
 /** Zona de Variables */
 const { startLoading, finishLoading } = useLoaderStore();
-const items = ref<CountryResponse[] | unknown>([]);
 const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   // Resetear todos los estados
   isMode.value = false;
@@ -253,8 +252,12 @@ const openModalEstado = (type: 'changeStatus', country?: any) => {
 
 /** Zona de Composables */
 const {
-  getCountries,
+  items,
+  isPending,
+  isFetching,
   createCountry,
+  updateCountry,
+  changeStatusCountry,
   handleSubmit,
   name,
   nameAttrs,
@@ -268,8 +271,6 @@ const {
   phoneCodeAttrs,
   errors,
   resetForm,
-  updateCountry,
-  changeStatusCountry,
   filter,
   findCountries,
   validateAlphaInput,
@@ -282,14 +283,14 @@ const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
   { name: 'Activo', value: true },
   { name: 'Inactivo', value: false },
 ]);
-const wrapperFindCountries = async (value: {
+const wrapperFindCountries = (value: {
   filter_name?: string;
   status?: boolean | 'Todos';
 }) => {
-  items.value = await findCountries(value);
+  findCountries(value);
 };
-const wrapperCleanSearch = async () => {
-  items.value = await cleanSearch();
+const wrapperCleanSearch = () => {
+  cleanSearch();
 };
 const closeModalCreate = (value: boolean) => {
   showModal.value = value;
@@ -331,8 +332,6 @@ const confirmModal = handleSubmit(async values => {
       };
       await createCountry(form);
     }
-    // Refrescar la lista de países después de crear uno nuevo
-    items.value = await getCountries();
     closeModalCreate(false);
   } catch (error: unknown) {
     console.error(error);
@@ -345,7 +344,6 @@ const confirmModalEstado = async (id: string) => {
     startLoading();
     await changeStatusCountry(id);
     CloseModalEstado(false);
-    items.value = await getCountries();
   } catch (error) {
     console.error(error);
   } finally {
@@ -417,21 +415,15 @@ const headers = ref<TableHeaders[]>([
 //     vinculador_seis: 'Editar | Eliminar',
 //   },
 // ]);
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) return;
   pagination.page = page + 1;
-  startLoading();
-  items.value = await getCountries();
-  finishLoading();
 };
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
-  startLoading();
-  items.value = await getCountries();
-  finishLoading();
 };
 const iconFilter = computed(() => {
   const filterValues = Object.values(filter).some(v => v);
@@ -439,17 +431,6 @@ const iconFilter = computed(() => {
     return 'pi pi-filter';
   }
   return 'pi pi-filter-slash';
-});
-/** Zona de Métodos */
-onMounted(async () => {
-  try {
-    startLoading();
-    items.value = await getCountries();
-  } catch (error) {
-    console.log(error);
-  } finally {
-    finishLoading();
-  }
 });
 </script>
 <style scoped></style>

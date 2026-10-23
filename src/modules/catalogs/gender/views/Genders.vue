@@ -41,6 +41,7 @@
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
+        :loading="isPending || isFetching"
         @page-update="handlePagination"
       >
         <template #body-acciones="{ data }">
@@ -60,7 +61,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue';
+import { reactive } from 'vue';
 import { Button } from 'primevue';
 
 import { useGender } from '../../composables/useGender';
@@ -72,10 +73,11 @@ const {
   cleanSearch,
   findGender,
   validateAlphaInput,
-  getGenders,
   headers,
   pagination,
   genders,
+  isPending,
+  isFetching,
 } = useGender();
 
 const modalState = reactive<{
@@ -100,15 +102,10 @@ const closeModal = () => {
   modalState.selectedItem = null;
 };
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getGenders();
 };
-
-onMounted(async () => {
-  await getGenders();
-});
 </script>

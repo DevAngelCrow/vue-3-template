@@ -42,7 +42,8 @@
         :total_items="pagination.total_items"
         :page="pagination.page"
         :show-per-page-options="true"
-        :per-page-options="[10, 2, 50, 100]"
+        :per-page-options="[10, 20, 50, 100]"
+        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -87,7 +88,7 @@
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import { computed, onMounted, reactive, provide, ref } from 'vue';
+import { computed, provide, reactive } from 'vue';
 
 import { useUserRole } from '../composables/useUserRole';
 import { UsersResponse } from '../interfaces/user-role/users.response.interface';
@@ -97,7 +98,6 @@ const userRoleInstance = useUserRole();
 provide('useUserRole', userRoleInstance);
 
 const {
-  getUsers,
   getUserRoleById,
   getRoles,
   users,
@@ -106,6 +106,10 @@ const {
   filter_name,
   validateAlphaInput,
   rolesPagination,
+  isPending,
+  isFetching,
+  findUser,
+  cleanSearch,
 } = userRoleInstance;
 
 const modalState = reactive<{
@@ -126,16 +130,7 @@ const modalState = reactive<{
   userEmail: '',
 });
 
-const localFilter = ref<string | null>(null);
 
-const findUser = (value: string | null) => {
-  localFilter.value = value;
-};
-
-const cleanSearch = () => {
-  filter_name.value = null;
-  localFilter.value = null;
-};
 
 const openModal = async (action: 'view' | 'edit', data: UsersResponse) => {
   modalState.selectedItem = data.id;
@@ -170,27 +165,18 @@ const closeModal = () => {
   modalState.userEmail = '';
 };
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) return;
   pagination.page = page + 1;
-  await getUsers();
 };
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
-  await getUsers();
 };
 const iconFilter = computed(() => {
   return filter_name.value ? 'pi pi-filter-slash' : 'pi pi-filter';
-});
-onMounted(async () => {
-  try {
-    await Promise.all([getUsers()]);
-  } catch (error) {
-    console.error(error);
-  }
 });
 </script>
 <style scoped></style>

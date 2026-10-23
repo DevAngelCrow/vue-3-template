@@ -65,9 +65,10 @@
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
-        @page-update="handlePagination"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
+        :loading="isPending || isFetching"
+        @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
         <template #body-acciones="{ data }">
@@ -113,7 +114,6 @@ import { Button } from 'primevue';
 import {
   computed,
   nextTick,
-  onMounted,
   reactive,
   watch,
   provide,
@@ -133,7 +133,6 @@ provide('useAdmin', adminInstance);
 const router = useRouter();
 
 const {
-  getRoutes,
   child_route,
   resetField,
   items,
@@ -146,7 +145,8 @@ const {
   pagination,
   headers,
   parentRoutes,
-  loadParentRoutes,
+  isPending,
+  isFetching,
 } = adminInstance;
 
 const goToRouteMaintenance = (id?: string) => {
@@ -214,19 +214,17 @@ watch(
   },
 );
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getRoutes();
 };
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
-  getRoutes();
 };
 const iconFilter = computed(() => {
   const filterValues = Object.values(filter).some(Boolean);
@@ -234,14 +232,6 @@ const iconFilter = computed(() => {
     return 'pi pi-filter';
   }
   return 'pi pi-filter-slash';
-});
-onMounted(async () => {
-  try {
-    await getRoutes();
-    await loadParentRoutes();
-  } catch (error) {
-    console.error(error);
-  }
 });
 </script>
 <style scoped></style>

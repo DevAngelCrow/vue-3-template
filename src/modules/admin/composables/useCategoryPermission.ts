@@ -1,16 +1,35 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import adminServices from '../services/admin.services';
 import { CategoryPermissionsResponse } from '../interfaces/category-permissions/category-permissions-response.interface';
 import { CategoryPermissionForm } from '../interfaces/category-permissions/category-permission-form.interface';
-type filterType = { filter_name?: string; status?: boolean | 'Todos' };
+
+export type FilterCategoryPermissionType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+};
+
+export const categoryPermissionKeys = createQueryKeys<
+  FilterCategoryPermissionType & { page?: number; per_page?: number }
+>('admin-category-permissions');
+
 export function useCategoryPermission() {
+  const queryClient = useQueryClient();
+  const alert = useAlertStore();
+
   const {
     errors,
     defineField,
@@ -68,116 +87,175 @@ export function useCategoryPermission() {
     },
   ]);
 
-  const categories = ref<CategoryPermissionsResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterCategoryPermissionType>({
     filter_name: undefined,
     status: undefined,
   });
+
+  const appliedFilter = reactive<FilterCategoryPermissionType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9- ]/g;
 
-  const getCategoryPermissions = async () => {
-    try {
-      startLoading();
-      const params: {
-        page?: number;
-        per_page?: number;
-        name?: string;
-        active?: boolean;
-      } = {
+  // Query paginada de categorías de permisos
+  const {
+    data: categoriesQueryResult,
+    isPending,
+    isFetching,
+    refetch: refetchCategories,
+  } = useQuery({
+    queryKey: computed(() =>
+      categoryPermissionKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        name: filter.filter_name,
-        active: filter.status === 'Todos' ? undefined : filter.status,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+      }),
+    ),
+    queryFn: async () => {
+      const params = {
+        page: pagination.page,
+        per_page: pagination.per_page,
+        name: appliedFilter.filter_name || undefined,
+        active:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       };
       const response = await adminServices.getCategoryPermissions(params);
       if (response.statusCode === 200) {
-        categories.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+        return response.data;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+      return null;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  const addCategoryPermission = async (form: CategoryPermissionForm) => {
-    try {
-      startLoading();
-      const response = await adminServices.postCategoryPermission({
+  watch(
+    () => categoriesQueryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
+      }
+    },
+    { immediate: true },
+  );
+
+  const categories = computed<CategoryPermissionsResponse[]>(
+    () => categoriesQueryResult.value?.data ?? [],
+  );
+
+  // Mutaciones TanStack Query
+  const addMutation = useMutation({
+    mutationFn: (form: CategoryPermissionForm) =>
+      adminServices.postCategoryPermission({
         ...form,
         active: true,
-      });
+      }),
+    onSuccess: response => {
       if (response.status === 201) {
-        getCategoryPermissions();
+        queryClient.invalidateQueries({ queryKey: categoryPermissionKeys.all });
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
           show: true,
         });
-        return response.data;
       }
+    },
+    onError: error => {
+      console.error('Error al agregar categoría de permiso:', error);
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Omit<CategoryPermissionForm, 'id'>;
+    }) => adminServices.putCategoryPermission(id, body),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: categoryPermissionKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al editar categoría de permiso:', error);
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (id: string) => adminServices.toggleCategoryPermission(id),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: categoryPermissionKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al alternar estado de categoría de permiso:', error);
+    },
+  });
+
+  const addCategoryPermission = async (form: CategoryPermissionForm) => {
+    try {
+      const response = await addMutation.mutateAsync(form);
+      return response.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
   };
 
   const editCategoryPermission = async (form: CategoryPermissionForm) => {
     try {
-      startLoading();
       const { id, ...body } = form;
-      const response = await adminServices.putCategoryPermission(id!, body);
-      if (response.status === 200) {
-        getCategoryPermissions();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
+      const response = await editMutation.mutateAsync({
+        id: id!,
+        body,
+      });
+      return response.data;
     } catch (error) {
-      console.log(error);
-    } finally {
-      finishLoading();
+      console.error(error);
+      return undefined;
     }
   };
 
   const toggleCategoryPermission = async (id: string) => {
     try {
-      startLoading();
-      const response = await adminServices.toggleCategoryPermission(id);
-      if (response.status === 200) {
-        getCategoryPermissions();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
+      const response = await toggleMutation.mutateAsync(id);
+      return response.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
+  };
+
+  const getCategoryPermissions = async () => {
+    const result = await refetchCategories();
+    return result.data?.data || [];
   };
 
   const validateAlphaInput = (
@@ -202,7 +280,9 @@ export function useCategoryPermission() {
     }
     filter.filter_name = undefined;
     filter.status = undefined;
-    getCategoryPermissions();
+    pagination.page = 1;
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
   };
 
   const setCategoryPermissionItem = (value: CategoryPermissionsResponse) => {
@@ -212,11 +292,13 @@ export function useCategoryPermission() {
     setFieldValue('active', value?.active);
   };
 
-  const findCategoryPermission = (value: filterType) => {
-    if (value) {
-      getCategoryPermissions();
-    }
+  const findCategoryPermission = (value: FilterCategoryPermissionType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value.status ?? filter.status;
   };
+
   return {
     headers,
     errors,
@@ -242,10 +324,18 @@ export function useCategoryPermission() {
     activeAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
+    categories,
+    isPending,
+    isFetching,
     addCategoryPermission,
     editCategoryPermission,
     toggleCategoryPermission,
-    categories,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useCategoryPermission;

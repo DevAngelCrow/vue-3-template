@@ -1,101 +1,205 @@
+import { computed, nextTick, reactive, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { nextTick, reactive } from 'vue';
 
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import { CreateCountry } from '../interfaces/country.create.interface';
-import catalogServices from '../Services/catalog.services';
 import { UpdateCountry } from '../interfaces/country.update.interface';
+import { CountryResponse } from '../interfaces/country.response.interface';
+import catalogServices from '../Services/catalog.services';
 
-type filterType = { filter_name?: string; status?: boolean | 'Todos' };
+export type FilterCountryType = {
+  filter_name?: string;
+  status?: boolean | 'Todos';
+};
+
+export const countriesKeys = createQueryKeys<FilterCountryType & { page?: number; per_page?: number }>('countries');
 
 export function useCountries() {
   const alert = useAlertStore();
-  const { startLoading, finishLoading } = useLoaderStore();
-  const getCountries = async () => {
-    try {
-      const params: {
-        page?: number;
-        per_page?: number;
-        filter_name?: string | null;
-        status?: boolean | null;
-      } = {
+  const queryClient = useQueryClient();
+
+  // Filtros del formulario de búsqueda
+  const filter = reactive<FilterCountryType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+
+  // Filtros aplicados a la consulta actual
+  const appliedFilter = reactive<FilterCountryType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+
+  // Estado de paginación
+  const pagination = reactive({
+    page: 1,
+    per_page: 10,
+    total_items: 0,
+  });
+
+  // Query reactiva para obtener países
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      countriesKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
-        status: filter.status === 'Todos' ? undefined : filter.status,
-      };
-      const response = await catalogServices.getAllCountries({ ...params });
-      if (response.statusCode === 200) {
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
-        return response.data.data;
-      }
-    } catch (error) {
-      console.error('Error al obtener el listado de países', error);
-    }
-  };
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getAllCountries({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  const createCountry = async (data: CreateCountry) => {
-    try {
-      const response = await catalogServices.createCountries(data);
-      if (response.status === 201) {
-        const newCountry = response.data;
-        return newCountry;
+  // Sincronizar el total de items con la respuesta del backend
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
       }
-    } catch (error) {
-      console.error(error);
+    },
+    { immediate: true },
+  );
+
+  // Lista de países computada a partir de los datos en caché
+  const items = computed<CountryResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar País
+  const createMutation = useMutation({
+    mutationFn: async (data: CreateCountry) => {
+      const response = await catalogServices.createCountries(data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: countriesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: 'País registrado',
+        content: 'El país se registró exitosamente',
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar país:', err);
       alert.showAlert({
         type: 'error',
-        title: 'Error en el registro de pais',
-        content: 'Ocurrió un error al momento del registro del usuario',
+        title: 'Error en el registro de país',
+        content: 'Ocurrió un error al momento del registro del país',
       });
-    }
-  };
+    },
+  });
 
-  const updateCountry = async (id: string, data: UpdateCountry) => {
-    try {
+  // Mutación: Actualizar País
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateCountry }) => {
       const response = await catalogServices.updateCountries(id, data);
-      if (response.status === 200) {
-        const updatedCountry = response.data;
-        return updatedCountry;
-      }
-    } catch (error) {
-      console.error(error);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: countriesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: 'País actualizado',
+        content: 'El país se actualizó exitosamente',
+      });
+    },
+    onError: err => {
+      console.error('Error al actualizar país:', err);
       alert.showAlert({
         type: 'error',
         title: 'Error en la actualización de país',
         content: 'Ocurrió un error al momento de actualizar el país',
       });
-    }
-  };
-  const changeStatusCountry = async (id: string) => {
-    try {
+    },
+  });
+
+  // Mutación: Cambiar Estado
+  const changeStatusMutation = useMutation({
+    mutationFn: async (id: string) => {
       const response = await catalogServices.changeStatusCountry(id);
-      if (response.status === 200) {
-        const updatedCountry = response.data;
-        return updatedCountry;
-      }
-    } catch (error) {
-      console.error(error);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: countriesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: 'Estado actualizado',
+        content: 'El estado del país se actualizó exitosamente',
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado del país:', err);
       alert.showAlert({
         type: 'error',
         title: 'Error en el cambio de estado del país',
         content: 'Ocurrió un error al momento de cambiar el estado del país',
       });
-    }
+    },
+  });
+
+  // Métodos de búsqueda
+  const findCountries = (value?: FilterCountryType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value?.status ?? filter.status;
   };
-  const findCountries = async (value: filterType) => {
-    if (value.filter_name || value.status !== null) {
-      startLoading();
-      const items = await getCountries();
-      finishLoading();
-      return items;
-    }
+
+  const cleanSearch = () => {
+    filter.filter_name = undefined;
+    filter.status = undefined;
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    pagination.page = 1;
   };
+
+  // Compatibilidad hacia atrás para llamadas directas
+  const createCountry = async (data: CreateCountry) => {
+    return await createMutation.mutateAsync(data);
+  };
+
+  const updateCountry = async (id: string, data: UpdateCountry) => {
+    return await updateMutation.mutateAsync({ id, data });
+  };
+
+  const changeStatusCountry = async (id: string) => {
+    return await changeStatusMutation.mutateAsync(id);
+  };
+
+  const getCountries = async () => {
+    const result = await refetch();
+    return result.data?.data ?? [];
+  };
+
+  // Formulario y validaciones con VeeValidate + Yup
   const { handleSubmit, validateField, defineField, errors, resetForm } =
     useForm({
       validateOnMount: false,
@@ -107,7 +211,6 @@ export function useCountries() {
         phone_code: '',
       },
       validationSchema: yup.object({
-        // Validación para los campos del formulario
         name: yup
           .string()
           .required('El nombre es obligatorio')
@@ -151,21 +254,13 @@ export function useCountries() {
           .matches(/^\d+$/, 'Solo se permiten números'),
       }),
     });
-  // Definir los campos del formulario
+
   const [name, nameAttrs] = defineField('name');
   const [abbreviation, abbreviationAttrs] = defineField('abbreviation');
   const [code, codeAttrs] = defineField('code');
   const [iso2, iso2Attrs] = defineField('iso2');
   const [phone_code, phoneCodeAttrs] = defineField('phone_code');
-  const filter = reactive<filterType>({
-    filter_name: undefined,
-    status: undefined,
-  });
-  const pagination = reactive({
-    page: 1,
-    per_page: 10,
-    total_items: 0,
-  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const validateAlphaInput = (
     value: string | null | undefined,
@@ -180,31 +275,34 @@ export function useCountries() {
     });
   };
 
-  const cleanSearch = async () => {
-    if (
-      (!filter.filter_name || filter.filter_name === '') &&
-      filter.status === null
-    ) {
-      return;
-    }
-    startLoading();
-    filter.filter_name = undefined;
-    filter.status = undefined;
-    const items = await getCountries();
-    finishLoading();
-    return items;
-  };
   return {
+    // TanStack Query State & Methods
+    items,
+    isPending,
+    isFetching,
+    error,
+    refetch,
+    createMutation,
+    updateMutation,
+    changeStatusMutation,
+
+    // CRUD Methods
     getCountries,
     createCountry,
     updateCountry,
     changeStatusCountry,
+
+    // Filtros y Paginación
+    filter,
+    appliedFilter,
+    pagination,
+    findCountries,
+    cleanSearch,
+    validateAlphaInput,
+
+    // Formulario VeeValidate
     handleSubmit,
     validateField,
-    findCountries,
-    validateAlphaInput,
-    cleanSearch,
-    // Agregar los campos del formulario
     name,
     nameAttrs,
     abbreviation,
@@ -217,7 +315,7 @@ export function useCountries() {
     phoneCodeAttrs,
     errors,
     resetForm,
-    filter,
-    pagination,
   };
 }
+
+export default useCountries;

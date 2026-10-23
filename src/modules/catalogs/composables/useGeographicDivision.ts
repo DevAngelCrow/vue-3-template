@@ -1,10 +1,17 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { GeographicDivisionResponse } from '../interfaces/geographic-division/geographic-division.response.interface';
@@ -12,8 +19,9 @@ import { GeographicDivisionForm } from '../interfaces/geographic-division/geogra
 import { GeographicDivisionTypeSimple } from '../interfaces/geographic-division/geographic-division.type.interface';
 import { GeographicDivisionParent } from '../interfaces/geographic-division/geographic-division.parent.interface';
 import catalogServices from '../Services/catalog.services';
+import { countriesKeys } from './useCountries';
 
-type filterType = {
+export type FilterGeographicDivisionType = {
   filter?: string;
   status?: boolean | 'Todos';
   id_country?: string;
@@ -21,7 +29,14 @@ type filterType = {
   id_parent?: string;
 };
 
+export const geographicDivisionsKeys = createQueryKeys<
+  FilterGeographicDivisionType & { page?: number; per_page?: number }
+>('geographic-divisions');
+
 export function useGeographicDivision() {
+  const alert = useAlertStore();
+  const queryClient = useQueryClient();
+
   const {
     errors,
     defineField,
@@ -62,8 +77,8 @@ export function useGeographicDivision() {
       alignItems: 'start',
     },
     {
-      field: 'description',
-      header: 'Descripción',
+      field: 'country.name',
+      header: 'País',
       sortable: false,
       alignHeaders: 'start',
       alignItems: 'start',
@@ -76,8 +91,8 @@ export function useGeographicDivision() {
       alignItems: 'start',
     },
     {
-      field: 'country.name',
-      header: 'País',
+      field: 'parent.name',
+      header: 'Pertenece a',
       sortable: false,
       alignHeaders: 'start',
       alignItems: 'start',
@@ -99,14 +114,11 @@ export function useGeographicDivision() {
     },
   ]);
 
-  const divisions = ref<GeographicDivisionResponse[]>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -116,36 +128,41 @@ export function useGeographicDivision() {
   const [parent, parentAttrs] = defineField('parent');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterGeographicDivisionType>({
     filter: undefined,
     status: undefined,
     id_country: undefined,
     id_type: undefined,
     id_parent: undefined,
   });
+
+  const appliedFilter = reactive<FilterGeographicDivisionType>({
+    filter: undefined,
+    status: undefined,
+    id_country: undefined,
+    id_type: undefined,
+    id_parent: undefined,
+  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
-  const countries = ref<CountryResponse[]>([]);
+  // Cache para lista de países
+  const { data: countriesData } = useQuery({
+    queryKey: computed(() => countriesKeys.list({ status: true })),
+    queryFn: async () => {
+      const response = await catalogServices.getAllCountries({ status: true });
+      return response.data.data ?? [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const countries = computed<CountryResponse[]>(() => countriesData.value || []);
+
   const divisionTypesList = ref<GeographicDivisionTypeSimple[]>([]);
   const parentDivisionsList = ref<GeographicDivisionParent[]>([]);
 
-  const getCountries = async () => {
-    try {
-      startLoading();
-      const response = await catalogServices.getAllCountries({ status: true });
-      if (response.statusCode === 200) {
-        countries.value = response.data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-
   const getDivisionTypesList = async (params?: { id_country?: string }) => {
     try {
-      startLoading();
       const response = await catalogServices.getAllGeographicDivisionTypes({
         active: true,
         per_page: 100,
@@ -156,14 +173,11 @@ export function useGeographicDivision() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
     }
   };
 
   const getParentDivisionsList = async (params?: { id_country?: string }) => {
     try {
-      startLoading();
       const response = await catalogServices.getAllGeographicDivisionsCursor({
         active: true,
         limit: 100,
@@ -174,100 +188,147 @@ export function useGeographicDivision() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
     }
   };
 
-  const getDivisions = async () => {
-    try {
-      startLoading();
-      const params = {
+  // Consulta paginada y reactiva de divisiones geográficas
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      geographicDivisionsKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter.filter || undefined,
-        active: filter.status === 'Todos' ? undefined : filter.status,
-        id_country: filter.id_country || undefined,
-        id_type: filter.id_type || undefined,
-        id_parent: filter.id_parent || undefined,
-      };
-      const response = await catalogServices.getAllGeographicDivisions(params);
-      if (response.statusCode === 200) {
-        divisions.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+        filter: appliedFilter.filter || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_country: appliedFilter.id_country || undefined,
+        id_type: appliedFilter.id_type || undefined,
+        id_parent: appliedFilter.id_parent || undefined,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getAllGeographicDivisions({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter: appliedFilter.filter || undefined,
+        active:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_country: appliedFilter.id_country || undefined,
+        id_type: appliedFilter.id_type || undefined,
+        id_parent: appliedFilter.id_parent || undefined,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  const addDivision = async (form: GeographicDivisionForm) => {
-    try {
-      startLoading();
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
+      }
+    },
+    { immediate: true },
+  );
+
+  const divisions = computed<GeographicDivisionResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar División
+  const addMutation = useMutation({
+    mutationFn: async (form: GeographicDivisionForm) => {
       const response = await catalogServices.postGeographicDivision({
         ...form,
         active: true,
       });
-      if (response.status === 201) {
-        getDivisions();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: geographicDivisionsKeys.all,
+      });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'División registrada'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar división geográfica:', err);
+    },
+  });
+
+  // Mutación: Editar División
+  const editMutation = useMutation({
+    mutationFn: async (form: GeographicDivisionForm) => {
+      const { id: divId, ...body } = form;
+      if (!divId) {
+        throw new Error('ID de división no proporcionado');
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+      const response = await catalogServices.putGeographicDivision(divId, body);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: geographicDivisionsKeys.all,
+      });
+      alert.showAlert({
+        type: 'success',
+        title: `${data?.message || 'División actualizada'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al editar división geográfica:', err);
+    },
+  });
+
+  // Mutación: Alternar Estado
+  const toggleMutation = useMutation({
+    mutationFn: async (divId: string) => {
+      const response = await catalogServices.patchGeographicDivision(divId);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: geographicDivisionsKeys.all,
+      });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Estado actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado de división:', err);
+    },
+  });
+
+  const addDivision = async (form: GeographicDivisionForm) => {
+    return await addMutation.mutateAsync(form);
   };
 
   const editDivision = async (form: GeographicDivisionForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      if (!id) return;
-      const response = await catalogServices.putGeographicDivision(id, body);
-      if (response.status === 200) {
-        getDivisions();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    return await editMutation.mutateAsync(form);
   };
 
-  const toggleDivision = async (id: string) => {
-    try {
-      startLoading();
-      const response = await catalogServices.patchGeographicDivision(id);
-      if (response.status === 200) {
-        getDivisions();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const toggleDivision = async (divId: string) => {
+    return await toggleMutation.mutateAsync(divId);
+  };
+
+  const getDivisions = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
+  };
+
+  const getCountries = async () => {
+    return countries.value;
   };
 
   const validateAlphaInput = (
@@ -284,21 +345,17 @@ export function useGeographicDivision() {
   };
 
   const cleanSearch = () => {
-    if (
-      (!filter.filter || filter.filter === '') &&
-      filter.status === undefined &&
-      filter.id_country === undefined &&
-      filter.id_type === undefined &&
-      filter.id_parent === undefined
-    ) {
-      return;
-    }
     filter.filter = undefined;
     filter.status = undefined;
     filter.id_country = undefined;
     filter.id_type = undefined;
     filter.id_parent = undefined;
-    getDivisions();
+    appliedFilter.filter = undefined;
+    appliedFilter.status = undefined;
+    appliedFilter.id_country = undefined;
+    appliedFilter.id_type = undefined;
+    appliedFilter.id_parent = undefined;
+    pagination.page = 1;
   };
 
   const setDivisionItem = (value: GeographicDivisionResponse) => {
@@ -311,16 +368,13 @@ export function useGeographicDivision() {
     setFieldValue('parent', value?.parent ?? null);
   };
 
-  const findDivision = (value: filterType) => {
-    if (
-      value.filter ||
-      value.status !== undefined ||
-      value.id_country !== undefined ||
-      value.id_type !== undefined ||
-      value.id_parent !== undefined
-    ) {
-      getDivisions();
-    }
+  const findDivision = (value: FilterGeographicDivisionType) => {
+    pagination.page = 1;
+    appliedFilter.filter = (value?.filter ?? filter.filter) || undefined;
+    appliedFilter.status = value?.status ?? filter.status;
+    appliedFilter.id_country = value?.id_country ?? filter.id_country;
+    appliedFilter.id_type = value?.id_type ?? filter.id_type;
+    appliedFilter.id_parent = value?.id_parent ?? filter.id_parent;
   };
 
   return {
@@ -357,13 +411,21 @@ export function useGeographicDivision() {
     parentAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     countries,
     divisionTypesList,
     parentDivisionsList,
     divisions,
+    isPending,
+    isFetching,
     addDivision,
     editDivision,
     toggleDivision,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useGeographicDivision;

@@ -8,8 +8,8 @@ import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autoc
 import { RouteForm } from '../interfaces/routes/route-form.interface';
 import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
 import { PermissionForm } from '../interfaces/permissions/permission.form.interface';
-import { PermissionsCategoryResponse } from '../interfaces/permissions/permission.category.response.interface';
 import { CategoryPermissionForm } from '../interfaces/category-permissions/category-permission-form.interface';
+import { CategoryPermissionsResponse } from '../interfaces/category-permissions/category-permissions-response.interface';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import { RoleForm } from '../interfaces/role/role.form.interface';
 import { RouteResponseById } from '../interfaces/routes/route-by-id.response.interface';
@@ -103,9 +103,9 @@ const togglePermission = async (id: string) => {
 
 const getCategoryPermissions = async (
   params?: paginateParams & ParamsFilter,
-) => {
+): Promise<ApiResponseGeneric<CategoryPermissionsResponse>> => {
   const response = await httpClient.get<
-    ApiResponseGeneric<PermissionsCategoryResponse>
+    ApiResponseGeneric<CategoryPermissionsResponse>
   >('security/category-permissions', params);
   return response.data;
 };
@@ -135,7 +135,9 @@ const toggleCategoryPermission = async (id: string) => {
   return response;
 };
 
-const getRole = async (params: paginateParams) => {
+const getRole = async (
+  params: paginateParams,
+): Promise<ApiResponseGeneric<RoleResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<RoleResponse>>(
     'security/role/',
     params,

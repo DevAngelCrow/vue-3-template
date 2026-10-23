@@ -68,6 +68,7 @@
         :page="pagination.page"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
+        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -115,7 +116,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, provide, reactive, ref } from 'vue';
+import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
 import { useGeographicDivisionType } from '../../composables/useGeographicDivisionType';
@@ -132,12 +133,12 @@ const {
   findDivisionType,
   validateAlphaInput,
   setDivisionTypeItem,
-  getCountries,
-  getDivisionTypes,
   headers,
   pagination,
   divisionTypes,
   countries,
+  isPending,
+  isFetching,
 } = divisionTypeInstance;
 
 const modalState = reactive<{
@@ -211,21 +212,14 @@ const iconFilter = computed(() => {
   return 'pi pi-filter-slash';
 });
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) return;
   pagination.page = page + 1;
-  getDivisionTypes();
 };
 
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
   pagination.per_page = perPage;
   pagination.page = 1;
-  getDivisionTypes();
 };
-
-onMounted(async () => {
-  await getCountries();
-  await getDivisionTypes();
-});
 </script>

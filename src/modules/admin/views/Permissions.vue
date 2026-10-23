@@ -66,9 +66,10 @@
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
-        @page-update="handlePagination"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
+        :loading="isPending || isFetching"
+        @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
         <template #body-acciones="{ data }">
@@ -115,7 +116,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, provide, reactive, ref } from 'vue';
+import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
 import { usePermission } from '../composables/usePermissions';
@@ -132,12 +133,12 @@ const {
   findPermission,
   validateAlphaInput,
   setPermissionItem,
-  getPermissions,
-  getCategoryPermissions,
   headers,
   pagination,
   permissions,
   categoryPermissions,
+  isPending,
+  isFetching,
 } = permissionInstance;
 
 const modalState = reactive<{
@@ -201,19 +202,17 @@ const closeModal = () => {
   resetForm();
 };
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getPermissions();
 };
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
-  getPermissions();
 };
 const iconFilter = computed(() => {
   const filterValues = Object.values(filter).some(Boolean);
@@ -221,10 +220,6 @@ const iconFilter = computed(() => {
     return 'pi pi-filter';
   }
   return 'pi pi-filter-slash';
-});
-onMounted(async () => {
-  await getPermissions();
-  await getCategoryPermissions();
 });
 </script>
 <style scoped></style>
