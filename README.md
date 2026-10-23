@@ -100,6 +100,7 @@ npm run dev
 ├── 📄 .gitignore
 ├── 📄 .prettierrc.json
 ├── 📄 .commitlint.config.ts
+├── 📄 AGENTS.md
 ├── 📄 index.html
 ├── 📄 package.json
 ├── 📄 README.md
@@ -159,4 +160,25 @@ npm run dev
 
 - 📄 tsconfig.app.json, tsconfig.json, tsconfig.node.json: Archivos de configuracion de TypeScript el cual define las opciones del compilador global
 
-- vite.config.ts: Archivo que define cómo se comporta Vite durante el desarrollo, build y preview. Es donde puedes extender funcionalidades, configurar plugins, establecer alias de rutas, entre otros.
+- 📄 vite.config.ts: Archivo que define cómo se comporta Vite durante el desarrollo, build y preview. Es donde puedes extender funcionalidades, configurar plugins, establecer alias de rutas, entre otros.
+
+- 📄 AGENTS.md: Documento normativo que define las directrices y estándares de arquitectura, componentes, TanStack Query, validaciones con Vee-Validate y políticas de desarrollo para agentes y programadores.
+
+## Scripts de Calidad y Validación de Tipos
+
+Para garantizar que el código se mantenga libre de errores de tipado e inconsistencias:
+
+```bash
+# Validación completa de tipos TypeScript de todo el proyecto (Project References)
+npm run check:types
+
+# Alias estándar para verificación de tipos
+npm run typecheck
+
+# Validación de tipos enfocada en el código fuente de la aplicación Vue
+npm run typecheck:app
+
+# Validación combinada de lint, tipos y formateo
+npm run check
+```
+
