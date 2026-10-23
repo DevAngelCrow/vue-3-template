@@ -52,8 +52,20 @@ const setupHttpClient = (api: AxiosInstance) => {
         console.error('Error de respuesta:', errorData);
 
         if (error.response.status === 401) {
-          localStorage.removeItem('token');
-          // Aquí se utilizará el router push
+          const auth = useAuthStore();
+          auth.closeSession();
+          import('../router').then(({ default: router }) => {
+            router.push({ name: 'login' });
+          });
+          return Promise.reject(errorData);
+        }
+
+        if (error.response.status === 403) {
+          // Si el backend responde 403 Forbidden, redirigir a 'not-found' sin mostrar alerta flotante
+          import('../router').then(({ default: router }) => {
+            router.push({ name: 'not-found' });
+          });
+          return Promise.reject(errorData);
         }
 
         alert.showAlert({

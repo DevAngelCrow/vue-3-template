@@ -9,7 +9,7 @@
       <main id="main-content-section" class="w-full grow pt-[70px]">
         <AppMainContent />
       </main>
-      <footer id="footer-section" class="w-full h-[6%] min-h-[50px] shrink-0">
+      <footer id="footer-section" class="w-full min-h-[50px] shrink-0 mt-auto">
         <AppFooter />
       </footer>
     </div>
