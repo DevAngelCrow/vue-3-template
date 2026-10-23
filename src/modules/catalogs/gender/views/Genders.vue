@@ -41,7 +41,6 @@
         :per_page="pagination.per_page"
         :total_items="pagination.total_items"
         :page="pagination.page"
-        :loading="isPending || isFetching"
         @page-update="handlePagination"
       >
         <template #body-acciones="{ data }">
@@ -76,8 +75,6 @@ const {
   headers,
   pagination,
   genders,
-  isPending,
-  isFetching,
 } = useGender();
 
 const modalState = reactive<{

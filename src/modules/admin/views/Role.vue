@@ -60,7 +60,6 @@
         :page="pagination.page"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
-        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -138,8 +137,6 @@ const {
   headers,
   getRolById,
   globalStatus,
-  isPending,
-  isFetching,
 } = roleInstance;
 
 const modalState = reactive<{

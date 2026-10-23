@@ -43,7 +43,6 @@
         :page="pagination.page"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
-        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -106,8 +105,6 @@ const {
   filter_name,
   validateAlphaInput,
   rolesPagination,
-  isPending,
-  isFetching,
   findUser,
   cleanSearch,
 } = userRoleInstance;

@@ -59,7 +59,6 @@
         :page="pagination.page"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
-        :loading="isPending || isFetching"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
       >
@@ -253,8 +252,6 @@ const openModalEstado = (type: 'changeStatus', country?: any) => {
 /** Zona de Composables */
 const {
   items,
-  isPending,
-  isFetching,
   createCountry,
   updateCountry,
   changeStatusCountry,
