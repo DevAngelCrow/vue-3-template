@@ -38,7 +38,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       {
-        path: '',
+        path: '/',
         redirect: '/dashboard',
       },
       ...routesCatalogs,
