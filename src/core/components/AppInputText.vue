@@ -32,7 +32,11 @@
           @click="clickSecondIcon"
         />
       </IconField>
-      <label :class="{ 'text-danger-600': invalid }" :for="inputId">
+      <label
+        v-if="label"
+        :class="{ 'text-danger-600': invalid }"
+        :for="inputId"
+      >
         {{ label }}
       </label>
     </FloatLabel>
@@ -48,7 +52,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, useId } from 'vue';
 import { InputText, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
@@ -115,15 +119,24 @@ const props = defineProps({
   },
   id: {
     type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
 });
 
 const emit = defineEmits(['update:modelValue', 'click-end-icon']);
 
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
+
 const invalid = ref<boolean>(false);
-const appendIconLocal = ref<string>(props.appendIcon);
+const appendIconLocal = ref<string>(
+  props.appendIcon || (props.type === 'password' ? 'pi pi-eye' : ''),
+);
 const typeInputLocal = ref<string>(props.type);
-const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: string | undefined) => {
@@ -152,15 +165,12 @@ const clickSecondIcon = () => {
   emit('click-end-icon');
 };
 
-onMounted(() => {
-  if (!props.id) {
-    inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
-  }
-
-  if (props.type === 'password') {
-    appendIconLocal.value = 'pi pi-eye';
-  }
-});
+watch(
+  () => props.appendIcon,
+  newVal => {
+    appendIconLocal.value = newVal;
+  },
+);
 
 watch(
   () => props.errorMessages,

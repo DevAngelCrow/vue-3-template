@@ -4,9 +4,9 @@
       v-bind="$attrs"
       :model-value="modelValue"
       @update:model-value="onUpdate"
-      :input-id="id"
+      :input-id="inputId"
     />
-    <label :for="id">{{ label }}</label>
+    <label v-if="label" :for="inputId">{{ label }}</label>
   </div>
   <Message
     class="left-0 top-full mt-0 text-xs z-10"
@@ -19,12 +19,16 @@
 </template>
 <script setup lang="ts">
 import { Checkbox, Message } from 'primevue';
-import { ref, computed } from 'vue';
+import { ref, computed, useId } from 'vue';
 
 const props = defineProps({
   id: {
     type: String,
-    default: '',
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
   modelValue: {
     type: Boolean,
@@ -39,6 +43,9 @@ const props = defineProps({
     default: '',
   },
 });
+
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
 
 const errors = ref<string>();
 const emit = defineEmits(['update:modelValue']);

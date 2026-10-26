@@ -36,9 +36,12 @@
           @click="clickSecondIcon"
         />
       </IconField>
-      <label :class="invalid ? 'text-danger-600' : ''" :for="inputId">{{
-        label
-      }}</label>
+      <label
+        v-if="label"
+        :class="invalid ? 'text-danger-600' : ''"
+        :for="inputId"
+        >{{ label }}</label
+      >
     </FloatLabel>
     <Message
       class="left-0 top-full mt-0 text-xs z-10"
@@ -51,7 +54,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, defineEmits, watch, onMounted } from 'vue';
+import { ref, computed, watch, useId } from 'vue';
 import {
   MultiSelect,
   InputIcon,
@@ -60,7 +63,7 @@ import {
   FloatLabel,
 } from 'primevue';
 
-defineOptions({ inheritAttrs: false, name: 'AppInputText' });
+defineOptions({ inheritAttrs: false, name: 'AppMultiSelect' });
 
 const props = defineProps({
   modelValue: {
@@ -130,6 +133,11 @@ const props = defineProps({
   },
   id: {
     type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
   options: {
     //Opciones que apareceran en el desplegable del select
@@ -145,11 +153,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'click-end-icon']);
 
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
+
 const errors = ref<string>();
 const invalid = ref<boolean>();
-const appendIconLocal = ref<string>(props.appendIcon);
+const appendIconLocal = ref<string>(
+  props.appendIcon || (props.type === 'password' ? 'pi pi-eye' : ''),
+);
 const typeInputLocal = ref<string>(props.type);
-const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: string | undefined) => {
@@ -193,11 +205,12 @@ const clickSecondIcon = () => {
   emit('click-end-icon');
 };
 
-onMounted(() => {
-  if (!props.id) {
-    inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
-  }
-});
+watch(
+  () => props.appendIcon,
+  newVal => {
+    appendIconLocal.value = newVal;
+  },
+);
 
 watch(
   () => props.errorMessages,

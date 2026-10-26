@@ -14,6 +14,6 @@ export interface NavigationItem {
   parent?: NavigationItem[] | null;
   children?: NavigationItem[];
   items?: NavigationItem[];
-  command?: (event?: unknown) => void;
+  command?: (_event?: unknown) => void;
   separator?: boolean;
 }
