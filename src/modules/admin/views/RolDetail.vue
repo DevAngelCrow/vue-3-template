@@ -155,7 +155,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive, onMounted, provide, watch } from 'vue';
+import { ref, reactive, onMounted, provide } from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
 import { useRoute, useRouter } from 'vue-router';
 
