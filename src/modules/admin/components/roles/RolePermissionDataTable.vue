@@ -160,8 +160,10 @@ const searchPermission = async (value: {
     let _filteredItems = [];
 
     // Verificar si hay filtros activos
-    const hasNameFilter = value.name && value.name.trim().length > 0;
-    const hasCategoryFilter = value.category?.id && value.category.id !== '';
+    const hasNameFilter = Boolean(value.name && value.name.trim().length > 0);
+    const hasCategoryFilter = Boolean(
+      value.category?.id && value.category.id !== '',
+    );
 
     for (let item of permissionsItemsLocal.value) {
       // Si no hay filtros activos, incluir todos los items
@@ -173,23 +175,26 @@ const searchPermission = async (value: {
       // Verificar coincidencia con nombre
       const matchesName =
         hasNameFilter &&
-        item?.name?.toLowerCase().indexOf(value?.name?.toLowerCase() ?? '') ===
-          0;
+        item?.name?.toLowerCase().includes(value.name.trim().toLowerCase());
 
       // Verificar coincidencia con categoría
       const matchesCategory =
         hasCategoryFilter &&
         item?.id_category_permissions === value.category?.id;
 
-      // Agregar si cumple AL MENOS UNO de los filtros activos
-      if (matchesName || matchesCategory) {
+      if (hasNameFilter && hasCategoryFilter) {
+        if (matchesName && matchesCategory) {
+          _filteredItems.push(item);
+        }
+      } else if (matchesName || matchesCategory) {
         _filteredItems.push(item);
       }
     }
-    permissionItemsFormated.value = _filteredItems;
     permissionsItemsFindLocal.value = _filteredItems;
-    permissionsPagination.total_items = permissionItemsFormated.value.length;
+    permissionsPagination.total_items = _filteredItems.length;
+    permissionsPagination.page = 1;
     localPaginationViewMode(0, true);
+    updateSelectAllState();
     return;
   }
   await findPermission(value);
@@ -213,6 +218,7 @@ const handlePagination = async (page: number) => {
 const handlePerPagePagination = async (perPage: number) => {
   if (modalState.value === 'view') {
     permissionsPagination.per_page = perPage;
+    permissionsPagination.page = 1;
     localPaginationViewMode(0);
     updateSelectAllState();
     return;
@@ -268,14 +274,31 @@ const setPermissionsIds = (
     active: boolean;
   }[],
 ) => {
-  if (value.length) {
-    permissionItemsFormated.value = value.map(item => {
-      return {
-        ...item,
-        state: false,
-      };
-    });
+  permissionItemsFormated.value = (value || []).map(item => {
+    return {
+      ...item,
+      state: false,
+    };
+  });
+};
+
+const syncPermissions = () => {
+  if (modalState.value === 'view') {
+    const formatted = (permissionsList.value || []).map(item => ({
+      ...item,
+      state: false,
+    }));
+    permissionsItemsLocal.value = formatted;
+    totalPermissions.value = formatted.length;
+    permissionsPagination.total_items = formatted.length;
+    const targetPage =
+      permissionsPagination.page > 0 ? permissionsPagination.page - 1 : 0;
+    localPaginationViewMode(targetPage);
+  } else {
+    setPermissionsIds(permissionsList.value || []);
+    totalPermissions.value = permissionsPagination.total_items;
   }
+  updateSelectAllState();
 };
 
 const closeModal = () => {
@@ -289,7 +312,7 @@ const closeModal = () => {
     category: { id: '', name: '', description: '' },
   };
   permissionItemsFormated.value = [];
-  if (modalState.value === 'view') {
+  if (modalState.value !== 'view') {
     getPermissions();
   }
   cleanSearch();
@@ -301,12 +324,14 @@ const cleanSearch = () => {
     category: undefined,
   };
   if (modalState.value === 'view') {
-    permissionItemsFormated.value = [...permissionsItemsLocal.value];
+    permissionsPagination.page = 1;
     totalPermissions.value = permissionsItemsLocal.value.length;
     permissionsPagination.total_items = totalPermissions.value;
     localPaginationViewMode(0);
+    updateSelectAllState();
     return;
   }
+  permissionsPagination.page = 1;
   getPermissions();
   totalPermissions.value = permissionsPagination.total_items;
 };
@@ -353,22 +378,23 @@ watch(
     emit('update:selected-permissions-ids', selectedPermissionsIds.value);
   },
 );
-watch(permissionsList, newVal => {
-  permissionItemsFormated.value = [];
-
-  setPermissionsIds(newVal);
-  updateSelectAllState();
-  if (modalState.value === 'view') {
-    permissionsItemsLocal.value = [...permissionItemsFormated.value];
-    localPaginationViewMode(0);
-    totalPermissions.value = permissionsItemsLocal.value.length;
-  }
-  totalPermissions.value = permissionsPagination.total_items;
-});
+watch(
+  () => permissionsList.value,
+  () => {
+    syncPermissions();
+  },
+  { deep: true },
+);
+watch(
+  () => modalState.value,
+  () => {
+    syncPermissions();
+  },
+);
 watch(
   () => permissions_ids.value,
   newIds => {
-    if (newIds && newIds.length > 0 && modalState.value === 'view') {
+    if (newIds && newIds.length > 0) {
       selectedPermissionsIds.value.clear();
       newIds.forEach((id: string) => {
         selectedPermissionsIds.value.add(id);
@@ -379,10 +405,7 @@ watch(
   { immediate: true, deep: true },
 );
 onMounted(async () => {
-  totalPermissions.value = permissionsPagination.total_items;
-  setPermissionsIds(permissionsList.value);
-  // El watcher de permissions_ids maneja la sincronización de checkboxes automáticamente
-  updateSelectAllState();
+  syncPermissions();
 });
 defineComponent({
   name: 'RoutePermissionDataTable',

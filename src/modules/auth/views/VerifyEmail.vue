@@ -62,7 +62,7 @@ const message = computed(() => {
 });
 
 onMounted(async () => {
-  console.log('Iniciando verificación de correo electrónico...');
+  //console.log('Iniciando verificación de correo electrónico...');
   await verifyEmail();
 });
 </script>

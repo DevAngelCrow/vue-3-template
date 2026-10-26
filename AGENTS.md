@@ -67,13 +67,10 @@ src/
 
 1. **Uso Obligatorio de Componentes Globales `App*`**:
    - Todo componente en `src/core/components/App*.vue` se encuentra automáticamente registrado de manera global por `registerGlobalComponents`.
-   - **Usar siempre**:
-     - `AppInputText`, `AppSelect`, `AppInputNumber`, `AppInputTextArea`, `AppDatePicker` para entradas de formulario.
-     - `AppDataTable` para listas y tablas paginadas.
-     - `AppModal` para ventanas emergentes y confirmaciones.
-     - `AppAlert` / `useAlertStore()` para notificaciones al usuario.
-     - `AppTitle` para encabezados de página consistentes.
-     - `AppChipStatus` para etiquetas de estado.
+   - **Catálogo de Componentes Transversales (`src/core/components/`)**:
+     - **Entradas & Formularios**: `AppInputText`, `AppSelect`, `AppMultiSelect`, `AppAutocomplete`, `AppInputNumber`, `AppInputMoney`, `AppInputMask`, `AppInputextArea`, `AppDatePicker`, `AppTimePicker`, `AppCheckBox`, `AppSelectButton`, `AppColorPicker`, `AppDragDropFile`.
+     - **Datos, Estado & Carga**: `AppDataTable`, `AppPaginator`, `AppSkeleton` (carga progresiva según `skeleton.interface.ts`), `AppLoader`, `AppAlert` / `useAlertStore()`, `AppChipStatus`, `AppCircularCounter`.
+     - **Estructura & Navegación**: `AppModal`, `AppCard`, `AppTitle`, `AppHeader`, `AppFooter`, `AppSideBar`, `AppNavBarMenu`, `AppMenuItemSideBar`, `AppUserMenu`, `AppVerticalStepper`, `AppFloatButton`, `AppDocumentVisor`, `AppMainContent`.
 2. **Componentes de Acción**:
    - Utilizar el componente `Button` de PrimeVue para acciones primarias, secundarias, botones con icono y estados (`variant="text"`, `:severity="data?.active ? 'danger' : 'success'"`).
    - Utilizar directiva `v-tooltip.bottom` para dar contexto accesible a botones de acciones.
@@ -94,6 +91,9 @@ src/
      }>({ ... });
      ```
    - Las vistas inyectan o proporcionan el composable del módulo (`provide('useMiModulo', miModuloInstance)`) y el modal lo consume con `inject` para compartir estado sin duplicar lógica.
+5. **Documentación Viva (Docs-as-Code)**:
+   - Todo componente en `src/core/components/` debe mantener tipados estrictos en TypeScript (`defineProps<{...}>` y `defineEmits<{...}>`) y comentarios explicativos JSDoc cuando sea necesario.
+   - Las interfaces de TypeScript y este documento `AGENTS.md` constituyen la fuente única de verdad para desarrolladores y agentes de IA, evitando herramientas externas desincronizadas.
 
 ---
 

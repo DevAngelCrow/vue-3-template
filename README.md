@@ -116,9 +116,9 @@ npm run dev
 
 - 📂 assets/: Contiene recursos de estilos, multimedia y archivos estaticos globales de la aplicacion.
 
-- 📂 components/: Contiene funciones reactivas creadas con Composition API de Vue 3, estos encapsulan logica que puede ser reutilizadas por los componentes de Vue.
+- 📂 components/: Contiene componentes Vue reutilizables globales con prefijo 'App' (tales como AppModal, AppDataTable, AppDatePicker, AppInputText, etc.).
 
-- 📂 composables/: Contiene e incluye componentes Vue reutilizables, tales como Modales, DataTable, DatePicker etc.
+- 📂 composables/: Contiene funciones reactivas creadas con Composition API de Vue 3 que encapsulan lógica reutilizable por la aplicación.
 
 - 📂 config/: Define configuraciones globales.
 

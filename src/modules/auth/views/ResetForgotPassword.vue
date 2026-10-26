@@ -154,7 +154,7 @@ const onSubmit = handleSubmit(async values => {
 });
 
 onMounted(() => {
-    console.log('route.query', route);
+    //console.log('route.query', route);
 })
 </script>
 
