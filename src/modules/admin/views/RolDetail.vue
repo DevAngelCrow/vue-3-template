@@ -270,10 +270,7 @@ const goBack = async () => {
   actionMode.mode = 'view';
   actionMode.title = 'Detalle del rol';
   actionMode.isReadonly = true;
-  await getPermissions();
-  actionMode.mode = 'view';
-  actionMode.title = 'Detalle del rol';
-  actionMode.isReadonly = true;
+  permissionsPagination.page = 1;
   const rol = await getRolById(route.params.id as string);
   if (!rol || !rol.data) {
     console.error('No se pudo obtener el rol');
@@ -299,7 +296,6 @@ watch(
 );
 onMounted(async () => {
   try {
-    await getPermissions();
     await getCategoryPermissions();
     await getStatus();
     if (route?.params?.id) {
@@ -328,14 +324,14 @@ onMounted(async () => {
     }
     actionMode.mode = 'add';
     actionMode.title = 'Crear nuevo rol';
-    if (actionMode.mode === 'add') {
-      status.value = globalStatus.value.find(item => {
-        return (
-          item?.name?.toLowerCase() === 'activo' &&
-          item?.code?.toLowerCase() === 'ac'
-        );
-      });
-    }
+    actionMode.isReadonly = false;
+    await getPermissions();
+    status.value = globalStatus.value.find(item => {
+      return (
+        item?.name?.toLowerCase() === 'activo' &&
+        item?.code?.toLowerCase() === 'ac'
+      );
+    });
   } catch (error) {
     console.error(error);
   } finally {

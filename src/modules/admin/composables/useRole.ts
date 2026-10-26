@@ -385,14 +385,18 @@ export function useRole() {
   const getRolById = async (id: string) => {
     try {
       permissionsList.value = [];
+      permissionsPagination.page = 1;
+      permissionsPagination.per_page = 10;
       permissionsPagination.total_items = 0;
       const response = await adminServices.getRol(id);
       if (response.statusCode === 200) {
         permissionsList.value = response.data.permissions
           ? response.data.permissions
           : [];
+        permissionsPagination.page = 1;
         permissionsPagination.per_page = 10;
-        permissionsPagination.total_items = response.data.permissions.length;
+        permissionsPagination.total_items =
+          response.data.permissions?.length ?? 0;
       }
       return response;
     } catch (error) {
