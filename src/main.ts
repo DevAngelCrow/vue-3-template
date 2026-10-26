@@ -10,6 +10,7 @@ import App from './App.vue';
 import { registerDirectives } from './core/directives';
 import { globalFunctions, GlobalFunctions } from './core/utils/globalFunctions';
 import { registerGlobalComponents } from './core/plugins/globalComponents';
+import { registerVueQuery } from './core/plugins/vueQuery';
 import { CustomTheme } from './customTheme';
 
 const app = createApp(App);
@@ -85,8 +86,8 @@ entries.forEach(([key, fn]) => {
   (app.config.globalProperties as Record<string, unknown>)[`$${key}`] = fn;
 });
 
-//Registro de componentes globales
-
+// Registro de plugins y componentes globales
 registerGlobalComponents(app);
+registerVueQuery(app);
 
 app.mount('#app');

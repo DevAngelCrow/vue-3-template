@@ -5,10 +5,12 @@
     </Transition>
     <AppAlert />
     <router-view />
+    <VueQueryDevtools v-if="isDev" />
   </div>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 
 import AppAlert from './core/components/AppAlert.vue';
 import AppLoader from './core/components/AppLoader.vue';
@@ -17,6 +19,7 @@ import { useLoaderStore } from './core/store';
 const storeLoader = useLoaderStore();
 
 const showLoader = computed(() => storeLoader.isLoading);
+const isDev = import.meta.env.DEV;
 </script>
 <style scoped>
 .fade-enter-active,

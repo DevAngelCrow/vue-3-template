@@ -3,7 +3,7 @@
     <Stepper :value="1" :linear>
       <StepItem v-for="(step, index) in steps" :key="index" :value="step">
         <Step>
-          <span class="text-white hover:text-gray-300">{{
+          <span class="text-white hover:text-surface-300">{{
             components[index].header
           }}</span></Step
         >

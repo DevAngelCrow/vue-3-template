@@ -1,22 +1,34 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import catalogServices from '../Services/catalog.services';
 import { GlobalStatusResponse } from '../interfaces/global-status/global-status.response.interface';
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatus } from '../interfaces/global-status/global-status.category-status.interface';
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
-type filterType = {
+import { categoryStatusKeys } from './useCategoryStatus';
+
+export type FilterGlobalStatusType = {
   filter_name?: string;
   status?: boolean | 'Todos';
   id_category?: string;
 };
+
+export const globalStatusKeys = createQueryKeys<
+  FilterGlobalStatusType & { page?: number; per_page?: number }
+>('global-status');
+
 export function useGlobalStatus() {
+  const queryClient = useQueryClient();
+  const alert = useAlertStore();
+
   const {
     errors,
     defineField,
@@ -119,138 +131,210 @@ export function useGlobalStatus() {
     },
   ]);
 
-  const globalStatus = ref<GlobalStatusResponse[]>([]);
-  const categoryStatuses = ref<CategoryStatusResponse[]>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [code, codeAttrs] = defineField('code');
   const [name, nameAttrs] = defineField('name');
   const [description, descriptionAttrs] = defineField('description');
-  //const [active, activeAttrs] = defineField('active');
   const [state_color, stateColorAttrs] = defineField('state_color');
   const [text_color, textColorAttrs] = defineField('text_color');
   const [category_status, categoryStatusAttrs] = defineField('category_status');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterGlobalStatusType>({
     filter_name: undefined,
     status: undefined,
     id_category: undefined,
   });
+
+  const appliedFilter = reactive<FilterGlobalStatusType>({
+    filter_name: undefined,
+    status: undefined,
+    id_category: undefined,
+  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9_ ]/g;
 
-  const getGlobalStatus = async () => {
-    try {
-      startLoading();
+  // Query de Estados Globales
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      globalStatusKeys.list({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_category: appliedFilter.id_category || undefined,
+      }),
+    ),
+    queryFn: async () => {
       const params = {
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
-        status: filter.status === 'Todos' ? undefined : filter.status,
-        id_category: filter.id_category,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_category: appliedFilter.id_category || undefined,
       };
       const response = await catalogServices.getGlobalStatus(params);
-
       if (response.statusCode === 200) {
-        globalStatus.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+        return response.data;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+      return null;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  const addGlobalStatus = async (form: GlobalStatusForm) => {
-    try {
-      startLoading();
-      const response = await catalogServices.postGlobalStatus({
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
+      }
+    },
+    { immediate: true },
+  );
+
+  const globalStatus = computed<GlobalStatusResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Query de Categorías de Estado para selector / autocompletado
+  const { data: categoryStatusesData } = useQuery({
+    queryKey: computed(() => categoryStatusKeys.list({ status: true })),
+    queryFn: async () => {
+      const response = await catalogServices.getAllCategoryStatuses({
+        status: true,
+      });
+      if (response.statusCode === 200) {
+        return response.data.data ?? [];
+      }
+      return [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categoryStatuses = computed<CategoryStatusResponse[]>(
+    () => categoryStatusesData.value || [],
+  );
+
+  // Mutaciones TanStack Query
+  const addMutation = useMutation({
+    mutationFn: (form: GlobalStatusForm) =>
+      catalogServices.postGlobalStatus({
         ...form,
         active: true,
-      });
+      }),
+    onSuccess: response => {
       if (response.status === 201) {
-        getGlobalStatus();
+        queryClient.invalidateQueries({ queryKey: globalStatusKeys.all });
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
           show: true,
         });
-        return response.data;
       }
+    },
+    onError: error => {
+      console.error(error);
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Omit<GlobalStatusForm, 'id'>;
+    }) => catalogServices.putGlobalStatus(id, body),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: globalStatusKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error(error);
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (id: string) => catalogServices.toggleGlobalStatus(id),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: globalStatusKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error(error);
+    },
+  });
+
+  const addGlobalStatus = async (form: GlobalStatusForm) => {
+    try {
+      const result = await addMutation.mutateAsync(form);
+      return result.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
   };
 
   const editGlobalStatus = async (form: GlobalStatusForm) => {
     try {
-      startLoading();
       const { id, ...body } = form;
-      const response = await catalogServices.putGlobalStatus(id!, body);
-      if (response.status === 200) {
-        getGlobalStatus();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
+      const result = await editMutation.mutateAsync({ id: id!, body });
+      return result.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
   };
 
   const toggleGlobalStatus = async (id: string) => {
     try {
-      startLoading();
-      const response = await catalogServices.toggleGlobalStatus(id);
-      if (response.status === 200) {
-        getGlobalStatus();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
+      const result = await toggleMutation.mutateAsync(id);
+      return result.data;
     } catch (error) {
       console.error(error);
-    } finally {
-      finishLoading();
+      return undefined;
     }
   };
-  const getCategoryStatuses = async () => {
-    try {
-      startLoading();
-      const filter = {
-        status: true,
-      };
-      const response = await catalogServices.getAllCategoryStatuses(filter);
 
-      if (response.statusCode === 200) {
-        const { data } = response;
-        categoryStatuses.value = data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const getGlobalStatus = async () => {
+    const result = await refetch();
+    return result.data;
   };
+
+  const getCategoryStatuses = async () => {
+    const response = await catalogServices.getAllCategoryStatuses({
+      status: true,
+    });
+    if (response.statusCode === 200) {
+      return response.data.data;
+    }
+    return [];
+  };
+
   const validateAlphaInput = (
     value: string | undefined,
     regex: RegExp = findRegex,
@@ -275,7 +359,10 @@ export function useGlobalStatus() {
     filter.filter_name = undefined;
     filter.status = undefined;
     filter.id_category = undefined;
-    getGlobalStatus();
+    pagination.page = 1;
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    appliedFilter.id_category = undefined;
   };
 
   const setGlobalStatusItem = (value: GlobalStatusResponse) => {
@@ -283,17 +370,19 @@ export function useGlobalStatus() {
     setFieldValue('id', value?.id);
     setFieldValue('name', value?.name);
     setFieldValue('description', value?.description);
-    setFieldValue('active', value?.active);
     setFieldValue('state_color', value?.state_color);
     setFieldValue('text_color', value?.text_color);
     setFieldValue('category_status', value?.category_status);
   };
 
-  const findGlobalStatus = (value: filterType) => {
-    if (value) {
-      getGlobalStatus();
-    }
+  const findGlobalStatus = (value: FilterGlobalStatusType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value.status ?? filter.status;
+    appliedFilter.id_category = value.id_category ?? filter.id_category;
   };
+
   return {
     headers,
     errors,
@@ -324,13 +413,21 @@ export function useGlobalStatus() {
     categoryStatusAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     globalStatus,
+    categoryStatuses,
+    isPending,
+    isFetching,
     getGlobalStatus,
     addGlobalStatus,
     editGlobalStatus,
     toggleGlobalStatus,
     getCategoryStatuses,
-    categoryStatuses,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useGlobalStatus;

@@ -33,7 +33,11 @@
             />
             <InputIcon :class="appendIconDynamic" @click="clearable" />
           </IconField>
-          <label :class="{ 'text-red-600': invalid }" :for="inputId">
+          <label
+            v-if="label"
+            :class="{ 'text-danger-600': invalid }"
+            :for="inputId"
+          >
             {{ label }}
           </label>
         </FloatLabel>
@@ -59,7 +63,7 @@ import {
   IconField,
   FloatLabel,
 } from 'primevue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch, useId } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -75,6 +79,11 @@ const props = defineProps({
   },
   id: {
     type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
   errorMessages: {
     type: String,
@@ -204,7 +213,8 @@ const clearable = () => {
   emit('click-clear');
 };
 
-const inputId = ref<string>(props.id || '');
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
 const invalid = ref<boolean>(false);
 const isFocused = ref<boolean>(false);
 
@@ -232,9 +242,4 @@ watch(
     }
   },
 );
-onMounted(() => {
-  if (!props.id) {
-    inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
-  }
-});
 </script>

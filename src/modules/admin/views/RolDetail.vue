@@ -1,7 +1,10 @@
 <template>
   <div class="py-5 px-5 h-full max-h-full flex gap-3 flex-col">
     <AppTitle :title="actionMode.title" />
-    <section id="options" class="w-full flex justify-center md:justify-end gap-2 flex-wrap">
+    <section
+      id="options"
+      class="w-full flex justify-center md:justify-end gap-2 flex-wrap"
+    >
       <Button
         v-if="actionMode.mode === 'view'"
         class="transform animate-ease-in min-w-25 grow md:grow-0"
@@ -35,80 +38,84 @@
         outlined
       />
     </section>
-    <section
-      id="form"
-      class="flex justify-center items-center w-full rounded-lg border-2 border-primary p-5 flex-col gap-5"
-    >
-      <div class="w-full flex flex-wrap gap-5">
-        <h4 class="gap-3 flex justify-center items-center !font-bold">
-          <i class="pi pi-user !font-bold"></i>Informacion del rol
-        </h4>
-      </div>
-      <div class="w-full flex flex-wrap gap-5">
-        <AppInputText
-          class="flex-1 min-w-0"
-          id="name"
-          label="Nombre*"
-          v-model="name"
-          :error-messages="errors.name"
-          v-bind="nameAttrs"
+    <AppSkeleton :loading="!loadMounted" variant="card">
+      <section
+        id="form"
+        class="flex justify-center items-center w-full rounded-lg border-2 border-primary p-5 flex-col gap-5"
+      >
+        <div class="w-full flex flex-wrap gap-5">
+          <h4 class="gap-3 flex justify-center items-center !font-bold">
+            <i class="pi pi-user !font-bold"></i>Informacion del rol
+          </h4>
+        </div>
+        <div class="w-full flex flex-wrap gap-5">
+          <AppInputText
+            class="flex-1 min-w-0"
+            id="name"
+            label="Nombre*"
+            v-model="name"
+            :error-messages="errors.name"
+            v-bind="nameAttrs"
+            :readonly="actionMode.isReadonly"
+            maxlength="150"
+          />
+          <AppInputText
+            class="flex-1 min-w-0"
+            id="code"
+            label="Código*"
+            v-model="code"
+            :error-messages="errors.code"
+            v-bind="codeAttrs"
+            :readonly="actionMode.isReadonly"
+            maxlength="150"
+          />
+          <AppInputText
+            class="flex-1 min-w-0"
+            id="description"
+            label="Descripción*"
+            v-model="description"
+            :error-messages="errors.description"
+            v-bind="descriptionAttrs"
+            :readonly="actionMode.isReadonly"
+            maxlength="150"
+          />
+          <AppAutocomplete
+            class="flex-1 min-w-0"
+            id="status"
+            label="Estado*"
+            v-model="status"
+            v-bind="statusAttrs"
+            :error-messages="errors.status"
+            option-label="name"
+            :suggestions="statusFiltered"
+            dropdown
+            @complete="findAutocomplete"
+            :readonly="actionMode.isReadonly"
+            :disabled="actionMode.mode === 'add' || actionMode.mode === 'edit'"
+          />
+        </div>
+      </section>
+    </AppSkeleton>
+    <AppSkeleton :loading="!loadMounted" variant="table" :rows="4">
+      <section
+        id="permissions"
+        class="w-full flex justify-center items-center rounded-lg border-2 border-primary p-5 flex-col gap-5"
+      >
+        <div class="w-full flex flex-wrap gap-5">
+          <h4 class="gap-3 flex justify-center items-center !font-bold">
+            <i class="pi pi-key !font-bold"></i>Permisos
+          </h4>
+        </div>
+        <RolePermissionDataTable
+          :modal-state="actionMode.mode"
+          @update:selected-permissions-ids="
+            value => (selectedPermissionsIds = value)
+          "
+          ref="rolePermissionDataTable"
           :readonly="actionMode.isReadonly"
-          maxlength="150"
         />
-        <AppInputText
-          class="flex-1 min-w-0"
-          id="code"
-          label="Código*"
-          v-model="code"
-          :error-messages="errors.code"
-          v-bind="codeAttrs"
-          :readonly="actionMode.isReadonly"
-          maxlength="150"
-        />
-        <AppInputText
-          class="flex-1 min-w-0"
-          id="description"
-          label="Descripción*"
-          v-model="description"
-          :error-messages="errors.description"
-          v-bind="descriptionAttrs"
-          :readonly="actionMode.isReadonly"
-          maxlength="150"
-        />
-        <AppAutocomplete
-          class="flex-1 min-w-0"
-          id="status"
-          label="Estado*"
-          v-model="status"
-          v-bind="statusAttrs"
-          :error-messages="errors.status"
-          option-label="name"
-          :suggestions="statusFiltered"
-          dropdown
-          @complete="findAutocomplete"
-          :readonly="actionMode.isReadonly"
-          :disabled="actionMode.mode === 'add' || actionMode.mode === 'edit'"
-        />
-      </div>
-    </section>
-    <section
-      id="permissions"
-      class="w-full flex justify-center items-center rounded-lg border-2 border-primary p-5 flex-col gap-5"
-    >
-      <div class="w-full flex flex-wrap gap-5">
-        <h4 class="gap-3 flex justify-center items-center !font-bold">
-          <i class="pi pi-key !font-bold"></i>Permisos
-        </h4>
-      </div>
-      <RolePermissionDataTable
-        :modal-state="actionMode.mode"
-        @update:selected-permissions-ids="
-          value => (selectedPermissionsIds = value)
-        "
-        ref="rolePermissionDataTable"
-        :readonly="actionMode.isReadonly"
-      />
-    </section>
+      </section>
+    </AppSkeleton>
 
     <!-- Modal de confirmación para editar -->
     <AppModal
@@ -331,7 +338,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error(error);
-  }finally {
+  } finally {
     loadMounted.value = true;
   }
 });

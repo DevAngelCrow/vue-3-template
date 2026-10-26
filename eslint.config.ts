@@ -11,8 +11,9 @@ export default [
   {
     // Ignorar archivos y directorios globales que no deben ser lintados
     ignores: [
-      'node_modules',
-      'dist',
+      'node_modules/**',
+      'dist/**',
+      'documentation-astro/**',
       'commitlint.config.ts', // Generalmente no se linta
       'eslint.config.ts', // Generalmente no se linta a sí mismo
     ],
@@ -87,7 +88,7 @@ export default [
     settings: {
       'import/resolver': {
         typescript: {
-          projec: './tsconfig.json',
+          project: './tsconfig.json',
           alwaysTryTypes: true,
         },
       },

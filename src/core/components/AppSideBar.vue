@@ -1,69 +1,135 @@
 <template>
-  <Drawer class="bg-primary-100 border-2 border-neutral-800" v-model:visible="sideBarVisible.sideBar" dismissable
-    block-scroll :pt="{
+  <Drawer
+    v-model:visible="isVisible"
+    class="bg-white/95 backdrop-blur-xl border-r border-surface-200 shadow-2xl w-80 max-w-[85vw]"
+    dismissable
+    block-scroll
+    :pt="{
       header: {
-        class: 'flex justify-end items-end',
+        class: 'hidden',
       },
-    }" :pt-options="{
-      mergeProps: true,
-    }">
+      content: {
+        class: 'p-0 h-full flex flex-col',
+      },
+    }"
+  >
     <template #container="{ closeCallback }">
-      <div class="flex items-center justify-between px-1 pt-4 shrink-0">
-        <span class="inline-flex items-center gap-2">
-          <svg width="35" height="40" viewBox="0 0 35 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M25.87 18.05L23.16 17.45L25.27 20.46V29.78L32.49 23.76V13.53L29.18 14.73L25.87 18.04V18.05ZM25.27 35.49L29.18 31.58V27.67L25.27 30.98V35.49ZM20.16 17.14H20.03H20.17H20.16ZM30.1 5.19L34.89 4.81L33.08 12.33L24.1 15.67L30.08 5.2L30.1 5.19ZM5.72 14.74L2.41 13.54V23.77L9.63 29.79V20.47L11.74 17.46L9.03 18.06L5.72 14.75V14.74ZM9.63 30.98L5.72 27.67V31.58L9.63 35.49V30.98ZM4.8 5.2L10.78 15.67L1.81 12.33L0 4.81L4.79 5.19L4.8 5.2ZM24.37 21.05V34.59L22.56 37.29L20.46 39.4H14.44L12.34 37.29L10.53 34.59V21.05L12.42 18.23L17.45 26.8L22.48 18.23L24.37 21.05ZM22.85 0L22.57 0.69L17.45 13.08L12.33 0.69L12.05 0H22.85Z"
-              fill="var(--p-primary-color)" />
-            <path
-              d="M30.69 4.21L24.37 4.81L22.57 0.69L22.86 0H26.48L30.69 4.21ZM23.75 5.67L22.66 3.08L18.05 14.24V17.14H19.7H20.03H20.16H20.2L24.1 15.7L30.11 5.19L23.75 5.67ZM4.21002 4.21L10.53 4.81L12.33 0.69L12.05 0H8.43002L4.22002 4.21H4.21002ZM21.9 17.4L20.6 18.2H14.3L13 17.4L12.4 18.2L12.42 18.23L17.45 26.8L22.48 18.23L22.5 18.2L21.9 17.4ZM4.79002 5.19L10.8 15.7L14.7 17.14H14.74H15.2H16.85V14.24L12.24 3.09L11.15 5.68L4.79002 5.2V5.19Z"
-              fill="var(--p-text-color)" />
-          </svg>
-          <span class="font-semibold text-2xl text-primary">Your Logo</span>
-        </span>
-        <span>
-          <Button type="button" @click="closeCallback" icon="pi pi-times" rounded variant="outlined"></Button>
-        </span>
+      <div
+        class="flex flex-col h-full bg-gradient-to-b from-primary-50/30 via-white to-white"
+      >
+        <!-- Encabezado del Sidebar con estilo moderno y badge de marca -->
+        <div
+          class="flex items-center justify-between px-5 py-4 border-b border-surface-200/80 bg-gradient-to-r from-primary-950 via-primary-900 to-primary-950 text-white shrink-0 shadow-xs"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md shadow-primary-500/20 ring-1 ring-white/20"
+            >
+              <i class="pi pi-compass text-white text-base"></i>
+            </div>
+            <div class="flex flex-col">
+              <span
+                class="font-bold text-base tracking-tight text-white leading-tight"
+              >
+                Navegación
+              </span>
+              <span
+                class="text-[11px] text-primary-200/70 font-medium leading-none mt-0.5"
+              >
+                Menú del sistema
+              </span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            icon="pi pi-times"
+            rounded
+            variant="text"
+            class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full border border-white/10 p-0 flex items-center justify-center transition-all cursor-pointer"
+            aria-label="Cerrar menú"
+            @click="closeCallback"
+          />
+        </div>
+
+        <!-- Contenido / Lista de enlaces con scroll estilizado -->
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+          <AppMenuItemSideBar :mapped-menu="sidebarItems" />
+        </div>
+
+        <!-- Pie del Drawer con indicador de versión y estado -->
+        <div
+          class="p-3.5 border-t border-surface-200/80 bg-surface-50/80 flex items-center justify-between text-xs text-surface-500 shrink-0"
+        >
+          <span class="font-medium text-[11px]">Template Suite</span>
+          <span
+            class="flex items-center gap-1.5 text-[11px] font-semibold text-primary-700 bg-primary-100/70 px-2 py-0.5 rounded-full"
+          >
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"
+            ></span>
+            Sistema Activo
+          </span>
+        </div>
       </div>
-      <AppMenuItemSideBar :mappedMenu="mappedMenu" />
     </template>
   </Drawer>
 </template>
+
 <script setup lang="ts">
+import { computed, ref, onMounted, onBeforeUnmount, type PropType } from 'vue';
 import { Button, Drawer } from 'primevue';
-import { onMounted, ref, watch } from 'vue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
+import { useNavigationMenu } from '../composables/useNavigationMenu';
 import AppMenuItemSideBar from './AppMenuItemSideBar.vue';
-import { MenuBar } from '../interfaces/menu.bar.dinamic.interface';
+import type { NavigationItem } from '../interfaces/navigation.interface';
 
 defineOptions({ name: 'AppSideBar' });
 
-const sideBarVisible = useLayoutStore();
-const mappedMenu = ref<MenuBar[]>([]);
+const props = defineProps({
+  menu: {
+    type: Array as PropType<NavigationItem[]>,
+    default: null,
+  },
+});
 
-const props = defineProps<{
-  menu: MenuBar[];
-}>();
+const layoutStore = useLayoutStore();
+const { systemRoutes } = useNavigationMenu();
+const windowWidth = ref(
+  typeof window !== 'undefined' ? window.innerWidth : 1200,
+);
 
-const transformMenu = (menu: MenuBar[]) => {
-  return menu.filter(item => {
-    if (
-      (item.children && item.children.length > 0) ||
-      (!item.children.length && item.parent === null)
-    ) {
-      return item;
-    }
-  });
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
 };
 
 onMounted(() => {
-  mappedMenu.value = transformMenu(props.menu);
+  window.addEventListener('resize', handleResize);
 });
 
-watch(
-  () => props.menu,
-  new_value => {
-    mappedMenu.value = transformMenu(new_value);
-  },
-);
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+const isMobile = computed(() => windowWidth.value < 768);
+
+const isVisible = computed({
+  get: () => layoutStore.sideBar,
+  set: (val: boolean) => layoutStore.showSideBar(val),
+});
+
+const sidebarItems = computed<NavigationItem[]>(() => {
+  if (props.menu) {
+    return props.menu;
+  }
+  if (isMobile.value) {
+    return systemRoutes.value;
+  }
+  return layoutStore.overflowMenuItems;
+});
 </script>
+
+<style scoped>
+@reference "@/core/assets/style.css";
+</style>

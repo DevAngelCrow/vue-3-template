@@ -2,6 +2,7 @@
   <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
     <FloatLabel :variant="labelVariant">
       <DatePicker
+        :inputId="inputId"
         class="w-full"
         v-model="temporal"
         :selection-mode
@@ -26,7 +27,11 @@
         @blur="isFocused = false"
         :invalid="invalid"
       />
-      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+      <label
+        v-if="label"
+        :class="{ 'text-danger-600': invalid }"
+        :for="inputId"
+      >
         {{ label }}
       </label>
     </FloatLabel>
@@ -43,7 +48,7 @@
 </template>
 <script setup lang="ts">
 import { DatePicker, FloatLabel, Message } from 'primevue';
-import { computed, onMounted, ref, watch, type PropType } from 'vue';
+import { computed, ref, watch, useId, type PropType } from 'vue';
 
 import { CreateDateFromFormat, FormatDate, IsDateAfter } from '../utils/dates';
 
@@ -124,6 +129,11 @@ const props = defineProps({
   },
   id: {
     type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
   label: {
     type: String,
@@ -131,8 +141,10 @@ const props = defineProps({
   },
 });
 
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
+
 const invalid = ref<boolean>(false);
-const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const dateModel = defineModel<string | string[] | null>({
@@ -200,12 +212,6 @@ const temporal = computed<Date | Date[] | null>({
 
 const displayPlaceholder = computed(() => {
   return isFocused.value ? props.placeholder : undefined;
-});
-
-onMounted(() => {
-  if (!props.id) {
-    inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
-  }
 });
 
 watch(

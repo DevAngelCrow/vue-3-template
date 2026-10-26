@@ -1,9 +1,22 @@
 <template>
   <div :class="['min-w-37.5', 'relative', props.class || 'w-auto']">
+    <div class="p-hidden-accessible" data-p-hidden-accessible="true">
+      <input
+        :id="inputId"
+        type="text"
+        readonly
+        tabindex="-1"
+        :disabled="readonly"
+        role="combobox"
+        :aria-label="label || placeholder"
+        @focus="focusSelect"
+      />
+    </div>
     <FloatLabel :variant="labelVariant">
       <Select
+        ref="selectRef"
         :class="['w-full', { 'pointer-events-none': readonly }]"
-        :inputId="inputId"
+        :inputId="`${inputId}-select`"
         :model-value="modelValue"
         @update:model-value="onUpdateReadonly"
         :invalid="invalid"
@@ -16,7 +29,12 @@
         :options
         :optionLabel
       />
-      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+      <label
+        v-if="label"
+        :class="{ 'text-danger-600': invalid }"
+        :for="inputId"
+        @click="focusSelect"
+      >
         {{ label }}
       </label>
     </FloatLabel>
@@ -32,7 +50,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, useId } from 'vue';
 import { Select, Message, FloatLabel } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppSelect' });
@@ -83,6 +101,11 @@ const props = defineProps({
   },
   id: {
     type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
   options: {
     type: Array,
@@ -100,9 +123,24 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+const selectRef = ref<{ $el?: HTMLElement }>();
+
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
+
 const invalid = ref<boolean>(false);
-const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
+
+const focusSelect = () => {
+  if (!props.readonly && selectRef.value) {
+    const el = selectRef.value.$el as HTMLElement | undefined;
+    const focusable =
+      el?.querySelector<HTMLElement>('.p-select-label') ??
+      el?.querySelector<HTMLElement>('[tabindex="0"]') ??
+      el;
+    focusable?.focus?.();
+  }
+};
 
 const onUpdateReadonly = (value: string | number | object | undefined) => {
   if (!props.readonly) {
@@ -116,12 +154,6 @@ const displayPlaceholder = computed(() => {
   }
   if (!props.label.length) {
     return props.placeholder;
-  }
-});
-
-onMounted(() => {
-  if (!props.id) {
-    inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
   }
 });
 

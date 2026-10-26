@@ -2,6 +2,7 @@
   <div :class>
     <div class="w-auto">
       <DatePicker
+        :inputId="inputId"
         v-model="temporal"
         show-icon
         :icon-display
@@ -21,13 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 
 import { CreateDateFromFormat, FormatDate } from '../utils/dates';
 
 defineOptions({ name: 'AppTimePicker' });
 
-defineProps({
+const props = defineProps({
   class: {
     type: String,
     default: 'flex justify-center',
@@ -52,7 +53,18 @@ defineProps({
     type: String,
     default: '',
   },
+  id: {
+    type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
+  },
 });
+
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
 
 const timeValue = defineModel<string | null>({
   type: String,

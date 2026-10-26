@@ -4,7 +4,7 @@
       <IconField class="w-full group">
         <InputIcon
           v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-red-600': invalid }]"
+          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
         />
         <InputMask
           class="w-full"
@@ -25,12 +25,16 @@
           :class="[
             appendIcon,
             'absolute right-4 top-5.5',
-            { 'text-red-600': invalid },
+            { 'text-danger-600': invalid },
           ]"
           @click="emit('click-end-icon')"
         />
       </IconField>
-      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+      <label
+        v-if="label"
+        :class="{ 'text-danger-600': invalid }"
+        :for="inputId"
+      >
         {{ label }}
       </label>
     </FloatLabel>
@@ -46,7 +50,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, useId } from 'vue';
 import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
 defineOptions({ inheritAttrs: false, name: 'AppInputMask' });
@@ -105,6 +109,11 @@ const props = defineProps({
   },
   id: {
     type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
   },
   mask: {
     type: String,
@@ -114,8 +123,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'click-end-icon']);
 
+const autoId = useId();
+const inputId = computed(() => props.id || props.inputId || autoId);
+
 const invalid = ref<boolean>(false);
-const inputId = ref<string>(props.id || '');
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: string | undefined) => {
@@ -140,12 +151,6 @@ const primeMask = computed(() => {
   }
   if (props.modelValue?.length) {
     return props.mask;
-  }
-});
-
-onMounted(() => {
-  if (!props.id) {
-    inputId.value = `input-${Math.random().toString(36).substring(2, 9)}`;
   }
 });
 

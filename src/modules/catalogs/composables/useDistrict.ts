@@ -1,22 +1,39 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import catalogServices from '../Services/catalog.services';
 import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
 import { Municipality } from '../interfaces/districts/districts.municipality.interface';
 import { DistrictResponse } from '../interfaces/districts/district.response.interface';
 import { DistrictForm } from '../interfaces/districts/district.form.interface';
-type filterType = {
+import { municipalitiesKeys } from './useMunicipalities';
+
+export type FilterDistrictType = {
   filter_name?: string;
   status?: boolean | 'Todos';
   id_municipality?: string;
 };
+
+export const districtsKeys = createQueryKeys<
+  FilterDistrictType & { page?: number; per_page?: number }
+>('districts');
+
 export function useDistrict() {
+  const alert = useAlertStore();
+  const queryClient = useQueryClient();
+
   const {
     errors,
     defineField,
@@ -85,14 +102,11 @@ export function useDistrict() {
     },
   ]);
 
-  const districts = ref<DistrictResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -100,117 +114,157 @@ export function useDistrict() {
   const [municipality, municipalityAttrs] = defineField('municipality');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterDistrictType>({
     filter_name: undefined,
     status: undefined,
     id_municipality: undefined,
   });
-  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
-  const municipalities = ref<MunicipalityResponse[]>([]);
 
-  const getMunicipalities = async () => {
-    try {
-      startLoading();
-      const params = {
-        active: true,
-      };
-      const response = await catalogServices.getMunicipalities(params);
-      if (response.statusCode === 200) {
-        municipalities.value = response.data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const getDistricts = async () => {
-    try {
-      startLoading();
-      const params = {
+  const appliedFilter = reactive<FilterDistrictType>({
+    filter_name: undefined,
+    status: undefined,
+    id_municipality: undefined,
+  });
+
+  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
+
+  // Consulta en caché para selector de municipios
+  const { data: municipalitiesData } = useQuery({
+    queryKey: computed(() => municipalitiesKeys.list({ status: true })),
+    queryFn: async () => {
+      const response = await catalogServices.getMunicipalities({ active: true });
+      return response.data.data ?? [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const municipalities = computed<MunicipalityResponse[]>(() => municipalitiesData.value || []);
+
+  // Consulta paginada y reactiva de distritos
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      districtsKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
-        status: filter.status === 'Todos' ? undefined : filter.status,
-        id_municipality: filter.id_municipality,
-      };
-      const response = await catalogServices.getDistricts(params);
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_municipality: appliedFilter.id_municipality || undefined,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getDistricts({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_municipality: appliedFilter.id_municipality || undefined,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      if (response.statusCode === 200) {
-        districts.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+    },
+    { immediate: true },
+  );
 
-  const addDistrict = async (form: DistrictForm) => {
-    try {
-      startLoading();
+  const districts = computed<DistrictResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar Distrito
+  const addMutation = useMutation({
+    mutationFn: async (form: DistrictForm) => {
       const response = await catalogServices.postDistrict({
         ...form,
         active: true,
       });
-      if (response.status === 201) {
-        getDistricts();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: districtsKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Distrito registrado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar distrito:', err);
+    },
+  });
+
+  // Mutación: Editar Distrito
+  const editMutation = useMutation({
+    mutationFn: async (form: DistrictForm) => {
+      const { id: distId, ...body } = form;
+      const response = await catalogServices.putDistrict(distId!, body);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: districtsKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Distrito actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al editar distrito:', err);
+    },
+  });
+
+  // Mutación: Alternar Estado
+  const toggleMutation = useMutation({
+    mutationFn: async (distId: string) => {
+      const response = await catalogServices.toggleDistrict(distId);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: districtsKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Estado actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado del distrito:', err);
+    },
+  });
+
+  const addDistrict = async (form: DistrictForm) => {
+    return await addMutation.mutateAsync(form);
   };
 
   const editDistrict = async (form: DistrictForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      const response = await catalogServices.putDistrict(id!, body);
-      if (response.status === 200) {
-        getDistricts();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    return await editMutation.mutateAsync(form);
   };
 
-  const toggleDistrict = async (id: string) => {
-    try {
-      startLoading();
-      const response = await catalogServices.toggleDistrict(id);
-      if (response.status === 200) {
-        getDistricts();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const toggleDistrict = async (distId: string) => {
+    return await toggleMutation.mutateAsync(distId);
+  };
+
+  const getDistricts = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
+  };
+
+  const getMunicipalities = async () => {
+    return municipalities.value;
   };
 
   const validateAlphaInput = (
@@ -227,17 +281,13 @@ export function useDistrict() {
   };
 
   const cleanSearch = () => {
-    if (
-      (!filter.filter_name || filter.filter_name === '') &&
-      filter.status === undefined &&
-      filter.id_municipality === undefined
-    ) {
-      return;
-    }
     filter.filter_name = undefined;
     filter.status = undefined;
     filter.id_municipality = undefined;
-    getDistricts();
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    appliedFilter.id_municipality = undefined;
+    pagination.page = 1;
   };
 
   const setDistrictItem = (value: DistrictResponse) => {
@@ -248,11 +298,13 @@ export function useDistrict() {
     setFieldValue('municipality', value?.municipality);
   };
 
-  const findDistrict = (value: filterType) => {
-    if (value) {
-      getDistricts();
-    }
+  const findDistrict = (value: FilterDistrictType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name = (value?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value?.status ?? filter.status;
+    appliedFilter.id_municipality = value?.id_municipality ?? filter.id_municipality;
   };
+
   return {
     headers,
     errors,
@@ -263,11 +315,12 @@ export function useDistrict() {
     resetField,
     setFieldError,
     setFieldValue,
-    getMunicipalities,
+    getDistricts,
     validateAlphaInput,
     cleanSearch,
     setDistrictItem,
     findDistrict,
+    getMunicipalities,
     id,
     idAttrs,
     name,
@@ -280,12 +333,19 @@ export function useDistrict() {
     municipalityAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     municipalities,
     districts,
-    getDistricts,
+    isPending,
+    isFetching,
     addDistrict,
     editDistrict,
     toggleDistrict,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useDistrict;

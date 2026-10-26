@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="loader-container fade-in"
-    style="background: rgba(0, 0, 0, 0.3); z-index: 9999"
-  >
+  <div class="loader-container fade-in">
     <div class="Loader"></div>
   </div>
 </template>
@@ -53,7 +50,11 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  background-color: var(
+    --p-mask-background,
+    color-mix(in srgb, var(--p-primary-950) 45%, transparent)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,18 +91,17 @@ onUnmounted(() => {
   content: '';
   position: absolute;
   border-radius: 50%;
-  animation-duration: 1.8s;
+  animation-duration: 2s;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
-  /* Usar sombra con el color primario */
-  filter: drop-shadow(0 0 7px var(--p-primary-color));
+  /* Resplandor con el tono oscuro esmeralda 700 */
+  filter: drop-shadow(0 0 8px var(--p-primary-700));
 }
 
 .Loader:before {
   width: 100%;
   height: 100%;
-  /* Usar el color primario de PrimeVue/Tailwind */
-  box-shadow: inset 0 0 0 17px var(--p-primary-color);
+  box-shadow: inset 0 0 0 0 var(--p-primary-700);
   animation-name: pulsA;
 }
 
@@ -110,32 +110,45 @@ onUnmounted(() => {
   height: calc(100% - 34px);
   top: 17px;
   left: 17px;
-  /* Usar el color surface de PrimeVue/Tailwind */
-  box-shadow: 0 0 0 0 var(--p-surface-color);
+  box-shadow: 0 0 0 0 var(--p-primary-800);
   animation-name: pulsB;
 }
 
+/* Ciclo A: Nace suavemente en 0%, alcanza su pico en 25% y muere en 50% */
 @keyframes pulsA {
   0% {
-    box-shadow: inset 0 0 0 17px var(--p-primary-color);
+    box-shadow: inset 0 0 0 0 var(--p-primary-700);
+    opacity: 0;
+  }
+
+  25% {
+    box-shadow: inset 0 0 0 17px var(--p-primary-700);
     opacity: 1;
   }
+
   50%,
   100% {
-    box-shadow: inset 0 0 0 0 var(--p-primary-color);
+    box-shadow: inset 0 0 0 0 var(--p-primary-700);
     opacity: 0;
   }
 }
 
+/* Ciclo B: Nace en 50%, alcanza su pico en 75% y se disipa completamente a 0% en 100% */
 @keyframes pulsB {
   0%,
   50% {
-    box-shadow: 0 0 0 0 var(--p-surface-color);
+    box-shadow: 0 0 0 0 var(--p-primary-800);
     opacity: 0;
   }
-  100% {
-    box-shadow: 0 0 0 17px var(--p-surface-color);
+
+  75% {
+    box-shadow: 0 0 0 17px var(--p-primary-800);
     opacity: 1;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 var(--p-primary-800);
+    opacity: 0;
   }
 }
 
@@ -145,6 +158,7 @@ onUnmounted(() => {
     opacity: 0;
     backdrop-filter: blur(0px);
   }
+
   to {
     opacity: 1;
     backdrop-filter: blur(2px);
@@ -156,6 +170,7 @@ onUnmounted(() => {
     opacity: 1;
     backdrop-filter: blur(2px);
   }
+
   to {
     opacity: 0;
     backdrop-filter: blur(0px);
@@ -167,10 +182,12 @@ onUnmounted(() => {
     transform: scale(0.5);
     opacity: 0;
   }
+
   60% {
     transform: scale(1.1);
     opacity: 0.8;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -182,6 +199,7 @@ onUnmounted(() => {
     transform: scale(1);
     opacity: 1;
   }
+
   to {
     transform: scale(0.5);
     opacity: 0;

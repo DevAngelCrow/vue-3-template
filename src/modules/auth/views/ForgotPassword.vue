@@ -87,9 +87,10 @@ import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import AppInputText from '@/core/components/AppInputText.vue';
-import { emailFormat } from '@/core/utils/validationRules';
-import { useAuth } from '../composables/useAuth';
 import authServices from '@/core/services/auth.services';
+import { emailFormat } from '@/core/utils/validationRules';
+
+import { useAuth } from '../composables/useAuth';
 
 const { validationInputEmail } = useAuth();
 

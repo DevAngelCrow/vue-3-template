@@ -5,6 +5,32 @@
   --breakpoint-xs: 325px;
 }
 
+/* Tokens semánticos definidos en customTheme.ts (--p-success-*, --p-danger-*) */
+@theme inline {
+  --color-success-50: var(--p-success-50);
+  --color-success-100: var(--p-success-100);
+  --color-success-200: var(--p-success-200);
+  --color-success-300: var(--p-success-300);
+  --color-success-400: var(--p-success-400);
+  --color-success-500: var(--p-success-500);
+  --color-success-600: var(--p-success-600);
+  --color-success-700: var(--p-success-700);
+  --color-success-800: var(--p-success-800);
+  --color-success-900: var(--p-success-900);
+  --color-success-950: var(--p-success-950);
+  --color-danger-50: var(--p-danger-50);
+  --color-danger-100: var(--p-danger-100);
+  --color-danger-200: var(--p-danger-200);
+  --color-danger-300: var(--p-danger-300);
+  --color-danger-400: var(--p-danger-400);
+  --color-danger-500: var(--p-danger-500);
+  --color-danger-600: var(--p-danger-600);
+  --color-danger-700: var(--p-danger-700);
+  --color-danger-800: var(--p-danger-800);
+  --color-danger-900: var(--p-danger-900);
+  --color-danger-950: var(--p-danger-950);
+}
+
 @font-face {
   font-family: 'MuseoSans';
   src: url('/src/core/assets/fonts/MuseoSans.woff') format('woff');

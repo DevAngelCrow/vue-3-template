@@ -58,70 +58,80 @@
           ><span>Agregar</span></Button
         >
       </div>
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="deparments"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="openModal('view', data)"
-              v-tooltip.bottom="'Ver Detalle'"
-            ></Button>
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-pencil"
-              @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar'"
-              :disabled="!data?.active"
-            ></Button>
-            <Button
-              class="rounded-full"
-              variant="text"
-              :severity="data?.active ? 'danger' : 'success'"
-              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
-              @click="openModal('delete', data)"
-              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
-            ></Button>
-          </div>
-        </template>
-        <template #body-icon="{ data }">
-          <i :class="data.icon"></i>
-        </template>
-        <template #body-active="{ data }">
-          <AppChipStatus
-            :label="data?.status?.name"
-            :background-color="data?.status?.state_color"
-            :text-color="data?.status?.text_color"
-          >
-          </AppChipStatus>
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="deparments"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="openModal('view', data)"
+                v-tooltip.bottom="'Ver Detalle'"
+              ></Button>
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-pencil"
+                @click="openModal('edit', data)"
+                v-tooltip.bottom="'Editar'"
+                :disabled="!data?.active"
+              ></Button>
+              <Button
+                class="rounded-full"
+                variant="text"
+                :severity="data?.active ? 'danger' : 'success'"
+                :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+                @click="openModal('delete', data)"
+                v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
+              ></Button>
+            </div>
+          </template>
+          <template #body-icon="{ data }">
+            <i :class="data.icon"></i>
+          </template>
+          <template #body-active="{ data }">
+            <AppChipStatus
+              :label="data?.status?.name"
+              :background-color="data?.status?.state_color"
+              :text-color="data?.status?.text_color"
+            >
+            </AppChipStatus>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <DepartmentFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, provide, reactive, ref } from 'vue';
+import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
+
+import { useLoaderStore } from '@/core/store';
 
 import { useDepartment } from '../../composables/useDepartment';
 import { DepartmentResponse } from '../../interfaces/deparments/department.response.interface';
 import DepartmentFormModal from '../components/DepartmentFormModal.vue';
 
+const storeLoader = useLoaderStore();
 const departmentInstance = useDepartment();
 provide('useDepartment', departmentInstance);
 
@@ -132,8 +142,6 @@ const {
   findDepartment,
   validateAlphaInput,
   setDepartmenItem,
-  getCountries,
-  getDepartments,
   headers,
   pagination,
   deparments,
@@ -202,19 +210,17 @@ const closeModal = () => {
   resetForm();
 };
 
-const handlePagination = async (page: number) => {
+const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) {
     return;
   }
   pagination.page = page + 1;
-  getDepartments();
 };
-const handlePerPagePagination = async (perPage: number) => {
+const handlePerPagePagination = (perPage: number) => {
   if (perPage === pagination.per_page) return;
 
   pagination.per_page = perPage;
   pagination.page = 1;
-  getDepartments();
 };
 const iconFilter = computed(() => {
   const filterValues = Object.values(filter).some(Boolean);
@@ -222,10 +228,6 @@ const iconFilter = computed(() => {
     return 'pi pi-filter';
   }
   return 'pi pi-filter-slash';
-});
-onMounted(async () => {
-  await getCountries();
-  await getDepartments();
 });
 </script>
 <style scoped></style>

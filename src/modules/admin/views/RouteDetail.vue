@@ -38,35 +38,39 @@
         outlined
       />
     </section>
-    <section
-      id="form"
-      class="flex justify-center items-center w-full rounded-lg border-2 border-primary p-5 flex-col gap-5"
-    >
-      <div class="w-full flex flex-wrap gap-5">
-        <h4 class="gap-3 flex justify-center items-center !font-bold">
-          <i class="pi pi-directions !font-bold"></i>Información de la ruta
-        </h4>
-      </div>
-      <RouteFormComponent :modal-state="formModalState" />
-    </section>
-    <section
-      id="permissions"
-      class="w-full flex justify-center items-center rounded-lg border-2 border-primary p-5 flex-col gap-5"
-    >
-      <div class="w-full flex flex-wrap gap-5">
-        <h4 class="gap-3 flex justify-center items-center !font-bold">
-          <i class="pi pi-key !font-bold"></i>Permisos
-        </h4>
-      </div>
-      <RoutePermissionDataTable
-        :modal-state="actionMode.mode ?? 'add'"
-        @update:selected-permissions-ids="
-          value => (selectedPermissionsIds = value)
-        "
-        ref="routePermissionDataTable"
-        :readonly="actionMode.isReadonly"
-      />
-    </section>
+    <AppSkeleton :loading="!loadMounted" variant="card">
+      <section
+        id="form"
+        class="flex justify-center items-center w-full rounded-lg border-2 border-primary p-5 flex-col gap-5"
+      >
+        <div class="w-full flex flex-wrap gap-5">
+          <h4 class="gap-3 flex justify-center items-center !font-bold">
+            <i class="pi pi-directions !font-bold"></i>Información de la ruta
+          </h4>
+        </div>
+        <RouteFormComponent :modal-state="formModalState" />
+      </section>
+    </AppSkeleton>
+    <AppSkeleton :loading="!loadMounted" variant="table" :rows="4">
+      <section
+        id="permissions"
+        class="w-full flex justify-center items-center rounded-lg border-2 border-primary p-5 flex-col gap-5"
+      >
+        <div class="w-full flex flex-wrap gap-5">
+          <h4 class="gap-3 flex justify-center items-center !font-bold">
+            <i class="pi pi-key !font-bold"></i>Permisos
+          </h4>
+        </div>
+        <RoutePermissionDataTable
+          :modal-state="actionMode.mode ?? 'add'"
+          @update:selected-permissions-ids="
+            value => (selectedPermissionsIds = value)
+          "
+          ref="routePermissionDataTable"
+          :readonly="actionMode.isReadonly"
+        />
+      </section>
+    </AppSkeleton>
 
     <!-- Modal de confirmación para editar -->
     <AppModal
@@ -156,6 +160,7 @@ const {
 } = adminInstance;
 
 const { startLoading, finishLoading } = useLoaderStore();
+const loadMounted = ref(false);
 const selectedPermissionsIds = ref<Set<string>>(new Set());
 const showEditConfirmModal = ref(false);
 const showSaveConfirmModal = ref(false);
@@ -163,11 +168,7 @@ const showSaveConfirmModal = ref(false);
 const formModalState = computed(() => ({
   show: true,
   mode: (actionMode.mode ?? 'add') as
-    | 'add'
-    | 'view'
-    | 'edit'
-    | 'delete'
-    | 'closed',
+    'add' | 'view' | 'edit' | 'delete' | 'closed',
   title: actionMode.title,
   description: '',
   isReadonly: actionMode.isReadonly,
@@ -301,6 +302,8 @@ onMounted(async () => {
     actionMode.title = 'Crear nueva ruta';
   } catch (error) {
     console.error(error);
+  } finally {
+    loadMounted.value = true;
   }
 });
 </script>

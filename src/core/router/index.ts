@@ -4,6 +4,7 @@ import { routesCatalogs } from '@/modules/catalogs/routes';
 import { routesAdmin } from '@/modules/admin/routes';
 
 import { useAuthStore } from '../store/useAuthStore';
+import { isRouteAuthorized } from '../utils/routePermissions';
 
 const routes = [
   {
@@ -36,6 +37,10 @@ const routes = [
     component: () => import('../layouts/Layout.vue'),
     meta: { requiresAuth: true },
     children: [
+      {
+        path: '/',
+        redirect: '/dashboard',
+      },
       ...routesCatalogs,
       ...routesAdmin,
       {
@@ -56,13 +61,18 @@ const routes = [
         meta: { requiresAuth: true },
         component: () => import('../../modules/auth/views/Profile.vue'),
       },
+      {
+        path: '/not-found',
+        name: 'not-found',
+        meta: { requiresAuth: true, title: 'Sitio no encontrado' },
+        component: () => import('@/views/NotFound.vue'),
+      },
     ],
   },
   {
     path: '/forbidden',
     name: 'forbidden',
-    meta: { requiresAuth: false, title: 'Acceso denegado' },
-    component: () => import('../../views/Forbidden.vue'),
+    redirect: { name: 'not-found' },
   },
   {
     path: '/verify-email',
@@ -83,6 +93,12 @@ const routes = [
     meta: { requiresAuth: false, title: 'Restablecer contraseña' },
     component: () => import('../../modules/auth/views/ResetForgotPassword.vue'),
   },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'catch-all',
+    meta: { requiresAuth: false, title: 'Sitio no encontrado' },
+    component: () => import('@/views/NotFound.vue'),
+  },
 ];
 
 const router = createRouter({
@@ -95,11 +111,37 @@ const router = createRouter({
 
 router.beforeEach((to, _from, next) => {
   const auth = useAuthStore();
+  const hasValidSession = auth.validSession();
 
-  if (to.meta.requiresAuth && !auth.validSession()) {
+  // 1. Si la ruta requiere autenticación y el usuario no tiene sesión válida
+  if (to.meta.requiresAuth && !hasValidSession) {
     auth.closeSession();
-    return next({ name: 'login' });
+    return next({ name: 'login', query: { redirect: to.fullPath } });
   }
+
+  // 2. Si el usuario está autenticado
+  if (hasValidSession) {
+    // Si intenta ir a login o landing estando autenticado, redirigir al dashboard
+    if (to.name === 'login' || to.name === 'sign-up' || to.name === 'landing') {
+      return next({ name: 'dashboard' });
+    }
+
+    // Si cae en el comodín catch-all (URL inexistente), redirigir a la vista not-found dentro del layout
+    if (to.name === 'catch-all') {
+      return next({ name: 'not-found', replace: true });
+    }
+
+    // 3. Comprobación de permisos si la ruta requiere autenticación
+    if (to.meta.requiresAuth) {
+      const authorized = isRouteAuthorized(to.path, auth.menuInfo);
+      if (!authorized) {
+        // Usuario autenticado sin permisos para esta ruta:
+        // Se redirige a 'not-found' de forma preventiva sin montar el componente
+        return next({ name: 'not-found', replace: true });
+      }
+    }
+  }
+
   next();
 });
 

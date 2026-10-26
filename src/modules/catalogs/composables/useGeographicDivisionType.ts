@@ -1,23 +1,38 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { GeographicDivisionTypeResponse } from '../interfaces/geographic-division-type/geographic-division-type.response.interface';
 import { GeographicDivisionTypeForm } from '../interfaces/geographic-division-type/geographic-division-type.form.interface';
 import catalogServices from '../Services/catalog.services';
+import { countriesKeys } from './useCountries';
 
-type filterType = {
+export type FilterDivisionType = {
   filter?: string;
   status?: boolean | 'Todos';
   id_country?: string;
 };
 
+export const geographicDivisionTypesKeys = createQueryKeys<
+  FilterDivisionType & { page?: number; per_page?: number }
+>('geographic-division-types');
+
 export function useGeographicDivisionType() {
+  const alert = useAlertStore();
+  const queryClient = useQueryClient();
+
   const {
     errors,
     defineField,
@@ -85,14 +100,11 @@ export function useGeographicDivisionType() {
     },
   ]);
 
-  const divisionTypes = ref<GeographicDivisionTypeResponse[]>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -100,119 +112,168 @@ export function useGeographicDivisionType() {
   const [country, countryAttrs] = defineField('country');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterDivisionType>({
     filter: undefined,
     status: undefined,
     id_country: undefined,
   });
+
+  const appliedFilter = reactive<FilterDivisionType>({
+    filter: undefined,
+    status: undefined,
+    id_country: undefined,
+  });
+
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
-  const countries = ref<CountryResponse[]>([]);
 
-  const getCountries = async () => {
-    try {
-      startLoading();
+  // Consulta en caché para selector de países
+  const { data: countriesData } = useQuery({
+    queryKey: computed(() => countriesKeys.list({ status: true })),
+    queryFn: async () => {
       const response = await catalogServices.getAllCountries({ status: true });
-      if (response.statusCode === 200) {
-        countries.value = response.data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+      return response.data.data ?? [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
-  const getDivisionTypes = async () => {
-    try {
-      startLoading();
-      const params = {
+  const countries = computed<CountryResponse[]>(() => countriesData.value || []);
+
+  // Consulta paginada y reactiva de tipos de división geográfica
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      geographicDivisionTypesKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter: filter.filter || undefined,
-        active: filter.status === 'Todos' ? undefined : filter.status,
-        id_country: filter.id_country || undefined,
-      };
-      const response =
-        await catalogServices.getAllGeographicDivisionTypes(params);
-      if (response.statusCode === 200) {
-        divisionTypes.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+        filter: appliedFilter.filter || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_country: appliedFilter.id_country || undefined,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getAllGeographicDivisionTypes({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter: appliedFilter.filter || undefined,
+        active:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_country: appliedFilter.id_country || undefined,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  const addDivisionType = async (form: GeographicDivisionTypeForm) => {
-    try {
-      startLoading();
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
+      }
+    },
+    { immediate: true },
+  );
+
+  const divisionTypes = computed<GeographicDivisionTypeResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar Tipo de División
+  const addMutation = useMutation({
+    mutationFn: async (form: GeographicDivisionTypeForm) => {
       const response = await catalogServices.postGeographicDivisionType({
         ...form,
         active: true,
       });
-      if (response.status === 201) {
-        getDivisionTypes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: geographicDivisionTypesKeys.all,
+      });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Tipo de división registrado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar tipo de división:', err);
+    },
+  });
+
+  // Mutación: Editar Tipo de División
+  const editMutation = useMutation({
+    mutationFn: async (form: GeographicDivisionTypeForm) => {
+      const { id: divId, ...body } = form;
+      if (!divId) return;
+      const response = await catalogServices.putGeographicDivisionType(
+        divId,
+        body,
+      );
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: geographicDivisionTypesKeys.all,
+      });
+      alert.showAlert({
+        type: 'success',
+        title: `${data?.message || 'Tipo de división actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al editar tipo de división:', err);
+    },
+  });
+
+  // Mutación: Alternar Estado
+  const toggleMutation = useMutation({
+    mutationFn: async (divId: string) => {
+      const response =
+        await catalogServices.patchGeographicDivisionType(divId);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: geographicDivisionTypesKeys.all,
+      });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Estado actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado de tipo de división:', err);
+    },
+  });
+
+  const addDivisionType = async (form: GeographicDivisionTypeForm) => {
+    return await addMutation.mutateAsync(form);
   };
 
   const editDivisionType = async (form: GeographicDivisionTypeForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      if (!id) return;
-      const response = await catalogServices.putGeographicDivisionType(
-        id,
-        body,
-      );
-      if (response.status === 200) {
-        getDivisionTypes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    return await editMutation.mutateAsync(form);
   };
 
-  const toggleDivisionType = async (id: string) => {
-    try {
-      startLoading();
-      const response = await catalogServices.patchGeographicDivisionType(id);
-      if (response.status === 200) {
-        getDivisionTypes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const toggleDivisionType = async (divId: string) => {
+    return await toggleMutation.mutateAsync(divId);
+  };
+
+  const getDivisionTypes = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
+  };
+
+  const getCountries = async () => {
+    return countries.value;
   };
 
   const validateAlphaInput = (
@@ -229,17 +290,13 @@ export function useGeographicDivisionType() {
   };
 
   const cleanSearch = () => {
-    if (
-      (!filter.filter || filter.filter === '') &&
-      filter.status === undefined &&
-      filter.id_country === undefined
-    ) {
-      return;
-    }
     filter.filter = undefined;
     filter.status = undefined;
     filter.id_country = undefined;
-    getDivisionTypes();
+    appliedFilter.filter = undefined;
+    appliedFilter.status = undefined;
+    appliedFilter.id_country = undefined;
+    pagination.page = 1;
   };
 
   const setDivisionTypeItem = (value: GeographicDivisionTypeResponse) => {
@@ -250,14 +307,11 @@ export function useGeographicDivisionType() {
     setFieldValue('country', value?.country);
   };
 
-  const findDivisionType = (value: filterType) => {
-    if (
-      value.filter ||
-      value.status !== undefined ||
-      value.id_country !== undefined
-    ) {
-      getDivisionTypes();
-    }
+  const findDivisionType = (value: FilterDivisionType) => {
+    pagination.page = 1;
+    appliedFilter.filter = (value?.filter ?? filter.filter) || undefined;
+    appliedFilter.status = value?.status ?? filter.status;
+    appliedFilter.id_country = value?.id_country ?? filter.id_country;
   };
 
   return {
@@ -271,7 +325,6 @@ export function useGeographicDivisionType() {
     setFieldError,
     setFieldValue,
     getDivisionTypes,
-    pagination,
     validateAlphaInput,
     cleanSearch,
     setDivisionTypeItem,
@@ -289,10 +342,19 @@ export function useGeographicDivisionType() {
     countryAttrs,
     alert,
     filter,
+    appliedFilter,
+    pagination,
     countries,
     divisionTypes,
+    isPending,
+    isFetching,
     addDivisionType,
     editDivisionType,
     toggleDivisionType,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useGeographicDivisionType;

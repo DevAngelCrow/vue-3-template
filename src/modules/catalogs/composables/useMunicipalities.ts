@@ -1,22 +1,39 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useForm } from 'vee-validate';
-import { nextTick, reactive, ref } from 'vue';
 import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import catalogServices from '../Services/catalog.services';
 import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
 import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
 import { Department } from '../interfaces/municipalities/municipality.department.interface';
 import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
-type filterType = {
+import { departmentsKeys } from './useDepartment';
+
+export type FilterMunicipalityType = {
   filter_name?: string;
   status?: boolean | 'Todos';
   id_department?: string;
 };
+
+export const municipalitiesKeys = createQueryKeys<
+  FilterMunicipalityType & { page?: number; per_page?: number }
+>('municipalities');
+
 export function useMunicipality() {
+  const alert = useAlertStore();
+  const queryClient = useQueryClient();
+
   const {
     errors,
     defineField,
@@ -31,7 +48,7 @@ export function useMunicipality() {
       id: yup.string().typeError('El campo id debe ser de tipo string'),
       name: yup
         .string()
-        .required('El nombre del departamento es requerido')
+        .required('El nombre del municipio es requerido')
         .min(3, 'El nombre de tener al menos 3 caracteres')
         .max(150, 'El nombre no puede tener más de 255 caracteres'),
       description: yup
@@ -86,14 +103,11 @@ export function useMunicipality() {
     },
   ]);
 
-  const municipalities = ref<MunicipalityResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -101,117 +115,157 @@ export function useMunicipality() {
   const [department, departmentAttrs] = defineField('department');
   const [active, activeAttrs] = defineField('active');
 
-  const filter = reactive<filterType>({
+  const filter = reactive<FilterMunicipalityType>({
     filter_name: undefined,
     status: undefined,
     id_department: undefined,
   });
-  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
-  const departments = ref<DepartmentResponse[]>([]);
 
-  const getDepartments = async () => {
-    try {
-      startLoading();
-      const params = {
-        active: true,
-      };
-      const response = await catalogServices.getAllDepartments(params);
-      if (response.statusCode === 200) {
-        departments.value = response.data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const getMunicipalities = async () => {
-    try {
-      startLoading();
-      const params = {
+  const appliedFilter = reactive<FilterMunicipalityType>({
+    filter_name: undefined,
+    status: undefined,
+    id_department: undefined,
+  });
+
+  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
+
+  // Consulta en caché para selector de departamentos
+  const { data: departmentsData } = useQuery({
+    queryKey: computed(() => departmentsKeys.list({ status: true })),
+    queryFn: async () => {
+      const response = await catalogServices.getAllDepartments({ active: true });
+      return response.data.data ?? [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const departments = computed<DepartmentResponse[]>(() => departmentsData.value || []);
+
+  // Consulta paginada y reactiva de municipios
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: computed(() =>
+      municipalitiesKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        filter_name: filter.filter_name,
-        status: filter.status === 'Todos' ? undefined : filter.status,
-        id_department: filter.id_department,
-      };
-      const response = await catalogServices.getMunicipalities(params);
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_department: appliedFilter.id_department || undefined,
+      }),
+    ),
+    queryFn: async () => {
+      const response = await catalogServices.getMunicipalities({
+        page: pagination.page,
+        per_page: pagination.per_page,
+        filter_name: appliedFilter.filter_name || undefined,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        id_department: appliedFilter.id_department || undefined,
+      });
+      return response.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-      if (response.statusCode === 200) {
-        municipalities.value = response.data.data;
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
+  watch(
+    () => queryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+    },
+    { immediate: true },
+  );
 
-  const addMunicipality = async (form: MunicipalityForm) => {
-    try {
-      startLoading();
+  const municipalities = computed<MunicipalityResponse[]>(
+    () => queryResult.value?.data ?? [],
+  );
+
+  // Mutación: Registrar Municipio
+  const addMutation = useMutation({
+    mutationFn: async (form: MunicipalityForm) => {
       const response = await catalogServices.postMunicipality({
         ...form,
         active: true,
       });
-      if (response.status === 201) {
-        getMunicipalities();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: municipalitiesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Municipio registrado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al registrar municipio:', err);
+    },
+  });
+
+  // Mutación: Editar Municipio
+  const editMutation = useMutation({
+    mutationFn: async (form: MunicipalityForm) => {
+      const { id: munId, ...body } = form;
+      const response = await catalogServices.putMunicipality(munId!, body);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: municipalitiesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Municipio actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al editar municipio:', err);
+    },
+  });
+
+  // Mutación: Alternar Estado
+  const toggleMutation = useMutation({
+    mutationFn: async (munId: string) => {
+      const response = await catalogServices.toggleMunicipality(munId);
+      return response.data;
+    },
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: municipalitiesKeys.all });
+      alert.showAlert({
+        type: 'success',
+        title: `${data.message || 'Estado actualizado'}`,
+        show: true,
+      });
+    },
+    onError: err => {
+      console.error('Error al cambiar estado del municipio:', err);
+    },
+  });
+
+  const addMunicipality = async (form: MunicipalityForm) => {
+    return await addMutation.mutateAsync(form);
   };
 
   const editMunicipality = async (form: MunicipalityForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      const response = await catalogServices.putMunicipality(id!, body);
-      if (response.status === 200) {
-        getMunicipalities();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+    return await editMutation.mutateAsync(form);
   };
 
-  const toggleMunicipality = async (id: string) => {
-    try {
-      startLoading();
-      const response = await catalogServices.toggleMunicipality(id);
-      if (response.status === 200) {
-        getMunicipalities();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
+  const toggleMunicipality = async (munId: string) => {
+    return await toggleMutation.mutateAsync(munId);
+  };
+
+  const getMunicipalities = async () => {
+    const res = await refetch();
+    return res.data?.data ?? [];
+  };
+
+  const getDepartments = async () => {
+    return departments.value;
   };
 
   const validateAlphaInput = (
@@ -228,17 +282,13 @@ export function useMunicipality() {
   };
 
   const cleanSearch = () => {
-    if (
-      (!filter.filter_name || filter.filter_name === '') &&
-      filter.status === undefined &&
-      filter.id_department === undefined
-    ) {
-      return;
-    }
     filter.filter_name = undefined;
     filter.status = undefined;
     filter.id_department = undefined;
-    getMunicipalities();
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    appliedFilter.id_department = undefined;
+    pagination.page = 1;
   };
 
   const setMunicipalityItem = (value: MunicipalityResponse) => {
@@ -249,11 +299,13 @@ export function useMunicipality() {
     setFieldValue('department', value?.department);
   };
 
-  const findMunicipality = (value: filterType) => {
-    if (value) {
-      getMunicipalities();
-    }
+  const findMunicipality = (value: FilterMunicipalityType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name = (value?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = value?.status ?? filter.status;
+    appliedFilter.id_department = value?.id_department ?? filter.id_department;
   };
+
   return {
     headers,
     errors,
@@ -264,11 +316,12 @@ export function useMunicipality() {
     resetField,
     setFieldError,
     setFieldValue,
-    getDepartments,
+    getMunicipalities,
     validateAlphaInput,
     cleanSearch,
     setMunicipalityItem,
     findMunicipality,
+    getDepartments,
     id,
     idAttrs,
     name,
@@ -281,12 +334,19 @@ export function useMunicipality() {
     departmentAttrs,
     alert,
     filter,
+    appliedFilter,
     pagination,
     departments,
     municipalities,
-    getMunicipalities,
+    isPending,
+    isFetching,
     addMunicipality,
     editMunicipality,
     toggleMunicipality,
+    addMutation,
+    editMutation,
+    toggleMutation,
   };
 }
+
+export default useMunicipality;

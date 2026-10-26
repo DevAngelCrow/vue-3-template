@@ -62,7 +62,7 @@
 </template>
 <script setup lang="ts">
 import { Card, Divider, Button } from 'primevue';
-import { computed, onMounted, provide, ref } from 'vue';
+import { computed, provide } from 'vue';
 
 import AppTitle from '@/core/components/AppTitle.vue';
 
@@ -76,30 +76,12 @@ import AddressInformation from '../components/AddressInformation.vue';
 const useAuthInstance = useAuth();
 provide('useAuthInstance', useAuthInstance);
 const {
-  getNationalities,
-  getMaritalStatuses,
-  getGenders,
-  getDocumentTypes,
-  getDetailsProfile,
-  startLoading,
-  finishLoading,
   editMode,
   updateProfile,
+  isProfilePending,
 } = useAuthInstance;
-const loading = ref<boolean>(false);
-onMounted(async () => {
-  startLoading();
-  loading.value = true;
-  await Promise.all([
-    getDocumentTypes(),
-    getDetailsProfile(),
-    getNationalities(),
-    getMaritalStatuses(),
-    getGenders(),
-  ]);
-  finishLoading();
-  loading.value = false;
-});
+
+const loading = computed(() => isProfilePending.value);
 
 const toggleEditionMode = (flag: boolean) => {
   editMode.value = flag;

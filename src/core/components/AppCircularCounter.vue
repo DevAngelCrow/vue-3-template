@@ -7,7 +7,7 @@
           cy="100"
           r="90"
           fill="none"
-          stroke="#e5e7eb"
+          style="stroke: var(--p-surface-200)"
           :stroke-width="strokeWidth"
         />
 
@@ -16,7 +16,7 @@
           cy="100"
           r="90"
           fill="none"
-          :stroke="resolvedColor"
+          :style="{ stroke: resolvedColor }"
           :stroke-width="strokeWidth"
           :stroke-dasharray="circumference"
           :stroke-dashoffset="strokeDashoffset"
@@ -31,7 +31,7 @@
 
       <div class="absolute inset-0 flex justify-center items-center">
         <div
-          class="rounded-full bg-white w-[80%] h-[80%] flex justify-center items-center"
+          class="rounded-full bg-surface-0 w-[80%] h-[80%] flex justify-center items-center"
         >
           <div class="flex flex-col w-[75%] justify-center">
             <span
@@ -54,9 +54,16 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const { total, selected, color, size = '50px', strokeWidth = 20 } = defineProps<{
+const {
+  total,
+  selected,
+  color = 'primary',
+  size = '50px',
+  strokeWidth = 20,
+} = defineProps<{
   total: number;
   selected: number;
+  /** 'primary' | 'success' | 'danger' o cualquier color CSS válido */
   color?: string;
   size?: string;
   strokeWidth?: number;
@@ -70,15 +77,16 @@ const strokeDashoffset = computed(
 );
 
 const resolvedColor = computed(() => {
-  const col = color;
-  if (col?.startsWith('#') || col?.startsWith('rgb')) {
-    return col;
+  switch (color) {
+    case 'primary':
+      return 'var(--p-primary-color)';
+    case 'success':
+      return 'var(--p-success-600)';
+    case 'danger':
+      return 'var(--p-danger-600)';
+    default:
+      return color;
   }
-  const element = document.documentElement;
-  const style = getComputedStyle(element);
-  const varName = `--color-${col}`;
-  const value = style.getPropertyValue(varName).trim();
-  return value ? `rgb(${value})` : '#000000';
 });
 
 const textSizeClass = computed(() => {

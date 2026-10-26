@@ -1,8 +1,9 @@
 // composables/useAuth.ts
-import { nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 import { useAlertStore, useLoaderStore } from '@/core/store';
@@ -17,11 +18,19 @@ import { MaritalStatus } from '@/core/services/interfaces/auth/maritalStatus.int
 import { Country } from '@/core/services/interfaces/auth/country.interface';
 import { GeographicDivisionTypeResponse } from '@/modules/catalogs/interfaces/geographic-division-type/geographic-division-type.response.interface';
 import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import { DocumentTypeObject } from '../interfaces/documentType.interface';
 import { NationalitiesArray } from '../interfaces/nationalitiesArray.interface';
 
+export const authProfileKeys = createQueryKeys('auth-profile');
+export const authNationalitiesKeys = createQueryKeys('auth-nationalities');
+export const authDocumentTypesKeys = createQueryKeys('auth-document-types');
+export const authGendersKeys = createQueryKeys('auth-genders');
+export const authMaritalStatusKeys = createQueryKeys('auth-marital-status');
+
 export function useAuth() {
+  const queryClient = useQueryClient();
   const {
     setToken,
     setUserInfo,
@@ -35,7 +44,6 @@ export function useAuth() {
   const alert = useAlertStore();
   const router = useRouter();
   const route = useRoute();
-  const isLoading = ref(false);
   const isLoggingOut = ref(false);
   const error = ref<string | null>(null);
   const API_URL =
@@ -153,11 +161,7 @@ export function useAuth() {
   const [country, countryAttrs] = form.defineField('country');
   const [geographic_divisions_type, geographicDivisionTypesAttrs] =
     form.defineField('geographic_divisions_type');
-  const nationalitiesOptions = ref<NationalitiesArray[]>([]);
-  const documentTypesOptions = ref<DocumentType[]>([]);
-  const gendersOptions = ref<Gender[]>([]);
-  const maritalStatusesOptions = ref<MaritalStatus[]>([]);
-  const countriesOptions = ref<Country[]>([]);
+
   const geographicDivisionsOptions = ref<GeographicDivisionResponse[]>([]);
   const geographicDivisionsTypesOptions = ref<GeographicDivisionTypeResponse[]>(
     [],
@@ -168,55 +172,183 @@ export function useAuth() {
   const idAddress = ref<string>('');
   const idDocument = ref<string>('');
 
-  const getNationalities = async () => {
-    try {
+  // Queries cacheadas con TanStack Query para combos de soporte
+  const { data: nationalitiesData, refetch: refetchNationalities } = useQuery({
+    queryKey: computed(() => authNationalitiesKeys.all),
+    queryFn: async () => {
       const response = await authServices.getCountriesNationalities();
       if (response.statusCode === 200) {
-        nationalitiesOptions.value = response.data.data;
-        countriesOptions.value = response.data.data;
+        return response.data.data;
       }
-    } catch (error) {
-      console.error('Error al obtener las nacionalidades:', error);
-    }
-  };
-  const getDocumentTypes = async () => {
-    try {
+      return [];
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const nationalitiesOptions = computed<Country[]>(
+    () => nationalitiesData.value ?? [],
+  );
+
+  const countriesOptions = computed<Country[]>(
+    () => nationalitiesData.value ?? [],
+  );
+
+  const { data: documentTypesData, refetch: refetchDocumentTypes } = useQuery({
+    queryKey: computed(() => authDocumentTypesKeys.all),
+    queryFn: async () => {
       const response = await authServices.getDocumentTypes();
       if (response.statusCode === 200) {
-        documentTypesOptions.value = response.data.data.map(
-          (item: DocumentType) => ({
-            active: item.active,
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            mask: item.mask,
-          }),
-        );
+        return response.data.data.map((item: DocumentType) => ({
+          active: item.active,
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          mask: item.mask,
+        }));
       }
-    } catch (error) {
-      console.error('Error al obtener los tipos de documento:', error);
-    }
-  };
-  const getGenders = async () => {
-    try {
+      return [];
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const documentTypesOptions = computed<DocumentType[]>(
+    () => documentTypesData.value ?? [],
+  );
+
+  const { data: gendersData, refetch: refetchGenders } = useQuery({
+    queryKey: computed(() => authGendersKeys.all),
+    queryFn: async () => {
       const response = await authServices.getGenders();
       if (response.statusCode === 200) {
-        gendersOptions.value = response.data.data;
+        return response.data.data;
       }
-    } catch (error) {
-      console.error('Error al obtener los géneros:', error);
-    }
-  };
-  const getMaritalStatuses = async () => {
-    try {
+      return [];
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const gendersOptions = computed<Gender[]>(
+    () => gendersData.value ?? [],
+  );
+
+  const { data: maritalStatusData, refetch: refetchMaritalStatus } = useQuery({
+    queryKey: computed(() => authMaritalStatusKeys.all),
+    queryFn: async () => {
       const response = await authServices.getMaritalStatus();
       if (response.statusCode === 200) {
-        maritalStatusesOptions.value = response.data.data;
+        return response.data.data;
       }
-    } catch (error) {
-      console.error('Error al obtener los estados civiles:', error);
-    }
+      return [];
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const maritalStatusesOptions = computed<MaritalStatus[]>(
+    () => maritalStatusData.value ?? [],
+  );
+
+  // Query de Perfil de Usuario cacheada
+  const {
+    data: profileDetailsData,
+    isPending: isProfilePending,
+    refetch: refetchProfile,
+  } = useQuery({
+    queryKey: computed(() =>
+      authProfileKeys.detail(
+        userInfo && typeof userInfo === 'object' && 'id' in userInfo
+          ? (userInfo.id as string)
+          : '',
+      ),
+    ),
+    queryFn: async () => {
+      if (userInfo && typeof userInfo === 'object' && 'id' in userInfo) {
+        const idUser = userInfo.id;
+        const response = await authServices.getProfileDetails(idUser);
+        if (response.statusCode === 200) {
+          return response.data;
+        }
+      }
+      return null;
+    },
+    enabled: computed(
+      () =>
+        !!(
+          userInfo &&
+          typeof userInfo === 'object' &&
+          'id' in userInfo &&
+          userInfo.id
+        ),
+    ),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  watch(
+    () => profileDetailsData.value,
+    details => {
+      if (details) {
+        email.value = details.email;
+        userName.value = details.user_name;
+        firstName.value = details.first_name;
+        middleName.value = details.middle_name;
+        lastName.value = details.last_name;
+        maritalStatus.value = details.id_marital_status;
+        birthDate.value = FormatDate(
+          details.birth_date ?? '',
+          'DD/MM/YYYY',
+        );
+        nationalities.value = details.nationalities;
+        gender.value = details.id_gender;
+        phoneNumber.value = details.phone_number;
+        status.value = details.id_status;
+        documentType.value = details.document_type;
+        documentTypeId.value = details.document_type?.id;
+        documentNumber.value = details.document?.document_number;
+        country.value = details.country || null;
+        geographic_divisions_type.value =
+          details.geographic_division_type || null;
+        geographic_divisions.value =
+          details.geographic_division || null;
+        street.value = details.street;
+        streetNumber.value = details.street_number;
+        houseNumber.value = details.house_number;
+        neighborhood.value = details.neighborhood;
+        block.value = details.block;
+        pathway.value = details.pathway;
+        current.value = details.current;
+        idPeople.value = details.id_people || '';
+        idAddress.value = details.id_address || '';
+        idDocument.value = details.document?.id || '';
+        setProfileImg(details.profile_img ?? null);
+      }
+    },
+    { immediate: true },
+  );
+
+  const getNationalities = async () => {
+    const res = await refetchNationalities();
+    return res.data || [];
   };
+
+  const getDocumentTypes = async () => {
+    const res = await refetchDocumentTypes();
+    return res.data || [];
+  };
+
+  const getGenders = async () => {
+    const res = await refetchGenders();
+    return res.data || [];
+  };
+
+  const getMaritalStatuses = async () => {
+    const res = await refetchMaritalStatus();
+    return res.data || [];
+  };
+
+  const getDetailsProfile = async () => {
+    const res = await refetchProfile();
+    return res.data;
+  };
+
   const getGeographicalDivisions = async (params: string) => {
     try {
       const response = await authServices.getGeographicalDivisions({
@@ -225,10 +357,11 @@ export function useAuth() {
       if (response.statusCode === 200) {
         geographicDivisionsOptions.value = response.data.data;
       }
-    } catch (error) {
-      console.error('Error al obtener las divisiones geográficas:', error);
+    } catch (err) {
+      console.error('Error al obtener las divisiones geográficas:', err);
     }
   };
+
   const getGeographicalDivisionsTypes = async (params: string) => {
     try {
       const response = await authServices.getGeographicalDivisionsTypes({
@@ -237,62 +370,20 @@ export function useAuth() {
       if (response.statusCode === 200) {
         geographicDivisionsTypesOptions.value = response.data.data;
       }
-    } catch (error) {
-      console.error('Error al obtener las divisiones geográficas:', error);
+    } catch (err) {
+      console.error('Error al obtener los tipos de divisiones geográficas:', err);
     }
   };
-  const getDetailsProfile = async () => {
-    try {
-      if (userInfo && typeof userInfo === 'object' && 'id' in userInfo) {
-        const idUser = userInfo.id;
-        const response = await authServices.getProfileDetails(idUser);
-        if (response.statusCode === 200) {
-          email.value = response.data.email;
-          userName.value = response.data.user_name;
-          firstName.value = response.data.first_name;
-          middleName.value = response.data.middle_name;
-          lastName.value = response.data.last_name;
-          maritalStatus.value = response.data.id_marital_status;
-          birthDate.value = FormatDate(
-            response.data.birth_date ?? '',
-            'DD/MM/YYYY',
-          );
-          nationalities.value = response.data.nationalities;
-          gender.value = response.data.id_gender;
-          phoneNumber.value = response.data.phone_number;
-          status.value = response.data.id_status;
-          documentType.value = response.data?.document_type; // Direct assignment
-          documentTypeId.value = response.data.document_type?.id;
-          documentNumber.value = response.data.document?.document_number;
-          country.value = response.data.country || null; // Direct assignment
-          geographic_divisions_type.value =
-            response.data.geographic_division_type || null; // Direct assignment
-          geographic_divisions.value =
-            response.data.geographic_division || null; // Direct assignment
-          street.value = response.data.street;
-          streetNumber.value = response.data.street_number;
-          houseNumber.value = response.data.house_number;
-          neighborhood.value = response.data.neighborhood;
-          block.value = response.data.block;
-          pathway.value = response.data.pathway;
-          current.value = response.data.current;
-          idPeople.value = response.data.id_people || '';
-          idAddress.value = response.data.id_address || '';
-          idDocument.value = response.data.document?.id || '';
-          setProfileImg(response.data.profile_img ?? null);
-        }
-      }
-      console.warn(
-        'No se pudo obtener el ID del usuario para cargar los detalles del perfil',
-      );
-    } catch (error) {
-      console.error('Error al obtener los detalles del perfil:', error);
-    }
-  };
-  const login = async (user: string, password: string) => {
-    isLoading.value = true;
-    error.value = null;
-    try {
+
+  // Mutaciones TanStack Query para Login, Registro y Actualización de Perfil
+  const loginMutation = useMutation({
+    mutationFn: async ({
+      user,
+      password,
+    }: {
+      user: string;
+      password: string;
+    }) => {
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
@@ -320,8 +411,10 @@ export function useAuth() {
         );
       }
 
-      const data = await response.json();
-      if (data.data.access_token) {
+      return response.json();
+    },
+    onSuccess: async data => {
+      if (data?.data?.access_token) {
         setToken(data.data);
         if (data.data.refresh_token) {
           setRefreshToken(data.data);
@@ -347,19 +440,112 @@ export function useAuth() {
       } else {
         throw new Error('No se recibió el token de autenticación');
       }
-    } catch (err) {
+    },
+    onError: err => {
       console.error('Error en el login:', err);
       error.value =
         err instanceof Error ? err.message : 'Error desconocido en el login';
-    } finally {
-      isLoading.value = false;
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const formRegister = new FormData();
+      formRegister.append('email', data.email);
+      formRegister.append('password', data.password);
+      return authServices.signUp(formRegister);
+    },
+    onSuccess: response => {
+      if (response.status === 201) {
+        alert.showAlert({
+          type: 'success',
+          title: 'Registro exitoso',
+          content: 'El usuario ha sido registrado correctamente',
+        });
+        router.push('/login');
+      } else {
+        let errorMsg = 'No se pudo registrar el usuario';
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'message' in response.data
+        ) {
+          errorMsg = (response.data as any).message || errorMsg;
+        }
+        alert.showAlert({
+          type: 'error',
+          title: 'Error en el registro',
+          content: errorMsg,
+        });
+      }
+    },
+    onError: err => {
+      console.error(err);
+      alert.showAlert({
+        type: 'error',
+        title: `Error en el registro del usuario`,
+        content: 'Ocurrió un error al momento del registro del usuario',
+      });
+    },
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async ({
+      id,
+      formData,
+    }: {
+      id: string;
+      formData: FormData;
+    }) => authServices.updateProfile(id, formData),
+    onSuccess: response => {
+      if (response.statusCode === 200) {
+        queryClient.invalidateQueries({ queryKey: authProfileKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: 'Perfil actualizado',
+          content: 'El perfil se actualizó correctamente',
+        });
+        editMode.value = false;
+      }
+    },
+    onError: (err: any) => {
+      console.error('Error al actualizar el perfil:', err);
+      alert.showAlert({
+        type: 'error',
+        title: 'Error',
+        content: err.message || 'Error al actualizar el perfil',
+      });
+    },
+  });
+
+  const isLoading = computed(
+    () =>
+      loginMutation.isPending.value ||
+      registerMutation.isPending.value ||
+      updateProfileMutation.isPending.value,
+  );
+
+  const login = async (user: string, password: string) => {
+    error.value = null;
+    try {
+      await loginMutation.mutateAsync({ user, password });
+    } catch {
+      // Manejado en onError
     }
   };
+
+  const registerUser = async (data: { email: string; password: string }) => {
+    try {
+      await registerMutation.mutateAsync(data);
+    } catch {
+      // Manejado en onError
+    }
+  };
+
   const logout = async () => {
     isLoggingOut.value = true;
     try {
       const token = localStorage.getItem('access_token');
-      //const refreshToken = localStorage.getItem('refresh_token');
       const tokenType = localStorage.getItem('token_type') || 'Bearer';
       if (token) {
         await fetch(`${API_URL}/api/v1/auth/logout`, {
@@ -373,9 +559,10 @@ export function useAuth() {
           console.warn('No se pudo notificar al servidor sobre el logout');
         });
       }
-    } catch (error) {
-      console.error('Error durante logout:', error);
+    } catch (err) {
+      console.error('Error durante logout:', err);
     } finally {
+      queryClient.clear();
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('token_type');
@@ -405,49 +592,6 @@ export function useAuth() {
     return token ? `${tokenType} ${token}` : null;
   };
 
-  // Eliminar duplicado y dejar solo una función useAuth y registerUser
-
-  const registerUser = async (data: { email: string; password: string }) => {
-    try {
-      // Crear FormData y agregar solo email y password
-      const form = new FormData();
-      form.append('email', data.email);
-      form.append('password', data.password);
-      const response = await authServices.signUp(form);
-      // Manejar respuesta genérica
-      if (response.status === 201) {
-        alert.showAlert({
-          type: 'success',
-          title: 'Registro exitoso',
-          content: 'El usuario ha sido registrado correctamente',
-        });
-        router.push('/login');
-      } else {
-        let errorMsg = 'No se pudo registrar el usuario';
-        if (
-          response.data &&
-          typeof response.data === 'object' &&
-          'message' in response.data
-        ) {
-          errorMsg = (response.data as any).message || errorMsg;
-        }
-        alert.showAlert({
-          type: 'error',
-          title: 'Error en el registro',
-          content: errorMsg,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      alert.showAlert({
-        type: 'error',
-        title: `Error en el registro del usuario`,
-        content: 'Ocurrió un error al momento del registro del usuario',
-      });
-    }
-  };
-
-  // Declarar validationInputEmail para evitar error de propiedad no encontrada
   const validationInputEmail = (
     value: string,
     input: string,
@@ -475,7 +619,10 @@ export function useAuth() {
     input: string,
     regex: RegExp = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ@.0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/,
   ) => {
-    let sanitizedValue: string | undefined = sanitizedValueInput(value, regex);
+    const sanitizedValue: string | undefined = sanitizedValueInput(
+      value,
+      regex,
+    );
     nextTick(() => {
       form?.setFieldValue(input, sanitizedValue);
     });
@@ -535,23 +682,13 @@ export function useAuth() {
       if (values.file_img && values.file_img.length > 0) {
         formData.append('file_img', values.file_img[0] as unknown as Blob);
       }
-      const response = await authServices.updateProfile(userInfo.id, formData);
-      if (response.statusCode === 200) {
-        alert.showAlert({
-          type: 'success',
-          title: 'Perfil actualizado',
-          content: 'El perfil se actualizó correctamente',
-        });
-        editMode.value = false;
-        await getDetailsProfile();
-      }
+
+      await updateProfileMutation.mutateAsync({
+        id: userInfo.id,
+        formData,
+      });
     } catch (err: any) {
       console.error('Error al actualizar el perfil:', err);
-      alert.showAlert({
-        type: 'error',
-        title: 'Error',
-        content: err.message || 'Error al actualizar el perfil',
-      });
     } finally {
       finishLoading();
     }
@@ -644,5 +781,11 @@ export function useAuth() {
     idPeople,
     idAddress,
     idDocument,
+    isProfilePending,
+    loginMutation,
+    registerMutation,
+    updateProfileMutation,
   };
 }
+
+export default useAuth;

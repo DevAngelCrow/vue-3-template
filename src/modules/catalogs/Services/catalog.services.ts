@@ -25,8 +25,15 @@ import { GeographicDivisionTypeForm } from '../interfaces/geographic-division-ty
 import { GeographicDivisionResponse } from '../interfaces/geographic-division/geographic-division.response.interface';
 import { GeographicDivisionForm } from '../interfaces/geographic-division/geographic-division.form.interface';
 
-interface paramsFilter {
-  active: boolean;
+interface paramsFilter extends paginateParams {
+  active?: boolean;
+  filter_name?: string | null;
+  filter?: string | null;
+  status?: boolean | null;
+  id_country?: string | null;
+  id_department?: string | null;
+  id_municipality?: string | null;
+  id_category?: string | null;
 }
 
 const getAllCountries = async (
@@ -85,7 +92,9 @@ const toggleDepartment = async (id: string) => {
   return response;
 };
 
-const getMunicipalities = async (params?: paginateParams | paramsFilter) => {
+const getMunicipalities = async (
+  params?: paginateParams | paramsFilter,
+): Promise<ApiResponseGeneric<MunicipalityResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<MunicipalityResponse>
   >('catalogs/municipalities', params);
@@ -116,7 +125,9 @@ const toggleMunicipality = async (id: string) => {
   return response;
 };
 
-const getDistricts = async (params: paginateParams) => {
+const getDistricts = async (
+  params?: paginateParams | paramsFilter,
+): Promise<ApiResponseGeneric<DistrictResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<DistrictResponse>>(
     'catalogs/districts',
     params,
@@ -148,7 +159,9 @@ const toggleDistrict = async (id: string) => {
   return response;
 };
 
-const getGlobalStatus = async (params?: paginateParams) => {
+const getGlobalStatus = async (
+  params?: paginateParams | paramsFilter,
+): Promise<ApiResponseGeneric<GlobalStatusResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<GlobalStatusResponse>
   >('catalogs/global-statuses/', params);
@@ -211,7 +224,7 @@ const patchCategoryStatus = async (id: string) => {
   return response;
 };
 const getDocumentTypes = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<DocumentTypeResponse>> => {
   const response = await httpClient.get<
     ApiResponseGeneric<DocumentTypeResponse>
@@ -243,7 +256,7 @@ const toggleDocumentType = async (id: string) => {
 };
 
 const getGenders = async (
-  params?: paginateParams,
+  params?: paginateParams | paramsFilter,
 ): Promise<ApiResponseGeneric<GenderResponse>> => {
   const response = await httpClient.get<ApiResponseGeneric<GenderResponse>>(
     'catalogs/genders',

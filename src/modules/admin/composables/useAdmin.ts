@@ -1,25 +1,55 @@
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { nextTick, reactive, ref } from 'vue';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 
 import adminServices from '@/core/services/index.services';
-import { useAlertStore, useLoaderStore } from '@/core/store';
+import { useAlertStore } from '@/core/store';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { TableHeaders } from '@/core/interfaces';
+import { createQueryKeys } from '@/core/utils/queryKeys';
 
 import { RouteForm } from '../interfaces/routes/route-form.interface';
 import { RouteParentAutocomplete } from '../interfaces/routes/route-parent-autocomplete-obj.interface';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 import { CategoryPermissionsResponse } from '../interfaces/role/role.category-permisions.response.interface';
 
-type FilterType = {
+export type FilterRouteType = {
   filter_name?: string;
   active?: boolean;
   show?: boolean;
   id_parent?: string;
   required_auth?: boolean;
 };
+
+export const routeKeys = createQueryKeys<
+  FilterRouteType & { page?: number; per_page?: number }
+>('admin-routes');
+
+export const parentRoutesKeys = createQueryKeys('admin-parent-routes');
+
+export const routeDetailKeys = createQueryKeys<{ id: string }>(
+  'admin-route-detail',
+);
+
+export const categoryPermissionsKeys = createQueryKeys<{ active?: boolean }>(
+  'admin-category-permissions',
+);
+
 export function useAdmin() {
+  const queryClient = useQueryClient();
+  const alert = useAlertStore();
+
+  const invalidRouteRegex = /[^A-Za-z0-9\-/]/g;
+  const routeValidRegex =
+    /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
+  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
+
   const {
     errors,
     defineField,
@@ -117,7 +147,6 @@ export function useAdmin() {
       alignHeaders: 'center',
       alignItems: 'center',
     },
-
     {
       field: 'show',
       header: 'Mostrar en menú',
@@ -132,7 +161,6 @@ export function useAdmin() {
       alignHeaders: 'center',
       alignItems: 'center',
     },
-
     {
       field: 'active',
       header: 'Estado',
@@ -167,23 +195,17 @@ export function useAdmin() {
     },
   ]);
 
-  const parentRoutes = ref<
-    { title: string; id: string; uri: string; name: string }[]
-  >([]);
-
-  const items = ref<RoutesResponse[] | undefined>([]);
   const pagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
+
   const permissionsPagination = reactive({
     page: 1,
     per_page: 10,
     total_items: 0,
   });
-  const { startLoading, finishLoading } = useLoaderStore();
-  const alert = useAlertStore();
 
   const [id, idAttrs] = defineField('id');
   const [name, nameAttrs] = defineField('name');
@@ -200,12 +222,22 @@ export function useAdmin() {
     defineField('permissions_ids');
   const [required_auth, required_authAttrs] = defineField('required_auth');
 
-  const filter = reactive<FilterType>({
+  const filter = reactive<FilterRouteType>({
+    filter_name: undefined,
     active: undefined,
     show: undefined,
     id_parent: undefined,
     required_auth: undefined,
   });
+
+  const appliedFilter = reactive<FilterRouteType>({
+    filter_name: undefined,
+    active: undefined,
+    show: undefined,
+    id_parent: undefined,
+    required_auth: undefined,
+  });
+
   const filter_permission = ref<{
     name: string;
     category?: {
@@ -214,12 +246,6 @@ export function useAdmin() {
       description: string;
     };
   }>({ name: '' });
-  const categories = ref<CategoryPermissionsResponse[]>([]);
-  const invalidRouteRegex = /[^A-Za-z0-9\-/]/g;
-  const routeValidRegex =
-    /^(?:\/|\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:\/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*)$/;
-
-  const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
   const permissionsList = ref<
     {
@@ -230,45 +256,64 @@ export function useAdmin() {
     }[]
   >([]);
 
-  const getRoutes = async () => {
-    try {
-      startLoading();
-      const params: {
-        page?: number;
-        per_page?: number;
-        name?: string;
-        active?: boolean;
-        show?: boolean;
-        id_parent?: string;
-        required_auth?: boolean;
-      } = {
+  // Query principal paginada de rutas
+  const {
+    data: routesQueryResult,
+    isPending,
+    isFetching,
+    refetch: refetchRoutes,
+  } = useQuery({
+    queryKey: computed(() =>
+      routeKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
-        name: filter.filter_name,
-        ...filter,
+        filter_name: appliedFilter.filter_name || undefined,
+        active: appliedFilter.active,
+        show: appliedFilter.show,
+        id_parent: appliedFilter.id_parent || undefined,
+        required_auth: appliedFilter.required_auth,
+      }),
+    ),
+    queryFn: async () => {
+      const params = {
+        page: pagination.page,
+        per_page: pagination.per_page,
+        name: appliedFilter.filter_name || undefined,
+        active: appliedFilter.active,
+        show: appliedFilter.show,
+        id_parent: appliedFilter.id_parent,
+        required_auth: appliedFilter.required_auth,
       };
       const response = await adminServices.getAllRoutes(params);
       if (response.statusCode === 200) {
-        pagination.page = response.data.current_page;
-        pagination.per_page = response.data.per_page;
-        pagination.total_items = response.data.total_items;
-        items.value = response.data.data;
+        return response.data;
       }
-      return [];
-    } catch (error) {
-      console.error('Error al obtener el listado de rutas', error);
-    } finally {
-      finishLoading();
-    }
-  };
+      return null;
+    },
+    placeholderData: keepPreviousData,
+  });
 
-  // Nueva función para cargar solo rutas padre
-  const loadParentRoutes = async () => {
-    try {
-      startLoading();
+  watch(
+    () => routesQueryResult.value,
+    newData => {
+      if (newData) {
+        pagination.total_items = newData.total_items ?? 0;
+      }
+    },
+    { immediate: true },
+  );
+
+  const items = computed<RoutesResponse[]>(
+    () => routesQueryResult.value?.data ?? [],
+  );
+
+  // Query de rutas padre (sin paginar) para selección en formularios y filtros
+  const { data: parentRoutesData, refetch: refetchParentRoutes } = useQuery({
+    queryKey: computed(() => parentRoutesKeys.all),
+    queryFn: async () => {
       const response = await adminServices.getAllRoutesWithOutPaginate();
-      if (response.statusCode === 200) {
-        parentRoutes.value = response.data
+      if (response.statusCode === 200 && response.data) {
+        return response.data
           .filter(item => item.parent === null || item.parent === undefined)
           .map(item => ({
             title: item.title,
@@ -277,15 +322,152 @@ export function useAdmin() {
             name: item.name,
           }));
       }
+      return [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const parentRoutes = computed(
+    () => parentRoutesData.value ?? [],
+  );
+
+  // Query de categorías de permisos
+  const { data: categoriesData, refetch: refetchCategories } = useQuery({
+    queryKey: computed(() => categoryPermissionsKeys.list({ active: true })),
+    queryFn: async () => {
+      const response = await adminServices.getCategoryPermissions({
+        active: true,
+      });
+      if (response.statusCode === 200 && response.data) {
+        return response.data.data;
+      }
+      return [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categories = computed<CategoryPermissionsResponse[]>(
+    () => categoriesData.value ?? [],
+  );
+
+  // Mutaciones TanStack Query
+  const addRouteMutation = useMutation({
+    mutationFn: (form: RouteForm) => {
+      if (form.id_parent) {
+        form.uri = `${form.uri}`;
+      }
+      return adminServices.addRoute({ ...form, active: true });
+    },
+    onSuccess: response => {
+      if (response.status === 201) {
+        queryClient.invalidateQueries({ queryKey: routeKeys.all });
+        queryClient.invalidateQueries({ queryKey: parentRoutesKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al agregar ruta:', error);
+    },
+  });
+
+  const editRouteMutation = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Omit<RouteForm, 'id'>;
+    }) => adminServices.editRoute(id, body),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: routeKeys.all });
+        queryClient.invalidateQueries({ queryKey: parentRoutesKeys.all });
+        queryClient.invalidateQueries({ queryKey: routeDetailKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al editar ruta:', error);
+    },
+  });
+
+  const toggleRouteMutation = useMutation({
+    mutationFn: (id: string) => adminServices.toggleRoute(id),
+    onSuccess: response => {
+      if (response.status === 200) {
+        queryClient.invalidateQueries({ queryKey: routeKeys.all });
+        queryClient.invalidateQueries({ queryKey: parentRoutesKeys.all });
+        alert.showAlert({
+          type: 'success',
+          title: `${response.data.message}`,
+          show: true,
+        });
+      }
+    },
+    onError: error => {
+      console.error('Error al alternar estado de ruta:', error);
+    },
+  });
+
+  const addRoute = async (form: RouteForm) => {
+    try {
+      const response = await addRouteMutation.mutateAsync(form);
+      return response.data;
     } catch (error) {
-      console.error('Error al cargar rutas padre', error);
-    } finally {
-      finishLoading();
+      console.error(error);
+      return undefined;
     }
   };
+
+  const editRoute = async (form: RouteForm) => {
+    try {
+      const { id, ...body } = form;
+      const response = await editRouteMutation.mutateAsync({
+        id: id!,
+        body,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  };
+
+  const toggleRoute = async (id: string) => {
+    try {
+      const response = await toggleRouteMutation.mutateAsync(id);
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  };
+
+  const getRoutes = async () => {
+    const result = await refetchRoutes();
+    return result.data?.data || [];
+  };
+
+  const loadParentRoutes = async () => {
+    const result = await refetchParentRoutes();
+    return result.data || [];
+  };
+
+  const getCategoryPermissions = async () => {
+    const result = await refetchCategories();
+    return result.data || [];
+  };
+
   const getRouteById = async (id: string) => {
     try {
-      startLoading();
       permissionsList.value = [];
       permissionsPagination.per_page = 0;
       permissionsPagination.total_items = 0;
@@ -299,71 +481,31 @@ export function useAdmin() {
       }
       return response;
     } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const addRoute = async (form: RouteForm) => {
-    try {
-      startLoading();
-      if (form.id_parent) {
-        form.uri = `${form.uri}`;
-      }
-      const response = await adminServices.addRoute({ ...form, active: true });
-      if (response.status === 201) {
-        getRoutes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const editRoute = async (form: RouteForm) => {
-    try {
-      startLoading();
-      const { id, ...body } = form;
-      const response = await adminServices.editRoute(id!, body);
-      if (response.status === 200) {
-        getRoutes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
+      console.error('Error al obtener ruta por ID:', error);
+      return null;
     }
   };
 
-  const toggleRoute = async (id: string) => {
+  const getPermissions = async () => {
     try {
-      startLoading();
-      const response = await adminServices.toggleRoute(id);
-      if (response.status === 200) {
-        getRoutes();
-        alert.showAlert({
-          type: 'success',
-          title: `${response.data.message}`,
-          show: true,
-        });
-        return response.data;
+      const filterParams = {
+        page: permissionsPagination.page,
+        per_page: permissionsPagination.per_page,
+        name: filter_permission.value.name
+          ? filter_permission.value.name
+          : undefined,
+        category_permission_id: filter_permission.value.category?.id,
+        active: true,
+      };
+      const response = await adminServices.getPermissions(filterParams);
+      if (response.statusCode === 200) {
+        permissionsList.value = response.data.data;
+        permissionsPagination.page = response.data.current_page;
+        permissionsPagination.per_page = response.data.per_page;
+        permissionsPagination.total_items = response.data.total_items;
       }
     } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
+      console.error('Error al obtener permisos:', error);
     }
   };
 
@@ -379,47 +521,7 @@ export function useAdmin() {
       getPermissions();
     }
   };
-  const getPermissions = async () => {
-    try {
-      startLoading();
-      const filter = {
-        page: permissionsPagination.page,
-        per_page: permissionsPagination.per_page,
-        name: filter_permission.value.name
-          ? filter_permission.value.name
-          : undefined,
-        category_permission_id: filter_permission.value.category?.id,
-        active: true,
-      };
-      const response = await adminServices.getPermissions(filter);
-      if (response.statusCode === 200) {
-        permissionsList.value = response.data.data;
-        permissionsPagination.page = response.data.current_page;
-        permissionsPagination.per_page = response.data.per_page;
-        permissionsPagination.total_items = response.data.total_items;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
-  const getCategoryPermissions = async () => {
-    try {
-      startLoading();
-      const filters = {
-        active: true,
-      };
-      const response = await adminServices.getCategoryPermissions(filters);
-      if (response.statusCode === 200) {
-        categories.value = response.data.data;
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      finishLoading();
-    }
-  };
+
   const validateInputUri = (
     value: string,
     input: string,
@@ -428,7 +530,7 @@ export function useAdmin() {
     const sanitizedValue = sanitizedValueInput(value, regex);
 
     if (!routeValidRegex.test(sanitizedValue)) {
-      console.error('Ruta invalida', sanitizedValue);
+      console.error('Ruta inválida', sanitizedValue);
     }
     nextTick(() => {
       setFieldValue(input, sanitizedValue);
@@ -463,7 +565,12 @@ export function useAdmin() {
     filter.show = undefined;
     filter.id_parent = undefined;
     filter.required_auth = undefined;
-    getRoutes();
+    pagination.page = 1;
+    appliedFilter.filter_name = undefined;
+    appliedFilter.active = undefined;
+    appliedFilter.show = undefined;
+    appliedFilter.id_parent = undefined;
+    appliedFilter.required_auth = undefined;
   };
 
   const setRouteItem = (value: RoutesResponse) => {
@@ -487,11 +594,16 @@ export function useAdmin() {
     setFieldValue('required_auth', value.required_auth);
   };
 
-  const findRoute = (value: FilterType) => {
-    if (value) {
-      getRoutes();
-    }
+  const findRoute = (value: FilterRouteType) => {
+    pagination.page = 1;
+    appliedFilter.filter_name =
+      (value.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.active = value.active ?? filter.active;
+    appliedFilter.show = value.show ?? filter.show;
+    appliedFilter.id_parent = value.id_parent ?? filter.id_parent;
+    appliedFilter.required_auth = value.required_auth ?? filter.required_auth;
   };
+
   return {
     getRoutes,
     loadParentRoutes,
@@ -535,6 +647,7 @@ export function useAdmin() {
     items,
     validateInputUri,
     filter,
+    appliedFilter,
     validateAlphaInput,
     cleanSearch,
     setRouteItem,
@@ -549,5 +662,12 @@ export function useAdmin() {
     filter_permission,
     getCategoryPermissions,
     categories,
+    isPending,
+    isFetching,
+    addRouteMutation,
+    editRouteMutation,
+    toggleRouteMutation,
   };
 }
+
+export default useAdmin;
