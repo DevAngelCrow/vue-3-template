@@ -288,12 +288,12 @@ const goBack = async () => {
   originalData.value = { ...data };
   setRoleItem(data);
 };
-watch(
-  () => permissionsPagination.page,
-  newValue => {
-    console.log('permissionsPagination.page changed:', newValue);
-  },
-);
+// watch(
+//   () => permissionsPagination.page,
+//   newValue => {
+//     console.log('permissionsPagination.page changed:', newValue);
+//   },
+// );
 onMounted(async () => {
   try {
     await getCategoryPermissions();
