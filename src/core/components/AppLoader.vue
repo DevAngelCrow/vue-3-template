@@ -51,7 +51,10 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   z-index: 9999;
-  background-color: var(--p-mask-background, rgba(0, 0, 0, 0.4));
+  background-color: var(
+    --p-mask-background,
+    color-mix(in srgb, var(--p-primary-950) 45%, transparent)
+  );
   display: flex;
   align-items: center;
   justify-content: center;

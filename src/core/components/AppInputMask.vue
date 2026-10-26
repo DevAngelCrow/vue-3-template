@@ -4,7 +4,7 @@
       <IconField class="w-full group">
         <InputIcon
           v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-red-600': invalid }]"
+          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
         />
         <InputMask
           class="w-full"
@@ -25,12 +25,12 @@
           :class="[
             appendIcon,
             'absolute right-4 top-5.5',
-            { 'text-red-600': invalid },
+            { 'text-danger-600': invalid },
           ]"
           @click="emit('click-end-icon')"
         />
       </IconField>
-      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+      <label :class="{ 'text-danger-600': invalid }" :for="inputId">
         {{ label }}
       </label>
     </FloatLabel>

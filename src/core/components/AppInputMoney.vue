@@ -4,7 +4,7 @@
       <IconField class="w-full group">
         <InputIcon
           v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-red-600': invalid }]"
+          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
         />
         <InputNumber
           class="w-full"
@@ -46,7 +46,7 @@
           </template>
         </InputNumber>
       </IconField>
-      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+      <label :class="{ 'text-danger-600': invalid }" :for="inputId">
         {{ label }}
       </label>
     </FloatLabel>

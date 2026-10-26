@@ -1,6 +1,6 @@
 <template>
   <AppModal
-    class="bg-[#282828] border-none h-full"
+    class="bg-surface-800 border-none h-full"
     :show="show"
     :width="'99%'"
     :title="documentName"
@@ -93,8 +93,8 @@ const conversion = (dataURI: string) => {
 
 const typesValidation = (types: string) => {
   const typesArray = types.replace(/\s/g, '').split(',');
-  const valid = typesArray.filter((item) => fileTypes.includes(item));
-  const invalid = typesArray.filter((item) => !fileTypes.includes(item));
+  const valid = typesArray.filter(item => fileTypes.includes(item));
+  const invalid = typesArray.filter(item => !fileTypes.includes(item));
   const message: Message = {
     valid_types: valid.join(','),
     invalid_types: invalid.join(','),

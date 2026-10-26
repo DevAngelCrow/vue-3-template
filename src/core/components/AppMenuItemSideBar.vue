@@ -13,7 +13,7 @@
             'flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 select-none group',
             isOpen(section.id)
               ? 'bg-primary-500/10 text-primary-950 shadow-xs'
-              : 'hover:bg-primary-50/80 text-neutral-700',
+              : 'hover:bg-primary-50/80 text-surface-700',
           ]"
           @click="toggleItem(section.id)"
         >
@@ -38,8 +38,10 @@
             icon="pi pi-chevron-down"
             variant="text"
             rounded
-            class="bg-transparent border-none text-neutral-400 group-hover:text-neutral-700 p-1 w-7 h-7 transform transition-transform duration-200 shrink-0"
-            :class="isOpen(section.id) ? 'rotate-180 text-primary-700' : 'rotate-0'"
+            class="bg-transparent border-none text-surface-400 group-hover:text-surface-700 p-1 w-7 h-7 transform transition-transform duration-200 shrink-0"
+            :class="
+              isOpen(section.id) ? 'rotate-180 text-primary-700' : 'rotate-0'
+            "
             @click.stop="toggleItem(section.id)"
           />
         </div>
@@ -49,9 +51,7 @@
             v-if="isOpen(section.id)"
             class="w-full pl-5 pr-1 mt-1 border-l-2 border-primary-400/50 ml-4 space-y-1"
           >
-            <AppMenuItemSideBar
-              :mapped-menu="section.children || []"
-            />
+            <AppMenuItemSideBar :mapped-menu="section.children || []" />
           </div>
         </Transition>
       </div>
@@ -70,7 +70,7 @@
             'flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl transition-all duration-200 group select-none cursor-pointer',
             isActive
               ? 'bg-primary-600 text-white font-semibold shadow-xs'
-              : 'hover:bg-primary-50/80 text-neutral-700 hover:text-primary-950 font-medium',
+              : 'hover:bg-primary-50/80 text-surface-700 hover:text-primary-950 font-medium',
           ]"
         >
           <div
@@ -78,7 +78,7 @@
               'w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0',
               isActive
                 ? 'bg-white/20 text-white'
-                : 'bg-neutral-100 text-neutral-500 group-hover:bg-primary-100 group-hover:text-primary-700',
+                : 'bg-surface-100 text-surface-500 group-hover:bg-primary-100 group-hover:text-primary-700',
             ]"
           >
             <i v-if="section.icon" :class="[section.icon, 'text-xs']"></i>

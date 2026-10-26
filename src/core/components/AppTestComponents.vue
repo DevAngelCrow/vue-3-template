@@ -158,11 +158,11 @@ watch(fecha, newVale => {
       </div>
     </template>
   </AppDataTable> -->
-  <AppCircularCounter :selected="3" :total="10" color="#082f49" />
+  <AppCircularCounter :selected="3" :total="10" color="primary" />
 </template>
 
 <style scoped>
 .read-the-docs {
-  color: #888;
+  color: var(--p-surface-500);
 }
 </style>

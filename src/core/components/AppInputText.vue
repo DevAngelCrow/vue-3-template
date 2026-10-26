@@ -4,7 +4,7 @@
       <IconField class="w-full group">
         <InputIcon
           v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-red-600': invalid }]"
+          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
         />
         <InputText
           class="w-full"
@@ -26,13 +26,13 @@
           :class="[
             appendIconLocal,
             'absolute right-4 top-5.5',
-            { 'text-red-600': invalid },
+            { 'text-danger-600': invalid },
             { 'hover:cursor-pointer': type === 'password' },
           ]"
           @click="clickSecondIcon"
         />
       </IconField>
-      <label :class="{ 'text-red-600': invalid }" :for="inputId">
+      <label :class="{ 'text-danger-600': invalid }" :for="inputId">
         {{ label }}
       </label>
     </FloatLabel>

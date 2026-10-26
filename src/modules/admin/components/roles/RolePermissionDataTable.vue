@@ -44,7 +44,6 @@
           <AppCircularCounter
             :selected="selectedPermissionsIds.size"
             :total="totalPermissions"
-            color="#082f49"
             size="50px"
             v-tooltip.left="{ value: tooltipContent, escape: false }"
           />

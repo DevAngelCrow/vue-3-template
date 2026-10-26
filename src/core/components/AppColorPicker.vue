@@ -33,7 +33,7 @@
             />
             <InputIcon :class="appendIconDynamic" @click="clearable" />
           </IconField>
-          <label :class="{ 'text-red-600': invalid }" :for="inputId">
+          <label :class="{ 'text-danger-600': invalid }" :for="inputId">
             {{ label }}
           </label>
         </FloatLabel>

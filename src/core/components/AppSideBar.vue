@@ -1,7 +1,7 @@
 <template>
   <Drawer
     v-model:visible="isVisible"
-    class="bg-white/95 backdrop-blur-xl border-r border-neutral-200 shadow-2xl w-80 max-w-[85vw]"
+    class="bg-white/95 backdrop-blur-xl border-r border-surface-200 shadow-2xl w-80 max-w-[85vw]"
     dismissable
     block-scroll
     :pt="{
@@ -14,10 +14,12 @@
     }"
   >
     <template #container="{ closeCallback }">
-      <div class="flex flex-col h-full bg-gradient-to-b from-primary-50/30 via-white to-white">
+      <div
+        class="flex flex-col h-full bg-gradient-to-b from-primary-50/30 via-white to-white"
+      >
         <!-- Encabezado del Sidebar con estilo moderno y badge de marca -->
         <div
-          class="flex items-center justify-between px-5 py-4 border-b border-neutral-200/80 bg-gradient-to-r from-primary-950 via-primary-900 to-primary-950 text-white shrink-0 shadow-xs"
+          class="flex items-center justify-between px-5 py-4 border-b border-surface-200/80 bg-gradient-to-r from-primary-950 via-primary-900 to-primary-950 text-white shrink-0 shadow-xs"
         >
           <div class="flex items-center gap-3">
             <div
@@ -26,10 +28,14 @@
               <i class="pi pi-compass text-white text-base"></i>
             </div>
             <div class="flex flex-col">
-              <span class="font-bold text-base tracking-tight text-white leading-tight">
+              <span
+                class="font-bold text-base tracking-tight text-white leading-tight"
+              >
                 Navegación
               </span>
-              <span class="text-[11px] text-primary-200/70 font-medium leading-none mt-0.5">
+              <span
+                class="text-[11px] text-primary-200/70 font-medium leading-none mt-0.5"
+              >
                 Menú del sistema
               </span>
             </div>
@@ -53,11 +59,15 @@
 
         <!-- Pie del Drawer con indicador de versión y estado -->
         <div
-          class="p-3.5 border-t border-neutral-200/80 bg-neutral-50/80 flex items-center justify-between text-xs text-neutral-500 shrink-0"
+          class="p-3.5 border-t border-surface-200/80 bg-surface-50/80 flex items-center justify-between text-xs text-surface-500 shrink-0"
         >
           <span class="font-medium text-[11px]">Template Suite</span>
-          <span class="flex items-center gap-1.5 text-[11px] font-semibold text-primary-700 bg-primary-100/70 px-2 py-0.5 rounded-full">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
+          <span
+            class="flex items-center gap-1.5 text-[11px] font-semibold text-primary-700 bg-primary-100/70 px-2 py-0.5 rounded-full"
+          >
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"
+            ></span>
             Sistema Activo
           </span>
         </div>

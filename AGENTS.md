@@ -77,7 +77,11 @@ src/
 2. **Componentes de Acción**:
    - Utilizar el componente `Button` de PrimeVue para acciones primarias, secundarias, botones con icono y estados (`variant="text"`, `:severity="data?.active ? 'danger' : 'success'"`).
    - Utilizar directiva `v-tooltip.bottom` para dar contexto accesible a botones de acciones.
-3. **Modales de Formulario Desacoplados**:
+3. **Tokens de Color (obligatorio)**:
+   - Usar únicamente `primary-*`, `surface-*` (gris slate), `success-*`, `danger-*` o variables `--p-*` definidas en `customTheme.ts`.
+   - Prohibido usar hex/rgb fijos o paletas Tailwind directas (`red-600`, `green-600`, `slate-*`, `gray-*`, `neutral-*`) en componentes. Estados de error: `text-danger-600` / `border-danger-600`.
+   - Los tokens `success`/`danger` se mapean a Tailwind en `src/core/assets/style.css`.
+4. **Modales de Formulario Desacoplados**:
    - Los modales deben gestionar un objeto de estado reactivo `modalState`:
      ```ts
      const modalState = reactive<{

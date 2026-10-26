@@ -4,7 +4,7 @@
       <IconField class="w-full group">
         <InputIcon
           :class="
-            invalid ? `${prependInnerIcon} text-red-600` : prependInnerIcon
+            invalid ? `${prependInnerIcon} text-danger-600` : prependInnerIcon
           "
           v-if="showIcon"
           id="append-icon"
@@ -29,14 +29,14 @@
           v-if="showIcon"
           :class="
             invalid
-              ? ` ${appendIconLocal} text-red-600 ${passwordInputType} absolute right-4 top-5.5`
+              ? ` ${appendIconLocal} text-danger-600 ${passwordInputType} absolute right-4 top-5.5`
               : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
           "
           id="append-icon"
           @click="clickSecondIcon"
         />
       </IconField>
-      <label :class="invalid ? 'text-red-600' : ''" :for="inputId">{{
+      <label :class="invalid ? 'text-danger-600' : ''" :for="inputId">{{
         label
       }}</label>
     </FloatLabel>

@@ -1,9 +1,11 @@
 <template>
   <footer
-    class="w-full bg-gradient-to-r from-primary-950 via-primary-900 to-primary-950 border-t border-primary-500/20 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] backdrop-blur-md relative z-30 px-4 sm:px-6 py-3 md:py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs"
+    class="w-full bg-gradient-to-r from-primary-950 via-primary-900 to-primary-950 border-t border-primary-500/20 shadow-[0_-4px_20px_color-mix(in_srgb,var(--p-primary-950)_25%,transparent)] backdrop-blur-md relative z-30 px-4 sm:px-6 py-3 md:py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs"
   >
     <!-- Izquierda: Marca, Logo y Derechos de autor -->
-    <div class="flex items-center gap-2.5 shrink-0 flex-wrap justify-center sm:justify-start">
+    <div
+      class="flex items-center gap-2.5 shrink-0 flex-wrap justify-center sm:justify-start"
+    >
       <slot name="brand">
         <div
           class="w-6 h-6 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0"

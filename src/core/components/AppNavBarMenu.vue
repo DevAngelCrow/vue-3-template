@@ -38,7 +38,9 @@
                   : 'text-primary-300/80 group-hover:text-primary-200',
               ]"
             ></i>
-            <span class="text-primary-100 group-hover:text-white">{{ item.label }}</span>
+            <span class="text-primary-100 group-hover:text-white">{{
+              item.label
+            }}</span>
             <i
               v-if="hasSubmenu"
               class="pi pi-chevron-down ml-1.5 text-[10px] text-primary-200/70 transition-transform duration-200 group-hover:rotate-180"
@@ -55,7 +57,7 @@
               'group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors select-none cursor-pointer',
               isActive
                 ? 'bg-primary-100/80 text-primary-950 font-semibold'
-                : 'text-neutral-700 hover:text-primary-950 hover:bg-primary-50',
+                : 'text-surface-700 hover:text-primary-950 hover:bg-primary-50',
             ]"
             @click="navigate($event)"
           >
@@ -65,14 +67,20 @@
                 :class="[
                   item.icon,
                   'text-base transition-colors',
-                  isActive ? 'text-primary-700' : 'text-primary-600 group-hover:text-primary-700',
+                  isActive
+                    ? 'text-primary-700'
+                    : 'text-primary-600 group-hover:text-primary-700',
                 ]"
               ></i>
-              <span class="text-neutral-800 group-hover:text-primary-950 font-medium">
+              <span
+                class="text-surface-800 group-hover:text-primary-950 font-medium"
+              >
                 {{ item.label }}
               </span>
             </div>
-            <i class="pi pi-angle-right text-xs text-neutral-300 group-hover:text-primary-500 transition-colors"></i>
+            <i
+              class="pi pi-angle-right text-xs text-surface-300 group-hover:text-primary-500 transition-colors"
+            ></i>
           </a>
         </router-link>
 
@@ -91,7 +99,9 @@
               'text-sm text-primary-300/80 group-hover:text-primary-200 transition-colors',
             ]"
           ></i>
-          <span class="text-primary-100 group-hover:text-white">{{ item.label }}</span>
+          <span class="text-primary-100 group-hover:text-white">{{
+            item.label
+          }}</span>
           <i
             v-if="hasSubmenu"
             class="pi pi-chevron-down ml-1.5 text-[10px] text-primary-200/70 transition-transform duration-200 group-hover:rotate-180"
@@ -101,10 +111,13 @@
         <!-- Submenú sin URI -->
         <div
           v-else
-          class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium text-neutral-700 hover:text-primary-950 hover:bg-primary-50 transition-colors select-none cursor-pointer"
+          class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium text-surface-700 hover:text-primary-950 hover:bg-primary-50 transition-colors select-none cursor-pointer"
         >
-          <i v-if="item.icon" :class="[item.icon, 'text-primary-600 text-base']"></i>
-          <span class="text-neutral-800 font-medium">{{ item.label }}</span>
+          <i
+            v-if="item.icon"
+            :class="[item.icon, 'text-primary-600 text-base']"
+          ></i>
+          <span class="text-surface-800 font-medium">{{ item.label }}</span>
         </div>
       </template>
     </Menubar>
@@ -150,7 +163,8 @@ const checkWrapMenu = () => {
         '.p-menubar-root-list',
       ) as HTMLElement | null;
 
-      const navContainer = menuBarRef.value?.$el?.parentElement as HTMLElement | null;
+      const navContainer = menuBarRef.value?.$el
+        ?.parentElement as HTMLElement | null;
 
       if (!root || !navContainer) {
         layoutStore.setOverflowMenuItems([]);
@@ -233,7 +247,12 @@ onBeforeUnmount(() => {
   color: inherit !important;
 }
 
-:deep(.p-menubar-root-list > .p-menubar-item > .p-menubar-item-content > .p-menubar-item-link) {
+:deep(
+  .p-menubar-root-list
+    > .p-menubar-item
+    > .p-menubar-item-content
+    > .p-menubar-item-link
+) {
   background: transparent !important;
 }
 
@@ -246,9 +265,13 @@ onBeforeUnmount(() => {
   margin-top: 0.375rem !important;
   z-index: 9999 !important;
   border-radius: 1rem !important;
-  border: 1px solid rgba(229, 231, 235, 0.95) !important;
-  background: #ffffff !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid var(--p-surface-200) !important;
+  background: var(--p-surface-0) !important;
+  box-shadow:
+    \r\n0 20px 25px -5px
+      color-mix(in srgb, var(--p-primary-950) 15%, transparent),
+    \r\n0 8px 10px -6px
+      color-mix(in srgb, var(--p-primary-950) 10%, transparent) !important;
   padding: 0.375rem !important;
   min-width: 15rem !important;
 }

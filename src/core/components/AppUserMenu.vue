@@ -44,7 +44,7 @@
       id="user_popup_menu"
       :model="menuModel"
       :popup="true"
-      class="mt-2 min-w-64 p-2 shadow-2xl rounded-2xl border border-neutral-200/80 bg-white/95 backdrop-blur-md"
+      class="mt-2 min-w-64 p-2 shadow-2xl rounded-2xl border border-surface-200/80 bg-white/95 backdrop-blur-md"
     >
       <template #start>
         <!-- Tarjeta de presentación del usuario actual -->
@@ -64,10 +64,10 @@
           </div>
 
           <div class="flex flex-col overflow-hidden">
-            <span class="text-sm font-bold text-neutral-800 truncate">
+            <span class="text-sm font-bold text-surface-800 truncate">
               {{ currentUserName }}
             </span>
-            <span class="text-xs text-neutral-500 truncate">
+            <span class="text-xs text-surface-500 truncate">
               Sesión activa
             </span>
             <span
@@ -82,7 +82,7 @@
       <template #item="{ item, props }">
         <a
           v-ripple
-          class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-700 hover:text-primary-950 hover:bg-primary-50/80 transition-all cursor-pointer group"
+          class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-surface-700 hover:text-primary-950 hover:bg-primary-50/80 transition-all cursor-pointer group"
           v-bind="props.action"
         >
           <div class="flex items-center gap-2.5">
@@ -90,13 +90,13 @@
               v-if="item.icon"
               :class="[
                 item.icon,
-                'text-base text-neutral-400 group-hover:text-primary-600 transition-colors',
+                'text-base text-surface-400 group-hover:text-primary-600 transition-colors',
               ]"
             ></i>
             <span>{{ item.label }}</span>
           </div>
           <i
-            class="pi pi-angle-right text-xs text-neutral-300 group-hover:text-primary-500 transition-colors"
+            class="pi pi-angle-right text-xs text-surface-300 group-hover:text-primary-500 transition-colors"
           ></i>
         </a>
       </template>
