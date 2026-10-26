@@ -13,7 +13,6 @@ export default [
     ignores: [
       'node_modules/**',
       'dist/**',
-      'documentation-astro/**',
       'commitlint.config.ts', // Generalmente no se linta
       'eslint.config.ts', // Generalmente no se linta a sí mismo
     ],
