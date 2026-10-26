@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import Chip from 'primevue/chip';
 import { computed } from 'vue';
 
 defineOptions({ name: 'AppStatusChip' });
