@@ -57,75 +57,77 @@
           ><span>Agregar</span></Button
         >
       </div>
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="items"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="goToRouteMaintenance(data.id)"
-              v-tooltip.bottom="'Ver detalle'"
-            ></Button>
-            <Button
-              class="rounded-full"
-              variant="text"
-              :severity="data.active ? 'danger' : 'success'"
-              icon="pi pi-trash"
-              @click="openModal('delete', data)"
-              v-tooltip.bottom="'Eliminar'"
-            ></Button>
-          </div>
-        </template>
-        <template #body-icon="{ data }">
-          <i :class="data.icon"></i>
-        </template>
-        <template #body-active="{ data }">
-          <AppChipStatus
-            :label="data?.status?.name"
-            :background-color="data?.status?.state_color"
-            :text-color="data?.status?.text_color"
-          >
-          </AppChipStatus>
-        </template>
-        <template #body-show="{ data }">
-          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="items"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="goToRouteMaintenance(data.id)"
+                v-tooltip.bottom="'Ver detalle'"
+              ></Button>
+              <Button
+                class="rounded-full"
+                variant="text"
+                :severity="data.active ? 'danger' : 'success'"
+                icon="pi pi-trash"
+                @click="openModal('delete', data)"
+                v-tooltip.bottom="'Eliminar'"
+              ></Button>
+            </div>
+          </template>
+          <template #body-icon="{ data }">
+            <i :class="data.icon"></i>
+          </template>
+          <template #body-active="{ data }">
+            <AppChipStatus
+              :label="data?.status?.name"
+              :background-color="data?.status?.state_color"
+              :text-color="data?.status?.text_color"
+            >
+            </AppChipStatus>
+          </template>
+          <template #body-show="{ data }">
+            <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <RouteFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
 <script setup lang="ts">
 import { Button } from 'primevue';
-import {
-  computed,
-  nextTick,
-  reactive,
-  watch,
-  provide,
-  ref,
-} from 'vue';
+import { computed, nextTick, reactive, watch, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AppChipStatus from '@/core/components/AppChipStatus.vue';
+import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 import RouteFormModal from '../components/routes/RouteFormModal.vue';
 
+const storeLoader = useLoaderStore();
 const adminInstance = useAdmin();
 provide('useAdmin', adminInstance);
 

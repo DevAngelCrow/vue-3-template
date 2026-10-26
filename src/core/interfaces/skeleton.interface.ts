@@ -1,3 +1,5 @@
+import type { TableHeaders } from './datatable.interface';
+
 export type SkeletonVariant =
   | 'text'
   | 'title'
@@ -8,6 +10,7 @@ export type SkeletonVariant =
   | 'card'
   | 'image'
   | 'actions'
+  | 'table'
   | 'custom';
 
 export type SkeletonShape = 'rectangle' | 'circle';
@@ -69,6 +72,29 @@ export interface AppSkeletonProps {
    * @default 1
    */
   count?: number;
+
+  /**
+   * Número de filas para la variante 'table'.
+   * @default 5
+   */
+  rows?: number;
+
+  /**
+   * Número de columnas para la variante 'table' (cuando no se pasan headers).
+   * @default 4
+   */
+  columns?: number;
+
+  /**
+   * Encabezados de tabla para replicar columnas, anchos y tipos visuales.
+   */
+  headers?: TableHeaders[];
+
+  /**
+   * Indica si se simula el paginador inferior en la variante 'table'.
+   * @default true
+   */
+  showPaginator?: boolean;
 
   /**
    * Clases CSS opcionales para el contenedor o elemento.

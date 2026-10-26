@@ -52,58 +52,65 @@
         >
       </div>
 
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="categoryStatuses"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="openModal('view', data)"
-              v-tooltip.bottom="'Ver Detalle'"
-            ></Button>
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-pencil"
-              @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar'"
-              :disabled="!data?.active"
-            ></Button>
-            <Button
-              class="rounded-full"
-              variant="text"
-              :severity="data?.active ? 'danger' : 'success'"
-              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
-              @click="openModal('delete', data)"
-              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
-            ></Button>
-          </div>
-        </template>
-        <template #body-icon="{ data }">
-          <i :class="data.icon"></i>
-        </template>
-        <template #body-active="{ data }">
-          <AppChipStatus
-            :label="data?.status?.name"
-            :backgroundColor="data?.status?.state_color"
-            :textColor="data?.status?.text_color"
-          >
-          </AppChipStatus>
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="categoryStatuses"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="openModal('view', data)"
+                v-tooltip.bottom="'Ver Detalle'"
+              ></Button>
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-pencil"
+                @click="openModal('edit', data)"
+                v-tooltip.bottom="'Editar'"
+                :disabled="!data?.active"
+              ></Button>
+              <Button
+                class="rounded-full"
+                variant="text"
+                :severity="data?.active ? 'danger' : 'success'"
+                :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+                @click="openModal('delete', data)"
+                v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
+              ></Button>
+            </div>
+          </template>
+          <template #body-icon="{ data }">
+            <i :class="data.icon"></i>
+          </template>
+          <template #body-active="{ data }">
+            <AppChipStatus
+              :label="data?.status?.name"
+              :backgroundColor="data?.status?.state_color"
+              :textColor="data?.status?.text_color"
+            >
+            </AppChipStatus>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <CategoryStatusFormModal
       :modal-state="modalState"
@@ -115,10 +122,13 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
+import { useLoaderStore } from '@/core/store';
+
 import { useCategoryStatus } from '../../composables/useCategoryStatus';
 import { CategoryStatusResponse } from '../../interfaces/category-status/category-status.response.interface';
 import CategoryStatusFormModal from '../components/CategoryStatusFormModal.vue';
 
+const storeLoader = useLoaderStore();
 const categoryStatusInstance = useCategoryStatus();
 provide('useCategoryStatus', categoryStatusInstance);
 

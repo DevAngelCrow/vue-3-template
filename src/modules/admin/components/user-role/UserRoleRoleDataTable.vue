@@ -36,42 +36,49 @@
         </div>
       </div>
     </div>
-    <AppDataTable
-      class="w-full"
+    <AppSkeleton
+      :loading="storeLoader.isFetching"
+      variant="table"
+      :rows="rolesPagination.per_page"
       :headers="headersRole"
-      :items="roleItemsFormatted"
-      :paginator="true"
-      :show-per-page-options="true"
-      :per-page-options="[10, 20, 50, 100]"
-      :per_page="rolesPagination.per_page"
-      :total_items="totalRoles"
-      :page="rolesPagination.page"
-      @page-update="handlePagination"
-      @per-page-update="handlePerPagePagination"
     >
-      <template #header-Seleccion>
-        <div class="flex justify-center flex-row">
-          <AppCheckBox
-            :readonly="props.readonly"
-            binary
-            @update:model-value="checkAll"
-            v-model="selectAll"
-          />
-          <span>{{ `Selección (${allSelectionsPerPage})` }}</span>
-        </div>
-      </template>
-      <template #body-state="{ data, index }">
-        <div class="flex justify-center">
-          <AppCheckBox
-            :readonly="props.readonly"
-            binary
-            :model-value="isRoleSelected(data.id)"
-            :id="`${index}`"
-            @update:model-value="toggleRole(data.id, $event)"
-          />
-        </div>
-      </template>
-    </AppDataTable>
+      <AppDataTable
+        class="w-full"
+        :headers="headersRole"
+        :items="roleItemsFormatted"
+        :paginator="true"
+        :show-per-page-options="true"
+        :per-page-options="[10, 20, 50, 100]"
+        :per_page="rolesPagination.per_page"
+        :total_items="totalRoles"
+        :page="rolesPagination.page"
+        @page-update="handlePagination"
+        @per-page-update="handlePerPagePagination"
+      >
+        <template #header-Seleccion>
+          <div class="flex justify-center flex-row">
+            <AppCheckBox
+              :readonly="props.readonly"
+              binary
+              @update:model-value="checkAll"
+              v-model="selectAll"
+            />
+            <span>{{ `Selección (${allSelectionsPerPage})` }}</span>
+          </div>
+        </template>
+        <template #body-state="{ data, index }">
+          <div class="flex justify-center">
+            <AppCheckBox
+              :readonly="props.readonly"
+              binary
+              :model-value="isRoleSelected(data.id)"
+              :id="`${index}`"
+              @update:model-value="toggleRole(data.id, $event)"
+            />
+          </div>
+        </template>
+      </AppDataTable>
+    </AppSkeleton>
   </div>
 </template>
 <script setup lang="ts">
@@ -86,10 +93,13 @@ import {
 } from 'vue';
 import { Button } from 'primevue';
 
+import { useLoaderStore } from '@/core/store';
+
 import { useUserRole } from '../../composables/useUserRole';
 
 type UserRoleType = ReturnType<typeof useUserRole>;
 
+const storeLoader = useLoaderStore();
 const userRoleInstance = inject<UserRoleType>('useUserRole')!;
 
 const props = defineProps<{

@@ -33,28 +33,35 @@
           >
         </div>
       </div>
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="genders"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        @page-update="handlePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="openModal(data)"
-              v-tooltip.bottom="'Ver detalle'"
-            ></Button>
-          </div>
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="genders"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          @page-update="handlePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="openModal(data)"
+                v-tooltip.bottom="'Ver detalle'"
+              ></Button>
+            </div>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <GenderFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
@@ -63,9 +70,13 @@
 import { reactive } from 'vue';
 import { Button } from 'primevue';
 
+import { useLoaderStore } from '@/core/store';
+
 import { useGender } from '../../composables/useGender';
 import GenderFormModal from '../components/GenderFormModal.vue';
 import { GenderResponse } from '../../interfaces/gender/gender.response.interface';
+
+const storeLoader = useLoaderStore();
 
 const {
   filter_name,

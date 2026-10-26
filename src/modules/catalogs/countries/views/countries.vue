@@ -49,62 +49,77 @@
           ><span>Agregar</span>
         </Button>
       </div>
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="items"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="openModal('details', data)"
-              v-tooltip.bottom="'Ver Detalle'"
-            ></Button>
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-pencil"
-              @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar'"
-            ></Button>
-            <Button
-              class="rounded-full"
-              variant="text"
-              :severity="data?.active ? 'danger' : 'success'"
-              :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
-              @click="openModalEstado('changeStatus', data)"
-              v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
-            ></Button>
-          </div>
-        </template>
-        <template #body-active="{ data }">
-          <AppChipStatus
-            :label="data?.status?.name"
-            :background-color="data?.status?.state_color"
-            :textColor="data?.status?.text_color"
-          >
-          </AppChipStatus>
-        </template>
-        <template #body-name="{data}">
-          <div class="flex items-center gap-2">
-            <span v-if="data.iso2" class="text-lg">
-              <span :class="`fi fi-${data.iso2.toLowerCase()}`"  style="width: 1.5em; height: 1.1em; display: inline-block; border-radius: 2px;"></span>
-            </span>
-            <span>{{ data.name }}</span>
-          </div>
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="items"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="openModal('details', data)"
+                v-tooltip.bottom="'Ver Detalle'"
+              ></Button>
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-pencil"
+                @click="openModal('edit', data)"
+                v-tooltip.bottom="'Editar'"
+              ></Button>
+              <Button
+                class="rounded-full"
+                variant="text"
+                :severity="data?.active ? 'danger' : 'success'"
+                :icon="data?.active ? 'pi pi-trash' : 'pi pi-check-circle'"
+                @click="openModalEstado('changeStatus', data)"
+                v-tooltip.bottom="data?.active ? 'Desactivar' : 'Activar'"
+              ></Button>
+            </div>
+          </template>
+          <template #body-active="{ data }">
+            <AppChipStatus
+              :label="data?.status?.name"
+              :background-color="data?.status?.state_color"
+              :textColor="data?.status?.text_color"
+            >
+            </AppChipStatus>
+          </template>
+          <template #body-name="{ data }">
+            <div class="flex items-center gap-2">
+              <span v-if="data.iso2" class="text-lg">
+                <span
+                  :class="`fi fi-${data.iso2.toLowerCase()}`"
+                  style="
+                    width: 1.5em;
+                    height: 1.1em;
+                    display: inline-block;
+                    border-radius: 2px;
+                  "
+                ></span>
+              </span>
+              <span>{{ data.name }}</span>
+            </div>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <AppModal
       :show="showModal"
@@ -210,7 +225,8 @@ const showModalCambioStatus = ref<boolean>(false);
 const idCountry = ref<string>();
 
 /** Zona de Variables */
-const { startLoading, finishLoading } = useLoaderStore();
+const storeLoader = useLoaderStore();
+const { startLoading, finishLoading } = storeLoader;
 const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   // Resetear todos los estados
   isMode.value = false;

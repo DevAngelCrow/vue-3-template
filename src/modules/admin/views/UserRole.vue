@@ -33,54 +33,61 @@
           :icon="iconFilter"
         ></Button>
       </div>
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="users"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="openModal('view', data)"
-              v-tooltip.bottom="'Ver roles'"
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="users"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="openModal('view', data)"
+                v-tooltip.bottom="'Ver roles'"
+              />
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-pencil"
+                @click="openModal('edit', data)"
+                v-tooltip.bottom="'Editar roles'"
+              />
+            </div>
+          </template>
+          <template #body-is_validated="{ data }">
+            <i
+              :class="
+                data.is_validated
+                  ? 'pi pi-check-circle text-green-500'
+                  : 'pi pi-times-circle text-red-500'
+              "
             />
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-pencil"
-              @click="openModal('edit', data)"
-              v-tooltip.bottom="'Editar roles'"
+          </template>
+          <template #body-status.name="{ data }">
+            <AppChipStatus
+              :label="data?.status?.name"
+              :background-color="data?.status?.state_color"
+              :text-color="data?.status?.text_color"
             />
-          </div>
-        </template>
-        <template #body-is_validated="{ data }">
-          <i
-            :class="
-              data.is_validated
-                ? 'pi pi-check-circle text-green-500'
-                : 'pi pi-times-circle text-red-500'
-            "
-          />
-        </template>
-        <template #body-status.name="{ data }">
-          <AppChipStatus
-            :label="data?.status?.name"
-            :background-color="data?.status?.state_color"
-            :text-color="data?.status?.text_color"
-          />
-        </template>
-      </AppDataTable>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <UserRoleFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
@@ -89,10 +96,13 @@
 import { Button } from 'primevue';
 import { computed, provide, reactive } from 'vue';
 
+import { useLoaderStore } from '@/core/store';
+
 import { useUserRole } from '../composables/useUserRole';
 import { UsersResponse } from '../interfaces/user-role/users.response.interface';
 import UserRoleFormModal from '../components/user-role/UserRoleFormModal.vue';
 
+const storeLoader = useLoaderStore();
 const userRoleInstance = useUserRole();
 provide('useUserRole', userRoleInstance);
 
@@ -126,8 +136,6 @@ const modalState = reactive<{
   userName: '',
   userEmail: '',
 });
-
-
 
 const openModal = async (action: 'view' | 'edit', data: UsersResponse) => {
   modalState.selectedItem = data.id;

@@ -50,61 +50,68 @@
           ><span>Agregar</span></Button
         >
       </div>
-      <AppDataTable
-        class="w-full"
+      <AppSkeleton
+        :loading="storeLoader.isFetching"
+        variant="table"
+        :rows="pagination.per_page"
         :headers="headers"
-        :items="role"
-        :paginator="true"
-        :per_page="pagination.per_page"
-        :total_items="pagination.total_items"
-        :page="pagination.page"
-        :show-per-page-options="true"
-        :per-page-options="[10, 20, 50, 100]"
-        @page-update="handlePagination"
-        @per-page-update="handlePerPagePagination"
       >
-        <template #body-acciones="{ data }">
-          <div class="flex gap-0 justify-center">
-            <Button
-              class="rounded-full mx-0 my-0 px-0 py-0"
-              variant="text"
-              icon="pi pi-eye"
-              @click="goToRoleMaintenance(data.id)"
-              v-tooltip.bottom="'Ver detalle'"
-            ></Button>
-            <Button
-              class="rounded-full"
-              variant="text"
-              :severity="
-                data?.status?.name === 'Inactivo' ? 'success' : 'danger'
-              "
-              :icon="
-                data?.status?.name === 'Inactivo'
-                  ? 'pi pi-check-circle'
-                  : 'pi pi-trash'
-              "
-              @click="openModal('delete', data)"
-              v-tooltip.bottom="
-                data?.status?.name === 'Inactivo' ? 'Activar' : 'Desactivar'
-              "
-            ></Button>
-          </div>
-        </template>
-        <template #body-icon="{ data }">
-          <i :class="data.icon"></i>
-        </template>
-        <template #body-status.name="{ data }">
-          <AppChipStatus
-            :label="data?.status?.name"
-            :background-color="data?.status?.state_color"
-            :text-color="data?.status?.text_color"
-          >
-          </AppChipStatus>
-        </template>
-        <template #body-show="{ data }">
-          <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          class="w-full"
+          :headers="headers"
+          :items="role"
+          :paginator="true"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
+          :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-acciones="{ data }">
+            <div class="flex gap-0 justify-center">
+              <Button
+                class="rounded-full mx-0 my-0 px-0 py-0"
+                variant="text"
+                icon="pi pi-eye"
+                @click="goToRoleMaintenance(data.id)"
+                v-tooltip.bottom="'Ver detalle'"
+              ></Button>
+              <Button
+                class="rounded-full"
+                variant="text"
+                :severity="
+                  data?.status?.name === 'Inactivo' ? 'success' : 'danger'
+                "
+                :icon="
+                  data?.status?.name === 'Inactivo'
+                    ? 'pi pi-check-circle'
+                    : 'pi pi-trash'
+                "
+                @click="openModal('delete', data)"
+                v-tooltip.bottom="
+                  data?.status?.name === 'Inactivo' ? 'Activar' : 'Desactivar'
+                "
+              ></Button>
+            </div>
+          </template>
+          <template #body-icon="{ data }">
+            <i :class="data.icon"></i>
+          </template>
+          <template #body-status.name="{ data }">
+            <AppChipStatus
+              :label="data?.status?.name"
+              :background-color="data?.status?.state_color"
+              :text-color="data?.status?.text_color"
+            >
+            </AppChipStatus>
+          </template>
+          <template #body-show="{ data }">
+            <i :class="data.show ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </section>
     <RoleFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
@@ -115,11 +122,13 @@ import { computed, reactive, provide } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AppSelect from '@/core/components/AppSelect.vue';
+import { useLoaderStore } from '@/core/store';
 
 import { useRole } from '../composables/useRole';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import RoleFormModal from '../components/roles/RoleFormModal.vue';
 
+const storeLoader = useLoaderStore();
 const roleInstance = useRole();
 provide('useRole', roleInstance);
 
