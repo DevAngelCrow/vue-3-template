@@ -2,6 +2,7 @@ export interface ApiResponseLogin {
   data: {
     access_token: string;
     token_type: string;
+    refresh_token?: string;
     user: {
       id: string;
       id_people: number;
