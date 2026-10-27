@@ -172,6 +172,16 @@ export function useAuth() {
   const idAddress = ref<string>('');
   const idDocument = ref<string>('');
 
+  const isUserAuthenticated = computed(
+    () =>
+      !!(
+        userInfo &&
+        typeof userInfo === 'object' &&
+        'id' in userInfo &&
+        userInfo.id
+      ),
+  );
+
   // Queries cacheadas con TanStack Query para combos de soporte
   const { data: nationalitiesData, refetch: refetchNationalities } = useQuery({
     queryKey: computed(() => authNationalitiesKeys.all),
@@ -182,6 +192,7 @@ export function useAuth() {
       }
       return [];
     },
+    enabled: isUserAuthenticated,
     staleTime: 1000 * 60 * 30,
   });
 
@@ -208,6 +219,7 @@ export function useAuth() {
       }
       return [];
     },
+    enabled: isUserAuthenticated,
     staleTime: 1000 * 60 * 30,
   });
 
@@ -224,12 +236,11 @@ export function useAuth() {
       }
       return [];
     },
+    enabled: isUserAuthenticated,
     staleTime: 1000 * 60 * 30,
   });
 
-  const gendersOptions = computed<Gender[]>(
-    () => gendersData.value ?? [],
-  );
+  const gendersOptions = computed<Gender[]>(() => gendersData.value ?? []);
 
   const { data: maritalStatusData, refetch: refetchMaritalStatus } = useQuery({
     queryKey: computed(() => authMaritalStatusKeys.all),
@@ -240,6 +251,7 @@ export function useAuth() {
       }
       return [];
     },
+    enabled: isUserAuthenticated,
     staleTime: 1000 * 60 * 30,
   });
 
@@ -270,15 +282,7 @@ export function useAuth() {
       }
       return null;
     },
-    enabled: computed(
-      () =>
-        !!(
-          userInfo &&
-          typeof userInfo === 'object' &&
-          'id' in userInfo &&
-          userInfo.id
-        ),
-    ),
+    enabled: isUserAuthenticated,
     staleTime: 1000 * 60 * 10,
   });
 
@@ -292,10 +296,7 @@ export function useAuth() {
         middleName.value = details.middle_name;
         lastName.value = details.last_name;
         maritalStatus.value = details.id_marital_status;
-        birthDate.value = FormatDate(
-          details.birth_date ?? '',
-          'DD/MM/YYYY',
-        );
+        birthDate.value = FormatDate(details.birth_date ?? '', 'DD/MM/YYYY');
         nationalities.value = details.nationalities;
         gender.value = details.id_gender;
         phoneNumber.value = details.phone_number;
@@ -306,8 +307,7 @@ export function useAuth() {
         country.value = details.country || null;
         geographic_divisions_type.value =
           details.geographic_division_type || null;
-        geographic_divisions.value =
-          details.geographic_division || null;
+        geographic_divisions.value = details.geographic_division || null;
         street.value = details.street;
         streetNumber.value = details.street_number;
         houseNumber.value = details.house_number;
@@ -371,7 +371,10 @@ export function useAuth() {
         geographicDivisionsTypesOptions.value = response.data.data;
       }
     } catch (err) {
-      console.error('Error al obtener los tipos de divisiones geográficas:', err);
+      console.error(
+        'Error al obtener los tipos de divisiones geográficas:',
+        err,
+      );
     }
   };
 
@@ -490,13 +493,8 @@ export function useAuth() {
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: async ({
-      id,
-      formData,
-    }: {
-      id: string;
-      formData: FormData;
-    }) => authServices.updateProfile(id, formData),
+    mutationFn: async ({ id, formData }: { id: string; formData: FormData }) =>
+      authServices.updateProfile(id, formData),
     onSuccess: response => {
       if (response.statusCode === 200) {
         queryClient.invalidateQueries({ queryKey: authProfileKeys.all });
