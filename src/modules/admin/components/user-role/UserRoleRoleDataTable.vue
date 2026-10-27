@@ -5,19 +5,19 @@
         class="order-1 md:flex-1 grow"
         label="Buscar rol..."
         v-model="filter_role_name"
-        v-debounce:700.keydown.enter="searchRole"
+        @keydown.enter="debouncedSearchRole"
       />
       <div class="flex order-2 md:flex-1 grow items-center gap-2">
         <Button
           class="rounded_btn_search"
           icon="pi pi-search"
-          v-debounce:700.click="searchRole"
+          @click="debouncedSearchRole"
         />
         <Button
           class="rounded_btn_clean"
           :icon="filter_role_name ? 'pi pi-filter-slash' : 'pi pi-filter'"
           variant="outlined"
-          v-debounce:700.click="cleanSearch"
+          @click="debouncedCleanSearch"
           v-tooltip.bottom="
             filter_role_name ? 'Quitar filtro' : 'Escriba para filtrar'
           "
@@ -93,6 +93,7 @@ import {
 import { Button } from 'primevue';
 
 import { useLoaderStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 
 import { useUserRole } from '../../composables/useUserRole';
 
@@ -266,6 +267,9 @@ const cleanSearch = () => {
   getRoles();
   totalRoles.value = rolesPagination.total_items;
 };
+
+const debouncedSearchRole = debounce(searchRole, 700);
+const debouncedCleanSearch = debounce(cleanSearch, 700);
 
 const localPaginationViewMode = (page: number, find?: boolean) => {
   let itemsSource = find ? rolesItemsFindLocal.value : rolesItemsLocal.value;

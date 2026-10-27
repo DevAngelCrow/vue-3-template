@@ -18,17 +18,17 @@
           v-model="filter_name"
           append-icon="pi pi-search"
           @update:modelValue="validateAlphaInput(filter_name)"
-          v-debounce:700.keydown.enter="() => findUser(filter_name)"
+          @keydown.enter="debouncedFindUser"
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
-          v-debounce:700.click="() => findUser(filter_name)"
+          @click="debouncedFindUser"
           >Buscar</Button
         >
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
           outlined
-          v-debounce:700.click="cleanSearch"
+          @click="debouncedCleanSearch"
           label="Limpiar"
           :icon="iconFilter"
         ></Button>
@@ -115,8 +115,8 @@ const {
   filter_name,
   validateAlphaInput,
   rolesPagination,
-  findUser,
-  cleanSearch,
+  debouncedFindUser,
+  debouncedCleanSearch,
 } = userRoleInstance;
 
 const modalState = reactive<{

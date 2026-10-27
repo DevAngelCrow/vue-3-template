@@ -8,6 +8,7 @@ import {
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -263,9 +264,10 @@ export function useUserRole() {
     });
   };
 
-  const findUser = (value: string | null) => {
+  const findUser = (value?: string | null) => {
     pagination.page = 1;
-    applied_filter_name.value = value;
+    const target = typeof value === 'string' ? value : filter_name.value;
+    applied_filter_name.value = target || null;
   };
 
   const cleanSearch = () => {
@@ -273,6 +275,13 @@ export function useUserRole() {
     applied_filter_name.value = null;
     pagination.page = 1;
   };
+
+  const debouncedFindUser = debounce(() => {
+    findUser();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -294,7 +303,9 @@ export function useUserRole() {
     updateUserRole,
     validateAlphaInput,
     findUser,
+    debouncedFindUser,
     cleanSearch,
+    debouncedCleanSearch,
   };
 }
 

@@ -5,6 +5,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -375,13 +376,21 @@ export function useGlobalStatus() {
     setFieldValue('category_status', value?.category_status);
   };
 
-  const findGlobalStatus = (value: FilterGlobalStatusType) => {
+  const findGlobalStatus = (value?: FilterGlobalStatusType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = value.status ?? filter.status;
-    appliedFilter.id_category = value.id_category ?? filter.id_category;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
+    appliedFilter.id_category = target?.id_category ?? filter.id_category;
   };
+
+  const debouncedFindGlobalStatus = debounce(() => {
+    findGlobalStatus();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -395,8 +404,10 @@ export function useGlobalStatus() {
     setFieldValue,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setGlobalStatusItem,
     findGlobalStatus,
+    debouncedFindGlobalStatus,
     id,
     idAttrs,
     name,

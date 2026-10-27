@@ -10,6 +10,7 @@ import {
 
 import adminServices from '@/core/services/index.services';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { TableHeaders } from '@/core/interfaces';
 import { createQueryKeys } from '@/core/utils/queryKeys';
@@ -594,15 +595,23 @@ export function useAdmin() {
     setFieldValue('required_auth', value.required_auth);
   };
 
-  const findRoute = (value: FilterRouteType) => {
+  const findRoute = (value?: FilterRouteType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.active = value.active ?? filter.active;
-    appliedFilter.show = value.show ?? filter.show;
-    appliedFilter.id_parent = value.id_parent ?? filter.id_parent;
-    appliedFilter.required_auth = value.required_auth ?? filter.required_auth;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.active = target?.active ?? filter.active;
+    appliedFilter.show = target?.show ?? filter.show;
+    appliedFilter.id_parent = target?.id_parent ?? filter.id_parent;
+    appliedFilter.required_auth = target?.required_auth ?? filter.required_auth;
   };
+
+  const debouncedFindRoute = debounce(() => {
+    findRoute();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     getRoutes,
@@ -650,8 +659,10 @@ export function useAdmin() {
     appliedFilter,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setRouteItem,
     findRoute,
+    debouncedFindRoute,
     pagination,
     headers,
     getPermissions,

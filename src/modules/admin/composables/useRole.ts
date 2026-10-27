@@ -10,6 +10,7 @@ import {
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 import catalogServices from '@/modules/catalogs/Services/catalog.services';
@@ -475,12 +476,20 @@ export function useRole() {
     setFieldValue('id_status', value?.status?.id);
   };
 
-  const findRole = (value: FilterRoleType) => {
+  const findRole = (value?: FilterRoleType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.id_status = value.id_status ?? filter.id_status;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.id_status = target?.id_status ?? filter.id_status;
   };
+
+  const debouncedFindRole = debounce(() => {
+    findRole();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   const findPermission = (value: {
     name: string;
@@ -508,8 +517,10 @@ export function useRole() {
     getStatus,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setRoleItem,
     findRole,
+    debouncedFindRole,
     getRole,
     id,
     idAttrs,
