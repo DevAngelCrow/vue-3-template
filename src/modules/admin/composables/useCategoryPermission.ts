@@ -10,6 +10,7 @@ import {
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -292,12 +293,20 @@ export function useCategoryPermission() {
     setFieldValue('active', value?.active);
   };
 
-  const findCategoryPermission = (value: FilterCategoryPermissionType) => {
+  const findCategoryPermission = (value?: FilterCategoryPermissionType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = value.status ?? filter.status;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
   };
+
+  const debouncedFindCategoryPermission = debounce(() => {
+    findCategoryPermission();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -312,8 +321,10 @@ export function useCategoryPermission() {
     getCategoryPermissions,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setCategoryPermissionItem,
     findCategoryPermission,
+    debouncedFindCategoryPermission,
     id,
     idAttrs,
     name,

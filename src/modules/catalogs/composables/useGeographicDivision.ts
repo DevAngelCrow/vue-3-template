@@ -10,6 +10,7 @@ import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -368,14 +369,22 @@ export function useGeographicDivision() {
     setFieldValue('parent', value?.parent ?? null);
   };
 
-  const findDivision = (value: FilterGeographicDivisionType) => {
+  const findDivision = (value?: FilterGeographicDivisionType) => {
     pagination.page = 1;
-    appliedFilter.filter = (value?.filter ?? filter.filter) || undefined;
-    appliedFilter.status = value?.status ?? filter.status;
-    appliedFilter.id_country = value?.id_country ?? filter.id_country;
-    appliedFilter.id_type = value?.id_type ?? filter.id_type;
-    appliedFilter.id_parent = value?.id_parent ?? filter.id_parent;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    appliedFilter.filter = (target?.filter ?? filter.filter) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
+    appliedFilter.id_country = target?.id_country ?? filter.id_country;
+    appliedFilter.id_type = target?.id_type ?? filter.id_type;
+    appliedFilter.id_parent = target?.id_parent ?? filter.id_parent;
   };
+
+  const debouncedFindDivision = debounce(() => {
+    findDivision();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -392,8 +401,10 @@ export function useGeographicDivision() {
     getParentDivisionsList,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setDivisionItem,
     findDivision,
+    debouncedFindDivision,
     getCountries,
     id,
     idAttrs,

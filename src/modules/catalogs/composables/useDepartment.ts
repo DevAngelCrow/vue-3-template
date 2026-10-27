@@ -10,6 +10,7 @@ import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -296,12 +297,20 @@ export function useDepartment() {
     setFieldValue('country', value?.country);
   };
 
-  const findDepartment = (value: FilterDepartmentType) => {
+  const findDepartment = (value?: FilterDepartmentType) => {
     pagination.page = 1;
-    appliedFilter.filter_name = (value?.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = value?.status ?? filter.status;
-    appliedFilter.id_country = value?.id_country ?? filter.id_country;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
+    appliedFilter.id_country = target?.id_country ?? filter.id_country;
   };
+
+  const debouncedFindDepartment = debounce(() => {
+    findDepartment();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -316,8 +325,10 @@ export function useDepartment() {
     getDepartments,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setDepartmenItem,
     findDepartment,
+    debouncedFindDepartment,
     getCountries,
     id,
     idAttrs,

@@ -10,6 +10,11 @@ interface ElementBinding {
 
 const elementMap = new WeakMap<HTMLElement, ElementBinding>();
 
+/**
+ * @deprecated Esta directiva genera alto acoplamiento con el DOM y los componentes UI.
+ * En su lugar, utilice el retardo a nivel de composable con `debounce` de `@/core/utils/debounceFunction`
+ * y vincule los eventos nativos de Vue `@click` o `@keydown.enter`.
+ */
 export const debounceDirective: Directive = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
     const modifiers = Object.keys(binding.modifiers);

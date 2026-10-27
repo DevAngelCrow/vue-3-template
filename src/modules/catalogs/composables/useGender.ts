@@ -2,6 +2,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -105,10 +106,18 @@ export function useGender() {
     pagination.page = 1;
   };
 
-  const findGender = (value: string | null) => {
+  const findGender = (value?: string | null) => {
     pagination.page = 1;
-    appliedFilterName.value = value || null;
+    const target = typeof value === 'string' ? value : filter_name.value;
+    appliedFilterName.value = target || null;
   };
+
+  const debouncedFindGender = debounce(() => {
+    findGender();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -120,7 +129,9 @@ export function useGender() {
     getGenders,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     findGender,
+    debouncedFindGender,
   };
 }
 

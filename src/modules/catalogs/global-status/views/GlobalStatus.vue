@@ -18,7 +18,7 @@
           v-model="filter.filter_name"
           append-icon="pi pi-search"
           @update:modelValue="validateAlphaInput(filter.filter_name)"
-          v-debounce:700.keydown.enter="() => findGlobalStatus(filter)"
+          @keydown.enter="debouncedFindGlobalStatus"
         />
         <AppSelect
           class="w-full sm:w-[20%] lg:w-auto min-w-0 grow lg:grow-0 shrink-0"
@@ -38,13 +38,13 @@
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
-          v-debounce:700.click="() => findGlobalStatus(filter)"
+          @click="debouncedFindGlobalStatus"
           >Buscar</Button
         >
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
           outlined
-          v-debounce:700.click="cleanSearch"
+          @click="debouncedCleanSearch"
           label="Limpiar"
           :icon="iconFilter"
         ></Button>
@@ -155,8 +155,8 @@ provide('useGlobalStatus', globalStatusInstance);
 const {
   filter,
   resetForm,
-  cleanSearch,
-  findGlobalStatus,
+  debouncedCleanSearch,
+  debouncedFindGlobalStatus,
   validateAlphaInput,
   setGlobalStatusItem,
   headers,

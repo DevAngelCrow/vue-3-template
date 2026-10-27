@@ -10,6 +10,7 @@ import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -272,12 +273,20 @@ export function useDocumentType() {
     setFieldValue('active', value?.active);
   };
 
-  const findDocumentType = (value: FilterDocumentType) => {
+  const findDocumentType = (value?: FilterDocumentType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value?.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = value?.status ?? filter.status;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
   };
+
+  const debouncedFindDocumentType = debounce(() => {
+    findDocumentType();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -291,8 +300,10 @@ export function useDocumentType() {
     setFieldValue,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setDocumentTypeItem,
     findDocumentType,
+    debouncedFindDocumentType,
     id,
     idAttrs,
     name,

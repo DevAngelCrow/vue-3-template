@@ -1,0 +1,16 @@
+{
+  "vue3-quality-gate": {
+    "enabled": false,
+    "PostToolUse": [
+      {
+        "matcher": "replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Host '[Quality Gate] Ejecutar npm run check:types y npm run lint en vue-3-template'\""
+          }
+        ]
+      }
+    ]
+  }
+}

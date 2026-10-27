@@ -10,6 +10,7 @@ import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -307,12 +308,20 @@ export function useGeographicDivisionType() {
     setFieldValue('country', value?.country);
   };
 
-  const findDivisionType = (value: FilterDivisionType) => {
+  const findDivisionType = (value?: FilterDivisionType) => {
     pagination.page = 1;
-    appliedFilter.filter = (value?.filter ?? filter.filter) || undefined;
-    appliedFilter.status = value?.status ?? filter.status;
-    appliedFilter.id_country = value?.id_country ?? filter.id_country;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    appliedFilter.filter = (target?.filter ?? filter.filter) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
+    appliedFilter.id_country = target?.id_country ?? filter.id_country;
   };
+
+  const debouncedFindDivisionType = debounce(() => {
+    findDivisionType();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -327,8 +336,10 @@ export function useGeographicDivisionType() {
     getDivisionTypes,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setDivisionTypeItem,
     findDivisionType,
+    debouncedFindDivisionType,
     getCountries,
     id,
     idAttrs,

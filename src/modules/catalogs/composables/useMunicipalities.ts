@@ -10,6 +10,7 @@ import * as yup from 'yup';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -299,12 +300,20 @@ export function useMunicipality() {
     setFieldValue('department', value?.department);
   };
 
-  const findMunicipality = (value: FilterMunicipalityType) => {
+  const findMunicipality = (value?: FilterMunicipalityType) => {
     pagination.page = 1;
-    appliedFilter.filter_name = (value?.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = value?.status ?? filter.status;
-    appliedFilter.id_department = value?.id_department ?? filter.id_department;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
+    appliedFilter.id_department = target?.id_department ?? filter.id_department;
   };
+
+  const debouncedFindMunicipality = debounce(() => {
+    findMunicipality();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -319,8 +328,10 @@ export function useMunicipality() {
     getMunicipalities,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setMunicipalityItem,
     findMunicipality,
+    debouncedFindMunicipality,
     getDepartments,
     id,
     idAttrs,

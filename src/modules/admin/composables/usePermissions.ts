@@ -10,6 +10,7 @@ import {
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -342,14 +343,22 @@ export function usePermission() {
     setFieldValue('category', value?.category);
   };
 
-  const findPermission = (value: FilterPermissionType) => {
+  const findPermission = (value?: FilterPermissionType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.active = value.active ?? filter.active;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.active = target?.active ?? filter.active;
     appliedFilter.category_permission_id =
-      value.category_permission_id ?? filter.category_permission_id;
+      target?.category_permission_id ?? filter.category_permission_id;
   };
+
+  const debouncedFindPermission = debounce(() => {
+    findPermission();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   return {
     headers,
@@ -364,8 +373,10 @@ export function usePermission() {
     getCategoryPermissions,
     validateAlphaInput,
     cleanSearch,
+    debouncedCleanSearch,
     setPermissionItem,
     findPermission,
+    debouncedFindPermission,
     getPermissions,
     id,
     idAttrs,

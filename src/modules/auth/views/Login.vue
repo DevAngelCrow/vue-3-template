@@ -4,7 +4,7 @@
   >
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-primary-950 z-0"
+      class="absolute inset-0 bg-gradient-to-br from-surface-950 via-surface-900 to-primary-950 z-0"
     />
     <div
       class="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,rgba(var(--p-primary-500-rgb),0.15),transparent)]"
@@ -13,9 +13,9 @@
     <!-- Card -->
     <Transition name="fade-up" appear>
       <Card
-        class="relative z-10 w-[95%] xs:w-[85%] sm:w-[60%] md:w-[46%] lg:w-[38%] lg:max-w-[460px] shadow-2xl border border-white/10"
+        class="relative z-10 w-[95%] xs:w-[85%] sm:w-[60%] md:w-[46%] lg:w-[38%] lg:max-w-[460px] shadow-2xl border border-surface-700/40"
         :pt="{
-          root: { class: 'bg-zinc-900/80 backdrop-blur-md' },
+          root: { class: 'bg-surface-900/80 backdrop-blur-md' },
           body: { class: 'flex flex-col gap-0 p-0' },
           content: { class: 'p-0' },
         }"
@@ -32,7 +32,7 @@
               <h1 class="text-2xl font-semibold text-white tracking-tight">
                 Bienvenido
               </h1>
-              <p class="text-sm text-zinc-400 mt-1">
+              <p class="text-sm text-surface-400 mt-1">
                 Ingresa tus credenciales para continuar
               </p>
             </div>
@@ -49,7 +49,7 @@
             <Transition name="fade">
               <div
                 v-if="authError"
-                class="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+                class="flex items-start gap-2 p-3 rounded-lg bg-danger-500/10 border border-danger-500/30 text-danger-400 text-sm"
               >
                 <i class="pi pi-exclamation-circle mt-0.5 shrink-0" />
                 <span>{{ authError }}</span>
@@ -95,7 +95,7 @@
                 />
                 <label
                   for="remember"
-                  class="text-sm text-zinc-400 cursor-pointer select-none"
+                  class="text-sm text-surface-400 cursor-pointer select-none"
                 >
                   Recordar dispositivo
                 </label>

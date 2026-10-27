@@ -18,6 +18,7 @@
           v-model="filter.filter_name"
           append-icon="pi pi-search"
           @input="validateAlphaInput(filter.filter_name)"
+          @keydown.enter="debouncedFindRoute"
         />
         <AppSelect
           class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
@@ -37,13 +38,13 @@
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
-          v-debounce:700.click="() => findRoute(filter)"
+          @click="debouncedFindRoute"
           >Buscar</Button
         >
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
           outlined
-          v-debounce:700.click="cleanSearch"
+          @click="debouncedCleanSearch"
           label="Limpiar"
           :icon="iconFilter"
         ></Button>
@@ -140,9 +141,9 @@ const {
   filter,
   resetForm,
   validateAlphaInput,
-  cleanSearch,
+  debouncedCleanSearch,
   setRouteItem,
-  findRoute,
+  debouncedFindRoute,
   pagination,
   headers,
   parentRoutes,

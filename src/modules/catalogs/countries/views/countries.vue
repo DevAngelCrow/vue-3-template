@@ -18,6 +18,7 @@
           v-model="filter.filter_name"
           append-icon="pi pi-search"
           @input="validateAlphaInput(filter.filter_name)"
+          @keydown.enter="debouncedFindCountries"
         />
         <AppSelect
           class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
@@ -29,13 +30,13 @@
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
-          v-debounce:700.click="() => wrapperFindCountries(filter)"
+          @click="debouncedFindCountries"
           >Buscar</Button
         >
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
           outlined
-          v-debounce:700.click="() => wrapperCleanSearch()"
+          @click="debouncedCleanSearch"
           :icon="iconFilter"
           label="Limpiar"
         ></Button>
@@ -285,9 +286,9 @@ const {
   errors,
   resetForm,
   filter,
-  findCountries,
+  debouncedFindCountries,
   validateAlphaInput,
-  cleanSearch,
+  debouncedCleanSearch,
   pagination,
 } = useCountries();
 
@@ -296,15 +297,6 @@ const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([
   { name: 'Activo', value: true },
   { name: 'Inactivo', value: false },
 ]);
-const wrapperFindCountries = (value: {
-  filter_name?: string;
-  status?: boolean | 'Todos';
-}) => {
-  findCountries(value);
-};
-const wrapperCleanSearch = () => {
-  cleanSearch();
-};
 const closeModalCreate = (value: boolean) => {
   showModal.value = value;
   if (!value) {

@@ -5,6 +5,15 @@
 
 ---
 
+## 0. Visualización de Planes de Trabajo
+
+- Siempre que se proponga o elabore un plan de trabajo, arquitectura o refactorización:
+  1. Generar un artefacto Markdown de visualización detallado en el directorio de artefactos (`brain/<conversation-id>/...`).
+  2. El artefacto debe contener la arquitectura, diagramas Mermaid, tabla de componentes afectados, pasos de ejecución y estrategia de validación.
+  3. Establecer `RequestFeedback: true` en el metadata del artefacto cuando se requiera aprobación interactiva del usuario antes de ejecutar.
+
+---
+
 ## 1. Stack Tecnológico Base
 
 - **Framework**: Vue 3.5+ con Composition API y `<script setup lang="ts">`.
@@ -76,7 +85,8 @@ src/
    - Utilizar directiva `v-tooltip.bottom` para dar contexto accesible a botones de acciones.
 3. **Tokens de Color (obligatorio)**:
    - Usar únicamente `primary-*`, `surface-*` (gris slate), `success-*`, `danger-*` o variables `--p-*` definidas en `customTheme.ts`.
-   - Prohibido usar hex/rgb fijos o paletas Tailwind directas (`red-600`, `green-600`, `slate-*`, `gray-*`, `neutral-*`) en componentes. Estados de error: `text-danger-600` / `border-danger-600`.
+   - **Regla estricta por defecto**: Prohibido usar hex/rgb fijos o paletas Tailwind directas (`red-600`, `green-600`, `slate-*`, `zinc-*`, `gray-*`, `neutral-*`) en componentes. Estados de error: `text-danger-600` / `border-danger-600`.
+   - **Excepción por requerimiento explícito**: Se permitirá utilizar otro tipo de color de las paletas (ya sea de Tailwind o PrimeVue) **única y exclusivamente cuando al momento del requerimiento sea explícita dicha necesidad**. En caso contrario, se manejará lo que ya está estrictamente obligatorio.
    - Los tokens `success`/`danger` se mapean a Tailwind en `src/core/assets/style.css`.
 4. **Modales de Formulario Desacoplados**:
    - Los modales deben gestionar un objeto de estado reactivo `modalState`:
@@ -210,6 +220,46 @@ export function useMiEntidad() {
   };
 }
 ```
+
+### 7. Manejo Canónico de Búsquedas y Debounce:
+- **Prohibido el uso de la directiva `v-debounce` en plantillas:** Las directivas DOM generan alto acoplamiento con los nodos HTML, ocasionan comportamientos inconsistentes con wrappers de PrimeVue y carecen de tipado estricto.
+- **Debounce a nivel de Composable:** Toda función de búsqueda o filtro con retardo debe generarse y exportarse desde el composable utilizando la función utilitaria `debounce` de `@/core/utils/debounceFunction`:
+  ```ts
+  import { debounce } from '@/core/utils/debounceFunction';
+
+  const findMiEntidad = (value?: FilterType) => {
+    pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
+  };
+
+  const cleanSearch = () => {
+    filter.filter_name = undefined;
+    filter.status = undefined;
+    appliedFilter.filter_name = undefined;
+    appliedFilter.status = undefined;
+    pagination.page = 1;
+  };
+
+  const debouncedFindMiEntidad = debounce(findMiEntidad, 700);
+  const debouncedCleanSearch = debounce(cleanSearch, 700);
+
+  return {
+    debouncedFindMiEntidad,
+    debouncedCleanSearch,
+    // ...
+  };
+  ```
+- **Consumo en la Vista (`.vue`):** Enlazar directamente a través de eventos declarativos nativos de Vue 3:
+  ```html
+  <AppInputText
+    v-model="filter.filter_name"
+    @keydown.enter="debouncedFindMiEntidad"
+  />
+  <Button @click="debouncedFindMiEntidad">Buscar</Button>
+  <Button outlined @click="debouncedCleanSearch" label="Limpiar" />
+  ```
 
 ---
 

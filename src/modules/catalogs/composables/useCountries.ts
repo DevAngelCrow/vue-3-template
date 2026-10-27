@@ -9,6 +9,7 @@ import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import { useAlertStore } from '@/core/store';
+import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 
@@ -168,9 +169,10 @@ export function useCountries() {
   // Métodos de búsqueda
   const findCountries = (value?: FilterCountryType) => {
     pagination.page = 1;
+    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
     appliedFilter.filter_name =
-      (value?.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = value?.status ?? filter.status;
+      (target?.filter_name ?? filter.filter_name) || undefined;
+    appliedFilter.status = target?.status ?? filter.status;
   };
 
   const cleanSearch = () => {
@@ -180,6 +182,13 @@ export function useCountries() {
     appliedFilter.status = undefined;
     pagination.page = 1;
   };
+
+  const debouncedFindCountries = debounce(() => {
+    findCountries();
+  }, 700);
+  const debouncedCleanSearch = debounce(() => {
+    cleanSearch();
+  }, 700);
 
   // Compatibilidad hacia atrás para llamadas directas
   const createCountry = async (data: CreateCountry) => {
@@ -297,7 +306,9 @@ export function useCountries() {
     appliedFilter,
     pagination,
     findCountries,
+    debouncedFindCountries,
     cleanSearch,
+    debouncedCleanSearch,
     validateAlphaInput,
 
     // Formulario VeeValidate
