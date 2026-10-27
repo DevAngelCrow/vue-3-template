@@ -12,6 +12,12 @@ import { globalFunctions, GlobalFunctions } from './core/utils/globalFunctions';
 import { registerGlobalComponents } from './core/plugins/globalComponents';
 import { registerVueQuery } from './core/plugins/vueQuery';
 import { CustomTheme } from './customTheme';
+import { purgeLegacyAuthStorage } from './core/store/useAuthStore';
+
+// Elimina tokens persistidos por versiones anteriores (antes se guardaban en
+// localStorage; ahora el access token vive en memoria y el refresh token en
+// una cookie HttpOnly).
+purgeLegacyAuthStorage();
 
 const app = createApp(App);
 const pinia = createPinia();

@@ -1,88 +1,63 @@
 import { defineStore } from 'pinia';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 
-import {
-  UserStateStore,
-  Token,
-  Menu,
-  RefreshToken,
-} from '../interfaces/userState.store.interface';
+import { UserStateStore, Token, Menu } from '../interfaces/userState.store.interface';
+import type { AuthSessionData } from '../services/interfaces/auth/apiResponseLogin.interface';
+
+// Keys written by previous versions of the app. They are purged on startup
+// and on logout so no stale credentials remain on disk (OWASP: never persist
+// tokens in Web Storage, it is readable by any injected script).
+const LEGACY_STORAGE_KEYS = [
+  'access_token',
+  'refresh_token',
+  'token_type',
+  'user',
+  'menu',
+  'profile_img',
+  'auth_token',
+];
+
+export const purgeLegacyAuthStorage = () => {
+  try {
+    LEGACY_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+  } catch (e) {
+    console.error('Error al limpiar el almacenamiento local de sesión', e);
+  }
+};
+
+// Seconds before the real expiration at which the access token is already
+// considered expired, so it is renewed before requests start failing.
+const EXPIRATION_LEEWAY_SECONDS = 10;
 
 interface State {
-  user: UserStateStore | null | string;
-  token: Token | null | string;
+  user: UserStateStore | null;
+  // Access token lives ONLY in memory. After a page reload it is restored
+  // through POST /auth/refresh-token using the HttpOnly cookie.
+  token: string | null;
   token_type: string | null;
   menu: Menu[];
   menuSideBar: Menu[];
-  refresh_token: RefreshToken | null | string;
   profile_img: string | null;
 }
 
-const getFromLocalStorage = (key: string) => {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : null;
-  } catch (e) {
-    console.error(
-      `Error al parsear el item para la llave ${key} en el localStorage`,
-      e,
-    );
-    return null;
-  }
-};
-
-const setToLocalStorage = (key: string, value: unknown) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.error(`Error al settear el item para la llave ${key}`, e);
-  }
-};
-
-const removeAllFromLocalStorage = (keys: string[]) => {
-  keys.forEach(key => localStorage.removeItem(key));
-};
-
 export const useAuthStore = defineStore('authStore', {
   state: (): State => ({
-    user: getFromLocalStorage('user'),
-    token: localStorage.getItem('access_token')
-      ? localStorage.getItem('access_token')
-      : null,
-    token_type: localStorage.getItem('token_type')
-      ? localStorage.getItem('token_type')
-      : null,
-    refresh_token: localStorage.getItem('refresh_token')
-      ? localStorage.getItem('refresh_token')
-      : null,
-    menu: getFromLocalStorage('menu') || [],
+    user: null,
+    token: null,
+    token_type: null,
+    menu: [],
     menuSideBar: [],
-    profile_img: localStorage.getItem('profile_img') || null,
+    profile_img: null,
   }),
   getters: {
-    userInfo(): UserStateStore | null | string {
-      if (this.user) {
-        return this.user;
-      }
-      return null;
+    userInfo(): UserStateStore | null {
+      return this.user;
     },
-    tokenInfo(): Token | null | string {
-      if (this.token) {
-        return this.token;
-      }
-      return null;
+    tokenInfo(): string | null {
+      return this.token;
     },
-    refreshTokenInfo(): RefreshToken | null | string {
-      if (this.refresh_token) {
-        return this.refresh_token;
-      }
-      return null;
-    },
-    tokenTypeInfo(): null | string {
-      if (this.token_type) {
-        return this.token_type;
-      }
-      return null;
+    tokenTypeInfo(): string | null {
+      return this.token_type;
     },
     menuInfo(): Menu[] {
       return this.menu;
@@ -97,47 +72,40 @@ export const useAuthStore = defineStore('authStore', {
   actions: {
     setUserInfo(payload: UserStateStore) {
       this.user = payload;
-      setToLocalStorage('user', payload);
     },
     setToken(payload: Token) {
       this.token = payload.access_token;
-      localStorage.setItem('access_token', payload.access_token);
-    },
-    setRefreshToken(payload: RefreshToken) {
-      this.refresh_token = payload.refresh_token;
-      localStorage.setItem('refresh_token', payload.refresh_token);
     },
     setTokenType(payload: string) {
       this.token_type = payload;
-      localStorage.setItem('token_type', payload);
+    },
+    // Applies the payload returned by /auth/login or /auth/refresh-token.
+    setSession(payload: AuthSessionData) {
+      this.token = payload.access_token;
+      this.token_type = payload.token_type || 'Bearer';
+      this.user = { id: payload.id, user_name: payload.user_name };
     },
     setMenu(payload: Menu[]) {
       this.menu = payload;
-      //setToLocalStorage('menu', payload);
     },
     setMenuSideBar(payload: Menu[]) {
       this.menuSideBar = payload;
     },
     setProfileImg(payload: string | null) {
       this.profile_img = payload;
-      if (payload) {
-        localStorage.setItem('profile_img', payload);
-      } else {
-        localStorage.removeItem('profile_img');
-      }
     },
     isTokenExpired(): boolean {
       if (!this.token) return true;
       try {
-        const decoded = jwtDecode<JwtPayload>(this.token as string);
+        const decoded = jwtDecode<JwtPayload>(this.token);
 
         if (!decoded.exp) return true;
 
         const now = Math.floor(Date.now() / 1000);
 
-        return decoded.exp < now;
+        return decoded.exp - EXPIRATION_LEEWAY_SECONDS < now;
       } catch (error) {
-        console.error('Erorro al decodificar el token: ', error);
+        console.error('Error al decodificar el token: ', error);
         return true;
       }
     },
@@ -148,18 +116,11 @@ export const useAuthStore = defineStore('authStore', {
     closeSession() {
       this.user = null;
       this.token = null;
-      this.refresh_token = null;
       this.token_type = null;
       this.menu = [];
+      this.menuSideBar = [];
       this.profile_img = null;
-      removeAllFromLocalStorage([
-        'access_token',
-        'user',
-        'menu',
-        'token_type',
-        'refresh_token',
-        'profile_img',
-      ]);
+      purgeLegacyAuthStorage();
     },
   },
 });

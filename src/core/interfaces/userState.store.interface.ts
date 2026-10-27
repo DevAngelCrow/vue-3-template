@@ -1,17 +1,13 @@
 export interface UserStateStore {
   id: string;
-  id_people: number;
   user_name: string;
-  id_status: number;
-  is_validated: boolean;
+  id_people?: number;
+  id_status?: number;
+  is_validated?: boolean;
 }
 
 export interface Token {
   access_token: string;
-}
-
-export interface RefreshToken {
-  refresh_token: string;
 }
 
 export interface Menu {

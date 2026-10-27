@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
+import { loadSessionMenu } from '@/core/services/session.services';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { useAuthStore } from '@/core/store/useAuthStore';
 import { CreateDateFromFormat, FormatDate } from '@/core/utils/dates';
@@ -31,15 +32,8 @@ export const authMaritalStatusKeys = createQueryKeys('auth-marital-status');
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const {
-    setToken,
-    setUserInfo,
-    setTokenType,
-    setRefreshToken,
-    setMenu,
-    setProfileImg,
-    userInfo,
-  } = useAuthStore();
+  const authStore = useAuthStore();
+  const { setSession, userInfo, setProfileImg } = authStore;
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
   const router = useRouter();
@@ -389,6 +383,9 @@ export function useAuth() {
     }) => {
       const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
+        // Necesario para que el navegador guarde la cookie HttpOnly del
+        // refresh token que el backend envía en Set-Cookie.
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
@@ -418,25 +415,10 @@ export function useAuth() {
     },
     onSuccess: async data => {
       if (data?.data?.access_token) {
-        setToken(data.data);
-        if (data.data.refresh_token) {
-          setRefreshToken(data.data);
-        }
-        if (data.data.user) {
-          setUserInfo(data.data);
-        }
+        // Access token solo en memoria; el refresh token viaja en cookie HttpOnly
+        setSession(data.data);
 
-        if (data.data.token_type) {
-          setTokenType(data.data.token_type);
-        }
-
-        const menu = await authServices.getMenu();
-
-        if (menu.statusCode === 200) {
-          setMenu(menu.data.menus);
-          setProfileImg(menu.data.profile_img);
-          localStorage.setItem('menu', JSON.stringify(menu.data.menus));
-        }
+        await loadSessionMenu();
 
         const redirectTo = (route.query.redirect as string) || '/';
         router.push(redirectTo);
@@ -543,50 +525,30 @@ export function useAuth() {
   const logout = async () => {
     isLoggingOut.value = true;
     try {
-      const token = localStorage.getItem('access_token');
-      const tokenType = localStorage.getItem('token_type') || 'Bearer';
-      if (token) {
-        await fetch(`${API_URL}/api/v1/auth/logout`, {
-          method: 'POST',
-          headers: {
-            Authorization: `${tokenType} ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        }).catch(() => {
-          console.warn('No se pudo notificar al servidor sobre el logout');
-        });
-      }
+      await authServices.logout().catch(() => {
+        console.warn('No se pudo notificar al servidor sobre el logout');
+      });
     } catch (err) {
       console.error('Error durante logout:', err);
     } finally {
+      authStore.closeSession();
       queryClient.clear();
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('token_type');
-      localStorage.removeItem('user');
-      localStorage.removeItem('menu');
-      router.push('/login');
+      isLoggingOut.value = false;
+      await router.replace({ name: 'login' });
     }
   };
 
-  const isAuthenticated = (): boolean => {
-    const token = localStorage.getItem('auth_token');
-    return !!token;
-  };
+  // Helpers basados en el store en memoria (los tokens ya no se guardan en
+  // localStorage; el refresh token es una cookie HttpOnly inaccesible a JS).
+  const isAuthenticated = (): boolean => authStore.validSession();
 
-  const getCurrentUser = () => {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  };
+  const getCurrentUser = () => authStore.userInfo;
 
-  const getToken = () => {
-    return localStorage.getItem('auth_token');
-  };
+  const getToken = () => authStore.tokenInfo;
 
   const getAuthHeader = () => {
-    const token = localStorage.getItem('auth_token');
-    const tokenType = localStorage.getItem('token_type') || 'Bearer';
+    const token = authStore.tokenInfo;
+    const tokenType = authStore.tokenTypeInfo || 'Bearer';
     return token ? `${tokenType} ${token}` : null;
   };
 
@@ -696,6 +658,7 @@ export function useAuth() {
     ...form,
     login,
     logout,
+    isLoggingOut,
     isAuthenticated,
     getCurrentUser,
     getToken,

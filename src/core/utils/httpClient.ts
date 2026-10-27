@@ -3,6 +3,7 @@ import type {
   AxiosRequestConfig,
   AxiosResponse,
   AxiosError,
+  InternalAxiosRequestConfig,
 } from 'axios';
 import { AxiosHeaders } from 'axios';
 
@@ -13,19 +14,36 @@ import type {
 } from '../interfaces/httpClient.interface';
 import { useAlertStore } from '../store';
 import { useAuthStore } from '../store/useAuthStore';
+import { refreshAccessToken } from './tokenRefresh';
+
+type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+// Endpoints where a 401 means "bad credentials / no session", never
+// "access token expired": they must not trigger a silent refresh.
+const NO_REFRESH_ENDPOINTS = ['auth/login', 'auth/refresh-token'];
+
+const isNoRefreshEndpoint = (url?: string) =>
+  !!url && NO_REFRESH_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+const setAuthorizationHeader = (
+  config: InternalAxiosRequestConfig,
+  token: string,
+) => {
+  if (!config.headers) {
+    config.headers = AxiosHeaders.from({});
+  }
+  config.headers.set('Authorization', `Bearer ${token}`);
+};
 
 // Función para configurar los interceptores y envolver la instancia de Axios
 const setupHttpClient = (api: AxiosInstance) => {
   // Configurar interceptores de petición
   api.interceptors.request.use(
     config => {
-      const useAuth = useAuthStore();
-      const token = useAuth.token || localStorage.getItem('token');
+      // El access token vive solo en memoria (nunca en localStorage)
+      const token = useAuthStore().token;
       if (token) {
-        if (!config.headers) {
-          config.headers = AxiosHeaders.from({});
-        }
-        config.headers.set('Authorization', `Bearer ${token}`);
+        setAuthorizationHeader(config, token);
       }
       return config;
     },
@@ -39,7 +57,7 @@ const setupHttpClient = (api: AxiosInstance) => {
     (response: AxiosResponse) => {
       return response;
     },
-    (error: AxiosError<ErrorResponse>) => {
+    async (error: AxiosError<ErrorResponse>) => {
       const alert = useAlertStore();
 
       if (error.response) {
@@ -52,6 +70,30 @@ const setupHttpClient = (api: AxiosInstance) => {
         console.error('Error de respuesta:', errorData);
 
         if (error.response.status === 401) {
+          const originalRequest = error.config as
+            | RetriableRequestConfig
+            | undefined;
+
+          // Credenciales inválidas en el login: no hay sesión que refrescar
+          if (originalRequest?.url?.includes('auth/login')) {
+            return Promise.reject(errorData);
+          }
+
+          // Access token expirado: refresh silencioso con la cookie HttpOnly
+          // y reintento único de la petición original.
+          if (
+            originalRequest &&
+            !originalRequest._retry &&
+            !isNoRefreshEndpoint(originalRequest.url)
+          ) {
+            originalRequest._retry = true;
+            const newToken = await refreshAccessToken();
+            if (newToken) {
+              setAuthorizationHeader(originalRequest, newToken);
+              return api(originalRequest);
+            }
+          }
+
           const auth = useAuthStore();
           auth.closeSession();
           import('../router').then(({ default: router }) => {
