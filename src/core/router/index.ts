@@ -4,6 +4,7 @@ import { routesCatalogs } from '@/modules/catalogs/routes';
 import { routesAdmin } from '@/modules/admin/routes';
 
 import { useAuthStore } from '../store/useAuthStore';
+import { restoreSession } from '../services/session.services';
 import { isRouteAuthorized } from '../utils/routePermissions';
 
 const routes = [
@@ -109,26 +110,38 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, _from, next) => {
+// Evita una petición de refresh en cada visita a una ruta pública: solo se
+// intenta restaurar la sesión en la primera navegación (carga inicial / F5)
+// o cuando la ruta destino requiere autenticación.
+let initialRestoreAttempted = false;
+
+router.beforeEach(async to => {
   const auth = useAuthStore();
-  const hasValidSession = auth.validSession();
+  let hasValidSession = auth.validSession();
+
+  // 0. Sin access token válido en memoria: intentar restaurar la sesión
+  //    con la cookie HttpOnly del refresh token.
+  if (!hasValidSession && (to.meta.requiresAuth || !initialRestoreAttempted)) {
+    hasValidSession = await restoreSession();
+  }
+  initialRestoreAttempted = true;
 
   // 1. Si la ruta requiere autenticación y el usuario no tiene sesión válida
   if (to.meta.requiresAuth && !hasValidSession) {
     auth.closeSession();
-    return next({ name: 'login', query: { redirect: to.fullPath } });
+    return { name: 'login', query: { redirect: to.fullPath } };
   }
 
   // 2. Si el usuario está autenticado
   if (hasValidSession) {
     // Si intenta ir a login o landing estando autenticado, redirigir al dashboard
     if (to.name === 'login' || to.name === 'sign-up' || to.name === 'landing') {
-      return next({ name: 'dashboard' });
+      return { name: 'dashboard' };
     }
 
     // Si cae en el comodín catch-all (URL inexistente), redirigir a la vista not-found dentro del layout
     if (to.name === 'catch-all') {
-      return next({ name: 'not-found', replace: true });
+      return { name: 'not-found', replace: true };
     }
 
     // 3. Comprobación de permisos si la ruta requiere autenticación
@@ -137,12 +150,12 @@ router.beforeEach((to, _from, next) => {
       if (!authorized) {
         // Usuario autenticado sin permisos para esta ruta:
         // Se redirige a 'not-found' de forma preventiva sin montar el componente
-        return next({ name: 'not-found', replace: true });
+        return { name: 'not-found', replace: true };
       }
     }
   }
 
-  next();
+  return true;
 });
 
 export default router;

@@ -4,22 +4,15 @@ import { useRoute, useRouter } from 'vue-router';
 import { useMutation } from '@tanstack/vue-query';
 
 import authServices from '@/core/services/auth.services';
+import { loadSessionMenu } from '@/core/services/session.services';
 import { useAuthStore } from '@/core/store/useAuthStore';
 import type { Login } from '@/core/services/interfaces/auth/login.interface';
 import type { ApiResponseLogin } from '@/core/services/interfaces/auth/apiResponseLogin.interface';
-import type { UserStateStore } from '@/core/interfaces/userState.store.interface';
 
 export function useLogin() {
   const router = useRouter();
   const route = useRoute();
-  const {
-    setToken,
-    setUserInfo,
-    setTokenType,
-    setRefreshToken,
-    setMenu,
-    setProfileImg,
-  } = useAuthStore();
+  const { setSession } = useAuthStore();
 
   const error = ref<string | null>(null);
 
@@ -30,35 +23,11 @@ export function useLogin() {
     onSuccess: async (response: ApiResponseLogin) => {
       const loginData = response?.data;
       if (loginData?.access_token) {
-        setToken(loginData);
+        // Access token solo en memoria. El refresh token llega en una cookie
+        // HttpOnly (Set-Cookie) que JavaScript no puede leer.
+        setSession(loginData);
 
-        if (loginData.refresh_token) {
-          setRefreshToken({ refresh_token: loginData.refresh_token });
-        }
-
-        const userPayload = (typeof loginData.user === 'object' &&
-        loginData.user !== null
-          ? loginData.user
-          : loginData) as unknown as UserStateStore;
-
-        if (userPayload?.id || (loginData as any)?.id) {
-          setUserInfo(userPayload);
-        }
-
-        if (loginData.token_type) {
-          setTokenType(loginData.token_type);
-        }
-
-        try {
-          const menu = await authServices.getMenu();
-          if (menu.statusCode === 200 && menu.data) {
-            setMenu(menu.data.menus);
-            setProfileImg(menu.data.profile_img);
-            localStorage.setItem('menu', JSON.stringify(menu.data.menus));
-          }
-        } catch (menuError) {
-          console.warn('No se pudo cargar el menú tras el login:', menuError);
-        }
+        await loadSessionMenu();
 
         const redirectTo = (route.query.redirect as string) || '/';
         router.push(redirectTo);
