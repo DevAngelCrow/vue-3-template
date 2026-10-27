@@ -5,6 +5,15 @@
 
 ---
 
+## 0. Visualización de Planes de Trabajo
+
+- Siempre que se proponga o elabore un plan de trabajo, arquitectura o refactorización:
+  1. Generar un artefacto Markdown de visualización detallado en el directorio de artefactos (`brain/<conversation-id>/...`).
+  2. El artefacto debe contener la arquitectura, diagramas Mermaid, tabla de componentes afectados, pasos de ejecución y estrategia de validación.
+  3. Establecer `RequestFeedback: true` en el metadata del artefacto cuando se requiera aprobación interactiva del usuario antes de ejecutar.
+
+---
+
 ## 1. Stack Tecnológico Base
 
 - **Framework**: Vue 3.5+ con Composition API y `<script setup lang="ts">`.
