@@ -31,6 +31,7 @@ export const authMaritalStatusKeys = createQueryKeys('auth-marital-status');
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const authStore = useAuthStore();
   const {
     setToken,
     setUserInfo,
@@ -39,7 +40,7 @@ export function useAuth() {
     setMenu,
     setProfileImg,
     userInfo,
-  } = useAuthStore();
+  } = authStore;
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
   const router = useRouter();
@@ -543,30 +544,16 @@ export function useAuth() {
   const logout = async () => {
     isLoggingOut.value = true;
     try {
-      const token = localStorage.getItem('access_token');
-      const tokenType = localStorage.getItem('token_type') || 'Bearer';
-      if (token) {
-        await fetch(`${API_URL}/api/v1/auth/logout`, {
-          method: 'POST',
-          headers: {
-            Authorization: `${tokenType} ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        }).catch(() => {
-          console.warn('No se pudo notificar al servidor sobre el logout');
-        });
-      }
+      await authServices.logout().catch(() => {
+        console.warn('No se pudo notificar al servidor sobre el logout');
+      });
     } catch (err) {
       console.error('Error durante logout:', err);
     } finally {
+      authStore.closeSession();
       queryClient.clear();
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('token_type');
-      localStorage.removeItem('user');
-      localStorage.removeItem('menu');
-      router.push('/login');
+      isLoggingOut.value = false;
+      await router.replace({ name: 'login' });
     }
   };
 
@@ -696,6 +683,7 @@ export function useAuth() {
     ...form,
     login,
     logout,
+    isLoggingOut,
     isAuthenticated,
     getCurrentUser,
     getToken,

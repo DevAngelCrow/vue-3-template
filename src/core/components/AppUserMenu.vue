@@ -150,9 +150,9 @@ const menuModel = computed(() => {
       return {
         label: route.label || route.title,
         icon: route.icon || (isLogout ? 'pi pi-sign-out' : 'pi pi-user'),
-        command: () => {
+        command: async () => {
           if (isLogout) {
-            logout();
+            await logout();
           } else if (route.uri) {
             router.push(route.uri);
           }
@@ -173,7 +173,9 @@ const menuModel = computed(() => {
     {
       label: 'Cerrar sesión',
       icon: 'pi pi-sign-out',
-      command: () => logout(),
+      command: async () => {
+        await logout();
+      },
     },
   ];
 });

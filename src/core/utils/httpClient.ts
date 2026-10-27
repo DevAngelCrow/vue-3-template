@@ -20,7 +20,7 @@ const setupHttpClient = (api: AxiosInstance) => {
   api.interceptors.request.use(
     config => {
       const useAuth = useAuthStore();
-      const token = useAuth.token || localStorage.getItem('token');
+      const token = useAuth.token || localStorage.getItem('access_token');
       if (token) {
         if (!config.headers) {
           config.headers = AxiosHeaders.from({});
