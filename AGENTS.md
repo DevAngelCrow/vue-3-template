@@ -107,159 +107,30 @@ src/
 
 ---
 
-## 4. Patrón Canónico de Composables con TanStack Query y Vee-Validate
+## 4. Reglas Mandatorias de Composables (Estado y Formularios)
 
-Cada entidad o catálogo debe seguir el patrón unificado observado en `useCategoryPermission`:
+### 4.1. Estado de Servidor con TanStack Query v5
+- **Factoría de Claves**: Todo módulo debe estructurar sus claves con `createQueryKeys` (`@/core/utils/queryKeys`).
+- **Claves Reactivas**: Envolver obligatoriamente `queryKey` en `computed(() => ...)` para sincronizar automáticamente cambios en `pagination` o `appliedFilter`.
+- **Paginación Suave**: Usar `placeholderData: keepPreviousData` para evitar parpadeos visuales al navegar entre páginas.
+- **Invalidación Consistente**: Las mutaciones (`addMutation`, `updateMutation`, etc.) deben invalidar la caché oportunamente tras el éxito con `queryClient.invalidateQueries({ queryKey: keys.all })`.
+- *Ver recetas completas y mutaciones optimistas en la habilidad `vue3-tanstack-query-manager`.*
 
-```ts
-import { computed, reactive, ref, watch } from 'vue';
-import { useForm } from 'vee-validate';
-import * as yup from 'yup';
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/vue-query';
+### 4.2. Formularios Reactivos con Vee-Validate y Yup
+- **Enlace Reactivo**: Usar `defineField` (`const [field, fieldAttrs] = defineField('name')`) y enlazar a componentes `AppInput*` con `v-model="field"` y `v-bind="fieldAttrs"`.
+- **Reglas Centralizadas**: Reutilizar las validaciones de `@/core/utils/validationRules` (`requiredText`, `noEmojis`, `requiredNumber`, `emailFormat`, etc.).
+- **Errores Semánticos**: Conectar `:error="errors.field"`. Los componentes `AppInput*` aplican el color semántico `text-danger-600` de forma nativa.
+- **Ciclo de Vida con `modalState`**:
+  - Al abrir en modo `add`: llamar a `resetForm()`.
+  - Al abrir en modo `edit` o `view`: cargar datos mediante `setValues(itemData)`.
+  - En modo `view`: deshabilitar campos (`:disabled="true"`) y ocultar botones de envío.
+- *Ver catálogo de inputs y esquemas completos en la habilidad `vue3-vee-validate-forms`.*
 
-import { TableHeaders } from '@/core/interfaces';
-import { useAlertStore } from '@/core/store';
-import { createQueryKeys } from '@/core/utils/queryKeys';
-import miServicio from '../services/mi.services';
-import type { MiEntidadResponse } from '../interfaces/mi-entidad.response.interface';
-import type { MiEntidadForm } from '../interfaces/mi-entidad.form.interface';
-
-// 1. Tipos de filtro
-export type FilterType = {
-  filter_name?: string;
-  status?: boolean | 'Todos';
-};
-
-// 2. Factoría de Query Keys
-export const miEntidadKeys = createQueryKeys<
-  FilterType & { page?: number; per_page?: number }
->('mi-entidad');
-
-export function useMiEntidad() {
-  const queryClient = useQueryClient();
-  const alert = useAlertStore();
-
-  // 3. Esquema y Formulario reactivo con Vee-Validate y Yup
-  const {
-    errors,
-    defineField,
-    handleSubmit,
-    resetForm,
-    setFieldValue,
-  } = useForm({
-    validationSchema: yup.object({
-      id: yup.string().optional(),
-      name: yup.string().required('El nombre es requerido').min(3),
-      active: yup.boolean().default(true),
-    }),
-  });
-
-  const [name, nameAttrs] = defineField('name');
-
-  // 4. Paginación y Filtros
-  const pagination = reactive({ page: 1, per_page: 10, total_items: 0 });
-  const filter = reactive<FilterType>({ filter_name: undefined, status: undefined });
-  const appliedFilter = reactive<FilterType>({ filter_name: undefined, status: undefined });
-
-  // 5. Query principal con TanStack Query
-  const {
-    data: queryResult,
-    isPending,
-    isFetching,
-    refetch,
-  } = useQuery({
-    queryKey: computed(() =>
-      miEntidadKeys.list({
-        page: pagination.page,
-        per_page: pagination.per_page,
-        filter_name: appliedFilter.filter_name || undefined,
-        status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
-      }),
-    ),
-    queryFn: async () => {
-      const response = await miServicio.obtenerTodos({
-        page: pagination.page,
-        per_page: pagination.per_page,
-        name: appliedFilter.filter_name,
-        active: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
-      });
-      return response.data;
-    },
-    placeholderData: keepPreviousData,
-  });
-
-  // 6. Mutaciones con invalidación de caché
-  const addMutation = useMutation({
-    mutationFn: (form: MiEntidadForm) => miServicio.crear(form),
-    onSuccess: response => {
-      if (response.status === 201) {
-        queryClient.invalidateQueries({ queryKey: miEntidadKeys.all });
-        alert.showAlert({ type: 'success', title: response.data.message, show: true });
-      }
-    },
-  });
-
-  return {
-    name,
-    nameAttrs,
-    errors,
-    handleSubmit,
-    resetForm,
-    pagination,
-    filter,
-    appliedFilter,
-    items: computed(() => queryResult.value?.data ?? []),
-    isPending,
-    isFetching,
-    addMutation,
-  };
-}
-```
-
-### 7. Manejo Canónico de Búsquedas y Debounce:
-- **Prohibido el uso de la directiva `v-debounce` en plantillas:** Las directivas DOM generan alto acoplamiento con los nodos HTML, ocasionan comportamientos inconsistentes con wrappers de PrimeVue y carecen de tipado estricto.
-- **Debounce a nivel de Composable:** Toda función de búsqueda o filtro con retardo debe generarse y exportarse desde el composable utilizando la función utilitaria `debounce` de `@/core/utils/debounceFunction`:
-  ```ts
-  import { debounce } from '@/core/utils/debounceFunction';
-
-  const findMiEntidad = (value?: FilterType) => {
-    pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
-    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
-    appliedFilter.status = target?.status ?? filter.status;
-  };
-
-  const cleanSearch = () => {
-    filter.filter_name = undefined;
-    filter.status = undefined;
-    appliedFilter.filter_name = undefined;
-    appliedFilter.status = undefined;
-    pagination.page = 1;
-  };
-
-  const debouncedFindMiEntidad = debounce(findMiEntidad, 700);
-  const debouncedCleanSearch = debounce(cleanSearch, 700);
-
-  return {
-    debouncedFindMiEntidad,
-    debouncedCleanSearch,
-    // ...
-  };
-  ```
-- **Consumo en la Vista (`.vue`):** Enlazar directamente a través de eventos declarativos nativos de Vue 3:
-  ```html
-  <AppInputText
-    v-model="filter.filter_name"
-    @keydown.enter="debouncedFindMiEntidad"
-  />
-  <Button @click="debouncedFindMiEntidad">Buscar</Button>
-  <Button outlined @click="debouncedCleanSearch" label="Limpiar" />
-  ```
+### 4.3. Manejo Canónico de Búsquedas y Debounce
+- **Prohibido el uso de la directiva `v-debounce` en plantillas**: Las directivas DOM generan alto acoplamiento con los nodos HTML, ocasionan comportamientos inconsistentes con wrappers de PrimeVue y carecen de tipado estricto.
+- **Debounce a nivel de Composable**: Toda función de búsqueda o filtro con retardo debe generarse y exportarse desde el composable utilizando la función utilitaria `debounce` de `@/core/utils/debounceFunction` (ej. 600–700 ms).
+- **Consumo en la Vista (`.vue`)**: Enlazar directamente a través de eventos declarativos nativos de Vue 3 (`@keydown.enter` o `@click`).
+- *Ver implementación integral de vistas y filtros en la habilidad `vue3-crud-module-scaffolder`.*
 
 ---
 
@@ -313,3 +184,12 @@ Al implementar cualquier característica, refactorización o corrección:
      ```
 4. **Formato**:
    - Mantener consistencia ejecutando `npm run format` si se requiere formateo con Prettier.
+
+---
+
+## 8. Habilidades Disponibles en este Repositorio (`.agents/skills/`)
+
+- `vue3-crud-module-scaffolder`: Andamiaje guiado completo de módulos (vistas, modales, composables y rutas).
+- `vue3-tanstack-query-manager`: Gestión avanzada de estado de servidor, queries jerárquicas, invalidación y mutaciones optimistas.
+- `vue3-vee-validate-forms`: Formularios reactivos, esquemas Yup y enlace canónico con componentes globales `AppInput*`.
+- `fullstack-contract-sync`: Mapeo riguroso de contratos y DTOs desde el backend NestJS hacia interfaces y servicios de Vue 3.
