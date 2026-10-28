@@ -11,10 +11,9 @@
           label="País*"
           id="countries"
           v-bind="countryAttrs"
-          :error-messages="errors.country"
+          :error-message="errors.country"
           option-label="name"
           :suggestions="countriesFiltered"
-          :options="countriesOptions"
           dropdown
           @complete="findAutocompleteCountries"
           @change="wrappedGetGeographicalDivisionsTypesByCountry"
@@ -26,10 +25,9 @@
           label="Tipo de división*"
           id="geographic_divisions_type"
           v-bind="geographicDivisionTypesAttrs"
-          :error-messages="errors.geographic_division_types"
+          :error-message="errors.geographic_division_types"
           option-label="name"
           :suggestions="geographicDivisionsTypesFiltered"
-          :options="geographicDivisionsTypesOptions"
           dropdown
           @complete="findAutocompleteDivisionTypes"
           @change="wrappedGetGeographicalDivisions"
@@ -42,10 +40,9 @@
           label="División Geográfica*"
           id="geographic_divisions"
           v-bind="geographicDivisionsAttrs"
-          :error-messages="errors.geographic_divisions"
+          :error-message="errors.geographic_divisions"
           option-label="name"
           :suggestions="geographicDivisionsFiltered"
-          :options="geographicDivisionsOptions"
           dropdown
           @complete="findAutocomplete"
           :disabled="disableGeographicDivisions"
@@ -57,7 +54,7 @@
           label="Calle*"
           id="street"
           v-bind="streetAttrs"
-          :error-messages="errors.street"
+          :error-message="errors.street"
           @update:modelValue="validationInputAlphanumeric(street, 'street')"
           :readonly="!editMode"
         />
@@ -69,7 +66,7 @@
           label="No. de calle*"
           id="street_number"
           v-bind="streetNumberAttrs"
-          :error-messages="errors.streetNumber"
+          :error-message="errors.streetNumber"
           @update:modelValue="
             validationInputAlphanumeric(streetNumber, 'streetNumber')
           "
@@ -81,7 +78,7 @@
           label="No. de casa*"
           id="house_number"
           v-bind="houseNumberAttrs"
-          :error-messages="errors.houseNumber"
+          :error-message="errors.houseNumber"
           @update:modelValue="
             validationInputAlphanumeric(houseNumber, 'houseNumber')
           "
@@ -93,7 +90,7 @@
           label="Colonia/Reparto*"
           id="neighborhood"
           v-bind="neighborhoodAttrs"
-          :error-messages="errors.neighborhood"
+          :error-message="errors.neighborhood"
           @update:modelValue="
             validationInputAlphanumeric(neighborhood, 'neighborhood')
           "
@@ -105,7 +102,7 @@
           label="Block*"
           id="block"
           v-bind="blockAttrs"
-          :error-messages="errors.block"
+          :error-message="errors.block"
           @update:modelValue="
             validationInputAlphanumeric(streetNumber, 'streetNumber')
           "
@@ -119,23 +116,20 @@
           label="Pasaje"
           id="pathway"
           v-bind="pathwayAttrs"
-          :error-messages="errors.pathway"
+          :error-message="errors.pathway"
           @update:modelValue="validationInputAlphanumeric(pathway, 'pathway')"
           :readonly="!editMode"
         />
         <div class="flex items-center gap-2 flex-1">
-          <Checkbox
+          <AppCheckBox
             v-model="current"
-            id="current"
+            id="actual"
+            label="Actual"
             binary
-            name="Actual"
-            value="Actual"
-            input-id="actual"
             v-bind="currentAttrs"
-            :error-messages="errors.current"
+            :error-message="errors.current"
             :readonly="!editMode"
           />
-          <label for="actual">Actual</label>
         </div>
       </div>
     </section>
@@ -146,7 +140,6 @@ import { computed, inject, ref, watch } from 'vue';
 import {
   AutoCompleteChangeEvent,
   AutoCompleteCompleteEvent,
-  Checkbox,
 } from 'primevue';
 
 import { Country } from '@/core/services/interfaces/auth/country.interface';

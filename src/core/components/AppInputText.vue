@@ -3,8 +3,8 @@
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon
-          v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          v-if="prependIcon"
+          :class="[prependIcon, { 'text-danger-600': invalid }]"
         />
         <InputText
           class="w-full"
@@ -13,41 +13,43 @@
           @update:model-value="onUpdate"
           :invalid="invalid"
           v-bind="$attrs"
-          :autocomplete
+          :autocomplete="autocomplete"
           :placeholder="displayPlaceholder"
-          :id="inputId"
+          :id="resolvedInputId"
           @focus="isFocused = true"
           @blur="isFocused = false"
-          :variant="inputVarian"
-          :size="inputSize"
+          :variant="variant"
+          :size="size"
+          :fluid="fluid"
+          :disabled="disabled"
+          :readonly="readonly"
         />
         <InputIcon
           v-if="appendIconLocal"
           :class="[
             appendIconLocal,
-            'absolute right-4 top-5.5',
             { 'text-danger-600': invalid },
-            { 'hover:cursor-pointer': type === 'password' },
+            { 'cursor-pointer': type === 'password' || Boolean(appendIcon) },
           ]"
-          @click="clickSecondIcon"
+          @click="clickAppendIcon"
         />
       </IconField>
       <label
         v-if="label"
         :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+        :for="resolvedInputId"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
-      class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      v-if="errorMessage?.length"
+      class="left-0 top-full mt-1 text-xs z-10"
+      severity="error"
+      size="small"
+      variant="simple"
     >
-      {{ errorMessages }}
+      {{ errorMessage }}
     </Message>
   </div>
 </template>
@@ -55,84 +57,39 @@
 import { ref, computed, watch, useId } from 'vue';
 import { InputText, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
+import type { AppInputTextProps } from '../interfaces';
+
 defineOptions({ inheritAttrs: false, name: 'AppInputText' });
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  type: {
-    type: String,
-    default: 'text',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  inputSize: {
-    type: String,
-    default: 'normal',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVarian: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  appendIcon: {
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
+const props = withDefaults(defineProps<AppInputTextProps>(), {
+  modelValue: undefined,
+  class: 'w-full max-w-[322px]',
+  type: 'text',
+  placeholder: '',
+  size: undefined,
+  variant: 'outlined',
+  labelVariant: 'on',
+  fluid: true,
+  errorMessage: '',
+  appendIcon: '',
+  prependIcon: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  disabled: false,
+  readonly: false,
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+  'click-append-icon': [];
+}>();
 
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const resolvedInputId = computed(() => props.id || autoId);
 
-const invalid = ref<boolean>(false);
+const invalid = computed(() => Boolean(props.errorMessage?.length));
+
 const appendIconLocal = ref<string>(
   props.appendIcon || (props.type === 'password' ? 'pi pi-eye' : ''),
 );
@@ -145,14 +102,15 @@ const onUpdate = (value: string | undefined) => {
 
 const displayPlaceholder = computed(() => {
   if (isFocused.value && props.label) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
   if (!props.label.length) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
+  return undefined;
 });
 
-const clickSecondIcon = () => {
+const clickAppendIcon = () => {
   if (props.type === 'password') {
     if (appendIconLocal.value === 'pi pi-eye') {
       appendIconLocal.value = 'pi pi-eye-slash';
@@ -162,22 +120,23 @@ const clickSecondIcon = () => {
       typeInputLocal.value = 'password';
     }
   }
-  emit('click-end-icon');
+  emit('click-append-icon');
 };
 
 watch(
   () => props.appendIcon,
   newVal => {
-    appendIconLocal.value = newVal;
+    appendIconLocal.value =
+      newVal || (props.type === 'password' ? 'pi pi-eye' : '');
   },
 );
 
 watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
+  () => props.type,
+  newType => {
+    typeInputLocal.value = newType;
+    if (newType === 'password' && !props.appendIcon) {
+      appendIconLocal.value = 'pi pi-eye';
     }
   },
 );

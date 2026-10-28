@@ -8,7 +8,7 @@
         class="flex-1"
         id="email"
         v-model="email"
-        :error-messages="errors.email"
+        :error-message="errors.email"
         label="Email*"
         placeholder="juan@mail.com"
         v-bind="emailAttrs"
@@ -21,7 +21,7 @@
         label="Nombre usuario*"
         v-model="userName"
         v-bind="userNameAttrs"
-        :error-messages="errors.userName"
+        :error-message="errors.userName"
         @update:modelValue="validationInputAlphanumeric(userName, 'userName')"
         :readonly="!editMode"
       />

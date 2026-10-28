@@ -2,8 +2,7 @@
   <Toast position="top-right" />
 </template>
 <script setup lang="ts">
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
+import { Toast, useToast } from 'primevue';
 import { watch } from 'vue';
 
 import { useAlertStore } from '../store/useAlertStore';
@@ -23,7 +22,7 @@ const showTopRight = () => {
 
 watch(
   () => alert.show,
-  (newValue) => {
+  newValue => {
     if (newValue) {
       showTopRight();
     } else {

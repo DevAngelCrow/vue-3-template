@@ -1,169 +1,102 @@
 <template>
-  <div :class="['min-w-37.5', 'relative', props.class || 'w-auto']">
-    <div class="p-hidden-accessible" data-p-hidden-accessible="true">
-      <input
-        :id="inputId"
-        type="text"
-        readonly
-        tabindex="-1"
-        :disabled="readonly"
-        role="combobox"
-        :aria-label="label || placeholder"
-        @focus="focusSelect"
-      />
-    </div>
-    <FloatLabel :variant="labelVariant">
+  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
+    <FloatLabel :variant="labelVariant" class="w-full min-w-[150px]">
       <Select
         ref="selectRef"
-        :class="['w-full', { 'pointer-events-none': readonly }]"
-        :inputId="`${inputId}-select`"
+        class="w-full min-w-[150px]"
+        :input-id="resolvedInputId"
+        :aria-labelledby="label ? `${resolvedInputId}-label` : undefined"
+        :aria-label="!label ? placeholder || 'Seleccionar' : undefined"
         :model-value="modelValue"
         @update:model-value="onUpdateReadonly"
         :invalid="invalid"
         v-bind="$attrs"
-        :autocomplete
         :placeholder="displayPlaceholder"
         @focus="isFocused = true"
         @blur="isFocused = false"
-        :variant="inputVarian"
-        :options
-        :optionLabel
+        :variant="variant"
+        :size="size"
+        :options="options"
+        :option-label="optionLabel || undefined"
+        :option-value="optionValue || undefined"
+        :disabled="disabled"
+        :readonly="readonly"
+        :show-clear="showClear"
+        :filter="filter"
+        :fluid="fluid"
       />
       <label
         v-if="label"
+        :id="`${resolvedInputId}-label`"
         :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
-        @click="focusSelect"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
-      class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      v-if="errorMessage?.length"
+      class="left-0 top-full mt-1 text-xs z-10"
+      severity="error"
+      size="small"
+      variant="simple"
     >
-      {{ errorMessages }}
+      {{ errorMessage }}
     </Message>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { ref, computed, useId } from 'vue';
 import { Select, Message, FloatLabel } from 'primevue';
+
+import type { AppSelectProps } from '../interfaces';
 
 defineOptions({ inheritAttrs: false, name: 'AppSelect' });
 
-const props = defineProps({
-  modelValue: {
-    type: [String, Number, Object, Boolean],
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVarian: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  options: {
-    type: Array,
-    default: () => [],
-  },
-  optionLabel: {
-    type: String,
-    default: '',
-  },
-  readonly: {
-    type: Boolean,
-    default: false,
-  },
+const props = withDefaults(defineProps<AppSelectProps>(), {
+  modelValue: undefined,
+  class: 'w-full max-w-[322px]',
+  placeholder: '',
+  size: undefined,
+  variant: 'outlined',
+  labelVariant: 'on',
+  fluid: true,
+  errorMessage: '',
+  label: '',
+  id: undefined,
+  options: () => [],
+  optionLabel: '',
+  optionValue: '',
+  disabled: false,
+  readonly: false,
+  showClear: false,
+  filter: false,
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  'update:modelValue': [value: unknown];
+}>();
 
 const selectRef = ref<{ $el?: HTMLElement }>();
 
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const resolvedInputId = computed(() => props.id || autoId);
 
-const invalid = ref<boolean>(false);
+const invalid = computed(() => Boolean(props.errorMessage?.length));
 const isFocused = ref<boolean>(false);
 
-const focusSelect = () => {
-  if (!props.readonly && selectRef.value) {
-    const el = selectRef.value.$el as HTMLElement | undefined;
-    const focusable =
-      el?.querySelector<HTMLElement>('.p-select-label') ??
-      el?.querySelector<HTMLElement>('[tabindex="0"]') ??
-      el;
-    focusable?.focus?.();
-  }
-};
-
-const onUpdateReadonly = (value: string | number | object | undefined) => {
-  if (!props.readonly) {
+const onUpdateReadonly = (value: unknown) => {
+  if (!props.readonly && !props.disabled) {
     emit('update:modelValue', value ?? '');
   }
 };
 
 const displayPlaceholder = computed(() => {
   if (isFocused.value && props.label) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
   if (!props.label.length) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
+  return undefined;
 });
-
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
-  },
-);
 </script>

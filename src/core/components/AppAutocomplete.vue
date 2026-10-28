@@ -1,59 +1,85 @@
 <template>
   <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
-    <FloatLabel :variant="labelVariant">
-      <IconField class="w-full group">
+    <FloatLabel :variant="labelVariant" class="w-full">
+      <IconField v-if="prependIcon || appendIcon" class="w-full group">
         <InputIcon
-          v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          v-if="prependIcon"
+          :class="[prependIcon, { 'text-danger-600': invalid }]"
         />
         <AutoComplete
           :class="['w-full', { 'pointer-events-none': readonly }]"
-          :type="typeInputLocal"
           :model-value="modelValue"
           @update:model-value="onUpdate"
           :invalid="invalid"
           v-bind="$attrs"
           :placeholder="displayPlaceholder"
-          :input-id="inputId"
+          :input-id="resolvedInputId"
           @focus="isFocused = true"
           @blur="isFocused = false"
-          :variant="inputVarian"
-          :optionLabel
-          :multiple
+          :variant="variant"
+          :size="size"
+          :suggestions="suggestions"
+          :option-label="optionLabel || undefined"
+          :multiple="multiple"
+          :dropdown="dropdown"
+          :disabled="disabled"
+          :readonly="readonly"
+          :fluid="fluid"
           @complete="complete"
         />
         <InputIcon
-          v-if="appendIconLocal"
+          v-if="appendIcon"
           :class="[
-            appendIconLocal,
-            'absolute right-4 top-5.5',
+            appendIcon,
+            'cursor-pointer',
             { 'text-danger-600': invalid },
-            { 'hover:cursor-pointer': type === 'password' },
           ]"
-          @click="clickSecondIcon"
+          @click="emit('click-append-icon')"
         />
       </IconField>
+      <AutoComplete
+        v-else
+        :class="['w-full', { 'pointer-events-none': readonly }]"
+        :model-value="modelValue"
+        @update:model-value="onUpdate"
+        :invalid="invalid"
+        v-bind="$attrs"
+        :placeholder="displayPlaceholder"
+        :input-id="resolvedInputId"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+        :variant="variant"
+        :size="size"
+        :suggestions="suggestions"
+        :option-label="optionLabel || undefined"
+        :multiple="multiple"
+        :dropdown="dropdown"
+        :disabled="disabled"
+        :readonly="readonly"
+        :fluid="fluid"
+        @complete="complete"
+      />
       <label
         v-if="label"
         :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+        :for="resolvedInputId"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
-      class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      v-if="errorMessage?.length"
+      class="left-0 top-full mt-1 text-xs z-10"
+      severity="error"
+      size="small"
+      variant="simple"
     >
-      {{ errorMessages }}
+      {{ errorMessage }}
     </Message>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { ref, computed, useId } from 'vue';
 import {
   AutoComplete,
   InputIcon,
@@ -63,144 +89,60 @@ import {
 } from 'primevue';
 import type { AutoCompleteCompleteEvent } from 'primevue';
 
+import type { AppAutocompleteProps } from '../interfaces';
+
 defineOptions({ inheritAttrs: false, name: 'AppAutocomplete' });
 
-const props = defineProps({
-  modelValue: {
-    type: [Array, String, Object],
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  type: {
-    type: String,
-    default: 'text',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVarian: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  appendIcon: {
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    type: String,
-    default: '',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  suggestion: {
-    //Opciones que apareceran en el desplegable del select
-    type: Array,
-    default: () => [],
-  },
-  optionLabel: {
-    //Campo que aparecera si se envia un arreglo de objetos
-    type: String,
-    default: '',
-  },
-  multiple: {
-    type: Boolean,
-    default: false,
-  },
-  readonly: {
-    type: Boolean,
-    default: false,
-  },
+const props = withDefaults(defineProps<AppAutocompleteProps>(), {
+  modelValue: undefined,
+  class: 'w-full max-w-[322px]',
+  placeholder: '',
+  size: undefined,
+  variant: 'outlined',
+  labelVariant: 'on',
+  fluid: true,
+  errorMessage: '',
+  appendIcon: '',
+  prependIcon: '',
+  label: '',
+  id: undefined,
+  suggestions: () => [],
+  optionLabel: '',
+  multiple: false,
+  dropdown: false,
+  disabled: false,
+  readonly: false,
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon', 'complete']);
+const emit = defineEmits<{
+  'update:modelValue': [value: unknown];
+  'click-append-icon': [];
+  complete: [event: AutoCompleteCompleteEvent];
+}>();
 
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const resolvedInputId = computed(() => props.id || autoId);
 
-const invalid = ref<boolean>(false);
-const appendIconLocal = ref<string>(
-  props.appendIcon || (props.type === 'password' ? 'pi pi-eye' : ''),
-);
-const typeInputLocal = ref<string>(props.type);
+const invalid = computed(() => Boolean(props.errorMessage?.length));
 const isFocused = ref<boolean>(false);
 
-const onUpdate = (value: string | undefined) => {
-  emit('update:modelValue', value ?? '');
+const onUpdate = (value: unknown) => {
+  if (!props.readonly && !props.disabled) {
+    emit('update:modelValue', value ?? (props.multiple ? [] : ''));
+  }
 };
 
 const displayPlaceholder = computed(() => {
   if (isFocused.value && props.label) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
   if (!props.label.length) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
+  return undefined;
 });
-
-const clickSecondIcon = () => {
-  if (props.type === 'password') {
-    if (appendIconLocal.value === 'pi pi-eye') {
-      appendIconLocal.value = 'pi pi-eye-slash';
-      typeInputLocal.value = 'text';
-    } else {
-      appendIconLocal.value = 'pi pi-eye';
-      typeInputLocal.value = 'password';
-    }
-  }
-  emit('click-end-icon');
-};
 
 const complete = (event: AutoCompleteCompleteEvent) => {
   emit('complete', event);
 };
-
-watch(
-  () => props.appendIcon,
-  newVal => {
-    appendIconLocal.value = newVal;
-  },
-);
-
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
-  },
-);
 </script>

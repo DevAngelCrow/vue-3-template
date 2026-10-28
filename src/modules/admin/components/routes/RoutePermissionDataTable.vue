@@ -64,8 +64,8 @@
         :paginator="true"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
-        :per_page="permissionsPagination.per_page"
-        :total_items="permissionsPagination.total_items"
+        :per-page="permissionsPagination.per_page"
+        :total-items="permissionsPagination.total_items"
         :page="permissionsPagination.page"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
@@ -75,7 +75,7 @@
             <AppCheckBox
               :readonly="props.readonly"
               binary
-              @update:model-value="checkAll"
+              @update:model-value="checkAll(Boolean($event))"
               v-model="selectAll"
             >
             </AppCheckBox>
@@ -89,7 +89,7 @@
               binary
               :model-value="isPermissionSelected(data.id)"
               :id="`${index}`"
-              @update:model-value="togglePermission(data.id, $event)"
+              @update:model-value="togglePermission(data.id, Boolean($event))"
             />
           </div>
         </template>

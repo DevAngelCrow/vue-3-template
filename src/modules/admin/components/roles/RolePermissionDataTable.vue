@@ -64,8 +64,8 @@
         :paginator="true"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
-        :per_page="permissionsPagination.per_page"
-        :total_items="permissionsPagination.total_items"
+        :per-page="permissionsPagination.per_page"
+        :total-items="permissionsPagination.total_items"
         :page="permissionsPagination.page"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
@@ -75,7 +75,7 @@
             <AppCheckBox
               :readonly="props.readonly"
               binary
-              @update:model-value="checkAll"
+              @update:model-value="checkAll(Boolean($event))"
               v-model="selectAll"
             >
             </AppCheckBox>
@@ -89,7 +89,7 @@
               binary
               :model-value="isPermissionSelected(data.id)"
               :id="`${index}`"
-              @update:model-value="togglePermission(data.id, $event)"
+              @update:model-value="togglePermission(data.id, Boolean($event))"
             />
           </div>
         </template>
@@ -160,25 +160,21 @@ const searchPermission = async (value: {
   if (modalState.value === 'view') {
     let _filteredItems = [];
 
-    // Verificar si hay filtros activos
     const hasNameFilter = Boolean(value.name && value.name.trim().length > 0);
     const hasCategoryFilter = Boolean(
       value.category?.id && value.category.id !== '',
     );
 
     for (let item of permissionsItemsLocal.value) {
-      // Si no hay filtros activos, incluir todos los items
       if (!hasNameFilter && !hasCategoryFilter) {
         _filteredItems.push(item);
         continue;
       }
 
-      // Verificar coincidencia con nombre
       const matchesName =
         hasNameFilter &&
         item?.name?.toLowerCase().includes(value.name.trim().toLowerCase());
 
-      // Verificar coincidencia con categoría
       const matchesCategory =
         hasCategoryFilter &&
         item?.id_category_permissions === value.category?.id;
@@ -437,10 +433,6 @@ defineExpose({
   .rounded_btn_clean {
     @apply rounded-full;
   }
-
-  /* .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] max-h-[45px] flex !justify-end;
-  } */
 }
 
 @media (min-width: 452px) and (max-width: 594px) {
@@ -451,10 +443,6 @@ defineExpose({
   .rounded_btn_clean {
     @apply rounded-full;
   }
-
-  /* .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] max-h-[45px] order-3 flex justify-end;
-  } */
 }
 
 @media (min-width: 200px) and (max-width: 451px) {
@@ -465,10 +453,6 @@ defineExpose({
   .rounded_btn_clean {
     @apply rounded-full;
   }
-
-  /* .rounded_counter {
-    @apply min-w-[100px] max-w-[100px] order-2 flex justify-end;
-  } */
 }
 
 @media (max-width: 309px) {

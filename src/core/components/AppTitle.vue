@@ -6,12 +6,9 @@
   </div>
 </template>
 <script setup lang="ts">
+import type { AppTitleProps } from '../interfaces';
+
 defineOptions({ name: 'AppTitle' });
 
-defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
-});
+defineProps<AppTitleProps>();
 </script>

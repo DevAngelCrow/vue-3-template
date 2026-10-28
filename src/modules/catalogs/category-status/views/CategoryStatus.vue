@@ -27,7 +27,7 @@
           option-label="name"
           label="Estado"
           v-model="filter.status"
-          optionValue="value"
+          option-value="value"
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
@@ -63,8 +63,8 @@
           :headers="headers"
           :items="categoryStatuses"
           :paginator="true"
-          :per_page="pagination.per_page"
-          :total_items="pagination.total_items"
+          :per-page="pagination.per_page"
+          :total-items="pagination.total_items"
           :page="pagination.page"
           :show-per-page-options="true"
           :per-page-options="[10, 20, 50, 100]"
@@ -104,8 +104,8 @@
           <template #body-active="{ data }">
             <AppChipStatus
               :label="data?.status?.name"
-              :backgroundColor="data?.status?.state_color"
-              :textColor="data?.status?.text_color"
+              :background-color="data?.status?.state_color"
+              :text-color="data?.status?.text_color"
             >
             </AppChipStatus>
           </template>

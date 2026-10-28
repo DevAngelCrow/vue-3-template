@@ -2,27 +2,30 @@
   <div :class="['w-auto', 'min-w-[150px]', 'relative', props.class]">
     <FloatLabel :variant="labelVariant">
       <DatePicker
-        :inputId="inputId"
+        :input-id="resolvedInputId"
         class="w-full"
         v-model="temporal"
-        :selection-mode
+        v-bind="$attrs"
+        :selection-mode="selectionMode"
         date-format="dd/mm/yy"
-        :show-other-months
+        :show-other-months="showOtherMonths"
         show-icon
-        :icon
-        :icon-display
+        :icon="icon"
+        :icon-display="iconDisplay"
         :number-of-months="1"
-        :min-date
-        :max-date
-        :disabled-dates
-        :disabled-days
+        :min-date="minDate"
+        :max-date="maxDate"
+        :disabled-dates="disabledDates"
+        :disabled-days="disabledDays"
         hour-format="12"
-        :disabled
-        :readonly
+        :disabled="disabled"
+        :readonly="readonly"
         :placeholder="displayPlaceholder"
         :manual-input="false"
-        fluid
-        :show-time
+        :fluid="fluid"
+        :show-time="showTime"
+        :variant="variant"
+        :size="size"
         @focus="isFocused = true"
         @blur="isFocused = false"
         :invalid="invalid"
@@ -30,127 +33,64 @@
       <label
         v-if="label"
         :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+        :for="resolvedInputId"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
-      class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      v-if="errorMessage?.length"
+      class="left-0 top-full mt-1 text-xs z-10"
+      severity="error"
+      size="small"
+      variant="simple"
     >
-      {{ errorMessages }}
+      {{ errorMessage }}
     </Message>
   </div>
 </template>
 <script setup lang="ts">
 import { DatePicker, FloatLabel, Message } from 'primevue';
-import { computed, ref, watch, useId, type PropType } from 'vue';
+import { computed, ref, useId } from 'vue';
 
+import type { AppDatePickerProps } from '../interfaces';
 import { CreateDateFromFormat, FormatDate, IsDateAfter } from '../utils/dates';
 
-defineOptions({ name: 'AppDatePicker' });
+defineOptions({ inheritAttrs: false, name: 'AppDatePicker' });
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  icon: {
-    type: String,
-    default: 'pi pi-calendar',
-  },
-  selectionMode: {
-    type: String,
-    default: 'single',
-  },
-  showOtherMonths: {
-    type: Boolean,
-    default: true,
-  },
-  minDate: {
-    type: Date,
-    default: null,
-  },
-  maxDate: {
-    type: Date,
-    default: null,
-  },
-  disabledDates: {
-    type: Array as PropType<Date[]>,
-    default: () => [],
-  },
-  disabledDays: {
-    type: Array as PropType<number[]>,
-    default: null,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-  readonly: {
-    type: Boolean,
-    default: false,
-  },
-  placeholder: {
-    type: String,
-    default: 'DD/MM/AAAA',
-  },
-  iconDisplay: {
-    type: String,
-    default: '',
-  },
-  showTime: {
-    type: Boolean,
-    default: false,
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  label: {
-    type: String,
-    default: '',
-  },
+const props = withDefaults(defineProps<AppDatePickerProps>(), {
+  class: 'w-full max-w-[322px]',
+  icon: 'pi pi-calendar',
+  selectionMode: 'single',
+  showOtherMonths: true,
+  minDate: undefined,
+  maxDate: undefined,
+  disabledDates: () => [],
+  disabledDays: undefined,
+  disabled: false,
+  readonly: false,
+  placeholder: 'DD/MM/AAAA',
+  iconDisplay: 'input',
+  showTime: false,
+  labelVariant: 'on',
+  variant: 'outlined',
+  size: undefined,
+  fluid: true,
+  errorMessage: '',
+  id: undefined,
+  label: '',
 });
 
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const resolvedInputId = computed(() => props.id || autoId);
 
-const invalid = ref<boolean>(false);
+const invalid = computed(() => Boolean(props.errorMessage?.length));
 const isFocused = ref<boolean>(false);
 
 const dateModel = defineModel<string | string[] | null>({
-  type: [String, Array],
   default: null,
 });
+
 const validation = () => {
   const validSelectionMode: string[] = ['single', 'multiple', 'range'];
   if (!validSelectionMode.includes(props.selectionMode)) {
@@ -188,7 +128,7 @@ const temporal = computed<Date | Date[] | null>({
       const dias = dateModel.value;
       const diasFormated = dias
         .map(dia => CreateDateFromFormat(dia))
-        .filter((d): d is Date => d !== null); // filtra los null
+        .filter((d): d is Date => d !== null);
       return diasFormated;
     } else {
       return null;
@@ -211,18 +151,14 @@ const temporal = computed<Date | Date[] | null>({
 });
 
 const displayPlaceholder = computed(() => {
-  return isFocused.value ? props.placeholder : undefined;
+  if (isFocused.value && props.label) {
+    return props.placeholder || undefined;
+  }
+  if (!props.label.length) {
+    return props.placeholder || undefined;
+  }
+  return undefined;
 });
-
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
-  },
-);
 
 validation();
 </script>

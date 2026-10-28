@@ -26,7 +26,7 @@
           option-label="name"
           label="Estado"
           v-model="filter.status"
-          optionValue="value"
+          option-value="value"
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
@@ -61,8 +61,8 @@
           :headers="headers"
           :items="items"
           :paginator="true"
-          :per_page="pagination.per_page"
-          :total_items="pagination.total_items"
+          :per-page="pagination.per_page"
+          :total-items="pagination.total_items"
           :page="pagination.page"
           :show-per-page-options="true"
           :per-page-options="[10, 20, 50, 100]"
@@ -99,7 +99,7 @@
             <AppChipStatus
               :label="data?.status?.name"
               :background-color="data?.status?.state_color"
-              :textColor="data?.status?.text_color"
+              :text-color="data?.status?.text_color"
             >
             </AppChipStatus>
           </template>
@@ -124,14 +124,14 @@
     </section>
     <AppModal
       :show="showModal"
-      show-icon-close
+      show-close-icon
       :title="
         isDetailsMode ? 'Detalle País' : isMode ? 'Editar País' : 'Agregar País'
       "
-      :show-btn-confirm-footer="isDetailsMode ? false : true"
-      :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
-      :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
-      :show-buttons="!isDetailsMode"
+      :show-confirm-button="!isDetailsMode"
+      :confirm-label="isDetailsMode ? '' : 'Guardar'"
+      :cancel-label="isDetailsMode ? 'Cerrar' : 'Cancelar'"
+      show-footer
       @close-modal="closeModalCreate"
       @confirm-modal="confirmModal"
       width="350px"
@@ -142,7 +142,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el nombre del país"
           v-bind="nameAttrs"
-          :error-messages="errors.name"
+          :error-message="errors.name"
           :disabled="isDetailsMode"
         />
         <AppInputText
@@ -150,7 +150,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese la abreviación del país"
           v-bind="abbreviationAttrs"
-          :error-messages="errors.abbreviation"
+          :error-message="errors.abbreviation"
           :disabled="isDetailsMode"
         />
         <AppInputMask
@@ -158,7 +158,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el código del país"
           v-bind="codeAttrs"
-          :error-messages="errors.code"
+          :error-message="errors.code"
           :disabled="isDetailsMode"
           mask="999"
           placeholder="000"
@@ -168,7 +168,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el código ISO2"
           v-bind="iso2Attrs"
-          :error-messages="errors.iso2"
+          :error-message="errors.iso2"
           :disabled="isDetailsMode"
           maxlength="2"
         />
@@ -177,7 +177,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el código de teléfono"
           v-bind="phoneCodeAttrs"
-          :error-messages="errors.phone_code"
+          :error-message="errors.phone_code"
           :disabled="isDetailsMode"
           maxlength="10"
         />
@@ -186,12 +186,12 @@
 
     <AppModal
       :show="showModalCambioStatus"
-      show-icon-close
+      show-close-icon
       title="Cambiar estado"
-      :show-btn-confirm-footer="true"
-      :title-btn-confirm="'Confirmar'"
-      :title-btn-cancel="'Cancelar'"
-      :show-buttons="true"
+      :show-confirm-button="true"
+      confirm-label="Confirmar"
+      cancel-label="Cancelar"
+      :show-footer="true"
       @close-modal="CloseModalEstado"
       @confirm-modal="confirmModalEstado(idCountry!)"
       width="450px"
@@ -402,24 +402,6 @@ const headers = ref<TableHeaders[]>([
   },
 ]);
 
-// const items = ref([
-//   {
-//     vinculador_uno: '1',
-//     vinculador_dos: 'El Salvador',
-//     vinculador_tres: 'ESA',
-//     vinculador_cuatro: '503',
-//     vinculador_cinco: 'Activo',
-//     vinculador_seis: 'Editar | Eliminar',
-//   },
-//   {
-//     vinculador_uno: '2',
-//     vinculador_dos: 'Guatemala',
-//     vinculador_tres: 'GTM',
-//     vinculador_cuatro: '502',
-//     vinculador_cinco: 'Activo',
-//     vinculador_seis: 'Editar | Eliminar',
-//   },
-// ]);
 const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) return;
   pagination.page = page + 1;

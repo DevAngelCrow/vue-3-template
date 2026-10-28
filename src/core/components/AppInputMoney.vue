@@ -3,42 +3,46 @@
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon
-          v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          v-if="prependIcon"
+          :class="[prependIcon, { 'text-danger-600': invalid }]"
         />
         <InputNumber
           class="w-full"
-          type="text"
           :model-value="modelValue"
           @update:model-value="onUpdate"
           :invalid="invalid"
           v-bind="$attrs"
-          :autocomplete
+          :autocomplete="autocomplete"
           :placeholder="displayPlaceholder"
-          :inputId="inputId"
+          :input-id="resolvedInputId"
           @focus="isFocused = true"
           @blur="isFocused = false"
           mode="currency"
-          :currency
-          :locale
-          :show-buttons
-          :min
-          :max
-          :button-layout
-          fluid
-          :variant="inputVariant"
+          :currency="currency"
+          :locale="locale"
+          :show-buttons="showButtons"
+          :min="min"
+          :max="max"
+          :button-layout="buttonLayout"
+          :fluid="fluid"
+          :variant="variant"
+          :size="size"
+          :disabled="disabled"
+          :readonly="readonly"
         >
           <template #incrementicon>
             <span
               :class="
-                buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
+                buttonLayout === 'stacked' || buttonLayout === 'vertical'
+                  ? 'pi pi-chevron-up'
+                  : 'pi pi-plus'
               "
             />
           </template>
           <template #decrementicon>
             <span
               :class="
-                buttonLayout === 'vertical'
+                buttonLayout === 'stacked' || buttonLayout === 'vertical'
                   ? 'pi pi-chevron-down'
                   : 'pi pi-minus'
               "
@@ -49,24 +53,24 @@
       <label
         v-if="label"
         :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+        :for="resolvedInputId"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
-      class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      v-if="errorMessage?.length"
+      class="left-0 top-full mt-1 text-xs z-10"
+      severity="error"
+      size="small"
+      variant="simple"
     >
-      {{ errorMessages }}
+      {{ errorMessage }}
     </Message>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { ref, computed, useId } from 'vue';
 import {
   InputNumber,
   InputIcon,
@@ -75,116 +79,54 @@ import {
   FloatLabel,
 } from 'primevue';
 
+import type { AppInputMoneyProps } from '../interfaces';
+
 defineOptions({ inheritAttrs: false, name: 'AppInputMoney' });
 
-const props = defineProps({
-  modelValue: {
-    type: Number,
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVariant: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  currency: {
-    type: String,
-    default: 'USD',
-  },
-  locale: {
-    type: String,
-    default: 'en-US',
-  },
-  showButtons: {
-    type: Boolean,
-    default: false,
-  },
-  buttonLayout: {
-    type: String,
-    default: 'vertical',
-  },
-  min: {
-    type: Number,
-  },
-  max: {
-    type: Number,
-  },
+const props = withDefaults(defineProps<AppInputMoneyProps>(), {
+  modelValue: undefined,
+  class: 'w-full max-w-[322px]',
+  placeholder: '',
+  size: undefined,
+  variant: 'outlined',
+  labelVariant: 'on',
+  fluid: true,
+  errorMessage: '',
+  prependIcon: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  disabled: false,
+  readonly: false,
+  currency: 'USD',
+  locale: 'en-US',
+  showButtons: false,
+  buttonLayout: 'stacked',
+  min: undefined,
+  max: undefined,
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  'update:modelValue': [value: number | null | undefined];
+}>();
 
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const resolvedInputId = computed(() => props.id || autoId);
 
-const invalid = ref<boolean>(false);
+const invalid = computed(() => Boolean(props.errorMessage?.length));
 const isFocused = ref<boolean>(false);
 
-const onUpdate = (value: number | undefined) => {
+const onUpdate = (value: number | null | undefined) => {
   emit('update:modelValue', value);
 };
 
 const displayPlaceholder = computed(() => {
-  if (isFocused.value) {
-    return props.placeholder;
+  if (isFocused.value && props.label) {
+    return props.placeholder || undefined;
   }
   if (!props.label.length) {
-    return props.placeholder;
+    return props.placeholder || undefined;
   }
+  return undefined;
 });
-
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
-  },
-);
 </script>

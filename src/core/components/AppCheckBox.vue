@@ -1,63 +1,65 @@
 <template>
-  <div class="flex gap-2 items-center">
-    <Checkbox
-      v-bind="$attrs"
-      :model-value="modelValue"
-      @update:model-value="onUpdate"
-      :input-id="inputId"
-    />
-    <label v-if="label" :for="inputId">{{ label }}</label>
+  <div :class="['relative flex flex-col', props.class]">
+    <div class="flex gap-2 items-center">
+      <Checkbox
+        v-bind="$attrs"
+        :model-value="modelValue"
+        @update:model-value="onUpdate"
+        :input-id="resolvedInputId"
+        :binary="binary"
+        :readonly="readonly"
+        :disabled="disabled"
+        :invalid="invalid"
+      />
+      <label
+        v-if="label"
+        :for="resolvedInputId"
+        :class="['cursor-pointer select-none', { 'text-danger-600': invalid }]"
+      >
+        {{ label }}
+      </label>
+    </div>
+    <Message
+      v-if="errorMessage?.length"
+      class="left-0 top-full mt-1 text-xs z-10"
+      severity="error"
+      size="small"
+      variant="simple"
+    >
+      {{ errorMessage }}
+    </Message>
   </div>
-  <Message
-    class="left-0 top-full mt-0 text-xs z-10"
-    v-if="errorMessages.length"
-    severity="error"
-    size="small"
-    variant="simple"
-    >{{ messageErrorField }}</Message
-  >
 </template>
 <script setup lang="ts">
 import { Checkbox, Message } from 'primevue';
-import { ref, computed, useId } from 'vue';
+import { computed, useId } from 'vue';
 
-const props = defineProps({
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  modelValue: {
-    type: Boolean,
-    default: false,
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
+import type { AppCheckBoxProps } from '../interfaces';
+
+defineOptions({ inheritAttrs: false, name: 'AppCheckBox' });
+
+const props = withDefaults(defineProps<AppCheckBoxProps>(), {
+  id: undefined,
+  class: '',
+  modelValue: false,
+  binary: true,
+  readonly: false,
+  disabled: false,
+  errorMessage: '',
+  label: '',
 });
 
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const resolvedInputId = computed(() => props.id || autoId);
+const invalid = computed(() => Boolean(props.errorMessage?.length));
 
-const errors = ref<string>();
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean | unknown[]];
+}>();
 
-const messageErrorField = computed(() => {
-  if (props.errorMessages.length) {
-    errors.value = props.errorMessages;
+const onUpdate = (value: boolean | unknown[]) => {
+  if (!props.readonly && !props.disabled) {
+    emit('update:modelValue', value);
   }
-  return errors.value;
-});
-
-const onUpdate = (value: boolean) => {
-  return emit('update:modelValue', value);
 };
 </script>

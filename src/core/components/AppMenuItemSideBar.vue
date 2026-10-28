@@ -1,7 +1,7 @@
 <template>
   <ul class="flex flex-col m-0 p-0 list-none w-full gap-1.5">
     <li
-      v-for="section in mappedMenu"
+      v-for="section in items"
       :key="section.id || section.title || section.name"
       class="flex flex-col w-full"
     >
@@ -51,7 +51,7 @@
             v-if="isOpen(section.id)"
             class="w-full pl-5 pr-1 mt-1 border-l-2 border-primary-400/50 ml-4 space-y-1"
           >
-            <AppMenuItemSideBar :mapped-menu="section.children || []" />
+            <AppMenuItemSideBar :items="section.children || []" />
           </div>
         </Transition>
       </div>
@@ -102,7 +102,7 @@ import { useLayoutStore } from '../store/useLayoutStore';
 defineOptions({ name: 'AppMenuItemSideBar' });
 
 defineProps<{
-  mappedMenu: NavigationItem[];
+  items: NavigationItem[];
 }>();
 
 const layoutStore = useLayoutStore();

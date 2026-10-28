@@ -61,9 +61,8 @@
               <AppInputText
                 placeholder="Correo electrónico"
                 v-model="email"
-                show-icon
-                prepend-inner-icon="pi pi-envelope"
-                :error-messages="errors.email"
+                prepend-icon="pi pi-envelope"
+                :error-message="errors.email"
                 v-bind="emailAttrs"
                 label="Correo electrónico"
                 class="w-full"
@@ -73,9 +72,8 @@
               <AppInputText
                 placeholder="Contraseña"
                 v-model="password"
-                show-icon
-                prepend-inner-icon="pi pi-lock"
-                :error-messages="errors.password"
+                prepend-icon="pi pi-lock"
+                :error-message="errors.password"
                 v-bind="passwordAttrs"
                 autocomplete="new-password"
                 type="password"

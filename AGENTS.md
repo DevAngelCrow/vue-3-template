@@ -21,7 +21,7 @@
 - **Lenguaje**: TypeScript ~5.8+ con modo estricto y *Project References*.
 - **Estado de Servidor & Caché**: `@tanstack/vue-query` v5.
 - **Formularios & Validación**: `vee-validate` 4.x + `yup` 1.6+.
-- **Componentes UI & Estilos**: PrimeVue 4 (tema personalizado en `customTheme.ts`), Iconos `primeicons`, Tailwind CSS 4 (`@tailwindcss/vite`).
+- **Componentes UI & Estilos**: PrimeVue 5 (tema personalizado en `customTheme.ts`), Iconos `primeicons`, Tailwind CSS 4 (`@tailwindcss/vite`).
 - **Estado Global de Cliente**: `pinia` 3.x (`useAlertStore`, `useAuthStore`, `useLoaderStore`, `useLayoutStore`).
 - **Cliente HTTP**: Instancia centralizada `httpClient` sobre Axios (`@/core/utils/httpClient`).
 - **Enrutamiento**: `vue-router` 4.x con guards de autenticación y permisos dinámicos.
@@ -77,9 +77,9 @@ src/
 1. **Uso Obligatorio de Componentes Globales `App*`**:
    - Todo componente en `src/core/components/App*.vue` se encuentra automáticamente registrado de manera global por `registerGlobalComponents`.
    - **Catálogo de Componentes Transversales (`src/core/components/`)**:
-     - **Entradas & Formularios**: `AppInputText`, `AppSelect`, `AppMultiSelect`, `AppAutocomplete`, `AppInputNumber`, `AppInputMoney`, `AppInputMask`, `AppInputextArea`, `AppDatePicker`, `AppTimePicker`, `AppCheckBox`, `AppSelectButton`, `AppColorPicker`, `AppDragDropFile`.
+     - **Entradas & Formularios**: `AppInputText`, `AppSelect`, `AppMultiSelect`, `AppAutocomplete`, `AppInputNumber`, `AppInputMoney`, `AppInputMask`, `AppInputTextArea`, `AppDatePicker`, `AppTimePicker`, `AppCheckBox`, `AppSelectButton`, `AppColorPicker`, `AppDragDropFile`.
      - **Datos, Estado & Carga**: `AppDataTable`, `AppPaginator`, `AppSkeleton` (carga progresiva según `skeleton.interface.ts`), `AppLoader`, `AppAlert` / `useAlertStore()`, `AppChipStatus`, `AppCircularCounter`.
-     - **Estructura & Navegación**: `AppModal`, `AppCard`, `AppTitle`, `AppHeader`, `AppFooter`, `AppSideBar`, `AppNavBarMenu`, `AppMenuItemSideBar`, `AppUserMenu`, `AppVerticalStepper`, `AppFloatButton`, `AppDocumentVisor`, `AppMainContent`.
+     - **Estructura & Navegación**: `AppModal`, `AppCard`, `AppTitle`, `AppHeader`, `AppFooter`, `AppSideBar`, `AppNavBarMenu`, `AppMenuItemSideBar`, `AppCommandMenu`, `AppUserMenu`, `AppVerticalStepper`, `AppFloatButton`, `AppDocumentVisor`, `AppMainContent`.
 2. **Componentes de Acción**:
    - Utilizar el componente `Button` de PrimeVue para acciones primarias, secundarias, botones con icono y estados (`variant="text"`, `:severity="data?.active ? 'danger' : 'success'"`).
    - Utilizar directiva `v-tooltip.bottom` para dar contexto accesible a botones de acciones.
@@ -119,11 +119,11 @@ src/
 ### 4.2. Formularios Reactivos con Vee-Validate y Yup
 - **Enlace Reactivo**: Usar `defineField` (`const [field, fieldAttrs] = defineField('name')`) y enlazar a componentes `AppInput*` con `v-model="field"` y `v-bind="fieldAttrs"`.
 - **Reglas Centralizadas**: Reutilizar las validaciones de `@/core/utils/validationRules` (`requiredText`, `noEmojis`, `requiredNumber`, `emailFormat`, etc.).
-- **Errores Semánticos**: Conectar `:error="errors.field"`. Los componentes `AppInput*` aplican el color semántico `text-danger-600` de forma nativa.
+- **Errores Semánticos**: Conectar `:error-message="errors.field"`. Los componentes `AppInput*` aplican el color semántico `text-danger-600` de forma nativa.
 - **Ciclo de Vida con `modalState`**:
   - Al abrir en modo `add`: llamar a `resetForm()`.
   - Al abrir en modo `edit` o `view`: cargar datos mediante `setValues(itemData)`.
-  - En modo `view`: deshabilitar campos (`:disabled="true"`) y ocultar botones de envío.
+  - En modo `view`: deshabilitar campos (`:disabled="true"` o `:readonly="true"`) y ocultar botones de envío (`:show-confirm-button="false"`).
 - *Ver catálogo de inputs y esquemas completos en la habilidad `vue3-vee-validate-forms`.*
 
 ### 4.3. Manejo Canónico de Búsquedas y Debounce

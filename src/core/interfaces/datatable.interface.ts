@@ -7,31 +7,21 @@ export interface TableHeaders {
   alignItems?: 'start' | 'center' | 'end';
 }
 export interface BaseTableProps<T> {
-  headers: TableHeaders[];
-  items: T[];
+  headers?: TableHeaders[];
+  items?: T[];
   loading?: boolean;
   loadingIcon?: string;
   rowHover?: boolean;
 }
 
-interface PaginatorOff<T> extends BaseTableProps<T> {
-  paginator?: false;
+export interface TableProps<T> extends BaseTableProps<T> {
+  paginator?: boolean;
+  perPage?: number;
   per_page?: number;
+  totalItems?: number;
   total_items?: number;
   page?: number;
-  total_pages?: number;
   showPerPageOptions?: boolean;
   perPageOptions?: number[];
 }
 
-interface PaginatorOn<T> extends BaseTableProps<T> {
-  paginator: true;
-  per_page: number;
-  total_items: number;
-  page: number;
-  total_pages?: number;
-  showPerPageOptions?: boolean;
-  perPageOptions?: number[];
-}
-
-export type TableProps<T> = PaginatorOff<T> | PaginatorOn<T>;

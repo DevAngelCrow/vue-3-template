@@ -1,6 +1,19 @@
-import { definePreset } from '@primeuix/themes';
+import {
+  definePreset,
+  type PaletteDesignToken,
+  type Preset,
+} from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
-export const CustomTheme = definePreset(Aura, {
+import type { AuraBaseDesignTokens } from '@primeuix/themes/aura/base';
+
+type CustomAuraDesignTokens = Omit<AuraBaseDesignTokens, 'semantic'> & {
+  semantic?: AuraBaseDesignTokens['semantic'] & {
+    success?: PaletteDesignToken;
+    danger?: PaletteDesignToken;
+  };
+};
+
+export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
   semantic: {
     primary: {
       50: '{emerald.50}',
@@ -60,7 +73,7 @@ export const CustomTheme = definePreset(Aura, {
       light: {
         primary: {
           color: '{emerald.950}',
-          inverseColor: '#FFFFFF',
+          contrastColor: '#FFFFFF',
           hoverColor: '{emerald.900}',
           //activeColor: '{emerald.800}',
           //outlined: '{emerald.950}'

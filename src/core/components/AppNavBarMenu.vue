@@ -17,7 +17,7 @@
           <!-- Ítem RAÍZ (Barra superior oscura) -->
           <a
             v-if="root"
-            ripple
+            v-ripple
             :href="href"
             v-bind="props.action"
             :class="[
@@ -50,7 +50,7 @@
           <!-- Ítem SUBMENÚ (Dentro del desplegable blanco flotante) -->
           <a
             v-else
-            ripple
+            v-ripple
             :href="href"
             v-bind="props.action"
             :class="[
@@ -268,9 +268,9 @@ onBeforeUnmount(() => {
   border: 1px solid var(--p-surface-200) !important;
   background: var(--p-surface-0) !important;
   box-shadow:
-    \r\n0 20px 25px -5px
+    0 20px 25px -5px
       color-mix(in srgb, var(--p-primary-950) 15%, transparent),
-    \r\n0 8px 10px -6px
+    0 8px 10px -6px
       color-mix(in srgb, var(--p-primary-950) 10%, transparent) !important;
   padding: 0.375rem !important;
   min-width: 15rem !important;

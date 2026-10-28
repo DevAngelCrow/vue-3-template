@@ -470,7 +470,8 @@ export function useAdmin() {
   const getRouteById = async (id: string) => {
     try {
       permissionsList.value = [];
-      permissionsPagination.per_page = 0;
+      permissionsPagination.page = 1;
+      permissionsPagination.per_page = 10;
       permissionsPagination.total_items = 0;
       const response = await adminServices.getRoute(id);
       if (response.statusCode === 200) {

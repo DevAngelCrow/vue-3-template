@@ -54,7 +54,7 @@
             id="name"
             label="Nombre*"
             v-model="name"
-            :error-messages="errors.name"
+            :error-message="errors.name"
             v-bind="nameAttrs"
             :readonly="actionMode.isReadonly"
             maxlength="150"
@@ -64,7 +64,7 @@
             id="code"
             label="Código*"
             v-model="code"
-            :error-messages="errors.code"
+            :error-message="errors.code"
             v-bind="codeAttrs"
             :readonly="actionMode.isReadonly"
             maxlength="150"
@@ -74,7 +74,7 @@
             id="description"
             label="Descripción*"
             v-model="description"
-            :error-messages="errors.description"
+            :error-message="errors.description"
             v-bind="descriptionAttrs"
             :readonly="actionMode.isReadonly"
             maxlength="150"
@@ -85,7 +85,7 @@
             label="Estado*"
             v-model="status"
             v-bind="statusAttrs"
-            :error-messages="errors.status"
+            :error-message="errors.status"
             option-label="name"
             :suggestions="statusFiltered"
             dropdown
@@ -121,8 +121,8 @@
     <AppModal
       :show="showEditConfirmModal"
       title="Confirmar para iniciar la edición"
-      titleBtnCancel="Cancelar"
-      titleBtnConfirm="Aceptar"
+      cancel-label="Cancelar"
+      confirm-label="Aceptar"
       width="30rem"
       @close-modal="showEditConfirmModal = false"
       @confirm-modal="confirmEdit"
@@ -138,8 +138,8 @@
     <AppModal
       :show="showSaveConfirmModal"
       title="Confirmar guardado"
-      titleBtnCancel="Cancelar"
-      titleBtnConfirm="Guardar"
+      cancel-label="Cancelar"
+      confirm-label="Guardar"
       width="30rem"
       @close-modal="showSaveConfirmModal = false"
       @confirm-modal="confirmSave"
@@ -288,12 +288,7 @@ const goBack = async () => {
   originalData.value = { ...data };
   setRoleItem(data);
 };
-// watch(
-//   () => permissionsPagination.page,
-//   newValue => {
-//     console.log('permissionsPagination.page changed:', newValue);
-//   },
-// );
+
 onMounted(async () => {
   try {
     await getCategoryPermissions();

@@ -2,14 +2,14 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    :title-btn-cancel="modalButtons.cancelText"
-    :title-btn-confirm="modalButtons.confirmText"
-    footer-buttons
-    show-icon-close
+    :cancel-label="modalButtons.cancelText"
+    :confirm-label="modalButtons.confirmText"
+    show-footer
+    show-close-icon
     width="45rem"
     @close-modal="closeModal"
     @confirm-modal="onSubmit"
-    :showBtnConfirmFooter="props.modalState.mode !== 'view'"
+    :show-confirm-button="props.modalState.mode !== 'view'"
   >
     <section
       v-if="props.modalState.mode !== 'delete'"
@@ -21,7 +21,7 @@
         id="name"
         label="Nombre*"
         v-model="name"
-        :error-messages="errors.name"
+        :error-message="errors.name"
         v-bind="nameAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -30,7 +30,7 @@
         id="description"
         label="Descripción"
         v-model="description"
-        :error-messages="errors.description"
+        :error-message="errors.description"
         v-bind="descriptionAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -40,13 +40,13 @@
         label="País*"
         v-model="country"
         v-bind="countryAttrs"
-        :error-messages="errors.country"
+        :error-message="errors.country"
         option-label="name"
         :suggestions="countriesFiltered"
         dropdown
         @complete="findCountry"
         :readonly="props.modalState.isReadonly"
-        @update:modelValue="onCountryChange"
+        @update:model-value="onCountryChange($event as CountryResponse | null)"
       />
       <AppAutocomplete
         class="grow"
@@ -54,7 +54,7 @@
         label="Tipo de División*"
         v-model="divisionType"
         v-bind="divisionTypeAttrs"
-        :error-messages="errors.divisionType"
+        :error-message="errors.divisionType"
         option-label="name"
         :suggestions="divisionTypesFiltered"
         dropdown
@@ -68,7 +68,7 @@
         label="División Padre"
         v-model="parent"
         v-bind="parentAttrs"
-        :error-messages="errors.parent"
+        :error-message="errors.parent"
         option-label="name"
         :suggestions="parentsFiltered"
         dropdown
@@ -137,7 +137,6 @@ const {
   toggleDivision,
 } = divisionInstance;
 
-
 const countriesFiltered = ref<CountryResponse[]>([]);
 const divisionTypesFiltered = ref<GeographicDivisionTypeSimple[]>([]);
 const parentsFiltered = ref<GeographicDivisionParent[]>([]);
@@ -193,12 +192,14 @@ const findCountry = (event: AutoCompleteCompleteEvent) => {
   countriesFiltered.value = filtered;
 };
 
-
 const findDivisionType = (event: AutoCompleteCompleteEvent) => {
   const query = event?.query.toLowerCase();
   const filtered: GeographicDivisionTypeSimple[] = [];
   for (const item of divisionTypesList.value) {
-    if (item?.id_country === country.value?.id && item?.name?.toLowerCase().indexOf(query) === 0) {
+    if (
+      item?.id_country === country.value?.id &&
+      item?.name?.toLowerCase().indexOf(query) === 0
+    ) {
       filtered.push(item);
     }
   }
@@ -209,7 +210,10 @@ const findParent = (event: AutoCompleteCompleteEvent) => {
   const query = event?.query.toLowerCase();
   const filtered: GeographicDivisionParent[] = [];
   for (const item of parentDivisionsList.value) {
-    if (item?.id_country === country.value?.id && item?.name?.toLowerCase().indexOf(query) === 0) {
+    if (
+      item?.id_country === country.value?.id &&
+      item?.name?.toLowerCase().indexOf(query) === 0
+    ) {
       filtered.push(item);
     }
   }
@@ -229,11 +233,19 @@ const onCountryChange = async (selectedCountry: CountryResponse | null) => {
   parentLoading.value = true;
   try {
     // Cargar tipos de división filtrados por país
-    await divisionInstance.getDivisionTypesList({ id_country: selectedCountry.id });
-    divisionTypesFiltered.value = divisionTypesList.value.filter((item) => item.id_country === selectedCountry.id);
+    await divisionInstance.getDivisionTypesList({
+      id_country: selectedCountry.id,
+    });
+    divisionTypesFiltered.value = divisionTypesList.value.filter(
+      item => item.id_country === selectedCountry.id,
+    );
     // Cargar divisiones padre filtradas por país
-    await divisionInstance.getParentDivisionsList({ id_country: selectedCountry.id });
-    parentsFiltered.value = parentDivisionsList.value.filter((item) => item.id_country === selectedCountry.id);
+    await divisionInstance.getParentDivisionsList({
+      id_country: selectedCountry.id,
+    });
+    parentsFiltered.value = parentDivisionsList.value.filter(
+      item => item.id_country === selectedCountry.id,
+    );
   } finally {
     divisionTypeLoading.value = false;
     parentLoading.value = false;

@@ -44,8 +44,8 @@
           :headers="headers"
           :items="genders"
           :paginator="true"
-          :per_page="pagination.per_page"
-          :total_items="pagination.total_items"
+          :per-page="pagination.per_page"
+          :total-items="pagination.total_items"
           :page="pagination.page"
           @page-update="handlePagination"
         >

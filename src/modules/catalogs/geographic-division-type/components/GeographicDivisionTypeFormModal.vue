@@ -2,14 +2,14 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    :title-btn-cancel="modalButtons.cancelText"
-    :title-btn-confirm="modalButtons.confirmText"
-    footer-buttons
-    show-icon-close
+    :cancel-label="modalButtons.cancelText"
+    :confirm-label="modalButtons.confirmText"
+    show-footer
+    show-close-icon
     width="45rem"
     @close-modal="closeModal"
     @confirm-modal="onSubmit"
-    :showBtnConfirmFooter="props.modalState.mode !== 'view'"
+    :show-confirm-button="props.modalState.mode !== 'view'"
   >
     <section
       v-if="props.modalState.mode !== 'delete'"
@@ -21,7 +21,7 @@
         id="name"
         label="Nombre*"
         v-model="name"
-        :error-messages="errors.name"
+        :error-message="errors.name"
         v-bind="nameAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -30,7 +30,7 @@
         id="level"
         label="Nivel*"
         v-model="level"
-        :error-messages="errors.level"
+        :error-message="errors.level"
         v-bind="levelAttrs"
         :readonly="props.modalState.isReadonly"
         :min="1"
@@ -41,7 +41,7 @@
         label="País*"
         v-model="country"
         v-bind="countryAttrs"
-        :error-messages="errors.country"
+        :error-message="errors.country"
         option-label="name"
         :suggestions="countriesFiltered"
         dropdown

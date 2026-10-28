@@ -1,17 +1,18 @@
 <template>
   <div class="w-full px-0 sm:px-10 bg-primary-950">
-    <Stepper :value="1" :linear>
+    <Stepper :value="1" :linear="linear">
       <StepItem v-for="(step, index) in steps" :key="index" :value="step">
         <Step>
-          <span class="text-white hover:text-surface-300">{{
-            components[index].header
-          }}</span></Step
-        >
+          <span class="text-white hover:text-surface-300">
+            {{ components[index]?.header }}
+          </span>
+        </Step>
         <StepPanel class="rounded-xl h-auto" v-slot="{ activateCallback }">
           <div
             class="flex flex-col h-auto w-full max-w-full flex-wrap justify-center items-center py-5 gap-6"
           >
             <component
+              v-if="components[index]?.component"
               :is="components[index].component"
               v-bind="{ ...attrs, ...components[index].props }"
               v-on="attrs"
@@ -24,14 +25,14 @@
                 icon="pi pi-arrow-left"
                 icon-pos="left"
                 @click="customActivateCallBack(activateCallback, step, false)"
-              ></Button>
+              />
               <Button
                 v-if="step !== components.length"
                 label="Siguiente"
                 icon="pi pi-arrow-right"
                 icon-pos="right"
                 @click="customActivateCallBack(activateCallback, step, true)"
-              ></Button>
+              />
             </div>
           </div>
         </StepPanel>
@@ -41,50 +42,36 @@
 </template>
 <script setup lang="ts">
 import { Stepper, StepItem, Step, StepPanel, Button } from 'primevue';
-import { type PropType } from 'vue';
 import { useAttrs, ref } from 'vue';
 
-import type { StepperVerticalInterface } from '../interfaces/stepperVertical.interface';
+import type { AppVerticalStepperProps } from '../interfaces';
 
-defineOptions({ inheritAttrs: false });
+defineOptions({ inheritAttrs: false, name: 'AppVerticalStepper' });
 
-const emits = defineEmits(['next', 'back']);
+const emits = defineEmits<{
+  next: [callback: (_step: number) => void, step: number];
+  back: [callback: (_step: number) => void, step: number];
+}>();
 
 const attrs = useAttrs();
 
-defineProps({
-  steps: {
-    type: Number,
-    default: 1,
-  },
-  components: {
-    type: Array as PropType<StepperVerticalInterface[]>,
-    required: true,
-  },
-  linear: {
-    type: Boolean,
-    default: true,
-  },
+withDefaults(defineProps<AppVerticalStepperProps>(), {
+  steps: 1,
+  linear: true,
 });
 
 const componentRefs = ref<unknown[]>([]);
 
 const customActivateCallBack = (
-  callback: Function,
+  callback: (_step: number) => void,
   step: number,
   direction: boolean,
 ) => {
   try {
     if (direction) {
-      if (direction) {
-        emits('next', callback, step);
-        return;
-      }
+      emits('next', callback, step);
     } else {
-      if (!direction) {
-        emits('back', callback, step);
-        return;
-      }
+      emits('back', callback, step);
     }
   } catch (error) {
     console.error(error);

@@ -76,8 +76,8 @@
     <AppModal
       :show="showEditConfirmModal"
       title="Confirmar para iniciar la edición"
-      titleBtnCancel="Cancelar"
-      titleBtnConfirm="Aceptar"
+      cancel-label="Cancelar"
+      confirm-label="Aceptar"
       width="30rem"
       @close-modal="showEditConfirmModal = false"
       @confirm-modal="confirmEdit"
@@ -93,8 +93,8 @@
     <AppModal
       :show="showSaveConfirmModal"
       title="Confirmar guardado"
-      titleBtnCancel="Cancelar"
-      titleBtnConfirm="Guardar"
+      cancel-label="Cancelar"
+      confirm-label="Guardar"
       width="30rem"
       @close-modal="showSaveConfirmModal = false"
       @confirm-modal="confirmSave"
@@ -168,7 +168,11 @@ const showSaveConfirmModal = ref(false);
 const formModalState = computed(() => ({
   show: true,
   mode: (actionMode.mode ?? 'add') as
-    'add' | 'view' | 'edit' | 'delete' | 'closed',
+    | 'add'
+    | 'view'
+    | 'edit'
+    | 'delete'
+    | 'closed',
   title: actionMode.title,
   description: '',
   isReadonly: actionMode.isReadonly,
@@ -280,7 +284,6 @@ onMounted(async () => {
         console.error('No se pudo obtener la ruta');
         return;
       }
-      // console.log('Route data:', routeData.data);
       const data = {
         id: routeData.data.id,
         name: routeData.data.name,

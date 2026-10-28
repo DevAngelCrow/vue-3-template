@@ -17,11 +17,11 @@ Esta habilidad es el estándar para implementar formularios tipados y validados 
 2. **Reutilizar Reglas Centralizadas**:
    - Importar utilidades de `@/core/utils/validationRules`: `requiredText`, `noEmojis`, `requiredNumber`, `optionalNumber`, `emailFormat`, `passwordValidation`.
 3. **Mapeo de Errores Semánticos**:
-   - Pasar `:error="errors.fieldName"` al componente `AppInput*`. Los componentes de la plantilla muestran los mensajes de error automáticamente con el token semántico `text-danger-600`.
+   - Pasar `:error-message="errors.fieldName"` al componente `AppInput*`. Los componentes de la plantilla muestran los mensajes de error automáticamente con el token semántico `text-danger-600`.
 4. **Ciclo de Vida con `modalState`**:
    - Al abrir en modo `add`: invocar `resetForm()`.
    - Al abrir en modo `edit` o `view`: invocar `setValues(itemData)`.
-   - En modo `view`: pasar `:disabled="true"` o `:isReadonly="true"` a los inputs y ocultar el botón de envío.
+   - En modo `view`: pasar `:disabled="true"` o `:readonly="true"` a los inputs y ocultar el botón de envío (`:show-confirm-button="false"`).
 
 ---
 
@@ -29,14 +29,14 @@ Esta habilidad es el estándar para implementar formularios tipados y validados 
 
 | Componente | Tipo de Dato | Sintaxis de Enlace | Props Clave |
 | :--- | :--- | :--- | :--- |
-| `AppInputText` | `string` | `v-model="name" v-bind="nameAttrs"` | `label`, `placeholder`, `:error="errors.name"` |
-| `AppSelect` | `string \| number` | `v-model="roleId" v-bind="roleAttrs"` | `:options="roles" optionLabel="name" optionValue="id"` |
-| `AppMultiSelect` | `Array<string \| number>` | `v-model="permissions" v-bind="permAttrs"` | `:options="permissionsList" optionLabel="label"` |
-| `AppInputNumber` | `number` | `v-model="stock" v-bind="stockAttrs"` | `label`, `:min="0"`, `:max="9999"`, `:error="errors.stock"` |
-| `AppInputMoney` | `number` | `v-model="price" v-bind="priceAttrs"` | `label`, `currency="USD"`, `mode="currency"` |
-| `AppDatePicker` | `Date \| string` | `v-model="birthDate" v-bind="birthAttrs"` | `label`, `dateFormat="yy-mm-dd"`, `showIcon` |
-| `AppCheckBox` | `boolean` | `v-model="active" v-bind="activeAttrs"` | `binary`, `label="Activo"` |
-| `AppInputTextArea` | `string` | `v-model="description" v-bind="descAttrs"` | `label`, `rows="4"`, `:autoResize="true"` |
+| `AppInputText` | `string` | `v-model="name" v-bind="nameAttrs"` | `label`, `placeholder`, `:error-message="errors.name"` |
+| `AppSelect` | `string \| number` | `v-model="roleId" v-bind="roleAttrs"` | `:options="roles" option-label="name" option-value="id" :error-message="errors.roleId"` |
+| `AppMultiSelect` | `Array<string \| number>` | `v-model="permissions" v-bind="permAttrs"` | `:options="permissionsList" option-label="label" :error-message="errors.permissions"` |
+| `AppInputNumber` | `number` | `v-model="stock" v-bind="stockAttrs"` | `label`, `:min="0"`, `:max="9999"`, `:error-message="errors.stock"` |
+| `AppInputMoney` | `number` | `v-model="price" v-bind="priceAttrs"` | `label`, `currency="USD"`, `:error-message="errors.price"` |
+| `AppDatePicker` | `Date \| string` | `v-model="birthDate" v-bind="birthAttrs"` | `label`, `date-format="yy-mm-dd"`, `show-icon`, `:error-message="errors.birthDate"` |
+| `AppCheckBox` | `boolean` | `v-model="active" v-bind="activeAttrs"` | `binary`, `label="Activo"`, `:error-message="errors.active"` |
+| `AppInputTextArea` | `string` | `v-model="description" v-bind="descAttrs"` | `label`, `:rows="4"`, `:auto-resize="true"`, `:error-message="errors.description"` |
 
 ---
 
@@ -125,7 +125,7 @@ const props = defineProps<{
   };
 }>();
 
-const emit = defineEmits<{ (e: 'close'): void }>();
+const emit = defineEmits<{ (e: 'close-modal'): void }>();
 
 const composable = inject<UseProductReturn>('useProduct')!;
 const {
@@ -154,25 +154,31 @@ const onSubmit = handleSubmit(async (formData) => {
 
 const handleClose = () => {
   resetForm();
-  emit('close');
+  emit('close-modal');
 };
 </script>
 
 <template>
   <AppModal
-    v-model:visible="props.modalState.show"
+    :show="props.modalState.show"
     :title="props.modalState.title"
-    :description="props.modalState.description"
-    @hide="handleClose"
+    :cancel-label="props.modalState.isReadonly ? 'Cerrar' : 'Cancelar'"
+    :confirm-label="props.modalState.mode === 'add' ? 'Registrar' : 'Actualizar'"
+    :show-confirm-button="!props.modalState.isReadonly"
+    show-footer
+    show-close-icon
+    width="45rem"
+    @close-modal="handleClose"
+    @confirm-modal="onSubmit"
   >
-    <form @submit.prevent="onSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
       <AppInputText
         v-model="name"
         v-bind="nameAttrs"
         label="Nombre del Producto"
         placeholder="Ej. Teclado Mecánico"
-        :error="errors.name"
-        :disabled="props.modalState.isReadonly"
+        :error-message="errors.name"
+        :readonly="props.modalState.isReadonly"
         class="col-span-2"
       />
 
@@ -181,16 +187,16 @@ const handleClose = () => {
         v-bind="skuAttrs"
         label="Código SKU"
         placeholder="Ej. TEC-001"
-        :error="errors.sku"
-        :disabled="props.modalState.isReadonly"
+        :error-message="errors.sku"
+        :readonly="props.modalState.isReadonly"
       />
 
       <AppInputMoney
         v-model="price"
         v-bind="priceAttrs"
         label="Precio"
-        :error="errors.price"
-        :disabled="props.modalState.isReadonly"
+        :error-message="errors.price"
+        :readonly="props.modalState.isReadonly"
       />
 
       <AppSelect
@@ -198,10 +204,10 @@ const handleClose = () => {
         v-bind="categoryIdAttrs"
         label="Categoría"
         :options="categories"
-        optionLabel="name"
-        optionValue="id"
+        option-label="name"
+        option-value="id"
         placeholder="Selecciona categoría"
-        :error="errors.category_id"
+        :error-message="errors.category_id"
         :disabled="props.modalState.isReadonly"
         class="col-span-2"
       />
@@ -215,17 +221,7 @@ const handleClose = () => {
           :disabled="props.modalState.isReadonly"
         />
       </div>
-
-      <div class="col-span-2 flex justify-end gap-2 mt-4">
-        <Button label="Cancelar" variant="text" severity="secondary" @click="handleClose" />
-        <Button
-          v-if="!props.modalState.isReadonly"
-          type="submit"
-          :label="props.modalState.mode === 'add' ? 'Registrar' : 'Actualizar'"
-          :loading="addMutation.isPending.value || updateMutation.isPending.value"
-        />
-      </div>
-    </form>
+    </div>
   </AppModal>
 </template>
 ```

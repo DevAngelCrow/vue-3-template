@@ -54,7 +54,7 @@
 
         <!-- Contenido / Lista de enlaces con scroll estilizado -->
         <div class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          <AppMenuItemSideBar :mapped-menu="sidebarItems" />
+          <AppMenuItemSideBar :items="sidebarItems" />
         </div>
 
         <!-- Pie del Drawer con indicador de versión y estado -->
@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, type PropType } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { Button, Drawer } from 'primevue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
@@ -87,12 +87,14 @@ import type { NavigationItem } from '../interfaces/navigation.interface';
 
 defineOptions({ name: 'AppSideBar' });
 
-const props = defineProps({
-  menu: {
-    type: Array as PropType<NavigationItem[]>,
-    default: null,
+const props = withDefaults(
+  defineProps<{
+    menu?: NavigationItem[];
+  }>(),
+  {
+    menu: undefined,
   },
-});
+);
 
 const layoutStore = useLayoutStore();
 const { systemRoutes } = useNavigationMenu();

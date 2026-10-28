@@ -20,7 +20,7 @@
         accept="image/*"
         v-model="file_img"
         v-bind="fileImgAttrs"
-        :error-messages="errors.file_img"
+        :error-message="errors.file_img"
       />
     </div>
   </div>

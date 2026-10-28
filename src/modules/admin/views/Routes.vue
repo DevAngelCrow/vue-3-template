@@ -26,7 +26,7 @@
           option-label="name"
           label="Estado"
           v-model="filter.active"
-          optionValue="value"
+          option-value="value"
         />
         <AppSelect
           class="min-w-0 grow lg:grow-0 shrink-0 w-full sm:w-[40%] md:w-auto"
@@ -34,7 +34,7 @@
           option-label="name"
           label="Ruta padre"
           v-model="filter.id_parent"
-          optionValue="id"
+          option-value="id"
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
@@ -69,8 +69,8 @@
           :headers="headers"
           :items="items"
           :paginator="true"
-          :per_page="pagination.per_page"
-          :total_items="pagination.total_items"
+          :per-page="pagination.per_page"
+          :total-items="pagination.total_items"
           :page="pagination.page"
           :show-per-page-options="true"
           :per-page-options="[10, 20, 50, 100]"

@@ -1,9 +1,9 @@
 ---
 name: vue3-crud-module-scaffolder
-description: Use this skill when the user asks to create, scaffold, or refactor a business module or CRUD in vue-3-template following Vue 3.5, Vite 7, TanStack Query v5, Vee-Validate 4, Yup, PrimeVue 4, App* components, and strict color tokens.
+description: Use this skill when the user asks to create, scaffold, or refactor a business module or CRUD in vue-3-template following Vue 3.5, Vite 7, TanStack Query v5, Vee-Validate 4, Yup, PrimeVue 5, App* components, and strict color tokens.
 ---
 
-# Scaffolder de Módulos CRUD: Vue 3 + PrimeVue 4 + TanStack Query
+# Scaffolder de Módulos CRUD: Vue 3 + PrimeVue 5 + TanStack Query
 
 Esta habilidad es el runbook normativo para crear módulos de negocio completos en `vue-3-template` cumpliendo al 100% las directrices de `AGENTS.md`, asegurando que `npm run lint` y `npm run check:types` pasen con 0 errores y 0 advertencias.
 
@@ -275,7 +275,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close'): void;
+  (e: 'close-modal'): void;
 }>();
 
 const composable = inject<UseProductReturn>('useProduct')!;
@@ -292,37 +292,33 @@ const onSubmit = handleSubmit(async (values) => {
 
 const close = () => {
   resetForm();
-  emit('close');
+  emit('close-modal');
 };
 </script>
 
 <template>
   <AppModal
-    v-model:visible="props.modalState.show"
+    :show="props.modalState.show"
     :title="props.modalState.title"
-    :description="props.modalState.description"
-    @hide="close"
+    :cancel-label="props.modalState.isReadonly ? 'Cerrar' : 'Cancelar'"
+    :confirm-label="props.modalState.mode === 'add' ? 'Guardar' : 'Actualizar'"
+    :show-confirm-button="!props.modalState.isReadonly"
+    show-footer
+    show-close-icon
+    width="45rem"
+    @close-modal="close"
+    @confirm-modal="onSubmit"
   >
-    <form @submit.prevent="onSubmit" class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 w-full">
       <AppInputText
         v-model="name"
         v-bind="nameAttrs"
         label="Nombre del Producto"
         placeholder="Ej. Laptop Pro"
-        :error="errors.name"
-        :disabled="props.modalState.isReadonly"
+        :error-message="errors.name"
+        :readonly="props.modalState.isReadonly"
       />
-
-      <div class="flex justify-end gap-2 mt-4">
-        <Button label="Cancelar" variant="text" severity="secondary" @click="close" />
-        <Button
-          v-if="!props.modalState.isReadonly"
-          type="submit"
-          :label="props.modalState.mode === 'add' ? 'Guardar' : 'Actualizar'"
-          :loading="addMutation.isPending.value || updateMutation.isPending.value"
-        />
-      </div>
-    </form>
+    </div>
   </AppModal>
 </template>
 ```
@@ -373,15 +369,22 @@ const openAddModal = () => {
   modalState.selectedItem = null;
   modalState.show = true;
 };
+
+const handlePagination = (page: number) => {
+  if (page + 1 === pagination.page) return;
+  pagination.page = page + 1;
+};
+
+const handlePerPagePagination = (perPage: number) => {
+  if (perPage === pagination.per_page) return;
+  pagination.per_page = perPage;
+  pagination.page = 1;
+};
 </script>
 
 <template>
   <AppMainContent>
-    <AppHeader title="Gestión de Productos" description="Administra el catálogo de inventario">
-      <template #actions>
-        <Button label="Nuevo Producto" icon="pi pi-plus" @click="openAddModal" />
-      </template>
-    </AppHeader>
+    <AppTitle title="Gestión de Productos" />
 
     <AppCard>
       <!-- Barra de Filtros con debounce -->
@@ -394,27 +397,32 @@ const openAddModal = () => {
         />
         <Button label="Buscar" icon="pi pi-search" @click="debouncedFind" />
         <Button label="Limpiar" icon="pi pi-filter-slash" variant="text" severity="secondary" @click="debouncedClean" />
+        <Button label="Nuevo Producto" icon="pi pi-plus" class="ml-auto" @click="openAddModal" />
       </div>
 
       <!-- Tabla de Datos -->
-      <AppDataTable
-        :items="items"
-        :headers="headers"
-        :loading="isFetching"
-        :total-items="pagination.total_items"
-        v-model:page="pagination.page"
-        v-model:per-page="pagination.per_page"
-      >
-        <template #body-active="{ data }">
-          <AppChipStatus :active="data.active" />
-        </template>
-        <template #body-actions="{ data }">
-          <Button icon="pi pi-pencil" variant="text" severity="secondary" v-tooltip.bottom="'Editar'" />
-        </template>
-      </AppDataTable>
+      <AppSkeleton :loading="isFetching" variant="table" :rows="pagination.per_page" :headers="headers">
+        <AppDataTable
+          :items="items"
+          :headers="headers"
+          :paginator="true"
+          :total-items="pagination.total_items"
+          :page="pagination.page"
+          :per-page="pagination.per_page"
+          @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
+        >
+          <template #body-active="{ data }">
+            <AppChipStatus :label="data.active ? 'Activo' : 'Inactivo'" />
+          </template>
+          <template #body-actions="{ data }">
+            <Button icon="pi pi-pencil" variant="text" severity="secondary" v-tooltip.bottom="'Editar'" />
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </AppCard>
 
-    <ProductFormModal :modal-state="modalState" @close="modalState.show = false" />
+    <ProductFormModal :modal-state="modalState" @close-modal="modalState.show = false" />
   </AppMainContent>
 </template>
 ```

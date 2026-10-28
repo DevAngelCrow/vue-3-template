@@ -61,9 +61,8 @@
               <AppInputText
                 placeholder="Correo o nombre de usuario"
                 v-model="user"
-                show-icon
-                prepend-inner-icon="pi pi-user"
-                :error-messages="errors.user"
+                prepend-icon="pi pi-user"
+                :error-message="errors.user"
                 v-bind="userAttrs"
                 label="Usuario"
                 class="w-full"
@@ -72,9 +71,8 @@
               <AppInputText
                 placeholder="Contraseña"
                 v-model="password"
-                show-icon
-                prepend-inner-icon="pi pi-lock"
-                :error-messages="errors.password"
+                prepend-icon="pi pi-lock"
+                :error-message="errors.password"
                 v-bind="passwordAttrs"
                 autocomplete="current-password"
                 type="password"
