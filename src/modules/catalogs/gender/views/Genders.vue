@@ -34,7 +34,7 @@
         </div>
       </div>
       <AppSkeleton
-        :loading="isPending"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
@@ -92,7 +92,7 @@ const {
   validateAlphaInput,
   debouncedFindGender,
   debouncedCleanSearch,
-  isPending,
+  isFetching,
 } = useGender();
 
 const modalState = reactive<{

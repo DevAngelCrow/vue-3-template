@@ -53,10 +53,11 @@
       </div>
 
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -122,13 +123,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { useCategoryStatus } from '../../composables/useCategoryStatus';
 import { CategoryStatusResponse } from '../../interfaces/category-status/category-status.response.interface';
 import CategoryStatusFormModal from '../components/CategoryStatusFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const categoryStatusInstance = useCategoryStatus();
 provide('useCategoryStatus', categoryStatusInstance);
 
@@ -142,6 +140,7 @@ const {
   headers,
   pagination,
   categoryStatuses,
+  isFetching,
 } = categoryStatusInstance;
 
 const modalState = reactive<{

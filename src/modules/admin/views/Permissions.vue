@@ -59,10 +59,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -125,13 +126,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { usePermission } from '../composables/usePermissions';
 import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
 import PermissionFormModal from '../components/permissions/PermissionFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const permissionInstance = usePermission();
 provide('usePermission', permissionInstance);
 
@@ -146,6 +144,7 @@ const {
   pagination,
   permissions,
   categoryPermissions,
+  isFetching,
 } = permissionInstance;
 
 const modalState = reactive<{

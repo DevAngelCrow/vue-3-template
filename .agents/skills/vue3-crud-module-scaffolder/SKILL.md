@@ -475,27 +475,34 @@ const openAddModal = () => {
         />
       </div>
 
-      <!-- Tabla de Datos -->
-      <AppDataTable
-        :items="items"
-        :headers="headers"
+      <!-- Tabla de Datos envuelta en AppSkeleton (sin prop :loading en AppDataTable) -->
+      <AppSkeleton
         :loading="isFetching"
-        :total-items="pagination.total_items"
-        v-model:page="pagination.page"
-        v-model:per-page="pagination.per_page"
+        variant="table"
+        :rows="pagination.per_page"
+        :headers="headers"
+        show-paginator
       >
-        <template #body-active="{ data }">
-          <AppChipStatus :active="data.active" />
-        </template>
-        <template #body-actions="{ data }">
-          <Button
-            icon="pi pi-pencil"
-            variant="text"
-            severity="secondary"
-            v-tooltip.bottom="'Editar'"
-          />
-        </template>
-      </AppDataTable>
+        <AppDataTable
+          :items="items"
+          :headers="headers"
+          :total-items="pagination.total_items"
+          v-model:page="pagination.page"
+          v-model:per-page="pagination.per_page"
+        >
+          <template #body-active="{ data }">
+            <AppChipStatus :active="data.active" />
+          </template>
+          <template #body-actions="{ data }">
+            <Button
+              icon="pi pi-pencil"
+              variant="text"
+              severity="secondary"
+              v-tooltip.bottom="'Editar'"
+            />
+          </template>
+        </AppDataTable>
+      </AppSkeleton>
     </AppCard>
 
     <ProductFormModal

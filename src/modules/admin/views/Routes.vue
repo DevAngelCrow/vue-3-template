@@ -59,10 +59,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -122,13 +123,11 @@ import { computed, nextTick, reactive, watch, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AppChipStatus from '@/core/components/AppChipStatus.vue';
-import { useLoaderStore } from '@/core/store';
 
 import { useAdmin } from '../composables/useAdmin';
 import { RoutesResponse } from '../interfaces/routes/routes.response.interface';
 import RouteFormModal from '../components/routes/RouteFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const adminInstance = useAdmin();
 provide('useAdmin', adminInstance);
 
@@ -147,6 +146,7 @@ const {
   pagination,
   headers,
   parentRoutes,
+  isFetching,
 } = adminInstance;
 
 const goToRouteMaintenance = (id?: string) => {

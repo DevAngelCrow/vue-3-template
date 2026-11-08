@@ -51,10 +51,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -116,13 +117,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { useDocumentType } from '../../composables/useDocumentType';
 import DocumentTypeFormModal from '../components/DocumentTypeFormModal.vue';
 import { DocumentTypeResponse } from '../../interfaces/document-type/document-type.response.interface';
 
-const storeLoader = useLoaderStore();
 const documentTypeInstance = useDocumentType();
 provide('useDocumentType', documentTypeInstance);
 
@@ -136,6 +134,7 @@ const {
   headers,
   pagination,
   documentTypes,
+  isFetching,
 } = documentTypeInstance;
 
 const modalState = reactive<{

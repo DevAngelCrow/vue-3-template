@@ -59,10 +59,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -142,13 +143,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { useGlobalStatus } from '../../composables/useGlobalStatus';
 import { GlobalStatusResponse } from '../../interfaces/global-status/global-status.response.interface';
 import GlobalStatusFormModal from '../components/GlobalStatusFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const globalStatusInstance = useGlobalStatus();
 provide('useGlobalStatus', globalStatusInstance);
 
@@ -163,6 +161,7 @@ const {
   pagination,
   globalStatus,
   categoryStatuses,
+  isFetching,
 } = globalStatusInstance;
 
 const modalState = reactive<{

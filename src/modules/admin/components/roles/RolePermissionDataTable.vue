@@ -52,10 +52,11 @@
       </div>
     </div>
     <AppSkeleton
-      :loading="storeLoader.isFetching"
+      :loading="isPermissionsLoading"
       variant="table"
       :rows="permissionsPagination.per_page"
       :headers="headerPermissions"
+      show-paginator
     >
       <AppDataTable
         class="w-full"
@@ -109,7 +110,6 @@ import {
 } from 'vue';
 import { AutoCompleteCompleteEvent, Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
 import { debounce } from '@/core/utils/debounceFunction';
 
 import { useRole } from '../../composables/useRole';
@@ -117,7 +117,6 @@ import { CategoryPermissionsResponse } from '../../interfaces/role/role.category
 
 type RoleType = ReturnType<typeof useRole>;
 
-const storeLoader = useLoaderStore();
 const rol = inject<RoleType>('useRole')!;
 
 const props = defineProps<{
@@ -136,6 +135,7 @@ const {
   getPermissions,
   findPermission,
   categories,
+  isPermissionsLoading,
 } = rol;
 const selectedPermissionsIds = ref<Set<string>>(new Set());
 const selectAll = ref<boolean>(false);

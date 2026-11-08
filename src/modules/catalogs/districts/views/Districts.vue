@@ -59,10 +59,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -126,13 +127,11 @@ import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
 import AppSelect from '@/core/components/AppSelect.vue';
-import { useLoaderStore } from '@/core/store';
 
 import { useDistrict } from '../../composables/useDistrict';
 import DistrictFormModal from '../components/DistrictFormModal.vue';
 import { DistrictResponse } from '../../interfaces/districts/district.response.interface';
 
-const storeLoader = useLoaderStore();
 const districtInstance = useDistrict();
 provide('useDistrict', districtInstance);
 
@@ -147,6 +146,7 @@ const {
   pagination,
   districts,
   municipalities,
+  isFetching,
 } = districtInstance;
 
 const modalState = reactive<{

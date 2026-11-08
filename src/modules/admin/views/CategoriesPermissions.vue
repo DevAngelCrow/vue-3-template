@@ -51,10 +51,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -120,13 +121,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { PermissionsResponse } from '../interfaces/permissions/permissions.response.interface';
 import { useCategoryPermission } from '../composables/useCategoryPermission';
 import CategoryPermissionFormModal from '../components/category-permissions/CategoryPermissionFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const categoryPermissionInstance = useCategoryPermission();
 provide('useCategoryPermission', categoryPermissionInstance);
 
@@ -140,6 +138,7 @@ const {
   headers,
   pagination,
   categories,
+  isFetching,
 } = categoryPermissionInstance;
 
 const modalState = reactive<{

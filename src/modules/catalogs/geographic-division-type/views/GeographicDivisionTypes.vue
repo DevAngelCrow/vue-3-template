@@ -59,10 +59,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -125,13 +126,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { useGeographicDivisionType } from '../../composables/useGeographicDivisionType';
 import { GeographicDivisionTypeResponse } from '../../interfaces/geographic-division-type/geographic-division-type.response.interface';
 import GeographicDivisionTypeFormModal from '../components/GeographicDivisionTypeFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const divisionTypeInstance = useGeographicDivisionType();
 provide('useGeographicDivisionType', divisionTypeInstance);
 
@@ -146,6 +144,7 @@ const {
   pagination,
   divisionTypes,
   countries,
+  isFetching,
 } = divisionTypeInstance;
 
 const modalState = reactive<{
