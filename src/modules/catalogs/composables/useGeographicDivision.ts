@@ -157,7 +157,9 @@ export function useGeographicDivision() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const countries = computed<CountryResponse[]>(() => countriesData.value || []);
+  const countries = computed<CountryResponse[]>(
+    () => countriesData.value || [],
+  );
 
   const divisionTypesList = ref<GeographicDivisionTypeSimple[]>([]);
   const parentDivisionsList = ref<GeographicDivisionParent[]>([]);
@@ -371,7 +373,10 @@ export function useGeographicDivision() {
 
   const findDivision = (value?: FilterGeographicDivisionType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter = (target?.filter ?? filter.filter) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
     appliedFilter.id_country = target?.id_country ?? filter.id_country;

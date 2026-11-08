@@ -1,126 +1,159 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
+  <div :class="rootClass">
     <FloatLabel :variant="labelVariant">
       <Textarea
-        class="w-full"
+        ref="textareaRef"
+        :class="['w-full', { 'pointer-events-none': readonly }]"
         :model-value="modelValue"
-        @update:model-value="onUpdate"
-        :invalid="invalid"
-        v-bind="$attrs"
-        :autocomplete
+        :invalid="isInvalid"
+        :disabled="disabled"
+        :readonly="readonly"
+        :rows="rows"
+        :cols="cols"
+        :auto-resize="autoResize"
+        :fluid="fluid"
         :placeholder="displayPlaceholder"
-        :id="inputId"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-        :variant="inputVarian"
+        :id="computedInputId"
+        :aria-describedby="ariaDescribedby"
+        :aria-invalid="isInvalid"
+        :variant="computedVariant"
+        :autocomplete="autocomplete"
+        v-bind="$attrs"
+        @update:model-value="onUpdate"
+        @focus="onFocus"
+        @blur="onBlur"
+        @change="onChange"
       />
       <label
         v-if="label"
-        :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+        :class="{ 'text-danger-600': isInvalid }"
+        :for="computedInputId"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
+      v-if="errorMessageText.length > 0"
+      :id="errorId"
       class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      :severity="severity"
+      :size="size"
+      :variant="variant"
+      role="alert"
+      aria-live="assertive"
     >
-      {{ errorMessages }}
+      {{ errorMessageText }}
     </Message>
   </div>
 </template>
+
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { ref, computed, useId } from 'vue';
 import { Textarea, Message, FloatLabel } from 'primevue';
 
-defineOptions({ inheritAttrs: false, name: 'AppInputTextArea' });
+import type {
+  AppInputextAreaProps,
+  AppInputextAreaEmits,
+} from '../interfaces/inputextarea.interface';
+import { resolveInputRootClass } from '../utils/inputClasses';
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVarian: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
+defineOptions({
+  name: 'AppInputextArea',
+  inheritAttrs: false,
 });
 
-const emit = defineEmits(['update:modelValue']);
+const props = withDefaults(defineProps<AppInputextAreaProps>(), {
+  modelValue: '',
+  class: '',
+  placeholder: '',
+  severity: 'error',
+  size: 'small',
+  variant: 'simple',
+  labelVariant: 'on',
+  inputVariant: undefined,
+  errorMessages: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  inputId: undefined,
+  rows: 3,
+  cols: undefined,
+  autoResize: false,
+  fluid: true,
+  readonly: false,
+  disabled: false,
+  invalid: false,
+});
 
-const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const emit = defineEmits<AppInputextAreaEmits>();
 
-const invalid = ref<boolean>(false);
+const textareaRef = ref<{ $el?: HTMLTextAreaElement; focus?: () => void }>();
 const isFocused = ref<boolean>(false);
 
+const rootClass = computed(() => resolveInputRootClass(props.class));
+const autoId = useId();
+const computedInputId = computed(() => props.id || props.inputId || autoId);
+
+const errorMessageText = computed<string>(() => {
+  if (Array.isArray(props.errorMessages)) {
+    return props.errorMessages.filter(Boolean).join(', ');
+  }
+  return props.errorMessages || '';
+});
+
+const isInvalid = computed<boolean>(() => {
+  return Boolean(props.invalid || errorMessageText.value.length > 0);
+});
+
+const errorId = computed<string>(() => `${computedInputId.value}-error`);
+
+const ariaDescribedby = computed<string | undefined>(() => {
+  return errorMessageText.value.length > 0 ? errorId.value : undefined;
+});
+
+const computedVariant = computed<'outlined' | 'filled' | undefined>(() => {
+  if (props.inputVariant === 'outlined' || props.inputVariant === 'filled') {
+    return props.inputVariant;
+  }
+  return undefined;
+});
+
+const displayPlaceholder = computed<string | undefined>(() => {
+  if (isFocused.value) {
+    return props.placeholder;
+  }
+  if (!props.label?.length) {
+    return props.placeholder;
+  }
+  return undefined;
+});
+
 const onUpdate = (value: string | undefined) => {
+  if (props.readonly || props.disabled) return;
   emit('update:modelValue', value ?? '');
 };
 
-const displayPlaceholder = computed(() => {
-  if (isFocused.value && props.label) {
-    return props.placeholder;
-  }
-  if (!props.label.length) {
-    return props.placeholder;
-  }
-});
+const onFocus = (event: Event) => {
+  isFocused.value = true;
+  emit('focus', event);
+};
 
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
+const onBlur = (event: Event) => {
+  isFocused.value = false;
+  emit('blur', event);
+};
+
+const onChange = (event: Event) => {
+  emit('change', event);
+};
+
+defineExpose({
+  focus: () => {
+    const el =
+      textareaRef.value?.$el ??
+      (textareaRef.value as unknown as HTMLTextAreaElement);
+    el?.focus?.();
   },
-);
+  textarea: textareaRef,
+});
 </script>

@@ -1,6 +1,19 @@
-import { definePreset } from '@primeuix/themes';
+import {
+  definePreset,
+  type PaletteDesignToken,
+  type Preset,
+} from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
-export const CustomTheme = definePreset(Aura, {
+import type { AuraBaseDesignTokens } from '@primeuix/themes/aura/base';
+
+type CustomAuraDesignTokens = Omit<AuraBaseDesignTokens, 'semantic'> & {
+  semantic?: AuraBaseDesignTokens['semantic'] & {
+    success?: PaletteDesignToken;
+    danger?: PaletteDesignToken;
+  };
+};
+
+export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
   semantic: {
     primary: {
       50: '{emerald.50}',
@@ -59,18 +72,11 @@ export const CustomTheme = definePreset(Aura, {
     colorScheme: {
       light: {
         primary: {
-          color: '{emerald.950}',
-          inverseColor: '#FFFFFF',
-          hoverColor: '{emerald.900}',
-          //activeColor: '{emerald.800}',
-          //outlined: '{emerald.950}'
+          color: '{primary.600}',
+          contrastColor: '#FFFFFF',
+          hoverColor: '{primary.700}',
+          activeColor: '{primary.800}',
         },
-        // highlight: {
-        //   background: '{emerald.700}',
-        //   focusBackground: '{emerald.600}',
-        //   color: '#FFFFFF',
-        //   focusColor: '#FFFFFF',
-        // },
       },
     },
   },
@@ -80,8 +86,8 @@ export const CustomTheme = definePreset(Aura, {
         light: {
           outlined: {
             primary: {
-              color: '{emerald.950}',
-              borderColor: '{emerald.950}',
+              color: '{primary.600}',
+              borderColor: '{primary.600}',
             },
           },
         },
@@ -89,7 +95,27 @@ export const CustomTheme = definePreset(Aura, {
     },
     dialog: {
       root: {
-        borderColor: '{emerald.950}',
+        borderColor: '{surface.200}',
+      },
+    },
+    tabs: {
+      tablist: {
+        background: '{surface.0}',
+        borderColor: '{surface.200}',
+      },
+      tab: {
+        color: '{surface.500}',
+        hoverColor: '{primary.600}',
+        hoverBackground: '{surface.50}',
+        activeColor: '{primary.600}',
+        activeBorderColor: '{primary.600}',
+      },
+      activeBar: {
+        background: '{primary.600}',
+      },
+      tabpanel: {
+        background: '{surface.0}',
+        color: '{surface.700}',
       },
     },
   },

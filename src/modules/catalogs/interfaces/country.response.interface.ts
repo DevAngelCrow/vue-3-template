@@ -5,5 +5,6 @@ export interface CountryResponse {
   code: string;
   iso2: string;
   phone_code: string;
+  phone_mask?: string | null;
   active: boolean;
 }

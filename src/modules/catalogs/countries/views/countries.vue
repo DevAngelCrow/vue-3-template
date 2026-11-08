@@ -181,6 +181,16 @@
           :disabled="isDetailsMode"
           maxlength="10"
         />
+        <AppInputText
+          v-model="phone_mask"
+          class="lg:w-full grow sm:max-w-125"
+          label="Máscara telefónica (ej. 9999-9999)"
+          v-bind="phoneMaskAttrs"
+          :error-messages="errors.phone_mask"
+          :disabled="isDetailsMode"
+          placeholder="9999-9999"
+          maxlength="50"
+        />
       </div>
     </AppModal>
 
@@ -237,6 +247,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   if (type === 'create') {
     // Limpiar los campos del formulario
     resetForm();
+    phone_mask.value = '9999-9999';
   } else if (type === 'edit') {
     isMode.value = true;
     // Rellena con los datos del país a editar
@@ -246,6 +257,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     code.value = country.code || '';
     iso2.value = country.iso2 || '';
     phone_code.value = country.phone_code || '';
+    phone_mask.value = country.phone_mask || '9999-9999';
   } else if (type === 'details') {
     isDetailsMode.value = true;
     // Rellena con los datos del país a ver
@@ -254,6 +266,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     code.value = country.code || '';
     iso2.value = country.iso2 || '';
     phone_code.value = country.phone_code || '';
+    phone_mask.value = country.phone_mask || '9999-9999';
   }
 
   showModal.value = true;
@@ -283,6 +296,8 @@ const {
   iso2Attrs,
   phone_code,
   phoneCodeAttrs,
+  phone_mask,
+  phoneMaskAttrs,
   errors,
   resetForm,
   filter,
@@ -322,6 +337,7 @@ const confirmModal = handleSubmit(async values => {
         code: values.code,
         iso2: values.iso2,
         phone_code: values.phone_code,
+        phone_mask: values.phone_mask || '9999-9999',
         active: true,
       };
       await updateCountry(editingCountryId.value, updateForm);
@@ -333,6 +349,7 @@ const confirmModal = handleSubmit(async values => {
         code: values.code,
         iso2: values.iso2,
         phone_code: values.phone_code,
+        phone_mask: values.phone_mask || '9999-9999',
         active: true,
       };
       await createCountry(form);
@@ -381,6 +398,13 @@ const headers = ref<TableHeaders[]>([
   {
     field: 'phone_code',
     header: 'Código de Teléfono',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+  {
+    field: 'phone_mask',
+    header: 'Máscara Telefónica',
     sortable: false,
     alignHeaders: 'center',
     alignItems: 'center',

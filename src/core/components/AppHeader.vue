@@ -53,8 +53,9 @@
       <AppNavBarMenu />
     </div>
 
-    <!-- Extremo Derecho: Menú y Perfil de Usuario -->
-    <div class="flex items-center shrink-0">
+    <!-- Extremo Derecho: Buscador de Comandos y Perfil de Usuario -->
+    <div class="flex items-center gap-2.5 shrink-0">
+      <AppCommandMenu />
       <AppUserMenu />
     </div>
   </header>
@@ -65,6 +66,7 @@ import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { Button } from 'primevue';
 
 import { useLayoutStore } from '../store/useLayoutStore';
+import AppCommandMenu from './AppCommandMenu.vue';
 import AppNavBarMenu from './AppNavBarMenu.vue';
 import AppUserMenu from './AppUserMenu.vue';
 

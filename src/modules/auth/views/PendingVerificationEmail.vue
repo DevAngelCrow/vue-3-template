@@ -58,8 +58,8 @@
                 }}</span>
               </p>
               <p class="text-xs text-surface-400">
-                Por favor, revisa tu bandeja de entrada y sigue las instrucciones
-                para activar tu cuenta.
+                Por favor, revisa tu bandeja de entrada y sigue las
+                instrucciones para activar tu cuenta.
               </p>
             </div>
 

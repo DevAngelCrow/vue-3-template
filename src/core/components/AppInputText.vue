@@ -1,158 +1,185 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
+  <div :class="rootClass">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon
           v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          :class="[prependInnerIcon, { 'text-danger-600': isInvalid }]"
         />
         <InputText
-          class="w-full"
+          ref="inputTextRef"
+          :class="['w-full', { 'pointer-events-none': readonly }]"
+          :input-class="inputClass"
           :type="typeInputLocal"
-          :model-value="modelValue"
-          @update:model-value="onUpdate"
-          :invalid="invalid"
-          v-bind="$attrs"
-          :autocomplete
+          :model-value="modelValue != null ? String(modelValue) : ''"
+          :invalid="isInvalid"
+          :disabled="disabled"
+          :readonly="readonly"
+          :fluid="fluid"
           :placeholder="displayPlaceholder"
-          :id="inputId"
-          @focus="isFocused = true"
-          @blur="isFocused = false"
-          :variant="inputVarian"
+          :id="computedInputId"
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="isInvalid"
+          :variant="computedVariant"
           :size="inputSize"
+          :autocomplete="autocomplete"
+          v-bind="$attrs"
+          @update:model-value="onUpdate"
+          @focus="onFocus"
+          @blur="onBlur"
+          @change="onChange"
         />
         <InputIcon
           v-if="appendIconLocal"
           :class="[
             appendIconLocal,
             'absolute right-4 top-5.5',
-            { 'text-danger-600': invalid },
-            { 'hover:cursor-pointer': type === 'password' },
+            { 'text-danger-600': isInvalid },
+            { 'hover:cursor-pointer': isAppendIconClickable },
           ]"
+          :role="isAppendIconClickable ? 'button' : undefined"
+          :tabindex="isAppendIconClickable ? 0 : undefined"
+          :aria-label="appendIconAriaLabel"
           @click="clickSecondIcon"
+          @keydown.enter.prevent="clickSecondIcon"
+          @keydown.space.prevent="clickSecondIcon"
         />
       </IconField>
       <label
         v-if="label"
-        :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+        :class="{ 'text-danger-600': isInvalid }"
+        :for="computedInputId"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessages.length"
+      v-if="errorMessageText.length > 0"
+      :id="errorId"
       class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      :severity="severity"
+      :size="size"
+      :variant="variant"
+      role="alert"
+      aria-live="assertive"
     >
-      {{ errorMessages }}
+      {{ errorMessageText }}
     </Message>
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref, computed, watch, useId } from 'vue';
 import { InputText, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
-defineOptions({ inheritAttrs: false, name: 'AppInputText' });
+import type {
+  AppInputTextProps,
+  AppInputTextEmits,
+} from '../interfaces/input-text.interface';
+import { resolveInputRootClass } from '../utils/inputClasses';
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  type: {
-    type: String,
-    default: 'text',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  inputSize: {
-    type: String,
-    default: 'normal',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVarian: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  appendIcon: {
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
+defineOptions({
+  name: 'AppInputText',
+  inheritAttrs: false,
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const props = withDefaults(defineProps<AppInputTextProps>(), {
+  modelValue: '',
+  class: '',
+  inputClass: '',
+  type: 'text',
+  placeholder: '',
+  severity: 'error',
+  size: 'small',
+  inputSize: undefined,
+  variant: 'simple',
+  labelVariant: 'on',
+  inputVariant: undefined,
+  inputVarian: undefined,
+  errorMessages: '',
+  appendIcon: '',
+  prependInnerIcon: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  inputId: undefined,
+  readonly: false,
+  disabled: false,
+  fluid: true,
+  invalid: false,
+});
 
+const emit = defineEmits<AppInputTextEmits>();
+
+const inputTextRef = ref<{ $el?: HTMLInputElement; focus?: () => void }>();
+const isFocused = ref<boolean>(false);
+
+const rootClass = computed(() => resolveInputRootClass(props.class));
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const computedInputId = computed(() => props.id || props.inputId || autoId);
 
-const invalid = ref<boolean>(false);
+const typeInputLocal = ref<string>(props.type);
 const appendIconLocal = ref<string>(
   props.appendIcon || (props.type === 'password' ? 'pi pi-eye' : ''),
 );
-const typeInputLocal = ref<string>(props.type);
-const isFocused = ref<boolean>(false);
+
+const errorMessageText = computed<string>(() => {
+  if (Array.isArray(props.errorMessages)) {
+    return props.errorMessages.filter(Boolean).join(', ');
+  }
+  return props.errorMessages || '';
+});
+
+const isInvalid = computed<boolean>(() => {
+  return Boolean(props.invalid || errorMessageText.value.length > 0);
+});
+
+const errorId = computed<string>(() => `${computedInputId.value}-error`);
+
+const ariaDescribedby = computed<string | undefined>(() => {
+  return errorMessageText.value.length > 0 ? errorId.value : undefined;
+});
+
+const computedVariant = computed<'outlined' | 'filled' | undefined>(() => {
+  if (props.inputVariant === 'outlined' || props.inputVariant === 'filled') {
+    return props.inputVariant;
+  }
+  if (props.inputVarian === 'outlined' || props.inputVarian === 'filled') {
+    return props.inputVarian;
+  }
+  return undefined;
+});
+
+const displayPlaceholder = computed<string | undefined>(() => {
+  if (isFocused.value) {
+    return props.placeholder;
+  }
+  if (!props.label?.length) {
+    return props.placeholder;
+  }
+  return undefined;
+});
+
+const isAppendIconClickable = computed<boolean>(() => {
+  return Boolean(props.type === 'password' || props.appendIcon);
+});
+
+const appendIconAriaLabel = computed<string | undefined>(() => {
+  if (props.type === 'password') {
+    return typeInputLocal.value === 'password'
+      ? 'Mostrar contraseña'
+      : 'Ocultar contraseña';
+  }
+  return undefined;
+});
 
 const onUpdate = (value: string | undefined) => {
+  if (props.readonly || props.disabled) return;
   emit('update:modelValue', value ?? '');
 };
 
-const displayPlaceholder = computed(() => {
-  if (isFocused.value && props.label) {
-    return props.placeholder;
-  }
-  if (!props.label.length) {
-    return props.placeholder;
-  }
-});
-
-const clickSecondIcon = () => {
+const clickSecondIcon = (event?: MouseEvent | KeyboardEvent) => {
+  if (props.disabled || props.readonly) return;
   if (props.type === 'password') {
     if (appendIconLocal.value === 'pi pi-eye') {
       appendIconLocal.value = 'pi pi-eye-slash';
@@ -162,23 +189,53 @@ const clickSecondIcon = () => {
       typeInputLocal.value = 'password';
     }
   }
-  emit('click-end-icon');
+  emit('click-end-icon', event);
+};
+
+const onFocus = (event: Event) => {
+  isFocused.value = true;
+  emit('focus', event);
+};
+
+const onBlur = (event: Event) => {
+  isFocused.value = false;
+  emit('blur', event);
+};
+
+const onChange = (event: Event) => {
+  emit('change', event);
 };
 
 watch(
   () => props.appendIcon,
   newVal => {
-    appendIconLocal.value = newVal;
+    appendIconLocal.value =
+      newVal ||
+      (props.type === 'password'
+        ? typeInputLocal.value === 'password'
+          ? 'pi pi-eye'
+          : 'pi pi-eye-slash'
+        : '');
   },
 );
 
 watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
+  () => props.type,
+  newVal => {
+    typeInputLocal.value = newVal;
+    if (newVal === 'password' && !props.appendIcon) {
+      appendIconLocal.value = 'pi pi-eye';
     }
   },
 );
+
+defineExpose({
+  focus: () => {
+    const el =
+      inputTextRef.value?.$el ??
+      (inputTextRef.value as unknown as HTMLInputElement);
+    el?.focus?.();
+  },
+  input: inputTextRef,
+});
 </script>

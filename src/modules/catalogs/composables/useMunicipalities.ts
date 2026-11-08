@@ -134,13 +134,17 @@ export function useMunicipality() {
   const { data: departmentsData } = useQuery({
     queryKey: computed(() => departmentsKeys.list({ status: true })),
     queryFn: async () => {
-      const response = await catalogServices.getAllDepartments({ active: true });
+      const response = await catalogServices.getAllDepartments({
+        active: true,
+      });
       return response.data.data ?? [];
     },
     staleTime: 1000 * 60 * 10,
   });
 
-  const departments = computed<DepartmentResponse[]>(() => departmentsData.value || []);
+  const departments = computed<DepartmentResponse[]>(
+    () => departmentsData.value || [],
+  );
 
   // Consulta paginada y reactiva de municipios
   const {
@@ -302,8 +306,12 @@ export function useMunicipality() {
 
   const findMunicipality = (value?: FilterMunicipalityType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
-    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
+    appliedFilter.filter_name =
+      (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
     appliedFilter.id_department = target?.id_department ?? filter.id_department;
   };

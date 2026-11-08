@@ -27,18 +27,16 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        // Para vite.config.ts, seguimos apuntando explícitamente a tsconfig.node.json
-        // porque es un entorno distinto y es más preciso.
-        project: ['./tsconfig.node.json'],
       },
       globals: {
-        ...globals.node, // Solo globales de Node.js
+        ...globals.node,
       },
     },
     plugins: {
       '@typescript-eslint': tseslint,
     },
     rules: {
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -47,37 +45,22 @@ export default [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      'no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-      // Puedes añadir más reglas específicas para archivos de Node.js aquí
     },
   },
 
-  // --- Bloque de configuración para archivos TypeScript puros de tu aplicación (.ts, .tsx) ---
+  // --- Bloque de configuración para archivos TypeScript puros de la aplicación (.ts, .tsx) ---
   {
     files: ['**/*.ts', '**/*.tsx'],
-    // Ignoramos vite.config.ts en este bloque para evitar conflictos con el bloque anterior
     ignores: ['vite.config.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        // ¡CAMBIO CLAVE AQUÍ! Usamos projectService: true
-        projectService: true,
-        // Eliminamos 'project' ya que projectService lo manejará mejor con referencias
-        // project: ['./tsconfig.json'], // ¡QUITAR ESTO!
       },
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        // ...globals.node, // No siempre necesario para código frontend
       },
     },
     plugins: {
@@ -93,16 +76,9 @@ export default [
       },
     },
     rules: {
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-      'no-unused-vars': [
-        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -118,6 +94,14 @@ export default [
             'internal',
             ['parent', 'sibling', 'index'],
           ],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'internal',
+              position: 'before',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
           'newlines-between': 'always',
         },
       ],
@@ -129,24 +113,18 @@ export default [
   // --- Bloque de configuración para archivos Vue y TypeScript (.vue) ---
   {
     files: ['**/*.vue'],
-    // Ignoramos vite.config.ts aquí también
     ignores: ['vite.config.ts'],
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: tsParser, // Para analizar el script dentro de los SFC de Vue
+        parser: tsParser,
         ecmaVersion: 'latest',
         sourceType: 'module',
         extraFileExtensions: ['.vue'],
-        // ¡CAMBIO CLAVE AQUÍ! Usamos projectService: true
-        projectService: true,
-        // Eliminamos 'project'
-        // project: ['./tsconfig.json'], // ¡QUITAR ESTO!
       },
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        // ...globals.node, // No siempre necesario para código frontend
       },
     },
     plugins: {
@@ -165,16 +143,9 @@ export default [
     rules: {
       'vue/multi-word-component-names': 'off',
       'vue/no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-      'no-unused-vars': [
-        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
@@ -189,6 +160,14 @@ export default [
             'internal',
             ['parent', 'sibling', 'index'],
           ],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'internal',
+              position: 'before',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
           'newlines-between': 'always',
         },
       ],
@@ -196,5 +175,5 @@ export default [
       'import/no-duplicates': 'warn',
     },
   },
-  prettier, // Asegura que Prettier se ejecute al final
+  prettier,
 ];

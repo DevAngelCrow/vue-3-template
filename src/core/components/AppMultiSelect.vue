@@ -1,60 +1,104 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
-    <FloatLabel :variant="labelVariant">
+  <div :class="rootClass">
+    <FloatLabel :variant="labelVariant" class="w-full">
       <IconField class="w-full group">
         <InputIcon
-          :class="
-            invalid ? `${prependInnerIcon} text-danger-600` : prependInnerIcon
-          "
-          v-if="showIcon"
-          id="append-icon"
+          v-if="hasPrependIcon"
+          :class="[prependInnerIcon, { 'text-danger-600': isInvalid }]"
         />
         <MultiSelect
-          class="w-full"
-          :inputId="inputId"
-          :type="typeInputLocal"
+          ref="multiSelectRef"
+          :class="[
+            'w-full',
+            computedMinWidthClass,
+            { 'pointer-events-none': readonly },
+          ]"
+          :input-id="computedInputId"
           :model-value="modelValue"
-          @update:model-value="onUpdate"
-          :invalid="invalid"
-          v-bind="$attrs"
-          :autocomplete
+          :invalid="isInvalid"
+          :disabled="disabled"
+          :readonly="readonly"
+          :fluid="fluid"
+          :options="options"
+          :option-label="optionLabel"
+          :option-value="optionValue"
+          :option-disabled="optionDisabled"
+          :option-group-label="optionGroupLabel"
+          :option-group-children="optionGroupChildren"
+          :filter="filter"
+          :filter-placeholder="filterPlaceholder"
+          :display="display"
+          :max-selected-labels="maxSelectedLabels"
+          :selected-items-label="selectedItemsLabel"
+          :show-clear="showClear"
           :placeholder="displayPlaceholder"
-          @focus="() => (isFocused = true)"
-          @blur="() => (isFocused = false)"
-          :variant="inputVarian"
-          :options
-          :optionLabel
-        />
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="isInvalid"
+          :variant="computedVariant"
+          :size="inputSize"
+          :autocomplete="autocomplete"
+          v-bind="$attrs"
+          @update:model-value="onUpdate"
+          @focus="onFocus"
+          @blur="onBlur"
+          @change="onChange"
+          @filter="onFilter"
+          @selectall-change="onSelectAllChange"
+          @before-show="onBeforeShow"
+          @before-hide="onBeforeHide"
+          @show="onShow"
+          @hide="onHide"
+        >
+          <!-- Reenvío dinámico de todos los slots hacia PrimeVue MultiSelect -->
+          <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+            <slot :name="slotName" v-bind="slotProps ?? {}" />
+          </template>
+        </MultiSelect>
         <InputIcon
-          v-if="showIcon"
-          :class="
-            invalid
-              ? ` ${appendIconLocal} text-danger-600 ${passwordInputType} absolute right-4 top-5.5`
-              : `${appendIconLocal} ${passwordInputType} absolute right-4 top-5.5`
-          "
-          id="append-icon"
+          v-if="hasAppendIcon"
+          :class="[
+            appendIcon,
+            'absolute right-4 top-5.5',
+            { 'text-danger-600': isInvalid },
+            { 'hover:cursor-pointer': isAppendIconClickable },
+          ]"
+          :role="isAppendIconClickable ? 'button' : undefined"
+          :tabindex="isAppendIconClickable ? 0 : undefined"
           @click="clickSecondIcon"
+          @keydown.enter.prevent="clickSecondIcon"
+          @keydown.space.prevent="clickSecondIcon"
         />
       </IconField>
       <label
         v-if="label"
-        :class="invalid ? 'text-danger-600' : ''"
-        :for="inputId"
-        >{{ label }}</label
+        :class="[
+          'truncate select-none cursor-pointer',
+          labelMaxWidthClass,
+          { 'text-danger-600': isInvalid },
+        ]"
+        :for="computedInputId"
+        :title="label"
       >
+        {{ label }}
+      </label>
     </FloatLabel>
     <Message
+      v-if="errorMessageText.length > 0"
+      :id="errorId"
       class="left-0 top-full mt-0 text-xs z-10"
-      v-if="errorMessages.length"
-      :severity
-      :size
-      :variant
-      >{{ messageErrorField }}</Message
+      :severity="severity"
+      :size="size"
+      :variant="variant"
+      role="alert"
+      aria-live="assertive"
     >
+      {{ errorMessageText }}
+    </Message>
   </div>
 </template>
+
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { ref, computed, useId } from 'vue';
 import {
   MultiSelect,
   InputIcon,
@@ -62,163 +106,193 @@ import {
   IconField,
   FloatLabel,
 } from 'primevue';
+import type {
+  MultiSelectAllChangeEvent,
+  MultiSelectChangeEvent,
+  MultiSelectFilterEvent,
+} from 'primevue';
 
-defineOptions({ inheritAttrs: false, name: 'AppMultiSelect' });
+import type {
+  AppMultiSelectProps,
+  AppMultiSelectEmits,
+} from '../interfaces/multiselect.interface';
+import {
+  resolveInputRootClass,
+  hasCustomMinWidth,
+} from '../utils/inputClasses';
 
-const props = defineProps({
-  modelValue: {
-    type: Array,
-  },
-  class: {
-    type: String,
-    default: 'w-full max-w-[322px]',
-  },
-  type: {
-    type: String,
-    default: 'select',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'simple',
-  },
-  inputVarian: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  showIcon: {
-    type: Boolean,
-    default: false,
-  },
-  appendIcon: {
-    //final, dentro del input
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    //Inicio dentro y al principio del input
-    type: String,
-    default: '',
-  },
-  clearIcon: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  options: {
-    //Opciones que apareceran en el desplegable del select
-    type: Array,
-    default: () => [],
-  },
-  optionLabel: {
-    //Campo que aparecera si se envia un arreglo de objetos
-    type: String,
-    default: '',
-  },
+defineOptions({
+  name: 'AppMultiSelect',
+  inheritAttrs: false,
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const props = withDefaults(defineProps<AppMultiSelectProps>(), {
+  modelValue: () => [],
+  class: '',
+  options: () => [],
+  optionLabel: '',
+  optionValue: undefined,
+  optionDisabled: undefined,
+  optionGroupLabel: undefined,
+  optionGroupChildren: undefined,
+  placeholder: '',
+  severity: 'error',
+  size: 'small',
+  inputSize: undefined,
+  variant: 'simple',
+  labelVariant: 'on',
+  inputVariant: undefined,
+  inputVarian: undefined,
+  errorMessages: '',
+  showIcon: true,
+  appendIcon: '',
+  prependInnerIcon: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  inputId: undefined,
+  filter: false,
+  filterPlaceholder: 'Buscar...',
+  display: 'comma',
+  maxSelectedLabels: undefined,
+  selectedItemsLabel: '{0} seleccionados',
+  showClear: false,
+  fluid: true,
+  minWidth: undefined,
+  readonly: false,
+  disabled: false,
+  invalid: false,
+  type: 'select',
+});
 
-const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const emit = defineEmits<AppMultiSelectEmits>();
 
-const errors = ref<string>();
-const invalid = ref<boolean>();
-const appendIconLocal = ref<string>(
-  props.appendIcon || (props.type === 'password' ? 'pi pi-eye' : ''),
-);
-const typeInputLocal = ref<string>(props.type);
+const multiSelectRef = ref<{ $el?: HTMLElement; focus?: () => void }>();
 const isFocused = ref<boolean>(false);
 
-const onUpdate = (value: string | undefined) => {
-  return emit('update:modelValue', value ?? '');
-};
-const messageErrorField = computed(() => {
-  if (props.errorMessages.length) {
-    errors.value = props.errorMessages;
-  }
-  return errors.value;
+const computedMinWidthClass = computed<string>(() => {
+  if (props.minWidth) return props.minWidth;
+  if (hasCustomMinWidth(props.class)) return '';
+  return 'min-w-40';
 });
 
-const passwordInputType = computed(() => {
-  if (props.type === 'password') {
-    appendIconLocal.value = 'pi pi-eye';
-    return 'hover:cursor-pointer';
-  }
-  return '';
+const rootClass = computed(() =>
+  resolveInputRootClass(props.class, [computedMinWidthClass.value]),
+);
+const autoId = useId();
+const computedInputId = computed(() => props.id || props.inputId || autoId);
+
+const hasPrependIcon = computed<boolean>(() => {
+  return Boolean(props.prependInnerIcon && props.showIcon);
 });
 
-const displayPlaceholder = computed(() => {
-  if (isFocused.value && props.label) {
-    return props.placeholder;
-  }
-  if (!props.label.length) {
-    return props.placeholder;
-  }
+const hasAppendIcon = computed<boolean>(() => {
+  return Boolean(props.appendIcon && props.showIcon);
 });
 
-const clickSecondIcon = () => {
-  if (props.type === 'password' && appendIconLocal.value === 'pi pi-eye') {
-    appendIconLocal.value = 'pi pi-eye-slash';
-    typeInputLocal.value = 'text';
-  } else if (
-    appendIconLocal.value === 'pi pi-eye-slash' &&
-    props.type === 'password'
-  ) {
-    appendIconLocal.value = 'pi pi-eye';
-    typeInputLocal.value = 'password';
-  }
-  emit('click-end-icon');
-};
-
-watch(
-  () => props.appendIcon,
-  newVal => {
-    appendIconLocal.value = newVal;
-  },
+const isAppendIconClickable = computed<boolean>(() =>
+  Boolean(props.appendIcon),
 );
 
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
+const labelMaxWidthClass = computed<string>(() => {
+  if (hasAppendIcon.value) {
+    return 'max-w-[calc(100%-4.5rem)]';
+  }
+  return 'max-w-[calc(100%-2.5rem)]';
+});
+
+const errorMessageText = computed<string>(() => {
+  if (Array.isArray(props.errorMessages)) {
+    return props.errorMessages.filter(Boolean).join(', ');
+  }
+  return props.errorMessages || '';
+});
+
+const isInvalid = computed<boolean>(() => {
+  return Boolean(props.invalid || errorMessageText.value.length > 0);
+});
+
+const errorId = computed<string>(() => `${computedInputId.value}-error`);
+
+const ariaDescribedby = computed<string | undefined>(() => {
+  return errorMessageText.value.length > 0 ? errorId.value : undefined;
+});
+
+const computedVariant = computed<'outlined' | 'filled' | undefined>(() => {
+  if (props.inputVariant === 'outlined' || props.inputVariant === 'filled') {
+    return props.inputVariant;
+  }
+  if (props.inputVarian === 'outlined' || props.inputVarian === 'filled') {
+    return props.inputVarian;
+  }
+  return undefined;
+});
+
+const displayPlaceholder = computed<string | undefined>(() => {
+  if (isFocused.value) {
+    return props.placeholder;
+  }
+  if (!props.label?.length) {
+    return props.placeholder;
+  }
+  return undefined;
+});
+
+const onUpdate = (value: unknown[] | null | undefined) => {
+  if (props.readonly || props.disabled) return;
+  emit('update:modelValue', value ?? []);
+};
+
+const clickSecondIcon = (event?: MouseEvent | KeyboardEvent) => {
+  if (props.disabled || props.readonly) return;
+  emit('click-end-icon', event);
+};
+
+const onFocus = (event: Event) => {
+  isFocused.value = true;
+  emit('focus', event);
+};
+
+const onBlur = (event: Event) => {
+  isFocused.value = false;
+  emit('blur', event);
+};
+
+const onChange = (event: MultiSelectChangeEvent) => {
+  emit('change', event);
+};
+
+const onFilter = (event: MultiSelectFilterEvent) => {
+  emit('filter', event);
+};
+
+const onSelectAllChange = (event: MultiSelectAllChangeEvent) => {
+  emit('selectall-change', event);
+};
+
+const onBeforeShow = () => {
+  emit('before-show');
+};
+
+const onBeforeHide = () => {
+  emit('before-hide');
+};
+
+const onShow = () => {
+  emit('show');
+};
+
+const onHide = () => {
+  emit('hide');
+};
+
+defineExpose({
+  focus: () => {
+    const el = multiSelectRef.value?.$el?.querySelector<HTMLElement>(
+      '.p-multiselect-label, [tabindex="0"], input',
+    );
+    el?.focus?.();
   },
-);
+  multiSelect: multiSelectRef,
+});
 </script>

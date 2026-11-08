@@ -137,7 +137,9 @@ export function useDepartment() {
     staleTime: 1000 * 60 * 10, // 10 min de frescura para el combo
   });
 
-  const countries = computed<CountryResponse[]>(() => countriesData.value || []);
+  const countries = computed<CountryResponse[]>(
+    () => countriesData.value || [],
+  );
 
   // Consulta paginada y reactiva de departamentos
   const {
@@ -299,8 +301,12 @@ export function useDepartment() {
 
   const findDepartment = (value?: FilterDepartmentType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
-    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
+    appliedFilter.filter_name =
+      (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
     appliedFilter.id_country = target?.id_country ?? filter.id_country;
   };

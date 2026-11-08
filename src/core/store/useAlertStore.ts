@@ -9,7 +9,7 @@ export const useAlertStore = defineStore('message', {
     title: '',
     content: '',
     closable: false,
-    maxWith: 500,
+    maxWidth: 500,
     timeout: 3000,
   }),
   actions: {
@@ -20,7 +20,7 @@ export const useAlertStore = defineStore('message', {
       this.title = options?.title ?? '';
       this.content = options?.content ?? '';
       this.closable = options?.closable ?? false;
-      this.maxWith = options?.maxWith ?? 500;
+      this.maxWidth = options?.maxWidth ?? 500;
       this.timeout = options?.timeout ?? 3000;
 
       setTimeout(() => {
@@ -34,7 +34,7 @@ export const useAlertStore = defineStore('message', {
       this.title = '';
       this.content = '';
       this.closable = false;
-      this.maxWith = 500;
+      this.maxWidth = 500;
       this.timeout = 3000;
     },
     close() {

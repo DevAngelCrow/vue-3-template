@@ -1,43 +1,51 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
-    <FloatLabel :variant="labelVariant">
-      <IconField class="w-full group">
-        <InputIcon
-          v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
-        />
-        <InputMask
-          class="w-full"
-          :model-value="modelValue"
-          @update:model-value="onUpdate"
-          :invalid="invalid"
-          v-bind="$attrs"
-          :autocomplete
-          :placeholder="displayPlaceholder"
-          :id="inputId"
-          @focus="isFocused = true"
-          @blur="isFocused = false"
-          :mask="primeMask"
-          :variant="inputVariant"
-        />
-        <InputIcon
-          v-if="appendIcon"
-          :class="[
-            appendIcon,
-            'absolute right-4 top-5.5',
-            { 'text-danger-600': invalid },
-          ]"
-          @click="emit('click-end-icon')"
-        />
-      </IconField>
-      <label
-        v-if="label"
-        :class="{ 'text-danger-600': invalid }"
-        :for="inputId"
+  <div :class="rootClass">
+    <div class="flex items-stretch w-full">
+      <span
+        v-if="prefix"
+        class="inline-flex items-center px-3 text-sm font-semibold text-surface-600 bg-surface-100 border border-surface-300 border-r-0 rounded-l-md select-none shrink-0"
       >
-        {{ label }}
-      </label>
-    </FloatLabel>
+        {{ prefix }}
+      </span>
+      <FloatLabel :variant="labelVariant" class="w-full flex-1 min-w-0">
+        <IconField class="w-full group">
+          <InputIcon
+            v-if="prependInnerIcon"
+            :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          />
+          <InputMask
+            :class="['w-full', { '!rounded-l-none': !!prefix }]"
+            :model-value="modelValue"
+            @update:model-value="onUpdate"
+            :invalid="invalid"
+            v-bind="$attrs"
+            :autocomplete
+            :placeholder="displayPlaceholder"
+            :id="inputId"
+            @focus="isFocused = true"
+            @blur="isFocused = false"
+            :mask="primeMask"
+            :variant="inputVariant"
+          />
+          <InputIcon
+            v-if="appendIcon"
+            :class="[
+              appendIcon,
+              'absolute right-4 top-5.5',
+              { 'text-danger-600': invalid },
+            ]"
+            @click="emit('click-end-icon')"
+          />
+        </IconField>
+        <label
+          v-if="label"
+          :class="{ 'text-danger-600': invalid }"
+          :for="inputId"
+        >
+          {{ label }}
+        </label>
+      </FloatLabel>
+    </div>
     <Message
       v-if="errorMessages.length"
       class="left-0 top-full mt-0 text-xs z-10"
@@ -53,6 +61,7 @@
 import { ref, computed, watch, useId } from 'vue';
 import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
+import { resolveInputRootClass } from '../utils/inputClasses';
 defineOptions({ inheritAttrs: false, name: 'AppInputMask' });
 
 const props = defineProps({
@@ -61,7 +70,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full max-w-[322px]',
+    default: '',
   },
   placeholder: {
     type: String,
@@ -119,10 +128,15 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  prefix: {
+    type: String,
+    default: '',
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'click-end-icon']);
 
+const rootClass = computed(() => resolveInputRootClass(props.class));
 const autoId = useId();
 const inputId = computed(() => props.id || props.inputId || autoId);
 
@@ -143,15 +157,10 @@ const displayPlaceholder = computed(() => {
 });
 
 const primeMask = computed(() => {
-  if (isFocused.value) {
+  if (isFocused.value || !props.label?.length || props.modelValue?.length) {
     return props.mask;
   }
-  if (!props.label.length) {
-    return '';
-  }
-  if (props.modelValue?.length) {
-    return props.mask;
-  }
+  return undefined;
 });
 
 watch(

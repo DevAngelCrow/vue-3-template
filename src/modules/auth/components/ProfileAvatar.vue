@@ -18,6 +18,7 @@
     <div :class="['w-full', dragDropContainerClasses]">
       <AppDragDropFile
         accept="image/*"
+        empty-text="Arrastre y suelte la foto de perfil aquí para cargarla"
         v-model="file_img"
         v-bind="fileImgAttrs"
         :error-messages="errors.file_img"

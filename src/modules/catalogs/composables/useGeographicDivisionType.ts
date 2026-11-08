@@ -137,7 +137,9 @@ export function useGeographicDivisionType() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const countries = computed<CountryResponse[]>(() => countriesData.value || []);
+  const countries = computed<CountryResponse[]>(
+    () => countriesData.value || [],
+  );
 
   // Consulta paginada y reactiva de tipos de división geográfica
   const {
@@ -237,8 +239,7 @@ export function useGeographicDivisionType() {
   // Mutación: Alternar Estado
   const toggleMutation = useMutation({
     mutationFn: async (divId: string) => {
-      const response =
-        await catalogServices.patchGeographicDivisionType(divId);
+      const response = await catalogServices.patchGeographicDivisionType(divId);
       return response.data;
     },
     onSuccess: data => {
@@ -310,7 +311,10 @@ export function useGeographicDivisionType() {
 
   const findDivisionType = (value?: FilterDivisionType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter = (target?.filter ?? filter.filter) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
     appliedFilter.id_country = target?.id_country ?? filter.id_country;

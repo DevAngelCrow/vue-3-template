@@ -1,10 +1,10 @@
 export interface Alert {
   show?: boolean;
-  type?: 'success' | 'success' | 'info' | 'warning' | 'error';
+  type?: 'success' | 'info' | 'warning' | 'error';
   icon?: string;
   title?: string;
   content?: string;
   closable?: boolean;
-  maxWith?: number;
+  maxWidth?: number;
   timeout?: number;
 }

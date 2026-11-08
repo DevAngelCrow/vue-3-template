@@ -2,6 +2,7 @@
   <div class="flex gap-2 items-center">
     <Checkbox
       v-bind="$attrs"
+      :binary="binary"
       :model-value="modelValue"
       @update:model-value="onUpdate"
       :input-id="inputId"
@@ -29,6 +30,10 @@ const props = defineProps({
   inputId: {
     type: String,
     default: undefined,
+  },
+  binary: {
+    type: Boolean,
+    default: true,
   },
   modelValue: {
     type: Boolean,

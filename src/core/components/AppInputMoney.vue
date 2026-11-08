@@ -1,5 +1,5 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
+  <div :class="rootClass">
     <FloatLabel :variant="labelVariant">
       <IconField class="w-full group">
         <InputIcon
@@ -75,6 +75,7 @@ import {
   FloatLabel,
 } from 'primevue';
 
+import { resolveInputRootClass } from '../utils/inputClasses';
 defineOptions({ inheritAttrs: false, name: 'AppInputMoney' });
 
 const props = defineProps({
@@ -83,7 +84,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full max-w-[322px]',
+    default: '',
   },
   placeholder: {
     type: String,
@@ -159,6 +160,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+const rootClass = computed(() => resolveInputRootClass(props.class));
 const autoId = useId();
 const inputId = computed(() => props.id || props.inputId || autoId);
 

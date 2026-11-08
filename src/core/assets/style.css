@@ -41,7 +41,7 @@
 
 body {
   font-family: 'MuseoSans', sans-serif;
-  @apply text-primary
+  @apply text-primary-900;
 }
 
 h1 {
@@ -68,15 +68,15 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-surface-200 rounded-full;
+  @apply bg-primary-200 rounded-full;
 }
 
 *::-webkit-scrollbar-thumb {
-  @apply bg-primary-950 rounded-xl;
+  @apply bg-primary-500 rounded-xl;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply bg-surface-600;
+  @apply bg-primary-600;
 }
 
 

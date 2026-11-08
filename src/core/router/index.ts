@@ -119,12 +119,20 @@ router.beforeEach(async to => {
   const auth = useAuthStore();
   let hasValidSession = auth.validSession();
 
+  const isPublicLanding = to.name === 'landing';
+
   // 0. Sin access token válido en memoria: intentar restaurar la sesión
   //    con la cookie HttpOnly del refresh token.
-  if (!hasValidSession && (to.meta.requiresAuth || !initialRestoreAttempted)) {
+  if (
+    !hasValidSession &&
+    !isPublicLanding &&
+    (to.meta.requiresAuth || !initialRestoreAttempted)
+  ) {
     hasValidSession = await restoreSession();
   }
-  initialRestoreAttempted = true;
+  if (!isPublicLanding) {
+    initialRestoreAttempted = true;
+  }
 
   // 1. Si la ruta requiere autenticación y el usuario no tiene sesión válida
   if (to.meta.requiresAuth && !hasValidSession) {
@@ -134,8 +142,8 @@ router.beforeEach(async to => {
 
   // 2. Si el usuario está autenticado
   if (hasValidSession) {
-    // Si intenta ir a login o landing estando autenticado, redirigir al dashboard
-    if (to.name === 'login' || to.name === 'sign-up' || to.name === 'landing') {
+    // Si intenta ir a login o sign-up estando autenticado, redirigir al dashboard
+    if (to.name === 'login' || to.name === 'sign-up') {
       return { name: 'dashboard' };
     }
 

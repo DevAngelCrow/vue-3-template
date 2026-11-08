@@ -1,37 +1,46 @@
 <template>
-  <div
-    :class="[
-      'min-w-[150px]',
-      'relative',
-      props.class || 'w-auto',
-      'flex',
-      'flex-col',
-      'gap-0',
-    ]"
-  >
+  <div :class="rootClass">
     <div class="flex flex-row items-center gap-2">
-      <ColorPicker
-        name="color"
-        :inline
-        :model-value="modelValue"
-        :format
-        @update:model-value="onUpdate"
-      />
+      <div
+        :class="[
+          'relative flex items-center',
+          {
+            'pointer-events-none opacity-80 cursor-not-allowed':
+              readonly || disabled,
+          },
+        ]"
+      >
+        <ColorPicker
+          name="color"
+          :inline="inline"
+          :model-value="modelValue"
+          :format="format"
+          :disabled="disabled || readonly"
+          @update:model-value="onUpdate"
+        />
+      </div>
       <div id="inputs-color-picker" class="flex flex-col items-center">
         <FloatLabel v-if="showInputText" :variant="variantLabel">
           <IconField class="w-full group">
             <InputMask
-              :size
+              :size="size"
               :model-value="modelValue"
               :mask="computedMask"
-              @update:model-value="onUpdate"
               :id="inputId"
               :placeholder="displayPlaceholder"
+              :invalid="invalid"
+              :disabled="disabled"
+              :readonly="readonly"
+              :class="{ 'pointer-events-none': readonly }"
+              @update:model-value="onUpdate"
               @focus="isFocused = true"
               @blur="isFocused = false"
-              :invalid
             />
-            <InputIcon :class="appendIconDynamic" @click="clearable" />
+            <InputIcon
+              v-if="appendIconDynamic"
+              :class="appendIconDynamic"
+              @click="clearable"
+            />
           </IconField>
           <label
             v-if="label"
@@ -46,14 +55,15 @@
     <Message
       v-if="errorMessages.length"
       class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      :severity="severity"
+      :size="size"
+      :variant="variant"
     >
       {{ errorMessages }}
     </Message>
   </div>
 </template>
+
 <script lang="ts" setup>
 import {
   ColorPicker,
@@ -65,13 +75,17 @@ import {
 } from 'primevue';
 import { computed, ref, watch, useId } from 'vue';
 
+import { resolveInputRootClass } from '../utils/inputClasses';
+
+defineOptions({ name: 'AppColorPicker' });
+
 const props = defineProps({
   modelValue: {
     type: String,
   },
   class: {
     type: String,
-    default: 'w-full max-w-[322px]',
+    default: '',
   },
   label: {
     type: String,
@@ -125,6 +139,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'click-clear']);
@@ -161,6 +183,10 @@ const computedPlaceholder = computed(
 const computedMask = computed(() => props.mask || getDefaultMask());
 
 const onUpdate = (value: string | undefined) => {
+  if (props.readonly || props.disabled) {
+    return;
+  }
+
   if (!value) {
     emit('update:modelValue', value);
     return;
@@ -176,15 +202,13 @@ const onUpdate = (value: string | undefined) => {
       }
       break;
     case 'rgb':
-      // Asegurar formato RGB correcto
       if (!value.startsWith('rgb')) {
-        formattedValue = value; // El ColorPicker debería devolver el formato correcto
+        formattedValue = value;
       }
       break;
     case 'hsb':
-      // Asegurar formato HSB correcto
       if (!value.startsWith('hsb')) {
-        formattedValue = value; // El ColorPicker debería devolver el formato correcto
+        formattedValue = value;
       }
       break;
     default:
@@ -195,6 +219,10 @@ const onUpdate = (value: string | undefined) => {
 };
 
 const clearable = () => {
+  if (props.readonly || props.disabled) {
+    return;
+  }
+
   let defaultValue = '#000000';
 
   switch (props.format) {
@@ -213,17 +241,24 @@ const clearable = () => {
   emit('click-clear');
 };
 
+const rootClass = computed(() =>
+  resolveInputRootClass(props.class, ['flex', 'flex-col', 'gap-0']),
+);
 const autoId = useId();
 const inputId = computed(() => props.id || props.inputId || autoId);
 const invalid = ref<boolean>(false);
 const isFocused = ref<boolean>(false);
 
 const appendIconDynamic = computed(() => {
+  if (props.readonly || props.disabled) {
+    return '';
+  }
   if (props.modelValue) {
     return 'pi pi-times cursor-pointer';
   }
   return '';
 });
+
 const displayPlaceholder = computed(() => {
   if (isFocused.value && props.label) {
     return computedPlaceholder.value;
@@ -233,6 +268,7 @@ const displayPlaceholder = computed(() => {
   }
   return '';
 });
+
 watch(
   () => props.errorMessages,
   newValue => {

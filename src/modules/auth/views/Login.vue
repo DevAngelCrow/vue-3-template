@@ -24,9 +24,9 @@
         <template #header>
           <div class="flex flex-col items-center pt-8 pb-2 px-8 gap-3">
             <div
-              class="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center shadow-lg"
+              class="w-14 h-14 rounded-2xl bg-primary-600 flex items-center justify-center shadow-lg ring-1 ring-white/20"
             >
-              <i class="pi pi-shield text-white text-xl" />
+              <i class="pi pi-shield text-white text-2xl" />
             </div>
             <div class="text-center">
               <h1 class="text-2xl font-semibold text-white tracking-tight">

@@ -1,43 +1,44 @@
 <template>
-  <div class="py-5 px-5 h-full max-h-full flex items-start justify-center">
-    <section
-      id="gender_content"
-      class="w-full xl:w-[80%] flex flex-col flex-wrap gap-5"
-    >
-      <div class="w-full flex flex-row gap-3 flex-wrap">
-        <AppTitle
-          title="Géneros"
-          class="w-full md:w-auto flex justify-center items-center"
+  <div
+    class="py-5 px-4 sm:px-6 h-full max-h-full flex items-start justify-center"
+  >
+    <section id="gender_content" class="w-full xl:w-[86%] flex flex-col gap-5">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full"
+      >
+        <AppTitle title="Géneros" class="w-full sm:w-auto" />
+      </div>
+      <div
+        id="inputs"
+        class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full"
+      >
+        <AppInputText
+          label="Buscar..."
+          class="w-full sm:w-64 md:w-80 min-w-0"
+          v-model="filter_name"
+          append-icon="pi pi-search"
+          @update:modelValue="validateAlphaInput(filter_name)"
+          @keydown.enter="debouncedFindGender"
         />
-        <div
-          id="inputs"
-          class="flex rounded-lg py-0.5 px-0.5 gap-3 flex-wrap grow lg:grow-0 w-full"
-        >
-          <AppInputText
-            label="Buscar"
-            class="min-w-auto w-auto grow lg:grow-0 flex-shrink-0 md:w-[335px]"
-            v-model="filter_name"
-            @update:modelValue="validateAlphaInput(filter_name)"
-            @keydown.enter="debouncedFindGender"
-          />
+        <div class="flex items-center gap-2 flex-wrap">
+          <Button class="rounded-md" @click="debouncedFindGender">
+            Buscar
+          </Button>
           <Button
-            class="flex-shrink-0 grow md:grow-0 rounded-md"
-            @click="debouncedFindGender"
-            >Buscar</Button
-          >
-          <Button
-            class="flex-shrink-0 grow md:grow-0 rounded-md"
+            class="rounded-md"
             outlined
             @click="debouncedCleanSearch"
-            >Limpiar</Button
-          >
+            label="Limpiar"
+            :icon="iconFilter"
+          />
         </div>
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isPending"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -47,7 +48,10 @@
           :per_page="pagination.per_page"
           :total_items="pagination.total_items"
           :page="pagination.page"
+          :show-per-page-options="true"
+          :per-page-options="[10, 20, 50, 100]"
           @page-update="handlePagination"
+          @per-page-update="handlePerPagePagination"
         >
           <template #body-acciones="{ data }">
             <div class="flex gap-0 justify-center">
@@ -57,7 +61,7 @@
                 icon="pi pi-eye"
                 @click="openModal(data)"
                 v-tooltip.bottom="'Ver detalle'"
-              ></Button>
+              />
             </div>
           </template>
         </AppDataTable>
@@ -66,26 +70,29 @@
     <GenderFormModal :modal-state="modalState" @close-modal="closeModal" />
   </div>
 </template>
+
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { computed, reactive } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
+import AppTitle from '@/core/components/AppTitle.vue';
+import AppInputText from '@/core/components/AppInputText.vue';
+import AppDataTable from '@/core/components/AppDataTable.vue';
+import AppSkeleton from '@/core/components/AppSkeleton.vue';
 
 import { useGender } from '../../composables/useGender';
-import GenderFormModal from '../components/GenderFormModal.vue';
 import { GenderResponse } from '../../interfaces/gender/gender.response.interface';
-
-const storeLoader = useLoaderStore();
+import GenderFormModal from '../components/GenderFormModal.vue';
 
 const {
-  filter_name,
-  debouncedCleanSearch,
-  debouncedFindGender,
-  validateAlphaInput,
   headers,
   pagination,
   genders,
+  filter_name,
+  validateAlphaInput,
+  debouncedFindGender,
+  debouncedCleanSearch,
+  isPending,
 } = useGender();
 
 const modalState = reactive<{
@@ -116,4 +123,19 @@ const handlePagination = (page: number) => {
   }
   pagination.page = page + 1;
 };
+
+const handlePerPagePagination = (perPage: number) => {
+  if (perPage === pagination.per_page) return;
+  pagination.per_page = perPage;
+  pagination.page = 1;
+};
+
+const iconFilter = computed(() => {
+  if (!filter_name.value) {
+    return 'pi pi-filter';
+  }
+  return 'pi pi-filter-slash';
+});
 </script>
+
+<style scoped></style>

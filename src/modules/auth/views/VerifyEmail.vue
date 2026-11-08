@@ -58,7 +58,11 @@
                 <Button
                   class="w-full"
                   size="large"
-                  :label="stateVerified ? 'Iniciar sesión' : 'Volver al inicio de sesión'"
+                  :label="
+                    stateVerified
+                      ? 'Iniciar sesión'
+                      : 'Volver al inicio de sesión'
+                  "
                   icon="pi pi-sign-in"
                   :disabled="isLoading || stateVerified === null"
                 />

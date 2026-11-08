@@ -1,61 +1,74 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
-    <FloatLabel :variant="labelVariant">
-      <IconField class="w-full group">
+  <div :class="rootClass">
+    <component
+      :is="label ? FloatLabel : 'div'"
+      :variant="label ? labelVariant : undefined"
+      :class="{ contents: !label }"
+    >
+      <component
+        :is="prependInnerIcon ? IconField : 'div'"
+        :class="prependInnerIcon ? 'w-full group' : 'contents'"
+      >
         <InputIcon
           v-if="prependInnerIcon"
-          :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          :class="[prependInnerIcon, { 'text-danger-600': isInvalid }]"
         />
         <InputNumber
           class="w-full"
+          :fluid="fluid"
+          :input-class="computedInputClass"
+          :increment-button-class="computedIncrementButtonClass"
+          :decrement-button-class="computedDecrementButtonClass"
           :model-value="modelValue"
           @update:model-value="onUpdate"
-          :invalid="invalid"
+          :invalid="isInvalid"
           v-bind="$attrs"
-          :autocomplete
+          :autocomplete="autocomplete"
           :placeholder="displayPlaceholder"
           :input-id="inputId"
           @focus="isFocused = true"
           @blur="isFocused = false"
-          :show-buttons
-          :min
-          :max
-          :button-layout
+          :show-buttons="showButtons"
+          :min="min"
+          :max="max"
+          :button-layout="buttonLayout"
           :variant="inputVariant"
           :size="inputSize"
         >
           <template #incrementicon>
             <span
-              :class="
-                buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus'
-              "
+              :class="[
+                buttonLayout === 'vertical' ? 'pi pi-chevron-up' : 'pi pi-plus',
+                'text-xs',
+              ]"
             />
           </template>
           <template #decrementicon>
             <span
-              :class="
+              :class="[
                 buttonLayout === 'vertical'
                   ? 'pi pi-chevron-down'
-                  : 'pi pi-minus'
-              "
+                  : 'pi pi-minus',
+                'text-xs',
+              ]"
             />
           </template>
         </InputNumber>
-      </IconField>
+      </component>
       <label
         v-if="label"
-        :class="{ 'text-danger-600': invalid }"
+        :class="{ 'text-danger-600': isInvalid }"
         :for="inputId"
       >
         {{ label }}
       </label>
-    </FloatLabel>
+    </component>
     <Message
       v-if="errorMessages.length"
       class="left-0 top-full mt-0 text-xs z-10"
-      :severity
-      :size
-      :variant
+      :severity="severity"
+      :size="size"
+      :variant="variant"
     >
       {{ errorMessages }}
     </Message>
@@ -71,6 +84,8 @@ import {
   FloatLabel,
 } from 'primevue';
 
+import { resolveInputRootClass } from '../utils/inputClasses';
+
 defineOptions({ inheritAttrs: false, name: 'AppInputNumber' });
 
 const props = defineProps({
@@ -80,7 +95,7 @@ const props = defineProps({
   },
   class: {
     type: String,
-    default: 'w-full max-w-[322px]',
+    default: '',
   },
   placeholder: {
     type: String,
@@ -108,7 +123,7 @@ const props = defineProps({
   },
   inputVariant: {
     type: String,
-    default: 'large',
+    default: undefined,
   },
   errorMessages: {
     type: String,
@@ -144,18 +159,66 @@ const props = defineProps({
   },
   min: {
     type: Number,
+    default: undefined,
   },
   max: {
     type: Number,
+    default: undefined,
+  },
+  fluid: {
+    type: Boolean,
+    default: true,
+  },
+  invalid: {
+    type: Boolean,
+    default: false,
+  },
+  inputClass: {
+    type: [String, Object, Array],
+    default: '',
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  'update:modelValue': [value: number | null];
+}>();
 
+const rootClass = computed(() => resolveInputRootClass(props.class));
 const autoId = useId();
 const inputId = computed(() => props.id || props.inputId || autoId);
 
-const invalid = ref<boolean>(false);
+const invalidFromError = ref<boolean>(false);
+const isInvalid = computed(
+  () => props.invalid || invalidFromError.value || !!props.errorMessages.length,
+);
+
+const isHorizontal = computed(
+  () => props.showButtons && props.buttonLayout === 'horizontal',
+);
+
+const computedInputClass = computed(() => {
+  const custom = props.inputClass;
+  return [
+    'min-w-0',
+    isHorizontal.value ? 'text-center !px-1' : 'w-full',
+    custom,
+  ];
+});
+
+const computedIncrementButtonClass = computed(() => {
+  if (isHorizontal.value) {
+    return '!w-8 shrink-0 flex items-center justify-center hover:bg-surface-100 transition-colors cursor-pointer';
+  }
+  return undefined;
+});
+
+const computedDecrementButtonClass = computed(() => {
+  if (isHorizontal.value) {
+    return '!w-8 shrink-0 flex items-center justify-center hover:bg-surface-100 transition-colors cursor-pointer';
+  }
+  return undefined;
+});
+
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: number | undefined) => {
@@ -174,9 +237,9 @@ const displayPlaceholder = computed(() => {
 watch(
   () => props.errorMessages,
   newValue => {
-    invalid.value = true;
+    invalidFromError.value = true;
     if (!newValue.length) {
-      invalid.value = false;
+      invalidFromError.value = false;
     }
   },
 );

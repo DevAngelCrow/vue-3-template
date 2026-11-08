@@ -18,10 +18,10 @@
 
 - **Framework**: Vue 3.5+ con Composition API y `<script setup lang="ts">`.
 - **Compilador / Bundler**: Vite 7+.
-- **Lenguaje**: TypeScript ~5.8+ con modo estricto y *Project References*.
+- **Lenguaje**: TypeScript ~5.8+ con modo estricto y _Project References_.
 - **Estado de Servidor & Caché**: `@tanstack/vue-query` v5.
 - **Formularios & Validación**: `vee-validate` 4.x + `yup` 1.6+.
-- **Componentes UI & Estilos**: PrimeVue 4 (tema personalizado en `customTheme.ts`), Iconos `primeicons`, Tailwind CSS 4 (`@tailwindcss/vite`).
+- **Componentes UI & Estilos**: PrimeVue 5 (tema personalizado en `customTheme.ts`), Iconos `primeicons`, Tailwind CSS 4 (`@tailwindcss/vite`).
 - **Estado Global de Cliente**: `pinia` 3.x (`useAlertStore`, `useAuthStore`, `useLoaderStore`, `useLayoutStore`).
 - **Cliente HTTP**: Instancia centralizada `httpClient` sobre Axios (`@/core/utils/httpClient`).
 - **Enrutamiento**: `vue-router` 4.x con guards de autenticación y permisos dinámicos.
@@ -62,6 +62,7 @@ src/
 ```
 
 ### Reglas de Organización:
+
 1. **Aislamiento por módulo**: Ningún módulo debe importar servicios o componentes internos de otro módulo a menos que se trate de un recurso promovido a `src/core/`.
 2. **Nombres de archivo**:
    - Componentes y Vistas: `PascalCase.vue` (ej. `DepartmentFormModal.vue`, `Departments.vue`).
@@ -74,21 +75,41 @@ src/
 
 ## 3. Convenciones de Componentes y UI
 
-1. **Uso Obligatorio de Componentes Globales `App*`**:
+### 3.0 Orden de Prioridad Jerárquica de Componentes (Mandatorio)
+
+Para cualquier vista, formulario, modal, landing o layout en este repositorio, la selección de componentes debe obedecer estrictamente al siguiente orden de 3 niveles:
+
+1. **Prioridad 1 (Máxima - Mandatorio): Componentes Globales `App*` (`src/core/components/App*.vue`)**:
+   - Siempre verificar primero si existe un wrapper `App*`. Se encuentran registrados globalmente por `registerGlobalComponents` y encapsulan diseño, accesibilidad, clases responsive (`resolveInputRootClass`), soporte móvil y tokens de color oficiales.
+2. **Prioridad 2 (Secundaria - Fallback de Biblioteca UI): PrimeVue 5**:
+   - Utilizar componentes de PrimeVue 5 (ej. `Button`, `<Accordion>`, `<AccordionPanel>`, `Divider`, `Toast`, `ConfirmDialog`, `Badge`, `Tag`, etc.) **única y exclusivamente cuando NO exista un componente wrapper `App*`**.
+3. **Prioridad 3 (Última Instancia - Estructura y Maquetación): HTML Nativo**:
+   - Reservado exclusivamente para contenedores y maquetación semántica (`div`, `header`, `section`, `main`, `footer`, `nav`, `form`, `label`, `p`, `span`, `ul`, `li`, `a`).
+   - **ESTRICTAMENTE PROHIBIDO**: El uso de controles interactivos nativos como `<button>`, `<input>`, `<select>`, `<textarea>` cuando exista un componente en Prioridad 1 (`App*`) o Prioridad 2 (PrimeVue).
+
+4. **Uso Obligatorio de Componentes Globales `App*`**:
    - Todo componente en `src/core/components/App*.vue` se encuentra automáticamente registrado de manera global por `registerGlobalComponents`.
    - **Catálogo de Componentes Transversales (`src/core/components/`)**:
      - **Entradas & Formularios**: `AppInputText`, `AppSelect`, `AppMultiSelect`, `AppAutocomplete`, `AppInputNumber`, `AppInputMoney`, `AppInputMask`, `AppInputextArea`, `AppDatePicker`, `AppTimePicker`, `AppCheckBox`, `AppSelectButton`, `AppColorPicker`, `AppDragDropFile`.
      - **Datos, Estado & Carga**: `AppDataTable`, `AppPaginator`, `AppSkeleton` (carga progresiva según `skeleton.interface.ts`), `AppLoader`, `AppAlert` / `useAlertStore()`, `AppChipStatus`, `AppCircularCounter`.
-     - **Estructura & Navegación**: `AppModal`, `AppCard`, `AppTitle`, `AppHeader`, `AppFooter`, `AppSideBar`, `AppNavBarMenu`, `AppMenuItemSideBar`, `AppUserMenu`, `AppVerticalStepper`, `AppFloatButton`, `AppDocumentVisor`, `AppMainContent`.
-2. **Componentes de Acción**:
+     - **Estructura & Navegación**: `AppModal`, `AppCard`, `AppTitle`, `AppHeader`, `AppFooter`, `AppSideBar`, `AppNavBarMenu`, `AppMenuItemSideBar`, `AppUserMenu`, `AppStepper`, `AppVerticalStepper`, `AppTab`, `AppFloatButton`, `AppDocumentVisor`, `AppMainContent`.
+   - **`AppTab`** (wrapper de PrimeVue `Tabs`, colores `primary`/`surface` vía `customTheme.ts`). Para vistas paralelas/no secuenciales. Dos modos de uso:
+     - **Arreglo `tabs`** (`AppTabItem[]`: `value`, `label`, `icon`, `disabled`, `visible`, `badge`, `invalid`, `tooltip`, `loading`): contenido por slot `#panel-<value>` (o `#panel="{ tab }"`), cabecera personalizable con `#tab-<value>`.
+     - **Slots PrimeVue**: sin `tabs`, se escribe `TabList`/`Tab`/`TabPanels`/`TabPanel` en el slot por defecto (importados de `primevue`).
+     - Props: `v-model`, `scrollable` (true), `lazy` (true), `keepAlive` (solo modo arreglo), `syncQuery` (`true` => `?tab=`, o nombre de parámetro), `loading` (muestra `AppSkeleton`). Evento `change`; métodos expuestos `activate(value)` y `activateFirstInvalid()`.
+   - **`AppStepper`** (wrapper horizontal de PrimeVue `Stepper`). Para asistentes transaccionales secuenciales (_wizards_):
+     - **Arreglo `steps`** (`AppStepperItem[]`: `value`, `label`, `description`, `icon`, `completed`, `disabled`, `invalid`, `tooltip`, `visible`).
+     - Slots: `#panel-<value>` (o `#panel`) con `{ step, index, active, isFirst, isLast, next, prev, goTo }`, y cabecera personalizable con `#step-<value>` (`{ step, index, active }`).
+     - Props: `v-model`, `steps`, `linear` (false por defecto para permitir retroceder y bloquear avances con `step.disabled`). Evento `change`; métodos expuestos `next()`, `prev()` y `goTo(value)`.
+5. **Componentes de Acción**:
    - Utilizar el componente `Button` de PrimeVue para acciones primarias, secundarias, botones con icono y estados (`variant="text"`, `:severity="data?.active ? 'danger' : 'success'"`).
    - Utilizar directiva `v-tooltip.bottom` para dar contexto accesible a botones de acciones.
-3. **Tokens de Color (obligatorio)**:
+6. **Tokens de Color (obligatorio)**:
    - Usar únicamente `primary-*`, `surface-*` (gris slate), `success-*`, `danger-*` o variables `--p-*` definidas en `customTheme.ts`.
    - **Regla estricta por defecto**: Prohibido usar hex/rgb fijos o paletas Tailwind directas (`red-600`, `green-600`, `slate-*`, `zinc-*`, `gray-*`, `neutral-*`) en componentes. Estados de error: `text-danger-600` / `border-danger-600`.
    - **Excepción por requerimiento explícito**: Se permitirá utilizar otro tipo de color de las paletas (ya sea de Tailwind o PrimeVue) **única y exclusivamente cuando al momento del requerimiento sea explícita dicha necesidad**. En caso contrario, se manejará lo que ya está estrictamente obligatorio.
    - Los tokens `success`/`danger` se mapean a Tailwind en `src/core/assets/style.css`.
-4. **Modales de Formulario Desacoplados**:
+7. **Modales de Formulario Desacoplados**:
    - Los modales deben gestionar un objeto de estado reactivo `modalState`:
      ```ts
      const modalState = reactive<{
@@ -101,9 +122,14 @@ src/
      }>({ ... });
      ```
    - Las vistas inyectan o proporcionan el composable del módulo (`provide('useMiModulo', miModuloInstance)`) y el modal lo consume con `inject` para compartir estado sin duplicar lógica.
-5. **Documentación Viva (Docs-as-Code)**:
+8. **Documentación Viva (Docs-as-Code)**:
    - Todo componente en `src/core/components/` debe mantener tipados estrictos en TypeScript (`defineProps<{...}>` y `defineEmits<{...}>`) y comentarios explicativos JSDoc cuando sea necesario.
    - Las interfaces de TypeScript y este documento `AGENTS.md` constituyen la fuente única de verdad para desarrolladores y agentes de IA, evitando herramientas externas desincronizadas.
+9. **Responsive Obligatorio (Mobile-First)**:
+   - Toda vista, modal o formulario debe ser responsive y verse ordenado desde 320px hasta escritorio. Seguir la skill `.agents/skills/vue3-responsive-ui/SKILL.md`.
+   - Formularios: `grid grid-cols-1 items-start gap-x-4 gap-y-5 sm:grid-cols-2 md:grid-cols-6`, con `md:col-span-N` por campo (6 columnas por fila) y agrupación en secciones cuando haya más de ~6 campos.
+   - Los componentes `App*` de entrada estandarizan su ancho con `w-full min-w-0` por defecto vía `resolveInputRootClass` (`src/core/utils/inputClasses.ts`), eliminando el tope arbitrario de 322px. Dentro de un grid solo es necesario indicar `md:col-span-N`. Si se requiere restringir ancho en algún uso puntual, usar `max-w-*` o `w-*` explícito.
+   - El contenido de un `AppModal` debe iniciar con un contenedor `w-full`. Prohibidos anchos fijos en px dentro del contenido; `AppModal` ya limita su ancho a `calc(100vw - 1rem)`.
 
 ---
 
@@ -145,26 +171,27 @@ export function useMiEntidad() {
   const alert = useAlertStore();
 
   // 3. Esquema y Formulario reactivo con Vee-Validate y Yup
-  const {
-    errors,
-    defineField,
-    handleSubmit,
-    resetForm,
-    setFieldValue,
-  } = useForm({
-    validationSchema: yup.object({
-      id: yup.string().optional(),
-      name: yup.string().required('El nombre es requerido').min(3),
-      active: yup.boolean().default(true),
-    }),
-  });
+  const { errors, defineField, handleSubmit, resetForm, setFieldValue } =
+    useForm({
+      validationSchema: yup.object({
+        id: yup.string().optional(),
+        name: yup.string().required('El nombre es requerido').min(3),
+        active: yup.boolean().default(true),
+      }),
+    });
 
   const [name, nameAttrs] = defineField('name');
 
   // 4. Paginación y Filtros
   const pagination = reactive({ page: 1, per_page: 10, total_items: 0 });
-  const filter = reactive<FilterType>({ filter_name: undefined, status: undefined });
-  const appliedFilter = reactive<FilterType>({ filter_name: undefined, status: undefined });
+  const filter = reactive<FilterType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+  const appliedFilter = reactive<FilterType>({
+    filter_name: undefined,
+    status: undefined,
+  });
 
   // 5. Query principal con TanStack Query
   const {
@@ -178,7 +205,8 @@ export function useMiEntidad() {
         page: pagination.page,
         per_page: pagination.per_page,
         filter_name: appliedFilter.filter_name || undefined,
-        status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       }),
     ),
     queryFn: async () => {
@@ -186,7 +214,8 @@ export function useMiEntidad() {
         page: pagination.page,
         per_page: pagination.per_page,
         name: appliedFilter.filter_name,
-        active: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        active:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       });
       return response.data;
     },
@@ -199,7 +228,11 @@ export function useMiEntidad() {
     onSuccess: response => {
       if (response.status === 201) {
         queryClient.invalidateQueries({ queryKey: miEntidadKeys.all });
-        alert.showAlert({ type: 'success', title: response.data.message, show: true });
+        alert.showAlert({
+          type: 'success',
+          title: response.data.message,
+          show: true,
+        });
       }
     },
   });
@@ -222,6 +255,7 @@ export function useMiEntidad() {
 ```
 
 ### 7. Manejo Canónico de Búsquedas y Debounce:
+
 - **Prohibido el uso de la directiva `v-debounce` en plantillas:** Las directivas DOM generan alto acoplamiento con los nodos HTML, ocasionan comportamientos inconsistentes con wrappers de PrimeVue y carecen de tipado estricto.
 - **Debounce a nivel de Composable:** Toda función de búsqueda o filtro con retardo debe generarse y exportarse desde el composable utilizando la función utilitaria `debounce` de `@/core/utils/debounceFunction`:
   ```ts
@@ -229,8 +263,12 @@ export function useMiEntidad() {
 
   const findMiEntidad = (value?: FilterType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
-    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
+    appliedFilter.filter_name =
+      (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
   };
 
@@ -257,8 +295,8 @@ export function useMiEntidad() {
     v-model="filter.filter_name"
     @keydown.enter="debouncedFindMiEntidad"
   />
-  <Button @click="debouncedFindMiEntidad">Buscar</Button>
-  <Button outlined @click="debouncedCleanSearch" label="Limpiar" />
+  <button @click="debouncedFindMiEntidad">Buscar</button>
+  <button outlined @click="debouncedCleanSearch" label="Limpiar" />
   ```
 
 ---
@@ -291,8 +329,11 @@ export function useMiEntidad() {
 
 Al implementar cualquier característica, refactorización o corrección:
 
-1. **Cero Tolerancia a `any`**:
-   - Declarar siempre interfaces en `src/modules/<modulo>/interfaces/` o `src/core/interfaces/`.
+1. **Cero Tolerancia a `any` (Regla Absoluta y No Negociable)**:
+   - **Prohibición absoluta:** Queda terminantemente prohibido el uso de `any`, `as any`, `(<expr> as any)`, `(foo as any).bar` o cualquier escape similar en cualquier archivo del repositorio (`.ts`, `.vue`, etc.).
+   - **Tipado estricto obligatorio:** Toda respuesta de backend, payload, parámetro o estado reactivo debe contar con su correspondiente `interface` o `type` explícito en `src/modules/<modulo>/interfaces/` o `src/core/interfaces/`.
+   - **Sin atajos para respuestas dispares:** Si un endpoint devuelve una respuesta envuelta (`response.data.data.total_items`) y otro una plana (`response.data.total_items`), debe reflejarse con total precisión en la interfaz del servicio correspondiente (`ApiResponseGeneric<T>` o DTO paginado tipado), o usar interfaces de unión / narrowing seguro con comprobaciones de tipo (`'data' in response.data`). **Jamás** se debe usar `as any` como atajo.
+   - Cualquier detección de `any` o `as any` invalida la entrega y debe ser corregida de inmediato.
 2. **Comando de Verificación de Tipos**:
    - Ejecutar siempre antes de finalizar la tarea:
      ```bash
@@ -313,3 +354,47 @@ Al implementar cualquier característica, refactorización o corrección:
      ```
 4. **Formato**:
    - Mantener consistencia ejecutando `npm run format` si se requiere formateo con Prettier.
+
+---
+
+## 8. Estándares de Carga: `AppLoader` vs `AppSkeleton` vs TanStack Query
+
+1. **Overlay Bloqueante (`AppLoader`)**:
+   - **Exclusivo para Mutaciones y Descargas:** Se reserva para operaciones `POST`, `PUT`, `PATCH`, `DELETE` mediante `useMutation` o llamadas manuales a `startLoading()` (ej. generación o descarga de PDFs).
+   - Su propósito es bloquear la interacción del usuario y prevenir clics duplicados o estados inconsistentes.
+2. **Carga Progresiva (`AppSkeleton`)**:
+   - **Obligatorio para Consultas (`useQuery`):** Toda carga de datos para tablas, dashboards, tarjetas o vistas de detalle debe utilizar `AppSkeleton` condicionado a `isPending` o `isLoading`.
+   - Queda prohibido el uso de mensajes o spinners de texto plano (`Cargando datos...`).
+3. **Desacoplamiento de Queries del Loader Global**:
+   - `QueryClient` debe configurar `defaultOptions.queries.meta = { skipLoader: true }`.
+   - Las consultas de lectura y polling periódico (ej. métricas cada 30 segundos) nunca deben disparar el loader bloqueante `AppLoader`.
+
+---
+
+## 9. Estándares de Componentes UI de Estado y Entrada
+
+1. **`AppColorPicker`**:
+   - Debe implementar control estricto de lectura y deshabilitación mediante props `readonly` y `disabled`.
+   - Cuando `readonly` o `disabled` sea verdadero, debe desactivar la paleta de colores emergente, impedir clics en el botón de limpieza (`clearable`) e impedir edición en el `InputMask`.
+2. **`AppChip` y `AppChipStatus`**:
+   - `AppChip` es el componente transversal para etiquetas, badges y tags con soporte de severidades PrimeVue (`primary`, `success`, `danger`, etc.).
+   - `AppChipStatus` debe tipar y renderizar explícitamente la propiedad `label`, admitir clases responsive (`min-w-[80px] px-2.5 py-0.5 rounded-full`) y contar con fallback seguro cuando `backgroundColor` no esté definido para evitar fallos de CSS `color-mix`.
+
+---
+
+## 10. Convención Canónica de Paginación
+
+1. **Indexación:**
+   - PrimeVue `Paginator` maneja páginas con base 0 (`value.page = 0` para página 1).
+   - Los servicios backend reciben páginas con base 1 (`page = 1` para la primera página).
+   - En las vistas, `handlePagination(page)` debe calcular `pagination.page = page + 1`.
+2. **Resumen de Registros en `AppPaginator`:**
+   - La etiqueta de rango debe calcularse con acotación matemática estricta:
+     - `from = totalRecords === 0 ? 0 : first + 1`
+     - `to = Math.min(first + rows, totalRecords)`
+     - Mostrando `{from}` a `{to}` de `{totalRecords}` registros.
+3. **Respuesta Backend y Tipado Estricto:**
+   - La lectura de registros totales debe realizarse mediante acceso a propiedades debidamente tipadas en la interfaz de la respuesta:
+     - Si el servicio retorna `ApiResponseGeneric<T>` (estructura envuelta): `response.data?.data?.total_items || 0`.
+     - Si el servicio retorna DTO paginado directo: `response.data?.total_items || 0`.
+   - **Bajo ninguna circunstancia** utilizar `(response.data as any)` ni cast laxos para acceder a propiedades de paginación.

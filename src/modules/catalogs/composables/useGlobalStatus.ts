@@ -1,7 +1,12 @@
 import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
 import { useAlertStore } from '@/core/store';
@@ -378,7 +383,10 @@ export function useGlobalStatus() {
 
   const findGlobalStatus = (value?: FilterGlobalStatusType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter_name =
       (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;

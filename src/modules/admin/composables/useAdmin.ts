@@ -328,9 +328,7 @@ export function useAdmin() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const parentRoutes = computed(
-    () => parentRoutesData.value ?? [],
-  );
+  const parentRoutes = computed(() => parentRoutesData.value ?? []);
 
   // Query de categorías de permisos
   const { data: categoriesData, refetch: refetchCategories } = useQuery({
@@ -376,13 +374,8 @@ export function useAdmin() {
   });
 
   const editRouteMutation = useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: Omit<RouteForm, 'id'>;
-    }) => adminServices.editRoute(id, body),
+    mutationFn: ({ id, body }: { id: string; body: Omit<RouteForm, 'id'> }) =>
+      adminServices.editRoute(id, body),
     onSuccess: response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: routeKeys.all });
@@ -597,7 +590,10 @@ export function useAdmin() {
 
   const findRoute = (value?: FilterRouteType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter_name =
       (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.active = target?.active ?? filter.active;
