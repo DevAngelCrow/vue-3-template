@@ -128,6 +128,7 @@ export function useUserRole() {
   });
 
   const rolesList = ref<RoleResponse[]>([]);
+  const isRolesLoading = ref<boolean>(false);
   const userAssignedRoles = ref<UserRoleByIdRoleItem[]>([]);
   const roles_ids = ref<string[]>([]);
 
@@ -225,6 +226,7 @@ export function useUserRole() {
 
   const getRoles = async () => {
     try {
+      isRolesLoading.value = true;
       const filterParams = {
         page: rolesPagination.page,
         per_page: rolesPagination.per_page,
@@ -238,6 +240,8 @@ export function useUserRole() {
       }
     } catch (error) {
       console.error('Error al obtener lista de roles:', error);
+    } finally {
+      isRolesLoading.value = false;
     }
   };
 
@@ -297,6 +301,7 @@ export function useUserRole() {
     filter_role_name,
     isPending,
     isFetching,
+    isRolesLoading,
     getUsers,
     getUserRoleById,
     getRoles,

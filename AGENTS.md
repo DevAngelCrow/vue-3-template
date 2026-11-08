@@ -359,15 +359,51 @@ Al implementar cualquier característica, refactorización o corrección:
 
 ## 8. Estándares de Carga: `AppLoader` vs `AppSkeleton` vs TanStack Query
 
-1. **Overlay Bloqueante (`AppLoader`)**:
-   - **Exclusivo para Mutaciones y Descargas:** Se reserva para operaciones `POST`, `PUT`, `PATCH`, `DELETE` mediante `useMutation` o llamadas manuales a `startLoading()` (ej. generación o descarga de PDFs).
-   - Su propósito es bloquear la interacción del usuario y prevenir clics duplicados o estados inconsistentes.
-2. **Carga Progresiva (`AppSkeleton`)**:
-   - **Obligatorio para Consultas (`useQuery`):** Toda carga de datos para tablas, dashboards, tarjetas o vistas de detalle debe utilizar `AppSkeleton` condicionado a `isPending` o `isLoading`.
-   - Queda prohibido el uso de mensajes o spinners de texto plano (`Cargando datos...`).
-3. **Desacoplamiento de Queries del Loader Global**:
-   - `QueryClient` debe configurar `defaultOptions.queries.meta = { skipLoader: true }`.
-   - Las consultas de lectura y polling periódico (ej. métricas cada 30 segundos) nunca deben disparar el loader bloqueante `AppLoader`.
+1. **Separación de Responsabilidades:**
+   - **`AppLoader` (Overlay Global Bloqueante a Pantalla Completa):**
+     - Exclusivo para **Mutaciones de escritura (`POST`, `PUT`, `PATCH`, `DELETE`)** y **descargas binarias pesadas (PDF/Excel)**.
+     - Bloquea puntero y teclado (`pointer-events: none` en `document.body` y captura estricta de eventos) para evitar doble envío (*double-submit*) o inconsistencias transaccionales.
+     - Es orquestado automáticamente por TanStack Query mediante `initQueryLoaderSync` (`client.isMutating() > 0`) en `src/App.vue`. Las vistas no necesitan invocarlo manualmente para mutaciones normales con `useMutation`.
+   - **`AppSkeleton` (Carga Progresiva Integrada en el Layout):**
+     - Exclusivo para **Consultas de lectura (`GET` / `useQuery`)**, paginación y filtros de búsqueda.
+     - Mantiene la geometría visual del contenedor, previene saltos de layout (*CLS*) y **no bloquea** el puntero ni la navegación del usuario.
+     - Debe envolver todo listado, tabla, tarjeta o vista de detalle. Prohibido el uso de mensajes o spinners de texto plano (`Cargando datos...`).
+
+2. **Reglas para Tablas (`AppDataTable`):**
+   - El componente base `AppDataTable.vue` mantiene definida internamente la prop `loading?: boolean` (default: `false`) para posibles usos futuros o especializados.
+   - **En las vistas estándar está terminantemente prohibido pasarle la prop `:loading` a `<AppDataTable>`**, evitando que PrimeVue renderice su spinner/máscara nativa sobre la tabla.
+   - Toda tabla de datos debe envolverse obligatoriamente con `<AppSkeleton>` condicionado a `isFetching`:
+     ```html
+     <AppSkeleton
+       :loading="isFetching"
+       variant="table"
+       :rows="pagination.per_page"
+       :headers="headers"
+       show-paginator
+     >
+       <AppDataTable
+         :headers="headers"
+         :items="items"
+         :paginator="true"
+         :per_page="pagination.per_page"
+         :total_items="pagination.total_items"
+         :page="pagination.page"
+         @page-update="handlePagination"
+         @per-page-update="handlePerPagePagination"
+       >
+         <!-- Slots de columnas -->
+       </AppDataTable>
+     </AppSkeleton>
+     ```
+
+3. **Contrato Obligatorio en Composables:**
+   - Todo composable que gestione consultas de datos debe retornar `isFetching` de su `useQuery`.
+   - Todas las queries deben mantener `meta: { skipLoader: true }` (configurado globalmente en `QueryClient`), de modo que ninguna consulta GET active `AppLoader`.
+   - Las vistas consumen directamente `const { isFetching } = useEntidad();`. **Queda prohibido importar o usar `storeLoader.isFetching` en las vistas**, ya que `storeLoader` es de ámbito global y filtra las queries con `skipLoader: true`.
+
+4. **Subtablas en Modales y Listas Secundarias:**
+   - Si un modal o vista de detalle carga una lista secundaria (ej. permisos de un rol), el composable debe exponer una variable reactiva de carga (ej. `const isPermissionsLoading = ref(false)`) activada antes de la llamada y resuelta en `finally`.
+   - La subtabla en el modal debe envolverse en `<AppSkeleton :loading="isPermissionsLoading" variant="table">` sin pasar `:loading` a `<AppDataTable>`.
 
 ---
 

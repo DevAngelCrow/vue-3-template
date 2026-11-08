@@ -34,10 +34,11 @@
         ></Button>
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -96,13 +97,10 @@
 import { Button } from 'primevue';
 import { computed, provide, reactive } from 'vue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { useUserRole } from '../composables/useUserRole';
 import { UsersResponse } from '../interfaces/user-role/users.response.interface';
 import UserRoleFormModal from '../components/user-role/UserRoleFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const userRoleInstance = useUserRole();
 provide('useUserRole', userRoleInstance);
 
@@ -117,6 +115,7 @@ const {
   rolesPagination,
   debouncedFindUser,
   debouncedCleanSearch,
+  isFetching,
 } = userRoleInstance;
 
 const modalState = reactive<{

@@ -51,10 +51,11 @@
         </Button>
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -305,6 +306,7 @@ const {
   validateAlphaInput,
   debouncedCleanSearch,
   pagination,
+  isFetching,
 } = useCountries();
 
 const statusOptions = ref<{ name: string; value: boolean | null | 'Todos' }[]>([

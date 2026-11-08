@@ -51,10 +51,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -122,13 +123,11 @@ import { computed, reactive, provide } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AppSelect from '@/core/components/AppSelect.vue';
-import { useLoaderStore } from '@/core/store';
 
 import { useRole } from '../composables/useRole';
 import { RoleResponse } from '../interfaces/role/role.response.interface';
 import RoleFormModal from '../components/roles/RoleFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const roleInstance = useRole();
 provide('useRole', roleInstance);
 
@@ -146,6 +145,7 @@ const {
   headers,
   getRolById,
   globalStatus,
+  isFetching,
 } = roleInstance;
 
 const modalState = reactive<{

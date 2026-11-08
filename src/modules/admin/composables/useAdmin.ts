@@ -257,6 +257,8 @@ export function useAdmin() {
     }[]
   >([]);
 
+  const isPermissionsLoading = ref<boolean>(false);
+
   // Query principal paginada de rutas
   const {
     data: routesQueryResult,
@@ -482,6 +484,7 @@ export function useAdmin() {
 
   const getPermissions = async () => {
     try {
+      isPermissionsLoading.value = true;
       const filterParams = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
@@ -500,6 +503,8 @@ export function useAdmin() {
       }
     } catch (error) {
       console.error('Error al obtener permisos:', error);
+    } finally {
+      isPermissionsLoading.value = false;
     }
   };
 
@@ -669,6 +674,7 @@ export function useAdmin() {
     filter_permission,
     getCategoryPermissions,
     categories,
+    isPermissionsLoading,
     isPending,
     isFetching,
     addRouteMutation,

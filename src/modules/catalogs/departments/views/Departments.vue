@@ -59,10 +59,11 @@
         >
       </div>
       <AppSkeleton
-        :loading="storeLoader.isFetching"
+        :loading="isFetching"
         variant="table"
         :rows="pagination.per_page"
         :headers="headers"
+        show-paginator
       >
         <AppDataTable
           class="w-full"
@@ -125,13 +126,10 @@
 import { computed, provide, reactive, ref } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
-
 import { useDepartment } from '../../composables/useDepartment';
 import { DepartmentResponse } from '../../interfaces/deparments/department.response.interface';
 import DepartmentFormModal from '../components/DepartmentFormModal.vue';
 
-const storeLoader = useLoaderStore();
 const departmentInstance = useDepartment();
 provide('useDepartment', departmentInstance);
 
@@ -146,6 +144,7 @@ const {
   pagination,
   deparments,
   countries,
+  isFetching,
 } = departmentInstance;
 
 const modalState = reactive<{

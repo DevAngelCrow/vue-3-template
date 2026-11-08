@@ -36,10 +36,11 @@
       </div>
     </div>
     <AppSkeleton
-      :loading="storeLoader.isFetching"
+      :loading="isRolesLoading"
       variant="table"
       :rows="rolesPagination.per_page"
       :headers="headersRole"
+      show-paginator
     >
       <AppDataTable
         class="w-full"
@@ -92,14 +93,12 @@ import {
 } from 'vue';
 import { Button } from 'primevue';
 
-import { useLoaderStore } from '@/core/store';
 import { debounce } from '@/core/utils/debounceFunction';
 
 import { useUserRole } from '../../composables/useUserRole';
 
 type UserRoleType = ReturnType<typeof useUserRole>;
 
-const storeLoader = useLoaderStore();
 const userRoleInstance = inject<UserRoleType>('useUserRole')!;
 
 const props = defineProps<{
@@ -117,6 +116,7 @@ const {
   roles_ids,
   filter_role_name,
   getRoles,
+  isRolesLoading,
 } = userRoleInstance;
 
 const selectedRolesIds = ref<Set<string>>(new Set());

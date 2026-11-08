@@ -189,6 +189,8 @@ export function useRole() {
     }[]
   >([]);
 
+  const isPermissionsLoading = ref<boolean>(false);
+
   // Query de Roles paginada
   const {
     data: roleQueryResult,
@@ -405,6 +407,7 @@ export function useRole() {
 
   const getPermissions = async () => {
     try {
+      isPermissionsLoading.value = true;
       const filterParams = {
         page: permissionsPagination.page,
         per_page: permissionsPagination.per_page,
@@ -423,6 +426,8 @@ export function useRole() {
       }
     } catch (error) {
       console.error('Error al obtener permisos:', error);
+    } finally {
+      isPermissionsLoading.value = false;
     }
   };
 
@@ -554,6 +559,7 @@ export function useRole() {
     getRolById,
     getCategoryPermissions,
     categories,
+    isPermissionsLoading,
     isPending,
     isFetching,
     addRoleMutation,
