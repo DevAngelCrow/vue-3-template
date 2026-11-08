@@ -71,8 +71,7 @@ const setupHttpClient = (api: AxiosInstance) => {
 
         if (error.response.status === 401) {
           const originalRequest = error.config as
-            | RetriableRequestConfig
-            | undefined;
+            RetriableRequestConfig | undefined;
 
           // Credenciales inválidas en el login: no hay sesión que refrescar
           if (originalRequest?.url?.includes('auth/login')) {
@@ -103,9 +102,12 @@ const setupHttpClient = (api: AxiosInstance) => {
         }
 
         if (error.response.status === 403) {
-          // Si el backend responde 403 Forbidden, redirigir a 'not-found' sin mostrar alerta flotante
-          import('../router').then(({ default: router }) => {
-            router.push({ name: 'not-found' });
+          alert.showAlert({
+            type: 'error',
+            title: '403 Acceso Denegado',
+            content:
+              errorData.message ||
+              'No tienes permisos suficientes para realizar esta acción.',
           });
           return Promise.reject(errorData);
         }

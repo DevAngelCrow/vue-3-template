@@ -2,14 +2,14 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    :cancel-label="modalButtons.cancelText"
-    :confirm-label="modalButtons.confirmText"
-    show-footer
-    show-close-icon
+    :title-btn-cancel="modalButtons.cancelText"
+    :title-btn-confirm="modalButtons.confirmText"
+    footer-buttons
+    show-icon-close
     width="45rem"
     @close-modal="closeModal"
     @confirm-modal="onSubmit"
-    :show-confirm-button="props.modalState.mode !== 'view'"
+    :showBtnConfirmFooter="props.modalState.mode !== 'view'"
   >
     <section
       v-if="props.modalState.mode !== 'delete'"
@@ -21,7 +21,7 @@
         id="name"
         label="Nombre*"
         v-model="name"
-        :error-message="errors.name"
+        :error-messages="errors.name"
         v-bind="nameAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -30,7 +30,7 @@
         id="description"
         label="Descripción"
         v-model="description"
-        :error-message="errors.description"
+        :error-messages="errors.description"
         v-bind="descriptionAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -40,13 +40,13 @@
         label="País*"
         v-model="country"
         v-bind="countryAttrs"
-        :error-message="errors.country"
+        :error-messages="errors.country"
         option-label="name"
         :suggestions="countriesFiltered"
         dropdown
         @complete="findCountry"
         :readonly="props.modalState.isReadonly"
-        @update:model-value="onCountryChange($event as CountryResponse | null)"
+        @update:modelValue="onCountryChange"
       />
       <AppAutocomplete
         class="grow"
@@ -54,7 +54,7 @@
         label="Tipo de División*"
         v-model="divisionType"
         v-bind="divisionTypeAttrs"
-        :error-message="errors.divisionType"
+        :error-messages="errors.divisionType"
         option-label="name"
         :suggestions="divisionTypesFiltered"
         dropdown
@@ -68,7 +68,7 @@
         label="División Padre"
         v-model="parent"
         v-bind="parentAttrs"
-        :error-message="errors.parent"
+        :error-messages="errors.parent"
         option-label="name"
         :suggestions="parentsFiltered"
         dropdown

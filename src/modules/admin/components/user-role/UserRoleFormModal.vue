@@ -2,14 +2,14 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    :cancel-label="modalButtons.cancelText"
-    :confirm-label="modalButtons.confirmText"
-    show-footer
-    show-close-icon
+    :title-btn-cancel="modalButtons.cancelText"
+    :title-btn-confirm="modalButtons.confirmText"
+    footer-buttons
+    show-icon-close
     width="45rem"
     @close-modal="closeModal"
     @confirm-modal="onSubmit"
-    :show-confirm-button="props.modalState.mode === 'edit'"
+    :showBtnConfirmFooter="props.modalState.mode === 'edit'"
   >
     <section
       id="body_modal"

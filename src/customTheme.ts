@@ -72,18 +72,11 @@ export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
     colorScheme: {
       light: {
         primary: {
-          color: '{emerald.950}',
+          color: '{primary.600}',
           contrastColor: '#FFFFFF',
-          hoverColor: '{emerald.900}',
-          //activeColor: '{emerald.800}',
-          //outlined: '{emerald.950}'
+          hoverColor: '{primary.700}',
+          activeColor: '{primary.800}',
         },
-        // highlight: {
-        //   background: '{emerald.700}',
-        //   focusBackground: '{emerald.600}',
-        //   color: '#FFFFFF',
-        //   focusColor: '#FFFFFF',
-        // },
       },
     },
   },
@@ -93,8 +86,8 @@ export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
         light: {
           outlined: {
             primary: {
-              color: '{emerald.950}',
-              borderColor: '{emerald.950}',
+              color: '{primary.600}',
+              borderColor: '{primary.600}',
             },
           },
         },
@@ -102,7 +95,27 @@ export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
     },
     dialog: {
       root: {
-        borderColor: '{emerald.950}',
+        borderColor: '{surface.200}',
+      },
+    },
+    tabs: {
+      tablist: {
+        background: '{surface.0}',
+        borderColor: '{surface.200}',
+      },
+      tab: {
+        color: '{surface.500}',
+        hoverColor: '{primary.600}',
+        hoverBackground: '{surface.50}',
+        activeColor: '{primary.600}',
+        activeBorderColor: '{primary.600}',
+      },
+      activeBar: {
+        background: '{primary.600}',
+      },
+      tabpanel: {
+        background: '{surface.0}',
+        color: '{surface.700}',
       },
     },
   },

@@ -2,91 +2,102 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    :cancel-label="modalButtons.cancelText"
-    :confirm-label="modalButtons.confirmText"
-    show-footer
-    show-close-icon
+    :title-btn-cancel="modalButtons.cancelText"
+    :title-btn-confirm="modalButtons.confirmText"
+    footer-buttons
+    show-icon-close
     width="45rem"
     @close-modal="closeModal"
     @confirm-modal="onSubMit"
-    :show-confirm-button="props.modalState.mode !== 'view'"
+    :showBtnConfirmFooter="props.modalState.mode !== 'view'"
   >
-    <section
-      v-if="props.modalState.mode !== 'delete'"
-      id="body_modal"
-      class="flex justify-center items-center flex-wrap flex-row gap-5 py-1.5 w-full"
-    >
-      <AppInputText
-        class="w-full min-w-0"
-        id="name"
-        label="Nombre*"
-        v-model="name"
-        :error-message="errors.name"
-        v-bind="nameAttrs"
-        :readonly="props.modalState.isReadonly"
-      />
-      <AppInputText
-        class="w-full min-w-0"
-        id="description"
-        label="Descripción*"
-        v-model="description"
-        :error-message="errors.description"
-        v-bind="descriptionAttrs"
-        :readonly="props.modalState.isReadonly"
-      />
-      <AppInputText
-        class="w-full min-w-0"
-        id="code"
-        label="Código*"
-        v-model="code"
-        :error-message="errors.code"
-        v-bind="codeAttrs"
-        :readonly="props.modalState.isReadonly"
-        :disabled="
-          code_status.includes(code) &&
-          code_status.includes(category_status?.code) &&
-          !props.modalState.isReadonly
-        "
-      />
-      <AppAutocomplete
-        class="w-full"
-        id="category_status"
-        label="Categoría de estado*"
-        v-model="category_status"
-        v-bind="categoryStatusAttrs"
-        :error-message="errors.category_status"
-        option-label="name"
-        :suggestions="categoryStatusFiltered"
-        dropdown
-        @complete="findAutocomplete"
-        :readonly="props.modalState.isReadonly"
-      />
-      <div class="flex justify-between w-full flex-wrap gap-2">
-        <AppColorPicker
-          class="w-auto min-w-0"
-          v-model="state_color"
-          id="state_color"
-          :error-message="errors.state_color"
-          v-bind="stateColorAttrs"
-          label="Color de estado"
+    <div class="w-full space-y-4 py-2">
+      <section
+        v-if="props.modalState.mode !== 'delete'"
+        id="body_modal"
+        class="grid grid-cols-1 items-start gap-x-4 gap-y-5 sm:grid-cols-2 w-full"
+      >
+        <AppInputText
+          class="w-full sm:col-span-2 min-w-0"
+          id="name"
+          label="Nombre*"
+          v-model="name"
+          :error-messages="errors.name"
+          v-bind="nameAttrs"
+          :readonly="props.modalState.isReadonly"
         />
-        <AppColorPicker
-          class="w-auto min-w-0"
-          v-model="text_color"
-          id="text_color"
-          :error-message="errors.text_color"
-          v-bind="textColorAttrs"
-          label="Color de texto"
+        <AppInputText
+          class="w-full sm:col-span-2 min-w-0"
+          id="description"
+          label="Descripción*"
+          v-model="description"
+          :error-messages="errors.description"
+          v-bind="descriptionAttrs"
+          :readonly="props.modalState.isReadonly"
         />
-      </div>
-    </section>
-    <section v-else id="body_delete_modal" class="w-full flex flex-wrap gap-5">
-      <div class="w-full flex justify-center text-center items-center">
-        <span class="text-center flex">{{ props.modalState.description }}</span>
-      </div>
-    </section>
+        <AppInputText
+          class="w-full min-w-0"
+          id="code"
+          label="Código*"
+          v-model="code"
+          :error-messages="errors.code"
+          v-bind="codeAttrs"
+          :readonly="props.modalState.isReadonly"
+          :disabled="
+            code_status.includes(code) &&
+            code_status.includes(category_status?.code) &&
+            !props.modalState.isReadonly
+          "
+        />
+        <AppAutocomplete
+          class="w-full min-w-0"
+          id="category_status"
+          label="Categoría de estado*"
+          v-model="category_status"
+          v-bind="categoryStatusAttrs"
+          :error-messages="errors.category_status"
+          option-label="name"
+          :suggestions="categoryStatusFiltered"
+          dropdown
+          @complete="findAutocomplete"
+          :readonly="props.modalState.isReadonly"
+        />
+        <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          <AppColorPicker
+            class="w-full min-w-0"
+            v-model="state_color"
+            id="state_color"
+            :error-messages="errors.state_color"
+            v-bind="stateColorAttrs"
+            label="Color de estado"
+            :readonly="props.modalState.isReadonly"
+          />
+          <AppColorPicker
+            class="w-full min-w-0"
+            v-model="text_color"
+            id="text_color"
+            :error-messages="errors.text_color"
+            v-bind="textColorAttrs"
+            label="Color de texto"
+            :readonly="props.modalState.isReadonly"
+          />
+        </div>
+      </section>
+      <section
+        v-else
+        id="body_delete_modal"
+        class="w-full flex flex-wrap gap-5"
+      >
+        <div class="w-full flex justify-center text-center items-center">
+          <span class="text-center flex">{{
+            props.modalState.description
+          }}</span>
+        </div>
+      </section>
+    </div>
   </AppModal>
 </template>
+
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
 import { AutoCompleteCompleteEvent } from 'primevue';
@@ -134,8 +145,10 @@ const {
   toggleGlobalStatus,
   categoryStatuses,
 } = useGlobalStatusComposable;
+
 const categoryStatusFiltered = ref<unknown[]>([]);
 const code_status = ['AC', 'INA', 'BL'];
+
 const onSubMit = handleSubmit(async values => {
   try {
     startLoading();
@@ -174,6 +187,7 @@ const onSubMit = handleSubmit(async values => {
 const closeModal = () => {
   emit('close-modal');
 };
+
 const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   let query = event?.query;
   let _filteredItems = [];
@@ -186,6 +200,7 @@ const findAutocomplete = (event: AutoCompleteCompleteEvent) => {
   }
   categoryStatusFiltered.value = _filteredItems;
 };
+
 const modalButtons = computed(() => {
   switch (props.modalState.mode) {
     case 'edit':
@@ -199,4 +214,5 @@ const modalButtons = computed(() => {
   }
 });
 </script>
+
 <style scoped></style>

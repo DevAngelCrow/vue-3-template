@@ -2,13 +2,13 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    cancel-label="Cerrar"
-    :confirm-label="''"
-    show-footer
-    show-close-icon
+    title-btn-cancel="Cerrar"
+    :title-btn-confirm="''"
+    footer-buttons
+    show-icon-close
     width="45rem"
     @close-modal="closeModal"
-    :show-confirm-button="false"
+    :showBtnConfirmFooter="false"
   >
     <section
       id="body_modal"

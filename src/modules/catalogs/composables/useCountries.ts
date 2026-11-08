@@ -23,7 +23,9 @@ export type FilterCountryType = {
   status?: boolean | 'Todos';
 };
 
-export const countriesKeys = createQueryKeys<FilterCountryType & { page?: number; per_page?: number }>('countries');
+export const countriesKeys = createQueryKeys<
+  FilterCountryType & { page?: number; per_page?: number }
+>('countries');
 
 export function useCountries() {
   const alert = useAlertStore();
@@ -169,7 +171,10 @@ export function useCountries() {
   // Métodos de búsqueda
   const findCountries = (value?: FilterCountryType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter_name =
       (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
@@ -218,6 +223,7 @@ export function useCountries() {
         code: '',
         iso2: '',
         phone_code: '',
+        phone_mask: '9999-9999',
       },
       validationSchema: yup.object({
         name: yup
@@ -261,6 +267,11 @@ export function useCountries() {
           .min(1, 'El código de teléfono debe tener al menos 1 dígito')
           .max(10, 'El código de teléfono no puede tener más de 10 dígitos')
           .matches(/^\d+$/, 'Solo se permiten números'),
+        phone_mask: yup
+          .string()
+          .required('La máscara telefónica es obligatoria')
+          .min(4, 'La máscara debe tener al menos 4 caracteres')
+          .max(50, 'La máscara no puede tener más de 50 caracteres'),
       }),
     });
 
@@ -269,6 +280,7 @@ export function useCountries() {
   const [code, codeAttrs] = defineField('code');
   const [iso2, iso2Attrs] = defineField('iso2');
   const [phone_code, phoneCodeAttrs] = defineField('phone_code');
+  const [phone_mask, phoneMaskAttrs] = defineField('phone_mask');
 
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
   const validateAlphaInput = (
@@ -324,6 +336,8 @@ export function useCountries() {
     iso2Attrs,
     phone_code,
     phoneCodeAttrs,
+    phone_mask,
+    phoneMaskAttrs,
     errors,
     resetForm,
   };

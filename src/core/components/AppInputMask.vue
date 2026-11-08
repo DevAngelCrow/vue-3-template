@@ -1,94 +1,146 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
-    <FloatLabel :variant="labelVariant">
-      <IconField class="w-full group">
-        <InputIcon
-          v-if="prependIcon"
-          :class="[prependIcon, { 'text-danger-600': invalid }]"
-        />
-        <InputMask
-          class="w-full"
-          :model-value="modelValue"
-          @update:model-value="onUpdate"
-          :invalid="invalid"
-          v-bind="$attrs"
-          :autocomplete="autocomplete"
-          :placeholder="displayPlaceholder"
-          :id="resolvedInputId"
-          @focus="isFocused = true"
-          @blur="isFocused = false"
-          :mask="primeMask"
-          :variant="variant"
-          :size="size"
-          :fluid="fluid"
-          :disabled="disabled"
-          :readonly="readonly"
-        />
-        <InputIcon
-          v-if="appendIcon"
-          :class="[
-            appendIcon,
-            'cursor-pointer',
-            { 'text-danger-600': invalid },
-          ]"
-          @click="emit('click-append-icon')"
-        />
-      </IconField>
-      <label
-        v-if="label"
-        :class="{ 'text-danger-600': invalid }"
-        :for="resolvedInputId"
+  <div :class="rootClass">
+    <div class="flex items-stretch w-full">
+      <span
+        v-if="prefix"
+        class="inline-flex items-center px-3 text-sm font-semibold text-surface-600 bg-surface-100 border border-surface-300 border-r-0 rounded-l-md select-none shrink-0"
       >
-        {{ label }}
-      </label>
-    </FloatLabel>
+        {{ prefix }}
+      </span>
+      <FloatLabel :variant="labelVariant" class="w-full flex-1 min-w-0">
+        <IconField class="w-full group">
+          <InputIcon
+            v-if="prependInnerIcon"
+            :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+          />
+          <InputMask
+            :class="['w-full', { '!rounded-l-none': !!prefix }]"
+            :model-value="modelValue"
+            @update:model-value="onUpdate"
+            :invalid="invalid"
+            v-bind="$attrs"
+            :autocomplete
+            :placeholder="displayPlaceholder"
+            :id="inputId"
+            @focus="isFocused = true"
+            @blur="isFocused = false"
+            :mask="primeMask"
+            :variant="inputVariant"
+          />
+          <InputIcon
+            v-if="appendIcon"
+            :class="[
+              appendIcon,
+              'absolute right-4 top-5.5',
+              { 'text-danger-600': invalid },
+            ]"
+            @click="emit('click-end-icon')"
+          />
+        </IconField>
+        <label
+          v-if="label"
+          :class="{ 'text-danger-600': invalid }"
+          :for="inputId"
+        >
+          {{ label }}
+        </label>
+      </FloatLabel>
+    </div>
     <Message
-      v-if="errorMessage?.length"
-      class="left-0 top-full mt-1 text-xs z-10"
-      severity="error"
-      size="small"
-      variant="simple"
+      v-if="errorMessages.length"
+      class="left-0 top-full mt-0 text-xs z-10"
+      :severity
+      :size
+      :variant
     >
-      {{ errorMessage }}
+      {{ errorMessages }}
     </Message>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, useId } from 'vue';
+import { ref, computed, watch, useId } from 'vue';
 import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
-import type { AppInputMaskProps } from '../interfaces';
-
+import { resolveInputRootClass } from '../utils/inputClasses';
 defineOptions({ inheritAttrs: false, name: 'AppInputMask' });
 
-const props = withDefaults(defineProps<AppInputMaskProps>(), {
-  modelValue: undefined,
-  class: 'w-full max-w-[322px]',
-  placeholder: '',
-  size: undefined,
-  variant: 'outlined',
-  labelVariant: 'on',
-  fluid: true,
-  errorMessage: '',
-  appendIcon: '',
-  prependIcon: '',
-  autocomplete: 'off',
-  label: '',
-  id: undefined,
-  disabled: false,
-  readonly: false,
-  mask: '',
+const props = defineProps({
+  modelValue: {
+    type: String,
+  },
+  class: {
+    type: String,
+    default: '',
+  },
+  placeholder: {
+    type: String,
+    default: '',
+  },
+  severity: {
+    type: String,
+    default: 'error',
+  },
+  size: {
+    type: String,
+    default: 'small',
+  },
+  variant: {
+    type: String,
+    default: 'simple',
+  },
+  labelVariant: {
+    type: String,
+    default: 'on',
+  },
+  inputVariant: {
+    type: String,
+    default: 'large',
+  },
+  errorMessages: {
+    type: String,
+    default: '',
+  },
+  appendIcon: {
+    type: String,
+    default: '',
+  },
+  prependInnerIcon: {
+    type: String,
+    default: '',
+  },
+  autocomplete: {
+    type: String,
+    default: 'off',
+  },
+  label: {
+    type: String,
+    default: '',
+  },
+  id: {
+    type: String,
+    default: undefined,
+  },
+  inputId: {
+    type: String,
+    default: undefined,
+  },
+  mask: {
+    type: String,
+    default: '',
+  },
+  prefix: {
+    type: String,
+    default: '',
+  },
 });
 
-const emit = defineEmits<{
-  'update:modelValue': [value: string];
-  'click-append-icon': [];
-}>();
+const emit = defineEmits(['update:modelValue', 'click-end-icon']);
 
+const rootClass = computed(() => resolveInputRootClass(props.class));
 const autoId = useId();
-const resolvedInputId = computed(() => props.id || autoId);
+const inputId = computed(() => props.id || props.inputId || autoId);
 
-const invalid = computed(() => Boolean(props.errorMessage?.length));
+const invalid = ref<boolean>(false);
 const isFocused = ref<boolean>(false);
 
 const onUpdate = (value: string | undefined) => {
@@ -96,19 +148,28 @@ const onUpdate = (value: string | undefined) => {
 };
 
 const displayPlaceholder = computed(() => {
-  if (isFocused.value && props.label) {
-    return props.placeholder || undefined;
+  if (isFocused.value) {
+    return props.placeholder;
   }
   if (!props.label.length) {
-    return props.placeholder || undefined;
+    return props.placeholder;
+  }
+});
+
+const primeMask = computed(() => {
+  if (isFocused.value || !props.label?.length || props.modelValue?.length) {
+    return props.mask;
   }
   return undefined;
 });
 
-const primeMask = computed(() => {
-  if (isFocused.value || !props.label.length || props.modelValue?.length) {
-    return props.mask;
-  }
-  return '';
-});
+watch(
+  () => props.errorMessages,
+  newValue => {
+    invalid.value = true;
+    if (!newValue.length) {
+      invalid.value = false;
+    }
+  },
+);
 </script>

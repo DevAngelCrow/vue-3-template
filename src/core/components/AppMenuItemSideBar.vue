@@ -1,7 +1,7 @@
 <template>
   <ul class="flex flex-col m-0 p-0 list-none w-full gap-1.5">
     <li
-      v-for="section in items"
+      v-for="section in resolvedMenu"
       :key="section.id || section.title || section.name"
       class="flex flex-col w-full"
     >
@@ -51,7 +51,7 @@
             v-if="isOpen(section.id)"
             class="w-full pl-5 pr-1 mt-1 border-l-2 border-primary-400/50 ml-4 space-y-1"
           >
-            <AppMenuItemSideBar :items="section.children || []" />
+            <AppMenuItemSideBar :mapped-menu="section.children || []" />
           </div>
         </Transition>
       </div>
@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Button } from 'primevue';
 
 import type { NavigationItem } from '../interfaces/navigation.interface';
@@ -101,9 +101,12 @@ import { useLayoutStore } from '../store/useLayoutStore';
 
 defineOptions({ name: 'AppMenuItemSideBar' });
 
-defineProps<{
-  items: NavigationItem[];
+const props = defineProps<{
+  mappedMenu?: NavigationItem[];
+  items?: NavigationItem[];
 }>();
+
+const resolvedMenu = computed(() => props.mappedMenu ?? props.items ?? []);
 
 const layoutStore = useLayoutStore();
 const openItems = ref<Record<string, boolean>>({});

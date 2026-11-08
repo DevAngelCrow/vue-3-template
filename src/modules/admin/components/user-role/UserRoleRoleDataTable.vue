@@ -48,8 +48,8 @@
         :paginator="true"
         :show-per-page-options="true"
         :per-page-options="[10, 20, 50, 100]"
-        :per-page="rolesPagination.per_page"
-        :total-items="totalRoles"
+        :per_page="rolesPagination.per_page"
+        :total_items="totalRoles"
         :page="rolesPagination.page"
         @page-update="handlePagination"
         @per-page-update="handlePerPagePagination"
@@ -59,7 +59,7 @@
             <AppCheckBox
               :readonly="props.readonly"
               binary
-              @update:model-value="checkAll(Boolean($event))"
+              @update:model-value="checkAll"
               v-model="selectAll"
             />
             <span>{{ `Selección (${allSelectionsPerPage})` }}</span>
@@ -72,7 +72,7 @@
               binary
               :model-value="isRoleSelected(data.id)"
               :id="`${index}`"
-              @update:model-value="toggleRole(data.id, Boolean($event))"
+              @update:model-value="toggleRole(data.id, $event)"
             />
           </div>
         </template>

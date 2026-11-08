@@ -13,6 +13,7 @@ export const useNavigationMenu = () => {
     const mappedChildren = hasChildren
       ? item.children
           .filter(child => child.show !== false)
+          .sort((a, b) => (a.order || 0) - (b.order || 0))
           .map(mapMenuItem)
       : undefined;
 
@@ -67,6 +68,7 @@ export const useNavigationMenu = () => {
         if (isUserMenuRoute(item)) return false;
         return true;
       })
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
       .map(mapMenuItem);
   });
 
@@ -82,6 +84,7 @@ export const useNavigationMenu = () => {
 
     return userMenu.children
       .filter(child => child.show !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
       .map(mapMenuItem);
   });
 

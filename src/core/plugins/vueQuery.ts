@@ -16,6 +16,11 @@ export const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5, // 5 minutos de vigencia de datos
       gcTime: 1000 * 60 * 15, // 15 minutos en caché antes de garbage collection
       refetchOnWindowFocus: false, // Evita refetch automático al cambiar de ventana/pestaña
+      meta: {
+        // Por defecto, las consultas no activan el AppLoader bloqueante de pantalla completa;
+        // en su lugar utilizan AppSkeleton o indicadores locales de carga (isPending/isFetching).
+        skipLoader: true,
+      },
       retry: (failureCount, error) => {
         const httpError = error as HttpErrorLike;
         const status = httpError?.statusCode ?? httpError?.response?.status;
@@ -39,7 +44,9 @@ export const queryClient = new QueryClient({
  * Sincroniza de forma reactiva los eventos de consultas y mutaciones de TanStack Query
  * con el Pinia store `useLoaderStore`.
  */
-export const initQueryLoaderSync = (client: QueryClient = queryClient): (() => void) => {
+export const initQueryLoaderSync = (
+  client: QueryClient = queryClient,
+): (() => void) => {
   const loaderStore = useLoaderStore();
 
   const syncQueries = () => {
@@ -67,7 +74,9 @@ export const initQueryLoaderSync = (client: QueryClient = queryClient): (() => v
   };
 
   const unsubscribeQueries = client.getQueryCache().subscribe(syncQueries);
-  const unsubscribeMutations = client.getMutationCache().subscribe(syncMutations);
+  const unsubscribeMutations = client
+    .getMutationCache()
+    .subscribe(syncMutations);
 
   // Sincronizar estado inicial
   syncQueries();

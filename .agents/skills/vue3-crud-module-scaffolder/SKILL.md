@@ -36,8 +36,10 @@ src/modules/<nombre-modulo>/
 1. **Tokens de Color Obligatorios**:
    - Usar estrictamente `primary-*`, `surface-*` (slate), `success-*`, `danger-*` o variables `--p-*`.
    - **PROHIBIDO** el uso de colores fijos de Tailwind (`red-600`, `green-600`, `slate-*`, `zinc-*`, `gray-*`).
-2. **Componentes Globales `App*`**:
-   - Usar `AppInputText`, `AppSelect`, `AppDataTable`, `AppModal`, `AppCard`, `AppHeader`, `AppTitle`, etc. Se encuentran registrados globalmente.
+2. **Jerarquía Estricta de Componentes (1° `App*` > 2° PrimeVue > 3° HTML)**:
+   - **Prioridad 1 (`App*`)**: Usar prioritariamente los wrappers del proyecto (`AppInputText`, `AppInputNumber`, `AppSelect`, `AppMultiSelect`, `AppDatePicker`, `AppCheckBox`, `AppInputextArea`, `AppChip`, `AppModal`, `AppDataTable`, `AppCard`, `AppHeader`, `AppTitle`, etc.). Se encuentran registrados globalmente.
+   - **Prioridad 2 (PrimeVue)**: Usar componentes PrimeVue (`Button`, `Accordion`, `Divider`, `Toast`, etc.) única y exclusivamente cuando no exista un wrapper `App*`.
+   - **Prioridad 3 (HTML Nativo)**: Solo para estructura de maquetación (`div`, `section`, `span`, etc.). Prohibido usar `<button>`, `<input>`, `<select>` o `<textarea>` nativos teniendo opciones en P1 o P2.
 3. **Manejo de Debounce**:
    - **PROHIBIDO** el uso de la directiva `v-debounce`. El debounce se implementa en el composable con `debounce` de `@/core/utils/debounceFunction` y se enlaza con `@keydown.enter` o `@click`.
 4. **Modales Desacoplados**:
@@ -104,7 +106,9 @@ interface GetProductsParams {
 }
 
 export const productServices = {
-  obtenerTodos: (params?: GetProductsParams): Promise<ApiResponseGeneric<ProductItem[]>> =>
+  obtenerTodos: (
+    params?: GetProductsParams,
+  ): Promise<ApiResponseGeneric<ProductItem[]>> =>
     httpClient.get('/products', { params }),
 
   obtenerPorId: (id: string): Promise<ApiPostResponse<ProductItem>> =>
@@ -113,7 +117,10 @@ export const productServices = {
   crear: (payload: ProductForm): Promise<ApiPostResponse<null>> =>
     httpClient.post('/products', payload),
 
-  actualizar: (id: string, payload: ProductForm): Promise<ApiPostResponse<null>> =>
+  actualizar: (
+    id: string,
+    payload: ProductForm,
+  ): Promise<ApiPostResponse<null>> =>
     httpClient.put(`/products/${id}`, payload),
 
   cambiarEstado: (id: string): Promise<ApiPostResponse<null>> =>
@@ -132,7 +139,12 @@ export default productServices;
 import { computed, reactive } from 'vue';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { useAlertStore } from '@/core/store';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 import { debounce } from '@/core/utils/debounceFunction';
@@ -144,34 +156,50 @@ export type FilterType = {
   status?: boolean | 'Todos';
 };
 
-export const productKeys = createQueryKeys<FilterType & { page?: number; per_page?: number }>('products');
+export const productKeys = createQueryKeys<
+  FilterType & { page?: number; per_page?: number }
+>('products');
 
 export function useProduct() {
   const queryClient = useQueryClient();
   const alert = useAlertStore();
 
   // 1. Formulario reactivo Vee-Validate + Yup
-  const { errors, defineField, handleSubmit, resetForm, setValues } = useForm<ProductForm>({
-    validationSchema: yup.object({
-      id: yup.string().optional(),
-      name: yup.string().required('El nombre es requerido').min(3, 'Mínimo 3 caracteres'),
-      active: yup.boolean().default(true),
-    }),
-  });
+  const { errors, defineField, handleSubmit, resetForm, setValues } =
+    useForm<ProductForm>({
+      validationSchema: yup.object({
+        id: yup.string().optional(),
+        name: yup
+          .string()
+          .required('El nombre es requerido')
+          .min(3, 'Mínimo 3 caracteres'),
+        active: yup.boolean().default(true),
+      }),
+    });
 
   const [name, nameAttrs] = defineField('name');
   const [active, activeAttrs] = defineField('active');
 
   // 2. Paginación y Filtros
   const pagination = reactive({ page: 1, per_page: 10, total_items: 0 });
-  const filter = reactive<FilterType>({ filter_name: undefined, status: undefined });
-  const appliedFilter = reactive<FilterType>({ filter_name: undefined, status: undefined });
+  const filter = reactive<FilterType>({
+    filter_name: undefined,
+    status: undefined,
+  });
+  const appliedFilter = reactive<FilterType>({
+    filter_name: undefined,
+    status: undefined,
+  });
 
   // 3. Debounce para filtros y búsquedas
   const findItems = (value?: FilterType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
-    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
+    appliedFilter.filter_name =
+      (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
   };
 
@@ -187,13 +215,19 @@ export function useProduct() {
   const debouncedClean = debounce(cleanSearch, 600);
 
   // 4. Query TanStack Query
-  const { data: queryResult, isPending, isFetching, refetch } = useQuery({
+  const {
+    data: queryResult,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: computed(() =>
       productKeys.list({
         page: pagination.page,
         per_page: pagination.per_page,
         filter_name: appliedFilter.filter_name,
-        status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       }),
     ),
     queryFn: async () => {
@@ -201,7 +235,8 @@ export function useProduct() {
         page: pagination.page,
         per_page: pagination.per_page,
         name: appliedFilter.filter_name,
-        active: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        active:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       });
       if (response.data.total_items !== undefined) {
         pagination.total_items = response.data.total_items;
@@ -214,17 +249,26 @@ export function useProduct() {
   // 5. Mutaciones
   const addMutation = useMutation({
     mutationFn: (form: ProductForm) => productServices.crear(form),
-    onSuccess: (res) => {
+    onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
-      alert.showAlert({ type: 'success', title: res.data.message || 'Creado con éxito', show: true });
+      alert.showAlert({
+        type: 'success',
+        title: res.data.message || 'Creado con éxito',
+        show: true,
+      });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, form }: { id: string; form: ProductForm }) => productServices.actualizar(id, form),
-    onSuccess: (res) => {
+    mutationFn: ({ id, form }: { id: string; form: ProductForm }) =>
+      productServices.actualizar(id, form),
+    onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
-      alert.showAlert({ type: 'success', title: res.data.message || 'Actualizado con éxito', show: true });
+      alert.showAlert({
+        type: 'success',
+        title: res.data.message || 'Actualizado con éxito',
+        show: true,
+      });
     },
   });
 
@@ -275,50 +319,75 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close-modal'): void;
+  (e: 'close'): void;
 }>();
 
 const composable = inject<UseProductReturn>('useProduct')!;
-const { name, nameAttrs, errors, handleSubmit, resetForm, addMutation, updateMutation } = composable;
+const {
+  name,
+  nameAttrs,
+  errors,
+  handleSubmit,
+  resetForm,
+  addMutation,
+  updateMutation,
+} = composable;
 
-const onSubmit = handleSubmit(async (values) => {
+const onSubmit = handleSubmit(async values => {
   if (props.modalState.mode === 'add') {
     await addMutation.mutateAsync(values);
-  } else if (props.modalState.mode === 'edit' && props.modalState.selectedItem) {
-    await updateMutation.mutateAsync({ id: props.modalState.selectedItem, form: values });
+  } else if (
+    props.modalState.mode === 'edit' &&
+    props.modalState.selectedItem
+  ) {
+    await updateMutation.mutateAsync({
+      id: props.modalState.selectedItem,
+      form: values,
+    });
   }
   close();
 });
 
 const close = () => {
   resetForm();
-  emit('close-modal');
+  emit('close');
 };
 </script>
 
 <template>
   <AppModal
-    :show="props.modalState.show"
+    v-model:visible="props.modalState.show"
     :title="props.modalState.title"
-    :cancel-label="props.modalState.isReadonly ? 'Cerrar' : 'Cancelar'"
-    :confirm-label="props.modalState.mode === 'add' ? 'Guardar' : 'Actualizar'"
-    :show-confirm-button="!props.modalState.isReadonly"
-    show-footer
-    show-close-icon
-    width="45rem"
-    @close-modal="close"
-    @confirm-modal="onSubmit"
+    :description="props.modalState.description"
+    @hide="close"
   >
-    <div class="flex flex-col gap-4 w-full">
+    <form @submit.prevent="onSubmit" class="flex flex-col gap-4">
       <AppInputText
         v-model="name"
         v-bind="nameAttrs"
         label="Nombre del Producto"
         placeholder="Ej. Laptop Pro"
-        :error-message="errors.name"
-        :readonly="props.modalState.isReadonly"
+        :error="errors.name"
+        :disabled="props.modalState.isReadonly"
       />
-    </div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <Button
+          label="Cancelar"
+          variant="text"
+          severity="secondary"
+          @click="close"
+        />
+        <Button
+          v-if="!props.modalState.isReadonly"
+          type="submit"
+          :label="props.modalState.mode === 'add' ? 'Guardar' : 'Actualizar'"
+          :loading="
+            addMutation.isPending.value || updateMutation.isPending.value
+          "
+        />
+      </div>
+    </form>
   </AppModal>
 </template>
 ```
@@ -337,7 +406,8 @@ import type { TableHeaders } from '@/core/interfaces';
 const productComposable = useProduct();
 provide('useProduct', productComposable);
 
-const { items, pagination, filter, isFetching, debouncedFind, debouncedClean } = productComposable;
+const { items, pagination, filter, isFetching, debouncedFind, debouncedClean } =
+  productComposable;
 
 const headers: TableHeaders[] = [
   { field: 'name', header: 'Nombre', sortable: true },
@@ -369,22 +439,22 @@ const openAddModal = () => {
   modalState.selectedItem = null;
   modalState.show = true;
 };
-
-const handlePagination = (page: number) => {
-  if (page + 1 === pagination.page) return;
-  pagination.page = page + 1;
-};
-
-const handlePerPagePagination = (perPage: number) => {
-  if (perPage === pagination.per_page) return;
-  pagination.per_page = perPage;
-  pagination.page = 1;
-};
 </script>
 
 <template>
   <AppMainContent>
-    <AppTitle title="Gestión de Productos" />
+    <AppHeader
+      title="Gestión de Productos"
+      description="Administra el catálogo de inventario"
+    >
+      <template #actions>
+        <Button
+          label="Nuevo Producto"
+          icon="pi pi-plus"
+          @click="openAddModal"
+        />
+      </template>
+    </AppHeader>
 
     <AppCard>
       <!-- Barra de Filtros con debounce -->
@@ -396,33 +466,42 @@ const handlePerPagePagination = (perPage: number) => {
           @keydown.enter="debouncedFind"
         />
         <Button label="Buscar" icon="pi pi-search" @click="debouncedFind" />
-        <Button label="Limpiar" icon="pi pi-filter-slash" variant="text" severity="secondary" @click="debouncedClean" />
-        <Button label="Nuevo Producto" icon="pi pi-plus" class="ml-auto" @click="openAddModal" />
+        <Button
+          label="Limpiar"
+          icon="pi pi-filter-slash"
+          variant="text"
+          severity="secondary"
+          @click="debouncedClean"
+        />
       </div>
 
       <!-- Tabla de Datos -->
-      <AppSkeleton :loading="isFetching" variant="table" :rows="pagination.per_page" :headers="headers">
-        <AppDataTable
-          :items="items"
-          :headers="headers"
-          :paginator="true"
-          :total-items="pagination.total_items"
-          :page="pagination.page"
-          :per-page="pagination.per_page"
-          @page-update="handlePagination"
-          @per-page-update="handlePerPagePagination"
-        >
-          <template #body-active="{ data }">
-            <AppChipStatus :label="data.active ? 'Activo' : 'Inactivo'" />
-          </template>
-          <template #body-actions="{ data }">
-            <Button icon="pi pi-pencil" variant="text" severity="secondary" v-tooltip.bottom="'Editar'" />
-          </template>
-        </AppDataTable>
-      </AppSkeleton>
+      <AppDataTable
+        :items="items"
+        :headers="headers"
+        :loading="isFetching"
+        :total-items="pagination.total_items"
+        v-model:page="pagination.page"
+        v-model:per-page="pagination.per_page"
+      >
+        <template #body-active="{ data }">
+          <AppChipStatus :active="data.active" />
+        </template>
+        <template #body-actions="{ data }">
+          <Button
+            icon="pi pi-pencil"
+            variant="text"
+            severity="secondary"
+            v-tooltip.bottom="'Editar'"
+          />
+        </template>
+      </AppDataTable>
     </AppCard>
 
-    <ProductFormModal :modal-state="modalState" @close-modal="modalState.show = false" />
+    <ProductFormModal
+      :modal-state="modalState"
+      @close="modalState.show = false"
+    />
   </AppMainContent>
 </template>
 ```
@@ -455,8 +534,10 @@ export default productRoutes;
 ## 4. Validación Obligatoria
 
 Al concluir la generación de archivos, siempre ejecutar:
+
 ```bash
 npm run check:types
 npm run lint
 ```
+
 Asegurar que no existan tipos `any`, advertencias de ESLint ni uso de colores no semánticos.

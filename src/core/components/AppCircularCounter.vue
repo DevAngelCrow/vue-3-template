@@ -54,8 +54,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-defineOptions({ name: 'AppCircularCounter' });
-
 const {
   total,
   selected,
@@ -73,6 +71,7 @@ const {
 
 const radius = 90;
 const circumference = computed(() => 2 * Math.PI * radius);
+//const progress = computed(() => (selected / total) * 100)
 const strokeDashoffset = computed(
   () => circumference.value - (selected / total) * circumference.value,
 );

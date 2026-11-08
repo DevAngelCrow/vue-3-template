@@ -2,7 +2,8 @@
   <Toast position="top-right" />
 </template>
 <script setup lang="ts">
-import { Toast, useToast } from 'primevue';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 import { watch } from 'vue';
 
 import { useAlertStore } from '../store/useAlertStore';

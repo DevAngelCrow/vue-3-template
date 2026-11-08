@@ -2,29 +2,26 @@
   <AppModal
     class="bg-surface-800 border-none h-full"
     :show="show"
-    :width="width"
+    :width="'99%'"
     :title="documentName"
-    :show-footer="false"
-    @close-modal="closeModal"
+    :footer-buttons="false"
+    :styles-show-document="stylesShowDocument"
   >
-    <template #header>
-      <div class="relative text-white flex items-center justify-center w-full">
-        <span class="text-center truncate px-8">{{ documentName }}</span>
-        <div class="flex justify-end absolute right-0">
-          <Button
-            class="bg-transparent border-none text-white"
-            variant="text"
-            icon="pi pi-times"
-            rounded
-            aria-label="Cerrar visor"
-            @click="closeModal"
-          />
+    <template v-slot:header>
+      <div class="text-white flex justify-center w-full">
+        <div class="absolute flex justify-center text-center w-full">
+          <span class="">{{ documentName }}</span>
+        </div>
+        <div class="flex justify-end text-end w-full">
+          <Button class="bg-transparent border-none" @click="closeModal">
+            <i class="pi pi-times"></i>
+          </Button>
         </div>
       </div>
     </template>
-    <template #default>
+    <template v-slot:default>
       <embed
-        class="h-[77vh] w-full p-0 flex justify-center"
+        class="h-[77vh] w-full pa-none flex justify-center"
         :src="fileBlob"
       />
     </template>
@@ -35,28 +32,41 @@ import { Button } from 'primevue';
 import { ref, watchEffect } from 'vue';
 
 import AppModal from './AppModal.vue';
-import type { AppDocumentVisorProps } from '../interfaces';
 
 defineOptions({ name: 'AppDocumentVisor' });
 
-const props = withDefaults(defineProps<AppDocumentVisorProps>(), {
-  documentName: '',
-  file: '',
-  show: false,
-  validType: 'application/pdf',
-  width: '99%',
+const props = defineProps({
+  documentName: {
+    type: String,
+    default: '',
+  },
+  file: {
+    type: String,
+    default: '',
+  },
+  show: {
+    type: Boolean,
+    default: false,
+  },
+  validType: {
+    type: String,
+    default: 'application/pdf',
+  },
+  stylesShowDocument: {
+    type: Boolean,
+    default: true,
+  },
 });
 
-interface ValidationMessage {
+interface Message {
   valid_types: string;
   invalid_types: string;
   flag?: boolean;
 }
 
 const fileBlob = ref<string | undefined>();
-const emit = defineEmits<{
-  'close-visor': [value: boolean];
-}>();
+const emit = defineEmits(['close-visor']);
+// defineOptions({ inheritAttrs: false })
 
 const fileTypes = [
   'application/pdf',
@@ -70,14 +80,14 @@ const fileTypes = [
 ];
 
 const conversion = (dataURI: string) => {
-  const byteString = atob(dataURI.split(',')[1]);
-  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
+  let byteString = atob(dataURI.split(',')[1]);
+  let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  let ab = new ArrayBuffer(byteString.length);
+  let ia = new Uint8Array(ab);
   for (let i = 0; i < byteString.length; i++) {
     ia[i] = byteString.charCodeAt(i);
   }
-  const blob = new Blob([ab], { type: mimeString });
+  let blob = new Blob([ab], { type: mimeString });
   return blob;
 };
 
@@ -85,7 +95,7 @@ const typesValidation = (types: string) => {
   const typesArray = types.replace(/\s/g, '').split(',');
   const valid = typesArray.filter(item => fileTypes.includes(item));
   const invalid = typesArray.filter(item => !fileTypes.includes(item));
-  const message: ValidationMessage = {
+  const message: Message = {
     valid_types: valid.join(','),
     invalid_types: invalid.join(','),
   };

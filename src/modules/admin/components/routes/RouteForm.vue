@@ -6,7 +6,7 @@
         id="name"
         label="Nombre*"
         v-model="name"
-        :error-message="errors.name"
+        :error-messages="errors.name"
         v-bind="nameAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -15,7 +15,7 @@
         id="title"
         label="Título*"
         v-model="title"
-        :error-message="errors.title"
+        :error-messages="errors.title"
         v-bind="titleAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -26,7 +26,7 @@
         id="uri"
         label="Uri*"
         v-model="uri"
-        :error-message="errors.uri"
+        :error-messages="errors.uri"
         v-bind="uriAttrs"
         @update:modelValue="validateInputUri(uri, 'uri')"
         :readonly="props.modalState.isReadonly"
@@ -36,7 +36,7 @@
         id="description"
         label="Descripción*"
         v-model="description"
-        :error-message="errors.description"
+        :error-messages="errors.description"
         v-bind="descriptionAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -47,7 +47,7 @@
         id="order"
         label="Orden*"
         v-model.number="order"
-        :error-message="errors.order"
+        :error-messages="errors.order"
         v-bind="orderAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -56,7 +56,7 @@
         id="icon"
         label="Ícono (nombre)*"
         v-model="icon"
-        :error-message="errors.icon"
+        :error-messages="errors.icon"
         v-bind="iconAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -90,7 +90,7 @@
           label="Ruta padre"
           v-model="parent"
           v-bind="parentAttrs"
-          :error-message="errors.parent"
+          :error-messages="errors.parent"
           option-label="title"
           :suggestions="routesFiltered"
           dropdown

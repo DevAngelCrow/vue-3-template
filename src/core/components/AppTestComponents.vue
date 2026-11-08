@@ -20,6 +20,9 @@ const checkValue = ref<boolean>(false);
 const selectValue = ref<string | undefined>(undefined);
 const multiSelectValue = ref<unknown[]>([]);
 const autoCompleteValue = ref<unknown>(undefined);
+const iconValue = ref<string>('pi pi-check');
+const stepperValue = ref<string>('1');
+const activeTab = ref<string>('info');
 
 interface OptionItem {
   id: string;
@@ -92,12 +95,25 @@ const items = ref<SampleRow[]>([
     vinculador_tres: 'Inactivo',
   },
 ]);
+
+const tabItems = [
+  { value: 'info', label: 'Información General', icon: 'pi pi-info-circle' },
+  { value: 'config', label: 'Configuración', icon: 'pi pi-cog' },
+  { value: 'audit', label: 'Auditoría', icon: 'pi pi-history', badge: '3' },
+];
+
+const stepperSteps = [
+  { value: '1', label: 'Datos Básicos', icon: 'pi pi-user' },
+  { value: '2', label: 'Dirección', icon: 'pi pi-map-marker' },
+  { value: '3', label: 'Confirmación', icon: 'pi pi-check' },
+];
 </script>
 
 <template>
   <div class="p-6 flex flex-col gap-6 max-w-6xl mx-auto">
     <AppTitle title="Catálogo de Componentes Base (PrimeVue v5)" />
 
+    <!-- Sección de Entradas y Formularios -->
     <AppCard class="border border-surface-200 shadow-xs">
       <template #title>Entradas y Formularios</template>
       <template #content>
@@ -105,15 +121,14 @@ const items = ref<SampleRow[]>([
           <AppInputText
             v-model="textValue"
             label="Texto con ícono"
-            prepend-icon="pi pi-user"
-            append-icon="pi pi-search"
+            show-icon
+            prepend-inner-icon="pi pi-user"
             class="w-full"
           />
           <AppInputText
             v-model="passwordValue"
             type="password"
             label="Contraseña"
-            prepend-icon="pi pi-lock"
             class="w-full"
           />
           <AppInputMask
@@ -158,21 +173,14 @@ const items = ref<SampleRow[]>([
             label="Monto (USD)"
             class="w-full"
           />
-          <AppDatePicker
-            v-model="dateValue"
-            label="Fecha"
+          <AppIconSelect
+            v-model="iconValue"
+            label="Selector de Icono"
             class="w-full"
           />
-          <AppTimePicker
-            v-model="timeValue"
-            label="Hora"
-            class="w-full"
-          />
-          <AppColorPicker
-            v-model="colorValue"
-            label="Color"
-            class="w-full"
-          />
+          <AppDatePicker v-model="dateValue" label="Fecha" class="w-full" />
+          <AppTimePicker v-model="timeValue" label="Hora" class="w-full" />
+          <AppColorPicker v-model="colorValue" label="Color" class="w-full" />
           <div class="flex items-center gap-4">
             <AppCheckBox
               v-model="checkValue"
@@ -181,7 +189,20 @@ const items = ref<SampleRow[]>([
             />
             <AppCircularCounter :selected="3" :total="10" color="primary" />
           </div>
-          <AppInputTextArea
+          <div class="flex items-center gap-2 flex-wrap">
+            <AppChip label="Chip Primario" severity="primary" />
+            <AppChip
+              label="Chip Exitoso"
+              severity="success"
+              icon="pi pi-check"
+            />
+            <AppChip
+              label="Chip Alerta"
+              severity="warn"
+              icon="pi pi-exclamation-triangle"
+            />
+          </div>
+          <AppInputextArea
             v-model="textareaValue"
             label="Observaciones"
             class="w-full sm:col-span-2 lg:col-span-3"
@@ -190,11 +211,64 @@ const items = ref<SampleRow[]>([
       </template>
     </AppCard>
 
+    <!-- Sección de Pestañas (AppTab) -->
+    <AppCard class="border border-surface-200 shadow-xs">
+      <template #title>Navegación por Pestañas (AppTab)</template>
+      <template #content>
+        <AppTab v-model:active="activeTab" :tabs="tabItems">
+          <template #panel-info>
+            <div class="p-4 text-sm text-surface-600">
+              Contenido del panel de <strong>Información General</strong>.
+            </div>
+          </template>
+          <template #panel-config>
+            <div class="p-4 text-sm text-surface-600">
+              Configuraciones avanzadas del sistema.
+            </div>
+          </template>
+          <template #panel-audit>
+            <div class="p-4 text-sm text-surface-600">
+              Historial de cambios y auditoría operativa.
+            </div>
+          </template>
+        </AppTab>
+      </template>
+    </AppCard>
+
+    <!-- Sección de Asistente de Pasos (AppStepper) -->
+    <AppCard class="border border-surface-200 shadow-xs">
+      <template #title>Asistente por Pasos (AppStepper)</template>
+      <template #content>
+        <AppStepper v-model:active="stepperValue" :steps="stepperSteps">
+          <template #step-1>
+            <div class="p-4 border border-surface-200 rounded-lg text-sm">
+              Paso 1: Ingrese la información básica del usuario.
+            </div>
+          </template>
+          <template #step-2>
+            <div class="p-4 border border-surface-200 rounded-lg text-sm">
+              Paso 2: Ingrese los datos de dirección y contacto.
+            </div>
+          </template>
+          <template #step-3>
+            <div class="p-4 border border-surface-200 rounded-lg text-sm">
+              Paso 3: Revise y confirme los datos ingresados.
+            </div>
+          </template>
+        </AppStepper>
+      </template>
+    </AppCard>
+
+    <!-- Sección de Tabla de Datos y Modal -->
     <AppCard class="border border-surface-200 shadow-xs">
       <template #title>
         <div class="flex items-center justify-between">
           <span>Tabla de Datos y Estado</span>
-          <Button label="Abrir Modal" icon="pi pi-external-link" @click="showModal = true" />
+          <Button
+            label="Abrir Modal"
+            icon="pi pi-external-link"
+            @click="showModal = true"
+          />
         </div>
       </template>
       <template #content>
@@ -202,8 +276,8 @@ const items = ref<SampleRow[]>([
           :headers="headers"
           :items="items"
           :paginator="true"
-          :per-page="10"
-          :total-items="items.length"
+          :per_page="10"
+          :total_items="items.length"
           :page="1"
         >
           <template #body-estado="{ data }">
@@ -219,7 +293,12 @@ const items = ref<SampleRow[]>([
           <template #body-acciones>
             <div class="flex gap-1 justify-center">
               <Button icon="pi pi-pencil" variant="text" rounded />
-              <Button icon="pi pi-trash" variant="text" severity="danger" rounded />
+              <Button
+                icon="pi pi-trash"
+                variant="text"
+                severity="danger"
+                rounded
+              />
             </div>
           </template>
         </AppDataTable>
@@ -234,7 +313,8 @@ const items = ref<SampleRow[]>([
       @confirm-modal="showModal = false"
     >
       <div class="py-4 text-center">
-        Contenido de prueba del modal alineado con PrimeVue v5.
+        Contenido de prueba del modal alineado con PrimeVue v5 y diseño
+        responsivo.
       </div>
     </AppModal>
   </div>

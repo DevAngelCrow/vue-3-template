@@ -263,7 +263,9 @@ export function useRole() {
 
   // Query de Categorías de Permisos
   const { data: categoriesData, refetch: refetchCategories } = useQuery({
-    queryKey: computed(() => roleCategoryPermissionsKeys.list({ active: true })),
+    queryKey: computed(() =>
+      roleCategoryPermissionsKeys.list({ active: true }),
+    ),
     queryFn: async () => {
       const response = await adminServices.getCategoryPermissions({
         active: true,
@@ -299,13 +301,8 @@ export function useRole() {
   });
 
   const editRoleMutation = useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: Omit<RoleForm, 'id'>;
-    }) => adminServices.putRole(id, body),
+    mutationFn: ({ id, body }: { id: string; body: Omit<RoleForm, 'id'> }) =>
+      adminServices.putRole(id, body),
     onSuccess: response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: roleKeys.all });
@@ -478,7 +475,10 @@ export function useRole() {
 
   const findRole = (value?: FilterRoleType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter_name =
       (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.id_status = target?.id_status ?? filter.id_status;

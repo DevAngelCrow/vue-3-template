@@ -133,13 +133,17 @@ export function useDistrict() {
   const { data: municipalitiesData } = useQuery({
     queryKey: computed(() => municipalitiesKeys.list({ status: true })),
     queryFn: async () => {
-      const response = await catalogServices.getMunicipalities({ active: true });
+      const response = await catalogServices.getMunicipalities({
+        active: true,
+      });
       return response.data.data ?? [];
     },
     staleTime: 1000 * 60 * 10,
   });
 
-  const municipalities = computed<MunicipalityResponse[]>(() => municipalitiesData.value || []);
+  const municipalities = computed<MunicipalityResponse[]>(
+    () => municipalitiesData.value || [],
+  );
 
   // Consulta paginada y reactiva de distritos
   const {
@@ -301,10 +305,15 @@ export function useDistrict() {
 
   const findDistrict = (value?: FilterDistrictType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
-    appliedFilter.filter_name = (target?.filter_name ?? filter.filter_name) || undefined;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
+    appliedFilter.filter_name =
+      (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;
-    appliedFilter.id_municipality = target?.id_municipality ?? filter.id_municipality;
+    appliedFilter.id_municipality =
+      target?.id_municipality ?? filter.id_municipality;
   };
 
   const debouncedFindDistrict = debounce(() => {

@@ -2,14 +2,14 @@
   <AppModal
     :title="props.modalState.title"
     :show="props.modalState.show"
-    :cancel-label="modalButtons.cancelText"
-    :confirm-label="modalButtons.confirmText"
-    show-footer
-    show-close-icon
+    :title-btn-cancel="modalButtons.cancelText"
+    :title-btn-confirm="modalButtons.confirmText"
+    footer-buttons
+    show-icon-close
     width="45rem"
     @close-modal="closeModal"
     @confirm-modal="onSubMit"
-    :show-confirm-button="props.modalState.mode !== 'view'"
+    :showBtnConfirmFooter="props.modalState.mode !== 'view'"
   >
     <section
       v-if="props.modalState.mode !== 'delete'"
@@ -21,7 +21,7 @@
         id="name"
         label="Nombre*"
         v-model="name"
-        :error-message="errors.name"
+        :error-messages="errors.name"
         v-bind="nameAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -30,7 +30,7 @@
         id="description"
         label="Descripción*"
         v-model="description"
-        :error-message="errors.description"
+        :error-messages="errors.description"
         v-bind="descriptionAttrs"
         :readonly="props.modalState.isReadonly"
       />
@@ -39,7 +39,7 @@
         id="mask"
         label="Máscara"
         v-model="mask"
-        :error-message="errors.mask"
+        :error-messages="errors.mask"
         v-bind="maskAttrs"
         :readonly="props.modalState.isReadonly"
       />

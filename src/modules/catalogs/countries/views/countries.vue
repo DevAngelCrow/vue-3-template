@@ -26,7 +26,7 @@
           option-label="name"
           label="Estado"
           v-model="filter.status"
-          option-value="value"
+          optionValue="value"
         />
         <Button
           class="shrink-0 grow md:grow-0 rounded-md"
@@ -61,8 +61,8 @@
           :headers="headers"
           :items="items"
           :paginator="true"
-          :per-page="pagination.per_page"
-          :total-items="pagination.total_items"
+          :per_page="pagination.per_page"
+          :total_items="pagination.total_items"
           :page="pagination.page"
           :show-per-page-options="true"
           :per-page-options="[10, 20, 50, 100]"
@@ -99,7 +99,7 @@
             <AppChipStatus
               :label="data?.status?.name"
               :background-color="data?.status?.state_color"
-              :text-color="data?.status?.text_color"
+              :textColor="data?.status?.text_color"
             >
             </AppChipStatus>
           </template>
@@ -124,14 +124,14 @@
     </section>
     <AppModal
       :show="showModal"
-      show-close-icon
+      show-icon-close
       :title="
         isDetailsMode ? 'Detalle País' : isMode ? 'Editar País' : 'Agregar País'
       "
-      :show-confirm-button="!isDetailsMode"
-      :confirm-label="isDetailsMode ? '' : 'Guardar'"
-      :cancel-label="isDetailsMode ? 'Cerrar' : 'Cancelar'"
-      show-footer
+      :show-btn-confirm-footer="isDetailsMode ? false : true"
+      :title-btn-confirm="isDetailsMode ? '' : 'Guardar'"
+      :title-btn-cancel="isDetailsMode ? 'Cerrar' : 'Cancelar'"
+      :show-buttons="!isDetailsMode"
       @close-modal="closeModalCreate"
       @confirm-modal="confirmModal"
       width="350px"
@@ -142,7 +142,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el nombre del país"
           v-bind="nameAttrs"
-          :error-message="errors.name"
+          :error-messages="errors.name"
           :disabled="isDetailsMode"
         />
         <AppInputText
@@ -150,7 +150,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese la abreviación del país"
           v-bind="abbreviationAttrs"
-          :error-message="errors.abbreviation"
+          :error-messages="errors.abbreviation"
           :disabled="isDetailsMode"
         />
         <AppInputMask
@@ -158,7 +158,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el código del país"
           v-bind="codeAttrs"
-          :error-message="errors.code"
+          :error-messages="errors.code"
           :disabled="isDetailsMode"
           mask="999"
           placeholder="000"
@@ -168,7 +168,7 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el código ISO2"
           v-bind="iso2Attrs"
-          :error-message="errors.iso2"
+          :error-messages="errors.iso2"
           :disabled="isDetailsMode"
           maxlength="2"
         />
@@ -177,21 +177,31 @@
           class="lg:w-full grow sm:max-w-125"
           label="Ingrese el código de teléfono"
           v-bind="phoneCodeAttrs"
-          :error-message="errors.phone_code"
+          :error-messages="errors.phone_code"
           :disabled="isDetailsMode"
           maxlength="10"
+        />
+        <AppInputText
+          v-model="phone_mask"
+          class="lg:w-full grow sm:max-w-125"
+          label="Máscara telefónica (ej. 9999-9999)"
+          v-bind="phoneMaskAttrs"
+          :error-messages="errors.phone_mask"
+          :disabled="isDetailsMode"
+          placeholder="9999-9999"
+          maxlength="50"
         />
       </div>
     </AppModal>
 
     <AppModal
       :show="showModalCambioStatus"
-      show-close-icon
+      show-icon-close
       title="Cambiar estado"
-      :show-confirm-button="true"
-      confirm-label="Confirmar"
-      cancel-label="Cancelar"
-      :show-footer="true"
+      :show-btn-confirm-footer="true"
+      :title-btn-confirm="'Confirmar'"
+      :title-btn-cancel="'Cancelar'"
+      :show-buttons="true"
       @close-modal="CloseModalEstado"
       @confirm-modal="confirmModalEstado(idCountry!)"
       width="450px"
@@ -237,6 +247,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
   if (type === 'create') {
     // Limpiar los campos del formulario
     resetForm();
+    phone_mask.value = '9999-9999';
   } else if (type === 'edit') {
     isMode.value = true;
     // Rellena con los datos del país a editar
@@ -246,6 +257,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     code.value = country.code || '';
     iso2.value = country.iso2 || '';
     phone_code.value = country.phone_code || '';
+    phone_mask.value = country.phone_mask || '9999-9999';
   } else if (type === 'details') {
     isDetailsMode.value = true;
     // Rellena con los datos del país a ver
@@ -254,6 +266,7 @@ const openModal = (type: 'create' | 'edit' | 'details', country?: any) => {
     code.value = country.code || '';
     iso2.value = country.iso2 || '';
     phone_code.value = country.phone_code || '';
+    phone_mask.value = country.phone_mask || '9999-9999';
   }
 
   showModal.value = true;
@@ -283,6 +296,8 @@ const {
   iso2Attrs,
   phone_code,
   phoneCodeAttrs,
+  phone_mask,
+  phoneMaskAttrs,
   errors,
   resetForm,
   filter,
@@ -322,6 +337,7 @@ const confirmModal = handleSubmit(async values => {
         code: values.code,
         iso2: values.iso2,
         phone_code: values.phone_code,
+        phone_mask: values.phone_mask || '9999-9999',
         active: true,
       };
       await updateCountry(editingCountryId.value, updateForm);
@@ -333,6 +349,7 @@ const confirmModal = handleSubmit(async values => {
         code: values.code,
         iso2: values.iso2,
         phone_code: values.phone_code,
+        phone_mask: values.phone_mask || '9999-9999',
         active: true,
       };
       await createCountry(form);
@@ -386,6 +403,13 @@ const headers = ref<TableHeaders[]>([
     alignItems: 'center',
   },
   {
+    field: 'phone_mask',
+    header: 'Máscara Telefónica',
+    sortable: false,
+    alignHeaders: 'center',
+    alignItems: 'center',
+  },
+  {
     field: 'active',
     header: 'Estado',
     sortable: false,
@@ -402,6 +426,24 @@ const headers = ref<TableHeaders[]>([
   },
 ]);
 
+// const items = ref([
+//   {
+//     vinculador_uno: '1',
+//     vinculador_dos: 'El Salvador',
+//     vinculador_tres: 'ESA',
+//     vinculador_cuatro: '503',
+//     vinculador_cinco: 'Activo',
+//     vinculador_seis: 'Editar | Eliminar',
+//   },
+//   {
+//     vinculador_uno: '2',
+//     vinculador_dos: 'Guatemala',
+//     vinculador_tres: 'GTM',
+//     vinculador_cuatro: '502',
+//     vinculador_cinco: 'Activo',
+//     vinculador_seis: 'Editar | Eliminar',
+//   },
+// ]);
 const handlePagination = (page: number) => {
   if (page + 1 === pagination.page) return;
   pagination.page = page + 1;

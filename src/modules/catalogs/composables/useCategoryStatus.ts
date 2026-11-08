@@ -278,7 +278,10 @@ export function useCategoryStatus() {
 
   const findCategoryStatus = (value?: FilterCategoryStatusType) => {
     pagination.page = 1;
-    const target = value && typeof value === 'object' && !('target' in value) ? value : filter;
+    const target =
+      value && typeof value === 'object' && !('target' in value)
+        ? value
+        : filter;
     appliedFilter.filter_name =
       (target?.filter_name ?? filter.filter_name) || undefined;
     appliedFilter.status = target?.status ?? filter.status;

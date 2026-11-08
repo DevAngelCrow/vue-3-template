@@ -14,7 +14,9 @@ Esta habilidad guía el uso avanzado de `@tanstack/vue-query` v5 en `vue-3-templ
 1. **Factoría de Claves `createQueryKeys`**:
    - Todo módulo debe definir sus claves con `createQueryKeys` importado desde `@/core/utils/queryKeys`:
      ```ts
-     export const productKeys = createQueryKeys<FilterType & { page?: number; per_page?: number }>('products');
+     export const productKeys = createQueryKeys<
+       FilterType & { page?: number; per_page?: number }
+     >('products');
      ```
    - Esto genera automáticamente la jerarquía:
      - `productKeys.all`: `['products']`
@@ -36,7 +38,12 @@ Esta habilidad guía el uso avanzado de `@tanstack/vue-query` v5 en `vue-3-templ
 ```typescript
 // src/modules/<modulo>/composables/useProductQuery.ts
 import { computed, reactive } from 'vue';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query';
 import { createQueryKeys } from '@/core/utils/queryKeys';
 import { useAlertStore } from '@/core/store';
 import productServices from '../services/product.services';
@@ -48,14 +55,19 @@ export type ProductFilters = {
   status?: boolean | 'Todos';
 };
 
-export const productKeys = createQueryKeys<ProductFilters & { page?: number; per_page?: number }>('products');
+export const productKeys = createQueryKeys<
+  ProductFilters & { page?: number; per_page?: number }
+>('products');
 
 export function useProductQuery() {
   const queryClient = useQueryClient();
   const alert = useAlertStore();
 
   const pagination = reactive({ page: 1, per_page: 10, total_items: 0 });
-  const appliedFilter = reactive<ProductFilters>({ filter_name: undefined, status: undefined });
+  const appliedFilter = reactive<ProductFilters>({
+    filter_name: undefined,
+    status: undefined,
+  });
 
   // 1. Query Principal con Paginación en Servidor
   const {
@@ -70,7 +82,8 @@ export function useProductQuery() {
         page: pagination.page,
         per_page: pagination.per_page,
         filter_name: appliedFilter.filter_name || undefined,
-        status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        status:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       }),
     ),
     queryFn: async () => {
@@ -78,7 +91,8 @@ export function useProductQuery() {
         page: pagination.page,
         per_page: pagination.per_page,
         name: appliedFilter.filter_name,
-        active: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+        active:
+          appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
       });
 
       if (response.data.total_items !== undefined) {
@@ -92,7 +106,7 @@ export function useProductQuery() {
   // 2. Mutación de Creación
   const addMutation = useMutation({
     mutationFn: (form: ProductForm) => productServices.crear(form),
-    onSuccess: (res) => {
+    onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       alert.showAlert({
         type: 'success',
@@ -104,8 +118,9 @@ export function useProductQuery() {
 
   // 3. Mutación de Actualización
   const updateMutation = useMutation({
-    mutationFn: ({ id, form }: { id: string; form: ProductForm }) => productServices.actualizar(id, form),
-    onSuccess: (res) => {
+    mutationFn: ({ id, form }: { id: string; form: ProductForm }) =>
+      productServices.actualizar(id, form),
+    onSuccess: res => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       alert.showAlert({
         type: 'success',
@@ -128,7 +143,8 @@ export function useProductQuery() {
           page: pagination.page,
           per_page: pagination.per_page,
           filter_name: appliedFilter.filter_name,
-          status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+          status:
+            appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
         }),
       );
 
@@ -138,7 +154,8 @@ export function useProductQuery() {
           page: pagination.page,
           per_page: pagination.per_page,
           filter_name: appliedFilter.filter_name,
-          status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+          status:
+            appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
         }),
         (old: any) => {
           if (!old?.data) return old;
@@ -161,7 +178,10 @@ export function useProductQuery() {
             page: pagination.page,
             per_page: pagination.per_page,
             filter_name: appliedFilter.filter_name,
-            status: appliedFilter.status === 'Todos' ? undefined : appliedFilter.status,
+            status:
+              appliedFilter.status === 'Todos'
+                ? undefined
+                : appliedFilter.status,
           }),
           context.previousData,
         );
@@ -221,4 +241,5 @@ En la vista (`Products.vue`), utilizar el estado de TanStack Query para orquesta
 npm run check:types
 npm run lint
 ```
+
 Garantizar que todas las funciones de `useMutation` y `useQuery` mantengan tipos explícitos para sus payloads y retornos.

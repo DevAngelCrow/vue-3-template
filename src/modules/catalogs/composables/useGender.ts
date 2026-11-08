@@ -39,8 +39,8 @@ export function useGender() {
     total_items: 0,
   });
 
-  const filter_name = ref<string | null>(null);
-  const appliedFilterName = ref<string | null>(null);
+  const filter_name = ref<string | undefined>(undefined);
+  const appliedFilterName = ref<string | undefined>(undefined);
   const findRegex = /[^a-zA-ZáÁéÉíÍóÓúÚñÑ.0-9 ]/g;
 
   // Consulta paginada y reactiva de géneros
@@ -88,7 +88,7 @@ export function useGender() {
   };
 
   const validateAlphaInput = (
-    value: string | null,
+    value: string | null | undefined,
     regex: RegExp = findRegex,
   ) => {
     if (!value) {
@@ -101,15 +101,15 @@ export function useGender() {
   };
 
   const cleanSearch = () => {
-    filter_name.value = null;
-    appliedFilterName.value = null;
+    filter_name.value = undefined;
+    appliedFilterName.value = undefined;
     pagination.page = 1;
   };
 
   const findGender = (value?: string | null) => {
     pagination.page = 1;
     const target = typeof value === 'string' ? value : filter_name.value;
-    appliedFilterName.value = target || null;
+    appliedFilterName.value = target || undefined;
   };
 
   const debouncedFindGender = debounce(() => {

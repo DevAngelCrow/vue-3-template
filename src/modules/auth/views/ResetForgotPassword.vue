@@ -72,8 +72,9 @@
               <AppInputText
                 placeholder="Nueva contraseña"
                 v-model="password"
-                prepend-icon="pi pi-lock"
-                :error-message="errors.password"
+                show-icon
+                prepend-inner-icon="pi pi-lock"
+                :error-messages="errors.password"
                 v-bind="passwordAttrs"
                 type="password"
                 label="Nueva contraseña"
@@ -83,8 +84,9 @@
               <AppInputText
                 placeholder="Confirmar contraseña"
                 v-model="confirmPassword"
-                prepend-icon="pi pi-lock"
-                :error-message="errors.confirmPassword"
+                show-icon
+                prepend-inner-icon="pi pi-lock"
+                :error-messages="errors.confirmPassword"
                 v-bind="confirmPasswordAttrs"
                 type="password"
                 label="Confirmar contraseña"
@@ -166,6 +168,7 @@ const onSubmit = handleSubmit(async values => {
   successMessage.value = '';
 
   try {
+    // Aquí se conectaría la llamada real a la API para restablecer la contraseña
     await authServices.resetPassword(
       {
         password: values.password,
@@ -176,11 +179,13 @@ const onSubmit = handleSubmit(async values => {
       },
     );
 
+    // Simulación de carga
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     successMessage.value = 'Tu contraseña ha sido restablecida correctamente.';
     isSuccess.value = true;
 
+    // Redirigir al login después de unos segundos
     setTimeout(() => {
       router.push('/login');
     }, 2000);
@@ -193,7 +198,9 @@ const onSubmit = handleSubmit(async values => {
   }
 });
 
-onMounted(() => {});
+onMounted(() => {
+  //console.log('route.query', route);
+});
 </script>
 
 <style scoped>

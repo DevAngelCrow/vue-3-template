@@ -72,8 +72,9 @@
               <AppInputText
                 placeholder="Correo electrónico"
                 v-model="email"
-                prepend-icon="pi pi-envelope"
-                :error-message="errors.email"
+                show-icon
+                prepend-inner-icon="pi pi-envelope"
+                :error-messages="errors.email"
                 v-bind="emailAttrs"
                 label="Correo electrónico"
                 class="w-full"
@@ -155,7 +156,10 @@ const onSubmit = handleSubmit(async values => {
   successMessage.value = '';
 
   try {
+    // Aquí se conectaría la llamada real a la API para enviar el enlace de recuperación
+    // await authServices.forgotPassword({ email: values.email });
     await authServices.generateLinkResetPassword(values.email);
+    // Simulación de carga
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     successMessage.value =

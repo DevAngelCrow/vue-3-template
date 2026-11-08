@@ -75,11 +75,7 @@ import AddressInformation from '../components/AddressInformation.vue';
 
 const useAuthInstance = useAuth();
 provide('useAuthInstance', useAuthInstance);
-const {
-  editMode,
-  updateProfile,
-  isProfilePending,
-} = useAuthInstance;
+const { editMode, updateProfile, isProfilePending } = useAuthInstance;
 
 const loading = computed(() => isProfilePending.value);
 

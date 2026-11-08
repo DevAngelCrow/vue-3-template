@@ -1,102 +1,253 @@
 <template>
-  <div :class="['min-w-[150px]', 'relative', props.class || 'w-auto']">
-    <FloatLabel :variant="labelVariant" class="w-full min-w-[150px]">
+  <div :class="rootClass">
+    <div class="p-hidden-accessible" data-p-hidden-accessible="true">
+      <input
+        :id="computedInputId"
+        type="text"
+        readonly
+        tabindex="-1"
+        :disabled="disabled || readonly"
+        role="combobox"
+        :aria-label="label || placeholder"
+        @focus="focusSelect"
+      />
+    </div>
+    <FloatLabel :variant="labelVariant" class="w-full">
       <Select
         ref="selectRef"
-        class="w-full min-w-[150px]"
-        :input-id="resolvedInputId"
-        :aria-labelledby="label ? `${resolvedInputId}-label` : undefined"
-        :aria-label="!label ? placeholder || 'Seleccionar' : undefined"
+        :class="[
+          'w-full',
+          computedMinWidthClass,
+          { 'pointer-events-none': readonly },
+        ]"
+        :inputId="`${computedInputId}-select`"
         :model-value="modelValue"
-        @update:model-value="onUpdateReadonly"
-        :invalid="invalid"
-        v-bind="$attrs"
-        :placeholder="displayPlaceholder"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-        :variant="variant"
-        :size="size"
-        :options="options"
-        :option-label="optionLabel || undefined"
-        :option-value="optionValue || undefined"
+        :invalid="isInvalid"
         :disabled="disabled"
         :readonly="readonly"
-        :show-clear="showClear"
-        :filter="filter"
         :fluid="fluid"
-      />
+        :options="options"
+        :option-label="optionLabel"
+        :option-value="optionValue"
+        :option-disabled="optionDisabled"
+        :option-group-label="optionGroupLabel"
+        :option-group-children="optionGroupChildren"
+        :filter="filter"
+        :filter-placeholder="filterPlaceholder"
+        :show-clear="showClear"
+        :placeholder="displayPlaceholder"
+        :aria-describedby="ariaDescribedby"
+        :aria-invalid="isInvalid"
+        :variant="computedVariant"
+        :size="inputSize"
+        :autocomplete="autocomplete"
+        v-bind="$attrs"
+        @update:model-value="onUpdateReadonly"
+        @focus="onFocus"
+        @blur="onBlur"
+        @change="onChange"
+        @filter="onFilter"
+        @before-show="onBeforeShow"
+        @before-hide="onBeforeHide"
+        @show="onShow"
+        @hide="onHide"
+        @clear="onClear"
+      >
+        <!-- Reenvío dinámico de todos los slots hacia PrimeVue Select -->
+        <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+          <slot :name="slotName" v-bind="slotProps ?? {}" />
+        </template>
+      </Select>
       <label
         v-if="label"
-        :id="`${resolvedInputId}-label`"
-        :class="{ 'text-danger-600': invalid }"
+        :class="[
+          'truncate max-w-[calc(100%-2.5rem)] select-none cursor-pointer',
+          { 'text-danger-600': isInvalid },
+        ]"
+        :for="computedInputId"
+        :title="label"
+        @click="focusSelect"
       >
         {{ label }}
       </label>
     </FloatLabel>
     <Message
-      v-if="errorMessage?.length"
-      class="left-0 top-full mt-1 text-xs z-10"
-      severity="error"
-      size="small"
-      variant="simple"
+      v-if="errorMessageText.length > 0"
+      :id="errorId"
+      class="left-0 top-full mt-0 text-xs z-10"
+      :severity="severity"
+      :size="size"
+      :variant="variant"
+      role="alert"
+      aria-live="assertive"
     >
-      {{ errorMessage }}
+      {{ errorMessageText }}
     </Message>
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref, computed, useId } from 'vue';
 import { Select, Message, FloatLabel } from 'primevue';
+import type { SelectChangeEvent, SelectFilterEvent } from 'primevue';
 
-import type { AppSelectProps } from '../interfaces';
+import type {
+  AppSelectProps,
+  AppSelectEmits,
+} from '../interfaces/select.interface';
+import {
+  resolveInputRootClass,
+  hasCustomMinWidth,
+} from '../utils/inputClasses';
 
-defineOptions({ inheritAttrs: false, name: 'AppSelect' });
-
-const props = withDefaults(defineProps<AppSelectProps>(), {
-  modelValue: undefined,
-  class: 'w-full max-w-[322px]',
-  placeholder: '',
-  size: undefined,
-  variant: 'outlined',
-  labelVariant: 'on',
-  fluid: true,
-  errorMessage: '',
-  label: '',
-  id: undefined,
-  options: () => [],
-  optionLabel: '',
-  optionValue: '',
-  disabled: false,
-  readonly: false,
-  showClear: false,
-  filter: false,
+defineOptions({
+  name: 'AppSelect',
+  inheritAttrs: false,
 });
 
-const emit = defineEmits<{
-  'update:modelValue': [value: unknown];
-}>();
+const props = withDefaults(defineProps<AppSelectProps>(), {
+  modelValue: null,
+  class: '',
+  options: () => [],
+  optionLabel: '',
+  optionValue: undefined,
+  optionDisabled: undefined,
+  optionGroupLabel: undefined,
+  optionGroupChildren: undefined,
+  placeholder: '',
+  severity: 'error',
+  size: 'small',
+  inputSize: undefined,
+  variant: 'simple',
+  labelVariant: 'on',
+  inputVariant: undefined,
+  inputVarian: undefined,
+  errorMessages: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  inputId: undefined,
+  filter: false,
+  filterPlaceholder: 'Buscar...',
+  showClear: false,
+  fluid: true,
+  minWidth: undefined,
+  readonly: false,
+  disabled: false,
+  invalid: false,
+});
 
-const selectRef = ref<{ $el?: HTMLElement }>();
+const emit = defineEmits<AppSelectEmits>();
 
-const autoId = useId();
-const resolvedInputId = computed(() => props.id || autoId);
-
-const invalid = computed(() => Boolean(props.errorMessage?.length));
+const selectRef = ref<{ $el?: HTMLElement; focus?: () => void }>();
 const isFocused = ref<boolean>(false);
 
-const onUpdateReadonly = (value: unknown) => {
-  if (!props.readonly && !props.disabled) {
-    emit('update:modelValue', value ?? '');
+const computedMinWidthClass = computed<string>(() => {
+  if (props.minWidth) return props.minWidth;
+  if (hasCustomMinWidth(props.class)) return '';
+  return 'min-w-40';
+});
+
+const rootClass = computed(() =>
+  resolveInputRootClass(props.class, [computedMinWidthClass.value]),
+);
+const autoId = useId();
+const computedInputId = computed(() => props.id || props.inputId || autoId);
+
+const errorMessageText = computed<string>(() => {
+  if (Array.isArray(props.errorMessages)) {
+    return props.errorMessages.filter(Boolean).join(', ');
+  }
+  return props.errorMessages || '';
+});
+
+const isInvalid = computed<boolean>(() => {
+  return Boolean(props.invalid || errorMessageText.value.length > 0);
+});
+
+const errorId = computed<string>(() => `${computedInputId.value}-error`);
+
+const ariaDescribedby = computed<string | undefined>(() => {
+  return errorMessageText.value.length > 0 ? errorId.value : undefined;
+});
+
+const computedVariant = computed<'outlined' | 'filled' | undefined>(() => {
+  if (props.inputVariant === 'outlined' || props.inputVariant === 'filled') {
+    return props.inputVariant;
+  }
+  if (props.inputVarian === 'outlined' || props.inputVarian === 'filled') {
+    return props.inputVarian;
+  }
+  return undefined;
+});
+
+const displayPlaceholder = computed<string | undefined>(() => {
+  if (isFocused.value) {
+    return props.placeholder;
+  }
+  if (!props.label?.length) {
+    return props.placeholder;
+  }
+  return undefined;
+});
+
+const focusSelect = () => {
+  if (!props.readonly && !props.disabled && selectRef.value) {
+    const el = selectRef.value.$el as HTMLElement | undefined;
+    const focusable =
+      el?.querySelector<HTMLElement>('.p-select-label') ??
+      el?.querySelector<HTMLElement>('[tabindex="0"]') ??
+      el?.querySelector<HTMLElement>('input') ??
+      el;
+    focusable?.focus?.();
   }
 };
 
-const displayPlaceholder = computed(() => {
-  if (isFocused.value && props.label) {
-    return props.placeholder || undefined;
-  }
-  if (!props.label.length) {
-    return props.placeholder || undefined;
-  }
-  return undefined;
+const onUpdateReadonly = (value: AppSelectProps['modelValue']) => {
+  if (props.readonly || props.disabled) return;
+  emit('update:modelValue', value ?? null);
+};
+
+const onFocus = (event: Event) => {
+  isFocused.value = true;
+  emit('focus', event);
+};
+
+const onBlur = (event: Event) => {
+  isFocused.value = false;
+  emit('blur', event);
+};
+
+const onChange = (event: SelectChangeEvent) => {
+  emit('change', event);
+};
+
+const onFilter = (event: SelectFilterEvent) => {
+  emit('filter', event);
+};
+
+const onBeforeShow = () => {
+  emit('before-show');
+};
+
+const onBeforeHide = () => {
+  emit('before-hide');
+};
+
+const onShow = () => {
+  emit('show');
+};
+
+const onHide = () => {
+  emit('hide');
+};
+
+const onClear = () => {
+  emit('clear');
+};
+
+defineExpose({
+  focus: focusSelect,
+  select: selectRef,
 });
 </script>

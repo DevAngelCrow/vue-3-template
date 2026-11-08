@@ -1,100 +1,83 @@
 <template>
   <div
-    class="flex justify-center md:justify-between items-center gap-2 flex-wrap"
+    class="flex flex-col sm:flex-row justify-between items-center gap-3 w-full py-2 px-1 text-surface-600 dark:text-surface-400"
   >
-    <span class="text-xs">
-      Mostrando <span class="font-bold">{{ startRecord }}</span> a
-      <span class="font-bold">{{ endRecord }}</span> de
-      <span class="font-bold">{{ safeTotalRecords }}</span> registros
+    <span class="text-xs text-center sm:text-left select-none">
+      Mostrando
+      <span class="font-bold text-surface-900 dark:text-surface-250">{{
+        recordFrom
+      }}</span>
+      a
+      <span class="font-bold text-surface-900 dark:text-surface-250">{{
+        recordTo
+      }}</span>
+      de
+      <span class="font-bold text-surface-900 dark:text-surface-250">{{
+        totalRecords
+      }}</span>
+      registros
     </span>
     <Paginator
-      class="flex justify-end"
-      :rows="safeRows"
-      :total-records="safeTotalRecords"
-      v-model:first="localFirst"
+      class="flex justify-end p-0 border-0 bg-transparent text-xs"
+      :rows="rows"
+      :totalRecords="totalRecords"
+      :first="first"
+      :rowsPerPageOptions="showPerPageOptions ? rowsPerPageOptions : undefined"
       @page="updatePage"
       @update:rows="perPageUpdate"
-      :rows-per-page-options="showPerPageOptions ? rowsPerPageOptions : undefined"
     />
   </div>
 </template>
-<script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { Paginator, type PageState } from 'primevue';
 
-import type { AppPaginatorProps } from '../interfaces';
+<script setup lang="ts">
+import { computed, type PropType } from 'vue';
+import { Paginator, type PageState } from 'primevue';
 
 defineOptions({ name: 'AppPaginator' });
 
-const props = withDefaults(defineProps<AppPaginatorProps>(), {
-  rows: 10,
-  totalRecords: 0,
-  first: 0,
-  rowsPerPageOptions: () => [10, 20, 50, 100],
-  showPerPageOptions: false,
-});
-
-const emit = defineEmits<{
-  pageUpdate: [page: number];
-  perPageUpdate: [perPage: number];
-}>();
-
-const safeRows = computed(() => {
-  const r = typeof props.rows === 'number' ? props.rows : Number(props.rows);
-  return Number.isFinite(r) && r >= 1 ? Math.floor(r) : 10;
-});
-
-const safeTotalRecords = computed(() => {
-  const raw = props.totalRecords ?? props.total_records;
-  const t = typeof raw === 'number' ? raw : Number(raw);
-  return Number.isFinite(t) && t >= 0 ? Math.floor(t) : 0;
-});
-
-const localFirst = ref(Number(props.first) || 0);
-
-watch(
-  () => props.first,
-  (newVal) => {
-    const f = Number(newVal);
-    const valid = Number.isFinite(f) && f >= 0 ? Math.floor(f) : 0;
-    if (valid !== localFirst.value) {
-      localFirst.value = valid;
-    }
+const props = defineProps({
+  rows: {
+    type: Number,
+    default: 10,
   },
-  { immediate: true },
-);
-
-watch(
-  () => safeTotalRecords.value,
-  (newTotal) => {
-    if (newTotal > 0 && localFirst.value >= newTotal) {
-      const maxFirst =
-        Math.floor((newTotal - 1) / safeRows.value) * safeRows.value;
-      localFirst.value = Math.max(0, maxFirst);
-    }
+  totalRecords: {
+    type: Number,
+    default: 0,
   },
+  first: {
+    type: Number,
+    default: 0,
+  },
+  rowsPerPageOptions: {
+    type: Array as PropType<number[]>,
+    default: () => [10, 20, 50, 100],
+  },
+  showPerPageOptions: {
+    type: Boolean,
+    default: false,
+  },
+  justify: {
+    type: String,
+    default: '',
+  },
+});
+
+const emit = defineEmits(['pageUpdate', 'perPageUpdate']);
+
+const recordFrom = computed(() =>
+  props.totalRecords === 0 ? 0 : props.first + 1,
 );
-
-const startRecord = computed(() => {
-  if (safeTotalRecords.value === 0) return 0;
-  return Math.min(localFirst.value + 1, safeTotalRecords.value);
-});
-
-const endRecord = computed(() => {
-  if (safeTotalRecords.value === 0) return 0;
-  return Math.min(localFirst.value + safeRows.value, safeTotalRecords.value);
-});
+const recordTo = computed(() =>
+  Math.min(props.first + props.rows, props.totalRecords),
+);
 
 const updatePage = (value: PageState) => {
-  localFirst.value = Number(value.first) || 0;
-  const p = Number(value.page);
-  emit('pageUpdate', Number.isFinite(p) ? p : 0);
+  emit('pageUpdate', value.page);
 };
 
 const perPageUpdate = (value: number) => {
-  const pp = Number(value);
-  const safe = Number.isFinite(pp) && pp >= 1 ? Math.floor(pp) : 10;
-  localFirst.value = 0;
-  emit('perPageUpdate', safe);
+  emit('perPageUpdate', value);
 };
 </script>
+
+<style scoped></style>
