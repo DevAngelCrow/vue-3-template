@@ -17,6 +17,7 @@ export const routesAdmin = [
   {
     path: 'admin/role/role-maintenance/:id?',
     name: 'role-maintenance',
+    meta: { parentRouteUri: '/admin/role' },
     component: () => import('@/modules/admin/views/RolDetail.vue'),
   },
   {
@@ -27,6 +28,7 @@ export const routesAdmin = [
   {
     path: 'admin/routes-administration/route-maintenance/:id?',
     name: 'route-maintenance',
+    meta: { parentRouteUri: '/admin/routes-administration' },
     component: () => import('@/modules/admin/views/RouteDetail.vue'),
   },
   {

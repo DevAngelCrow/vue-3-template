@@ -9,6 +9,7 @@ import {
 } from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
+import { loadSessionMenu } from '@/core/services/session.services';
 import { useAlertStore } from '@/core/store';
 import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
@@ -229,9 +230,10 @@ export function usePermission() {
       id: string;
       body: Omit<PermissionForm, 'id'>;
     }) => adminServices.putPermission(id, body),
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: permissionKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -246,9 +248,10 @@ export function usePermission() {
 
   const toggleMutation = useMutation({
     mutationFn: (id: string) => adminServices.togglePermission(id),
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: permissionKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,

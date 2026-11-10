@@ -1,7 +1,7 @@
 <template>
   <ul class="flex flex-col m-0 p-0 list-none w-full gap-1.5">
     <li
-      v-for="section in resolvedMenu"
+      v-for="section in mappedMenu"
       :key="section.id || section.title || section.name"
       class="flex flex-col w-full"
     >
@@ -11,7 +11,7 @@
           v-ripple
           :class="[
             'flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 select-none group',
-            isOpen(section.id)
+            isOpen(section.id) || isSectionActive(section)
               ? 'bg-primary-500/10 text-primary-950 shadow-xs'
               : 'hover:bg-primary-50/80 text-surface-700',
           ]"
@@ -21,7 +21,7 @@
             <div
               :class="[
                 'w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0',
-                isOpen(section.id)
+                isOpen(section.id) || isSectionActive(section)
                   ? 'bg-primary-600 text-white shadow-xs'
                   : 'bg-primary-100 text-primary-700 group-hover:bg-primary-200/80',
               ]"
@@ -93,25 +93,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { Button } from 'primevue';
 
+import { hasActiveChild } from '../composables/useNavigationMenu';
 import type { NavigationItem } from '../interfaces/navigation.interface';
 import { useLayoutStore } from '../store/useLayoutStore';
 
 defineOptions({ name: 'AppMenuItemSideBar' });
 
 const props = defineProps<{
-  mappedMenu?: NavigationItem[];
-  items?: NavigationItem[];
+  mappedMenu: NavigationItem[];
 }>();
 
-const resolvedMenu = computed(() => props.mappedMenu ?? props.items ?? []);
-
+const route = useRoute();
 const layoutStore = useLayoutStore();
 const openItems = ref<Record<string, boolean>>({});
 
 const isOpen = (id: string) => Boolean(openItems.value[id]);
+
+const isSectionActive = (section: NavigationItem) =>
+  hasActiveChild(section, route.path);
 
 const toggleItem = (id: string) => {
   openItems.value[id] = !openItems.value[id];
@@ -119,6 +122,21 @@ const toggleItem = (id: string) => {
 
 const hasChildren = (children?: NavigationItem[]) =>
   Boolean(children && children.length > 0);
+
+watch(
+  [() => route.path, () => props.mappedMenu],
+  ([currentPath, items]) => {
+    for (const section of items) {
+      if (
+        hasChildren(section.children) &&
+        hasActiveChild(section, currentPath)
+      ) {
+        openItems.value[section.id] = true;
+      }
+    }
+  },
+  { immediate: true },
+);
 
 const handleNavigation = () => {
   layoutStore.showSideBar(false);

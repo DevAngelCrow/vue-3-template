@@ -11,7 +11,7 @@ export interface NavigationItem {
   order?: number;
   active?: boolean;
   required_auth?: boolean;
-  parent?: NavigationItem[] | null;
+  parent?: NavigationItem | null;
   children?: NavigationItem[];
   items?: NavigationItem[];
   command?: (_event?: unknown) => void;

@@ -27,18 +27,28 @@ export function useLogin() {
         // HttpOnly (Set-Cookie) que JavaScript no puede leer.
         setSession(loginData);
 
-        await loadSessionMenu();
+        await loadSessionMenu(true);
 
-        const redirectTo = (route.query.redirect as string) || '/';
+        const redirectTo =
+          typeof route.query.redirect === 'string' && route.query.redirect
+            ? route.query.redirect
+            : '/';
         router.push(redirectTo);
       } else {
         throw new Error('No se recibió el token de autenticación');
       }
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       console.error('Error en el login:', err);
+      const messageFromObj =
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof err.message === 'string'
+          ? err.message
+          : null;
       error.value =
-        err?.message ||
+        messageFromObj ||
         (err instanceof Error ? err.message : 'Error desconocido en el login');
     },
   });

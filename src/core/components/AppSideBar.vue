@@ -54,7 +54,7 @@
 
         <!-- Contenido / Lista de enlaces con scroll estilizado -->
         <div class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          <AppMenuItemSideBar :items="sidebarItems" />
+          <AppMenuItemSideBar :mapped-menu="sidebarItems" />
         </div>
 
         <!-- Pie del Drawer con indicador de versión y estado -->
@@ -77,9 +77,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed } from 'vue';
 import { Button, Drawer } from 'primevue';
 
+import { useMobileViewport } from '../composables/useMobileViewport';
 import { useLayoutStore } from '../store/useLayoutStore';
 import { useNavigationMenu } from '../composables/useNavigationMenu';
 import AppMenuItemSideBar from './AppMenuItemSideBar.vue';
@@ -98,23 +99,7 @@ const props = withDefaults(
 
 const layoutStore = useLayoutStore();
 const { systemRoutes } = useNavigationMenu();
-const windowWidth = ref(
-  typeof window !== 'undefined' ? window.innerWidth : 1200,
-);
-
-const handleResize = () => {
-  windowWidth.value = window.innerWidth;
-};
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize);
-});
-
-const isMobile = computed(() => windowWidth.value < 768);
+const { isMobile } = useMobileViewport();
 
 const isVisible = computed({
   get: () => layoutStore.sideBar,

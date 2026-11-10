@@ -62,9 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed } from 'vue';
 import { Button } from 'primevue';
 
+import { useMobileViewport } from '../composables/useMobileViewport';
 import { useLayoutStore } from '../store/useLayoutStore';
 import AppCommandMenu from './AppCommandMenu.vue';
 import AppNavBarMenu from './AppNavBarMenu.vue';
@@ -73,23 +74,7 @@ import AppUserMenu from './AppUserMenu.vue';
 defineOptions({ name: 'AppHeader' });
 
 const layoutStore = useLayoutStore();
-const windowWidth = ref(
-  typeof window !== 'undefined' ? window.innerWidth : 1200,
-);
-
-const handleResize = () => {
-  windowWidth.value = window.innerWidth;
-};
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize);
-});
-
-const isMobile = computed(() => windowWidth.value < 768);
+const { isMobile } = useMobileViewport();
 
 const showHamburger = computed(() => {
   return isMobile.value || layoutStore.hasOverflow;

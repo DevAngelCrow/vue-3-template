@@ -9,6 +9,7 @@ import {
 } from '@tanstack/vue-query';
 
 import adminServices from '@/core/services/index.services';
+import { loadSessionMenu } from '@/core/services/session.services';
 import { useAlertStore } from '@/core/store';
 import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
@@ -359,10 +360,11 @@ export function useAdmin() {
       }
       return adminServices.addRoute({ ...form, active: true });
     },
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 201) {
         queryClient.invalidateQueries({ queryKey: routeKeys.all });
         queryClient.invalidateQueries({ queryKey: parentRoutesKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -378,11 +380,12 @@ export function useAdmin() {
   const editRouteMutation = useMutation({
     mutationFn: ({ id, body }: { id: string; body: Omit<RouteForm, 'id'> }) =>
       adminServices.editRoute(id, body),
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: routeKeys.all });
         queryClient.invalidateQueries({ queryKey: parentRoutesKeys.all });
         queryClient.invalidateQueries({ queryKey: routeDetailKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -397,10 +400,11 @@ export function useAdmin() {
 
   const toggleRouteMutation = useMutation({
     mutationFn: (id: string) => adminServices.toggleRoute(id),
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: routeKeys.all });
         queryClient.invalidateQueries({ queryKey: parentRoutesKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,

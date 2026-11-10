@@ -7,7 +7,9 @@ import {
 } from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
+import { loadSessionMenu } from '@/core/services/session.services';
 import { useAlertStore } from '@/core/store';
+import { useAuthStore } from '@/core/store/useAuthStore';
 import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { createQueryKeys } from '@/core/utils/queryKeys';
@@ -39,6 +41,7 @@ export const userRoleAdminRolesKeys = createQueryKeys<{
 export function useUserRole() {
   const queryClient = useQueryClient();
   const alert = useAlertStore();
+  const authStore = useAuthStore();
 
   const headers = ref<TableHeaders[]>([
     {
@@ -187,10 +190,13 @@ export function useUserRole() {
   const updateMutation = useMutation({
     mutationFn: ({ id, form }: { id: string; form: UserRoleUpdateForm }) =>
       adminServices.putUserRole(id, form),
-    onSuccess: response => {
+    onSuccess: async (response, variables) => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: usersKeys.all });
         queryClient.invalidateQueries({ queryKey: userRolesKeys.all });
+        if (variables.id === authStore.userInfo?.id) {
+          await loadSessionMenu(true);
+        }
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
