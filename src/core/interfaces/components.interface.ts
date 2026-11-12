@@ -49,10 +49,29 @@ export interface AppInputMoneyProps extends BaseFormFieldProps {
   max?: number;
 }
 
-export interface AppInputMaskProps extends IconFormFieldProps {
+export interface AppInputMaskProps extends Omit<
+  IconFormFieldProps,
+  'variant' | 'size'
+> {
   modelValue?: string | null;
   mask?: string;
   autocomplete?: string;
+  inputId?: string;
+  prefix?: string;
+  prependInnerIcon?: string;
+  errorMessages?: string | string[];
+  invalid?: boolean;
+  severity?: 'error' | 'secondary' | 'info' | 'success' | 'warn' | 'contrast';
+  size?: 'small' | 'large';
+  variant?: 'simple' | 'outlined';
+  inputVariant?: 'outlined' | 'filled' | (string & {});
+}
+
+export interface AppInputMaskEmits {
+  (e: 'update:modelValue', value: string): void;
+  (e: 'click-end-icon'): void;
+  (e: 'focus', event: Event): void;
+  (e: 'blur', event: Event): void;
 }
 
 export interface AppInputTextAreaProps extends BaseFormFieldProps {

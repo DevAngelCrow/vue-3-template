@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 
-import { UserStateStore, Token, Menu } from '../interfaces/userState.store.interface';
+import {
+  UserStateStore,
+  Token,
+  Menu,
+} from '../interfaces/userState.store.interface';
 import type { AuthSessionData } from '../services/interfaces/auth/apiResponseLogin.interface';
 
 // Keys written by previous versions of the app. They are purged on startup
@@ -36,7 +40,9 @@ interface State {
   token: string | null;
   token_type: string | null;
   menu: Menu[];
-  menuSideBar: Menu[];
+  menuLoaded: boolean;
+  menuLoading: boolean;
+  menuError: string | null;
   profile_img: string | null;
 }
 
@@ -46,7 +52,9 @@ export const useAuthStore = defineStore('authStore', {
     token: null,
     token_type: null,
     menu: [],
-    menuSideBar: [],
+    menuLoaded: false,
+    menuLoading: false,
+    menuError: null,
     profile_img: null,
   }),
   getters: {
@@ -62,8 +70,14 @@ export const useAuthStore = defineStore('authStore', {
     menuInfo(): Menu[] {
       return this.menu;
     },
-    menuSideBarInfo(): Menu[] {
-      return this.menuSideBar;
+    isMenuLoaded(): boolean {
+      return this.menuLoaded;
+    },
+    isMenuLoading(): boolean {
+      return this.menuLoading;
+    },
+    menuLoadError(): string | null {
+      return this.menuError;
     },
     profileImg(): string | null {
       return this.profile_img;
@@ -88,8 +102,14 @@ export const useAuthStore = defineStore('authStore', {
     setMenu(payload: Menu[]) {
       this.menu = payload;
     },
-    setMenuSideBar(payload: Menu[]) {
-      this.menuSideBar = payload;
+    setMenuStatus(payload: {
+      loaded?: boolean;
+      loading?: boolean;
+      error?: string | null;
+    }) {
+      if (payload.loaded !== undefined) this.menuLoaded = payload.loaded;
+      if (payload.loading !== undefined) this.menuLoading = payload.loading;
+      if (payload.error !== undefined) this.menuError = payload.error;
     },
     setProfileImg(payload: string | null) {
       this.profile_img = payload;
@@ -118,7 +138,9 @@ export const useAuthStore = defineStore('authStore', {
       this.token = null;
       this.token_type = null;
       this.menu = [];
-      this.menuSideBar = [];
+      this.menuLoaded = false;
+      this.menuLoading = false;
+      this.menuError = null;
       this.profile_img = null;
       purgeLegacyAuthStorage();
     },

@@ -27,7 +27,7 @@ export function useLogin() {
         // HttpOnly (Set-Cookie) que JavaScript no puede leer.
         setSession(loginData);
 
-        await loadSessionMenu();
+        await loadSessionMenu(true);
 
         const redirectTo = (route.query.redirect as string) || '/';
         router.push(redirectTo);

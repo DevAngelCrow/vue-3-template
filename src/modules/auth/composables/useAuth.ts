@@ -1,6 +1,6 @@
 // composables/useAuth.ts
 import { computed, nextTick, ref, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
@@ -8,7 +8,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { emailFormat, passwordValidation } from '@/core/utils/validationRules';
 import { useAlertStore, useLoaderStore } from '@/core/store';
 import authServices from '@/core/services/auth.services';
-import { loadSessionMenu } from '@/core/services/session.services';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
 import { useAuthStore } from '@/core/store/useAuthStore';
 import { CreateDateFromFormat, FormatDate } from '@/core/utils/dates';
@@ -33,15 +32,12 @@ export const authMaritalStatusKeys = createQueryKeys('auth-marital-status');
 export function useAuth() {
   const queryClient = useQueryClient();
   const authStore = useAuthStore();
-  const { setSession, userInfo, setProfileImg } = authStore;
+  const { userInfo, setProfileImg } = authStore;
   const { startLoading, finishLoading } = useLoaderStore();
   const alert = useAlertStore();
   const router = useRouter();
-  const route = useRoute();
   const isLoggingOut = ref(false);
   const error = ref<string | null>(null);
-  const API_URL =
-    import.meta.env.VITE_VUE_APP_API_URL || 'http://127.0.0.1:8000';
 
   const form = useForm({
     validationSchema: yup.object({
@@ -372,67 +368,7 @@ export function useAuth() {
     }
   };
 
-  // Mutaciones TanStack Query para Login, Registro y Actualización de Perfil
-  const loginMutation = useMutation({
-    mutationFn: async ({
-      user,
-      password,
-    }: {
-      user: string;
-      password: string;
-    }) => {
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        // Necesario para que el navegador guarde la cookie HttpOnly del
-        // refresh token que el backend envía en Set-Cookie.
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          user_name: user,
-          password: password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: 'Error en el servidor' }));
-
-        if (response.status === 401) {
-          throw new Error(errorData.message || 'Credenciales incorrectas');
-        }
-
-        throw new Error(
-          errorData.message ||
-            `Error ${response.status}: ${response.statusText}`,
-        );
-      }
-
-      return response.json();
-    },
-    onSuccess: async data => {
-      if (data?.data?.access_token) {
-        // Access token solo en memoria; el refresh token viaja en cookie HttpOnly
-        setSession(data.data);
-
-        await loadSessionMenu();
-
-        const redirectTo = (route.query.redirect as string) || '/';
-        router.push(redirectTo);
-      } else {
-        throw new Error('No se recibió el token de autenticación');
-      }
-    },
-    onError: err => {
-      console.error('Error en el login:', err);
-      error.value =
-        err instanceof Error ? err.message : 'Error desconocido en el login';
-    },
-  });
-
+  // Mutaciones TanStack Query para Registro y Actualización de Perfil
   const registerMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
       const formRegister = new FormData();
@@ -500,19 +436,8 @@ export function useAuth() {
 
   const isLoading = computed(
     () =>
-      loginMutation.isPending.value ||
-      registerMutation.isPending.value ||
-      updateProfileMutation.isPending.value,
+      registerMutation.isPending.value || updateProfileMutation.isPending.value,
   );
-
-  const login = async (user: string, password: string) => {
-    error.value = null;
-    try {
-      await loginMutation.mutateAsync({ user, password });
-    } catch {
-      // Manejado en onError
-    }
-  };
 
   const registerUser = async (data: { email: string; password: string }) => {
     try {
@@ -656,7 +581,6 @@ export function useAuth() {
 
   return {
     ...form,
-    login,
     logout,
     isLoggingOut,
     isAuthenticated,
@@ -743,7 +667,6 @@ export function useAuth() {
     idAddress,
     idDocument,
     isProfilePending,
-    loginMutation,
     registerMutation,
     updateProfileMutation,
   };

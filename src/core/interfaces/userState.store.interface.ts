@@ -18,12 +18,10 @@ export interface Menu {
   uri: string;
   show: boolean;
   order: number;
-  parent: Menu[];
+  id_parent?: string | null;
+  parent: Menu | null;
   children: Menu[];
   required_auth: boolean;
   title: string;
   active: boolean;
-  is_open: boolean;
-  label: string;
-  isUser: boolean;
 }

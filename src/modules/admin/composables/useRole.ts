@@ -9,6 +9,7 @@ import {
 } from '@tanstack/vue-query';
 
 import { TableHeaders } from '@/core/interfaces';
+import { loadSessionMenu } from '@/core/services/session.services';
 import { useAlertStore } from '@/core/store';
 import { debounce } from '@/core/utils/debounceFunction';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
@@ -305,10 +306,11 @@ export function useRole() {
   const editRoleMutation = useMutation({
     mutationFn: ({ id, body }: { id: string; body: Omit<RoleForm, 'id'> }) =>
       adminServices.putRole(id, body),
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: roleKeys.all });
         queryClient.invalidateQueries({ queryKey: roleDetailKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,
@@ -323,9 +325,10 @@ export function useRole() {
 
   const toggleRoleMutation = useMutation({
     mutationFn: (id: string) => adminServices.toggleRole(id),
-    onSuccess: response => {
+    onSuccess: async response => {
       if (response.status === 200) {
         queryClient.invalidateQueries({ queryKey: roleKeys.all });
+        await loadSessionMenu(true);
         alert.showAlert({
           type: 'success',
           title: `${response.data.message}`,

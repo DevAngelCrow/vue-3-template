@@ -7,14 +7,14 @@
       :model="visibleItems"
     >
       <template #item="{ item, props, hasSubmenu, root }">
-        <!-- Ítems que tienen URI (enlace con router-link) -->
+        <!-- Enlaces directos navegables (sin submenú en raíz, o ítems hoja en submenú) -->
         <router-link
-          v-if="item.uri"
+          v-if="item.uri && !(root && hasSubmenu) && !hasSubmenu"
           v-slot="{ href, navigate, isActive }"
-          :to="root && item.items?.length ? '' : item.uri"
+          :to="item.uri"
           custom
         >
-          <!-- Ítem RAÍZ (Barra superior oscura) -->
+          <!-- Ítem RAÍZ directo (Barra superior oscura) -->
           <a
             v-if="root"
             ripple
@@ -22,18 +22,18 @@
             v-bind="props.action"
             :class="[
               'group flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap select-none cursor-pointer',
-              isActive
+              isRootActive(item, isActive)
                 ? 'bg-white/15 text-white shadow-xs border border-white/20 font-semibold'
                 : 'text-primary-100/90 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10',
             ]"
-            @click="hasSubmenu ? $event.preventDefault() : navigate($event)"
+            @click="navigate($event)"
           >
             <i
               v-if="item.icon"
               :class="[
                 item.icon,
                 'text-sm transition-colors',
-                isActive
+                isRootActive(item, isActive)
                   ? 'text-primary-300'
                   : 'text-primary-300/80 group-hover:text-primary-200',
               ]"
@@ -41,13 +41,9 @@
             <span class="text-primary-100 group-hover:text-white">{{
               item.label
             }}</span>
-            <i
-              v-if="hasSubmenu"
-              class="pi pi-chevron-down ml-1.5 text-[10px] text-primary-200/70 transition-transform duration-200 group-hover:rotate-180"
-            ></i>
           </a>
 
-          <!-- Ítem SUBMENÚ (Dentro del desplegable blanco flotante) -->
+          <!-- Ítem SUBMENÚ hoja (Dentro del desplegable blanco flotante) -->
           <a
             v-else
             ripple
@@ -55,7 +51,7 @@
             v-bind="props.action"
             :class="[
               'group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors select-none cursor-pointer',
-              isActive
+              isSubItemActive(item, isActive)
                 ? 'bg-primary-100/80 text-primary-950 font-semibold'
                 : 'text-surface-700 hover:text-primary-950 hover:bg-primary-50',
             ]"
@@ -67,7 +63,7 @@
                 :class="[
                   item.icon,
                   'text-base transition-colors',
-                  isActive
+                  isSubItemActive(item, isActive)
                     ? 'text-primary-700'
                     : 'text-primary-600 group-hover:text-primary-700',
                 ]"
@@ -84,19 +80,26 @@
           </a>
         </router-link>
 
-        <!-- Ítems sin URI (cabeceras o contenedores de menú) -->
-        <div
+        <!-- Contenedores RAÍZ con submenú o sin URI navegable -->
+        <a
           v-else-if="root"
+          ripple
+          v-bind="props.action"
           :class="[
             'group flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap select-none cursor-pointer',
-            'text-primary-100/90 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10',
+            isRootActive(item, false)
+              ? 'bg-white/15 text-white shadow-xs border border-white/20 font-semibold'
+              : 'text-primary-100/90 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10',
           ]"
         >
           <i
             v-if="item.icon"
             :class="[
               item.icon,
-              'text-sm text-primary-300/80 group-hover:text-primary-200 transition-colors',
+              'text-sm transition-colors',
+              isRootActive(item, false)
+                ? 'text-primary-300'
+                : 'text-primary-300/80 group-hover:text-primary-200',
             ]"
           ></i>
           <span class="text-primary-100 group-hover:text-white">{{
@@ -106,19 +109,38 @@
             v-if="hasSubmenu"
             class="pi pi-chevron-down ml-1.5 text-[10px] text-primary-200/70 transition-transform duration-200 group-hover:rotate-180"
           ></i>
-        </div>
+        </a>
 
-        <!-- Submenú sin URI -->
-        <div
+        <!-- Submenú contenedor o sin URI (incluye niveles N anidados) -->
+        <a
           v-else
-          class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium text-surface-700 hover:text-primary-950 hover:bg-primary-50 transition-colors select-none cursor-pointer"
+          ripple
+          v-bind="props.action"
+          :class="[
+            'group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors select-none cursor-pointer',
+            isSubItemActive(item, false)
+              ? 'bg-primary-100/80 text-primary-950 font-semibold'
+              : 'text-surface-700 hover:text-primary-950 hover:bg-primary-50',
+          ]"
         >
+          <div class="flex items-center gap-2.5">
+            <i
+              v-if="item.icon"
+              :class="[
+                item.icon,
+                'text-base transition-colors',
+                isSubItemActive(item, false)
+                  ? 'text-primary-700'
+                  : 'text-primary-600 group-hover:text-primary-700',
+              ]"
+            ></i>
+            <span class="text-surface-800 font-medium">{{ item.label }}</span>
+          </div>
           <i
-            v-if="item.icon"
-            :class="[item.icon, 'text-primary-600 text-base']"
+            v-if="hasSubmenu"
+            class="pi pi-angle-right text-xs text-surface-400 group-hover:text-primary-500 transition-colors"
           ></i>
-          <span class="text-surface-800 font-medium">{{ item.label }}</span>
-        </div>
+        </a>
       </template>
     </Menubar>
   </nav>
@@ -133,22 +155,54 @@ import {
   onBeforeUnmount,
   type ComponentPublicInstance,
 } from 'vue';
+import { useRoute } from 'vue-router';
 import { Menubar } from 'primevue';
 
 import type { NavigationItem } from '../interfaces/navigation.interface';
-import { useNavigationMenu } from '../composables/useNavigationMenu';
+import {
+  hasActiveChild,
+  isNavigationUriActive,
+  type NavigableMenuNode,
+  useNavigationMenu,
+} from '../composables/useNavigationMenu';
+import { useMobileViewport } from '../composables/useMobileViewport';
 import { useLayoutStore } from '../store/useLayoutStore';
 
 defineOptions({ name: 'AppNavBarMenu' });
 
+const route = useRoute();
 const { systemRoutes } = useNavigationMenu();
+const { isMobile } = useMobileViewport();
 const layoutStore = useLayoutStore();
 
 const menuBarRef = ref<ComponentPublicInstance>();
 const visibleItems = ref<NavigationItem[]>([]);
+let navResizeObserver: ResizeObserver | null = null;
+
+const isRootActive = (
+  item: NavigableMenuNode,
+  routerActive: boolean,
+): boolean => {
+  return (
+    routerActive ||
+    hasActiveChild(item, route.path) ||
+    isNavigationUriActive(item.uri, route.path)
+  );
+};
+
+const isSubItemActive = (
+  item: NavigableMenuNode,
+  routerActive: boolean,
+): boolean => {
+  return (
+    routerActive ||
+    isNavigationUriActive(item.uri, route.path) ||
+    hasActiveChild(item, route.path)
+  );
+};
 
 const checkWrapMenu = () => {
-  if (window.innerWidth < 768) {
+  if (isMobile.value) {
     visibleItems.value = [];
     layoutStore.setOverflowMenuItems(systemRoutes.value);
     return;
@@ -159,20 +213,27 @@ const checkWrapMenu = () => {
 
   nextTick(() => {
     window.requestAnimationFrame(() => {
-      const root = menuBarRef.value?.$el?.querySelector?.(
-        '.p-menubar-root-list',
-      ) as HTMLElement | null;
+      const menuEl: unknown = menuBarRef.value?.$el;
+      if (!(menuEl instanceof HTMLElement)) {
+        layoutStore.setOverflowMenuItems([]);
+        return;
+      }
 
-      const navContainer = menuBarRef.value?.$el
-        ?.parentElement as HTMLElement | null;
+      const root = menuEl.querySelector('.p-menubar-root-list');
+      const navContainer = menuEl.parentElement;
 
-      if (!root || !navContainer) {
+      if (
+        !(root instanceof HTMLElement) ||
+        !(navContainer instanceof HTMLElement)
+      ) {
         layoutStore.setOverflowMenuItems([]);
         return;
       }
 
       const availableWidth = navContainer.clientWidth;
-      const children = Array.from(root.children) as HTMLElement[];
+      const children = Array.from(root.children).filter(
+        (el): el is HTMLElement => el instanceof HTMLElement,
+      );
       let wrapIndex: number | null = null;
       let accumulatedWidth = 0;
 
@@ -205,17 +266,26 @@ watch(
   { immediate: true, deep: true },
 );
 
-const handleResize = () => {
+watch(isMobile, () => {
   checkWrapMenu();
-};
+});
 
 onMounted(() => {
-  window.addEventListener('resize', handleResize);
+  const menuEl: unknown = menuBarRef.value?.$el;
+  const navContainer =
+    menuEl instanceof HTMLElement ? menuEl.parentElement : null;
+  if (navContainer && typeof ResizeObserver !== 'undefined') {
+    navResizeObserver = new ResizeObserver(() => {
+      checkWrapMenu();
+    });
+    navResizeObserver.observe(navContainer);
+  }
   checkWrapMenu();
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize);
+  navResizeObserver?.disconnect();
+  navResizeObserver = null;
 });
 </script>
 
@@ -268,8 +338,8 @@ onBeforeUnmount(() => {
   border: 1px solid var(--p-surface-200) !important;
   background: var(--p-surface-0) !important;
   box-shadow:
-    \r\n020px25px-5pxcolor-mix(in srgb, var(--p-primary-950) 15%, transparent),
-    \r\n08px10px-6pxcolor-mix(in srgb, var(--p-primary-950) 10%, transparent) !important;
+    0 20px 25px -5px color-mix(in srgb, var(--p-primary-950) 15%, transparent),
+    0 8px 10px -6px color-mix(in srgb, var(--p-primary-950) 10%, transparent) !important;
   padding: 0.375rem !important;
   min-width: 15rem !important;
 }

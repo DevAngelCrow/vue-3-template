@@ -54,9 +54,14 @@
               :count="4"
               :loading="true"
             />
-            <slot v-else :name="`panel-${tab.value}`" :tab="tab">
-              <slot name="panel" :tab="tab" />
-            </slot>
+            <div
+              v-else
+              :class="['w-full motion-reduce:animate-none', animationClass]"
+            >
+              <slot :name="`panel-${tab.value}`" :tab="tab">
+                <slot name="panel" :tab="tab" />
+              </slot>
+            </div>
           </template>
         </TabPanel>
       </TabPanels>
@@ -74,6 +79,7 @@ import { Badge, Tab, TabList, TabPanel, TabPanels, Tabs } from 'primevue';
 
 import AppSkeleton from './AppSkeleton.vue';
 import type {
+  AppTabAnimationPreset,
   AppTabEmits,
   AppTabExposed,
   AppTabItem,
@@ -92,6 +98,7 @@ const props = withDefaults(defineProps<AppTabProps>(), {
   keepAlive: false,
   syncQuery: false,
   loading: false,
+  animation: 'slide-up',
 });
 
 const emit = defineEmits<AppTabEmits>();
@@ -231,6 +238,32 @@ const activateFirstInvalid: AppTabExposed['activateFirstInvalid'] = () => {
   const tab = selectableTabs.value.find(item => item.invalid);
   return tab ? activate(tab.value) : false;
 };
+
+// --- Presets de animación Tailwind encajonados -----------------------------
+
+const ANIMATION_PRESETS: Record<AppTabAnimationPreset, string> = {
+  'slide-up':
+    'animate-enter fade-in-0 slide-in-from-b-2 animate-duration-250 animate-ease-out animate-fill-both',
+  'slide-left':
+    'animate-enter fade-in-0 slide-in-from-r-3 animate-duration-250 animate-ease-out animate-fill-both',
+  fade: 'animate-fadein animate-duration-200 animate-ease-out',
+  scale:
+    'animate-enter fade-in-0 zoom-in-95 animate-duration-200 animate-ease-out animate-fill-both',
+};
+
+const isAnimationPreset = (value: string): value is AppTabAnimationPreset =>
+  Object.prototype.hasOwnProperty.call(ANIMATION_PRESETS, value);
+
+const animationClass = computed<string>(() => {
+  if (props.animation === false || props.animation === 'none') return '';
+  if (typeof props.animation === 'string') {
+    if (isAnimationPreset(props.animation)) {
+      return ANIMATION_PRESETS[props.animation];
+    }
+    return props.animation;
+  }
+  return ANIMATION_PRESETS['slide-up'];
+});
 
 defineExpose<AppTabExposed>({ activate, activateFirstInvalid });
 </script>

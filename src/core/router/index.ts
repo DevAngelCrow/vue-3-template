@@ -4,8 +4,12 @@ import { routesCatalogs } from '@/modules/catalogs/routes';
 import { routesAdmin } from '@/modules/admin/routes';
 
 import { useAuthStore } from '../store/useAuthStore';
-import { restoreSession } from '../services/session.services';
-import { isRouteAuthorized } from '../utils/routePermissions';
+import { loadSessionMenu, restoreSession } from '../services/session.services';
+import {
+  ALWAYS_ALLOWED_AUTH_ROUTES,
+  isRouteAuthorized,
+  normalizeRoute,
+} from '../utils/routePermissions';
 
 const routes = [
   {
@@ -154,7 +158,29 @@ router.beforeEach(async to => {
 
     // 3. Comprobación de permisos si la ruta requiere autenticación
     if (to.meta.requiresAuth) {
-      const authorized = isRouteAuthorized(to.path, auth.menuInfo);
+      if (!auth.menuLoaded) {
+        await loadSessionMenu();
+      }
+
+      const normalizedTarget = normalizeRoute(to.path);
+      if (!auth.menuLoaded) {
+        if (ALWAYS_ALLOWED_AUTH_ROUTES.has(normalizedTarget)) {
+          return true;
+        }
+        return { name: 'dashboard', replace: true };
+      }
+
+      const authorized = isRouteAuthorized(
+        {
+          path: to.path,
+          hasParams: Object.keys(to.params).length > 0,
+          parentUri:
+            typeof to.meta.parentRouteUri === 'string'
+              ? to.meta.parentRouteUri
+              : undefined,
+        },
+        auth.menuInfo,
+      );
       if (!authorized) {
         // Usuario autenticado sin permisos para esta ruta:
         // Se redirige a 'not-found' de forma preventiva sin montar el componente

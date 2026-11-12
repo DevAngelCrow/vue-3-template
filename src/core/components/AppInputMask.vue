@@ -10,141 +10,147 @@
       <FloatLabel :variant="labelVariant" class="w-full flex-1 min-w-0">
         <IconField class="w-full group">
           <InputIcon
-            v-if="prependInnerIcon"
-            :class="[prependInnerIcon, { 'text-danger-600': invalid }]"
+            v-if="resolvedPrependIcon"
+            :class="[resolvedPrependIcon, { 'text-danger-600': isInvalid }]"
           />
           <InputMask
             :class="['w-full', { '!rounded-l-none': !!prefix }]"
             :model-value="modelValue"
-            @update:model-value="onUpdate"
-            :invalid="invalid"
+            :invalid="isInvalid"
+            :disabled="disabled"
+            :readonly="readonly"
+            :fluid="fluid"
+            :aria-invalid="isInvalid"
+            :aria-describedby="ariaDescribedby"
             v-bind="$attrs"
             :autocomplete
             :placeholder="displayPlaceholder"
-            :id="inputId"
-            @focus="isFocused = true"
-            @blur="isFocused = false"
+            :id="computedInputId"
             :mask="primeMask"
-            :variant="inputVariant"
+            :variant="computedVariant"
+            @update:model-value="onUpdate"
+            @focus="onFocus"
+            @blur="onBlur"
           />
           <InputIcon
             v-if="appendIcon"
             :class="[
               appendIcon,
               'absolute right-4 top-5.5',
-              { 'text-danger-600': invalid },
+              { 'text-danger-600': isInvalid },
             ]"
             @click="emit('click-end-icon')"
           />
         </IconField>
         <label
           v-if="label"
-          :class="{ 'text-danger-600': invalid }"
-          :for="inputId"
+          :class="{ 'text-danger-600': isInvalid }"
+          :for="computedInputId"
         >
           {{ label }}
         </label>
       </FloatLabel>
     </div>
     <Message
-      v-if="errorMessages.length"
+      v-if="errorMessageText.length > 0"
+      :id="errorId"
       class="left-0 top-full mt-0 text-xs z-10"
       :severity
       :size
       :variant
+      role="alert"
+      aria-live="assertive"
     >
-      {{ errorMessages }}
+      {{ errorMessageText }}
     </Message>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, useId } from 'vue';
+import { ref, computed, useId } from 'vue';
 import { InputMask, InputIcon, Message, IconField, FloatLabel } from 'primevue';
 
+import type {
+  AppInputMaskEmits,
+  AppInputMaskProps,
+} from '../interfaces/components.interface';
 import { resolveInputRootClass } from '../utils/inputClasses';
+
 defineOptions({ inheritAttrs: false, name: 'AppInputMask' });
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-  },
-  class: {
-    type: String,
-    default: '',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  severity: {
-    type: String,
-    default: 'error',
-  },
-  size: {
-    type: String,
-    default: 'small',
-  },
-  variant: {
-    type: String,
-    default: 'simple',
-  },
-  labelVariant: {
-    type: String,
-    default: 'on',
-  },
-  inputVariant: {
-    type: String,
-    default: 'large',
-  },
-  errorMessages: {
-    type: String,
-    default: '',
-  },
-  appendIcon: {
-    type: String,
-    default: '',
-  },
-  prependInnerIcon: {
-    type: String,
-    default: '',
-  },
-  autocomplete: {
-    type: String,
-    default: 'off',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  id: {
-    type: String,
-    default: undefined,
-  },
-  inputId: {
-    type: String,
-    default: undefined,
-  },
-  mask: {
-    type: String,
-    default: '',
-  },
-  prefix: {
-    type: String,
-    default: '',
-  },
+const props = withDefaults(defineProps<AppInputMaskProps>(), {
+  modelValue: undefined,
+  class: '',
+  placeholder: '',
+  severity: 'error',
+  size: 'small',
+  variant: 'simple',
+  labelVariant: 'on',
+  inputVariant: undefined,
+  errorMessages: '',
+  errorMessage: undefined,
+  invalid: false,
+  appendIcon: '',
+  prependIcon: '',
+  prependInnerIcon: '',
+  autocomplete: 'off',
+  label: '',
+  id: undefined,
+  inputId: undefined,
+  mask: '',
+  prefix: '',
+  fluid: true,
+  disabled: false,
+  readonly: false,
 });
 
-const emit = defineEmits(['update:modelValue', 'click-end-icon']);
+const emit = defineEmits<AppInputMaskEmits>();
 
 const rootClass = computed(() => resolveInputRootClass(props.class));
 const autoId = useId();
-const inputId = computed(() => props.id || props.inputId || autoId);
+const computedInputId = computed(() => props.id || props.inputId || autoId);
 
-const invalid = ref<boolean>(false);
 const isFocused = ref<boolean>(false);
 
+const resolvedPrependIcon = computed<string>(
+  () => props.prependInnerIcon || props.prependIcon || '',
+);
+
+const errorMessageText = computed<string>(() => {
+  if (Array.isArray(props.errorMessages)) {
+    return props.errorMessages.filter(Boolean).join(', ');
+  }
+  return props.errorMessages || props.errorMessage || '';
+});
+
+const isInvalid = computed<boolean>(() => {
+  return Boolean(props.invalid || errorMessageText.value.length > 0);
+});
+
+const errorId = computed<string>(() => `${computedInputId.value}-error`);
+
+const ariaDescribedby = computed<string | undefined>(() => {
+  return errorMessageText.value.length > 0 ? errorId.value : undefined;
+});
+
+const computedVariant = computed<'outlined' | 'filled' | undefined>(() => {
+  if (props.inputVariant === 'outlined') return 'outlined';
+  if (props.inputVariant === 'filled') return 'filled';
+  return undefined;
+});
+
 const onUpdate = (value: string | undefined) => {
+  if (props.readonly || props.disabled) return;
   emit('update:modelValue', value ?? '');
+};
+
+const onFocus = (event: Event) => {
+  isFocused.value = true;
+  emit('focus', event);
+};
+
+const onBlur = (event: Event) => {
+  isFocused.value = false;
+  emit('blur', event);
 };
 
 const displayPlaceholder = computed(() => {
@@ -162,14 +168,4 @@ const primeMask = computed(() => {
   }
   return undefined;
 });
-
-watch(
-  () => props.errorMessages,
-  newValue => {
-    invalid.value = true;
-    if (!newValue.length) {
-      invalid.value = false;
-    }
-  },
-);
 </script>

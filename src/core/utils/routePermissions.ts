@@ -1,5 +1,11 @@
 import type { Menu } from '../interfaces/userState.store.interface';
 
+export interface RouteAuthorizationTarget {
+  path: string;
+  hasParams?: boolean;
+  parentUri?: string;
+}
+
 /**
  * Normaliza una ruta asegurando barra inicial, sin barra final y en minúsculas.
  */
@@ -13,86 +19,100 @@ export const normalizeRoute = (path: string): string => {
     : withLeading;
 };
 
-/**
- * Rutas que siempre están permitidas para cualquier usuario con sesión activa.
- */
-export const ALWAYS_ALLOWED_AUTH_ROUTES = new Set([
+const BASE_ALLOWED_AUTH_ROUTES = [
   '/',
   '/dashboard',
   '/profile',
-  '/test-view',
   '/not-found',
   '/forbidden',
-]);
+];
 
 /**
- * Contenedores o categorías de agrupación de menú que no corresponden a vistas finales navegables.
+ * Rutas esenciales del sistema siempre permitidas para cualquier usuario con sesión activa.
+ * En desarrollo se habilita /test-view para la galería de componentes UI; en producción
+ * las rutas funcionales se autorizan dinámicamente mediante el menú del backend (IAM).
  */
-const GROUP_CONTAINERS = new Set(['/admin', '/catalogs', '/user', '/']);
+export const ALWAYS_ALLOWED_AUTH_ROUTES = new Set(
+  import.meta.env.DEV
+    ? [...BASE_ALLOWED_AUTH_ROUTES, '/test-view']
+    : BASE_ALLOWED_AUTH_ROUTES,
+);
+
+const isNavigableLeafUri = (uri: string | null | undefined): uri is string => {
+  if (!uri || typeof uri !== 'string') return false;
+  const trimmed = uri.trim();
+  return trimmed !== '' && trimmed !== '#' && trimmed !== '/';
+};
 
 /**
- * Recorre recursivamente el árbol de menús del usuario y extrae todos los URIs válidos.
+ * Recorre recursivamente el árbol de menús del usuario y extrae únicamente los URIs de rutas hoja navegables.
  */
 export const extractAllowedUris = (menus: Menu[]): Set<string> => {
-  const allowed = new Set<string>();
+  const leafUris = new Set<string>();
 
   const traverse = (items: Menu[]) => {
     if (!Array.isArray(items)) return;
     for (const item of items) {
-      if (
-        item.uri &&
-        typeof item.uri === 'string' &&
-        item.uri.trim() !== '' &&
-        item.uri !== '#' &&
-        item.uri !== '/'
-      ) {
-        allowed.add(normalizeRoute(item.uri));
-      }
-      if (Array.isArray(item.children) && item.children.length > 0) {
+      const hasChildren =
+        Array.isArray(item.children) && item.children.length > 0;
+      if (hasChildren) {
         traverse(item.children);
+      } else if (isNavigableLeafUri(item.uri)) {
+        leafUris.add(normalizeRoute(item.uri));
       }
     }
   };
 
   traverse(menus);
-  return allowed;
+  return leafUris;
 };
 
 /**
- * Verifica si una ruta específica está autorizada para el usuario dado su árbol de menús.
+ * Verifica si una ruta específica está autorizada para el usuario dado su árbol de menús dinámico.
  *
- * @param targetPath Ruta de destino solicitada por el usuario (to.path).
- * @param userMenus Lista de menús y submódulos autorizados para el usuario.
+ * @param target Ruta solicitada o descriptor con metadatos de parámetros / ruta padre.
+ * @param userMenus Lista de menús y submódulos autorizados para el usuario provistos por el backend.
  * @returns true si el usuario tiene permiso explícito o la ruta es de acceso universal; false en caso contrario.
  */
 export const isRouteAuthorized = (
-  targetPath: string,
+  target: string | RouteAuthorizationTarget,
   userMenus: Menu[] | null | undefined,
 ): boolean => {
-  const normalized = normalizeRoute(targetPath);
+  const targetObj: RouteAuthorizationTarget =
+    typeof target === 'string' ? { path: target } : target;
+  const normalized = normalizeRoute(targetObj.path);
 
-  // 1. Si está en la lista blanca de rutas base autorizadas para todo usuario autenticado
+  // 1. Rutas utilitarias base del sistema
   if (ALWAYS_ALLOWED_AUTH_ROUTES.has(normalized)) {
     return true;
   }
 
-  // 2. Si no hay menús cargados, denegar acceso por seguridad
+  // 2. Sin menús cargados, denegar acceso por seguridad
   if (!userMenus || !Array.isArray(userMenus) || userMenus.length === 0) {
     return false;
   }
 
-  const allowedUris = extractAllowedUris(userMenus);
+  const allowedLeafUris = extractAllowedUris(userMenus);
 
-  // 3. Coincidencia directa con URI autorizado
-  if (allowedUris.has(normalized)) {
+  // 3. Coincidencia exacta con una ruta hoja autorizada
+  if (allowedLeafUris.has(normalized)) {
     return true;
   }
 
-  // 4. Coincidencia jerárquica para submódulos o formularios de mantenimiento (ej: /admin/role/role-maintenance/:id)
-  // Siempre que el prefijo pertenezca a un módulo permitido y no a un contenedor genérico
-  for (const uri of allowedUris) {
-    if (!GROUP_CONTAINERS.has(uri) && normalized.startsWith(`${uri}/`)) {
+  // 4. Coincidencia declarativa por ruta padre (formularios de mantenimiento o vistas de detalle)
+  if (targetObj.parentUri) {
+    const normalizedParent = normalizeRoute(targetObj.parentUri);
+    if (allowedLeafUris.has(normalizedParent)) {
       return true;
+    }
+  }
+
+  // 5. Coincidencia jerárquica estricta solo para rutas con parámetros dinámicos (:id)
+  if (targetObj.hasParams) {
+    for (const uri of allowedLeafUris) {
+      if (normalized.startsWith(`${uri}/`)) {
+        return true;
+      }
     }
   }
 
