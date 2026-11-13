@@ -83,6 +83,11 @@
               />
             </div>
 
+            <!-- Turnstile (solo cuando está configurado en env) -->
+            <div v-if="hasTurnstileSiteKey" class="flex justify-center">
+              <div ref="turnstileContainerRef" class="min-h-[65px]" />
+            </div>
+
             <!-- Submit -->
             <Button
               type="submit"
@@ -116,12 +121,13 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { Card, Button } from 'primevue';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 import AppInputText from '@/core/components/AppInputText.vue';
+import { useTurnstile } from '@/core/composables/useTurnstile';
 import authServices from '@/core/services/auth.services';
 import { emailFormat } from '@/core/utils/validationRules';
 import { sanitizedValueInput } from '@/core/utils/inputTextValidations';
@@ -136,39 +142,64 @@ const [email, emailAttrs] = defineField('email');
 
 const validationInputEmail = (
   value: string,
-  input: string,
+  input: 'email',
   regex: RegExp = /[^a-zA-Z0-9._%+\-@]/g,
 ) => {
   const sanitizedValue = sanitizedValueInput(value, regex);
   nextTick(() => {
-    setFieldValue(input as any, sanitizedValue);
+    setFieldValue(input, sanitizedValue);
   });
 };
+
+const {
+  hasSiteKey: hasTurnstileSiteKey,
+  token: turnstileToken,
+  containerRef: turnstileContainerRef,
+  reset: resetTurnstile,
+} = useTurnstile({ theme: 'dark' });
 
 const isLoading = ref(false);
 const isSuccess = ref(false);
 const authError = ref('');
 const successMessage = ref('');
 
+watch(turnstileToken, token => {
+  if (token) {
+    authError.value = '';
+  }
+});
+
 const onSubmit = handleSubmit(async values => {
-  isLoading.value = true;
   authError.value = '';
   successMessage.value = '';
 
+  if (hasTurnstileSiteKey.value && !turnstileToken.value) {
+    authError.value = 'Por favor, completa la verificación de seguridad.';
+    return;
+  }
+
+  isLoading.value = true;
+
   try {
-    // Aquí se conectaría la llamada real a la API para enviar el enlace de recuperación
-    // await authServices.forgotPassword({ email: values.email });
-    await authServices.generateLinkResetPassword(values.email);
-    // Simulación de carga
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await authServices.generateLinkResetPassword(
+      values.email,
+      turnstileToken.value || undefined,
+    );
 
     successMessage.value =
       'Se ha enviado un enlace de recuperación a tu correo electrónico.';
     isSuccess.value = true;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (hasTurnstileSiteKey.value) {
+      resetTurnstile();
+    }
     authError.value =
-      error.message ||
-      'Ocurrió un error al enviar el correo. Por favor, inténtalo de nuevo.';
+      typeof error === 'object' &&
+      error !== null &&
+      'message' in error &&
+      typeof error.message === 'string'
+        ? error.message
+        : 'Ocurrió un error al enviar el correo. Por favor, inténtalo de nuevo.';
   } finally {
     isLoading.value = false;
   }

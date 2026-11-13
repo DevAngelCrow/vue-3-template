@@ -86,6 +86,12 @@ const routes = [
     component: () => import('../../modules/auth/views/VerifyEmail.vue'),
   },
   {
+    path: '/change-email-confirm',
+    name: 'change-email-confirm',
+    meta: { requiresAuth: false, title: 'Confirmar cambio de correo' },
+    component: () => import('../../modules/auth/views/ConfirmEmailChange.vue'),
+  },
+  {
     path: '/pending-verification-email',
     name: 'pending-verification-email',
     meta: { requiresAuth: false, title: 'Verificación de correo electrónico' },

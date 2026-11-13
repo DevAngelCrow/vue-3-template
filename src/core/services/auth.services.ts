@@ -2,6 +2,8 @@ import { LocationQueryValue } from 'vue-router';
 
 import { GeographicDivisionTypeResponse } from '@/modules/catalogs/interfaces/geographic-division-type/geographic-division-type.response.interface';
 import { GeographicDivisionResponse } from '@/modules/catalogs/interfaces/geographic-division/geographic-division.response.interface';
+import type { RequestEmailChangeForm } from '@/modules/auth/interfaces/email-change.interface';
+import type { ActiveSessionItem } from '@/modules/auth/interfaces/session.interface';
 
 import { httpClient } from '../utils/httpClient';
 import { ApiResponseGeneric } from './interfaces/apiResponseGeneric.interface';
@@ -153,10 +155,14 @@ const updateProfile = async (
 
 const generateLinkResetPassword = async (
   email: string,
+  turnstileToken?: string,
 ): Promise<ApiPostResponse> => {
+  const payload = turnstileToken
+    ? { email, turnstile_token: turnstileToken }
+    : { email };
   const response = await httpClient.post<ApiPostResponse>(
     'auth/forgot-password',
-    { email },
+    payload,
   );
   return response.data;
 };
@@ -171,6 +177,55 @@ const resetPassword = async (
   );
   return response.data;
 };
+
+const requestEmailChange = async (
+  data: RequestEmailChangeForm,
+): Promise<ApiPostResponse<null>> => {
+  const response = await httpClient.post<ApiPostResponse<null>>(
+    'auth/change-email/request',
+    data,
+    { skipGlobalAlert: true },
+  );
+  return response.data;
+};
+
+const confirmEmailChange = async (
+  id: string,
+  token: string,
+): Promise<ApiPostResponse<null>> => {
+  const response = await httpClient.get<ApiPostResponse<null>>(
+    'auth/change-email/confirm',
+    { id, token },
+    { skipGlobalAlert: true },
+  );
+  return response.data;
+};
+
+const getSessions = async (): Promise<
+  ApiResponseGenericSingle<ActiveSessionItem[]>
+> => {
+  const response =
+    await httpClient.get<ApiResponseGenericSingle<ActiveSessionItem[]>>(
+      'auth/sessions',
+    );
+  return response.data;
+};
+
+const revokeSession = async (
+  sessionId: string,
+): Promise<ApiPostResponse<null>> => {
+  const response = await httpClient.delete<ApiPostResponse<null>>(
+    `auth/sessions/${sessionId}`,
+  );
+  return response.data;
+};
+
+const revokeAllSessions = async (): Promise<ApiPostResponse<null>> => {
+  const response =
+    await httpClient.delete<ApiPostResponse<null>>('auth/sessions');
+  return response.data;
+};
+
 export default {
   getMaritalStatus,
   getGenders,
@@ -189,4 +244,9 @@ export default {
   updateProfile,
   generateLinkResetPassword,
   resetPassword,
+  requestEmailChange,
+  confirmEmailChange,
+  getSessions,
+  revokeSession,
+  revokeAllSessions,
 };

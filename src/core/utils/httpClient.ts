@@ -39,10 +39,19 @@ const shouldSkipGlobalAlert = (
 
 // Endpoints where a 401 means "bad credentials / no session", never
 // "access token expired": they must not trigger a silent refresh.
-const NO_REFRESH_ENDPOINTS = ['auth/login', 'auth/refresh-token'];
+const NO_REFRESH_ENDPOINTS = [
+  'auth/login',
+  'auth/refresh-token',
+  'auth/change-email/request',
+];
+
+const NON_SESSION_401_ENDPOINTS = ['auth/login', 'auth/change-email/request'];
 
 const isNoRefreshEndpoint = (url?: string) =>
   !!url && NO_REFRESH_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+const isNonSession401Endpoint = (url?: string) =>
+  !!url && NON_SESSION_401_ENDPOINTS.some(endpoint => url.includes(endpoint));
 
 const setAuthorizationHeader = (
   config: InternalAxiosRequestConfig,
@@ -95,8 +104,22 @@ const setupHttpClient = (api: AxiosInstance) => {
           const originalRequest = error.config as
             RetriableRequestConfig | undefined;
 
-          // Credenciales inválidas en el login: no hay sesión que refrescar
-          if (originalRequest?.url?.includes('auth/login')) {
+          // Credenciales inválidas en login o validación de contraseña actual: no cerrar sesión
+          if (isNonSession401Endpoint(originalRequest?.url)) {
+            const skipLoginToast = originalRequest?.url?.includes('auth/login');
+            if (
+              !skipLoginToast &&
+              !shouldSkipGlobalAlert(
+                originalRequest,
+                errorData.code || errorData.errorCode,
+              )
+            ) {
+              alert.showAlert({
+                type: 'error',
+                title: `${errorData.statusCode} ${error.response.statusText}`,
+                content: errorData.message,
+              });
+            }
             return Promise.reject(errorData);
           }
 

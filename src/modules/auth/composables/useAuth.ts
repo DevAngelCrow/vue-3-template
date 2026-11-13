@@ -370,10 +370,17 @@ export function useAuth() {
 
   // Mutaciones TanStack Query para Registro y Actualización de Perfil
   const registerMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
+    mutationFn: async (data: {
+      email: string;
+      password: string;
+      turnstile_token?: string;
+    }) => {
       const formRegister = new FormData();
       formRegister.append('email', data.email);
       formRegister.append('password', data.password);
+      if (data.turnstile_token) {
+        formRegister.append('turnstile_token', data.turnstile_token);
+      }
       return authServices.signUp(formRegister);
     },
     onSuccess: response => {
@@ -439,7 +446,11 @@ export function useAuth() {
       registerMutation.isPending.value || updateProfileMutation.isPending.value,
   );
 
-  const registerUser = async (data: { email: string; password: string }) => {
+  const registerUser = async (data: {
+    email: string;
+    password: string;
+    turnstile_token?: string;
+  }) => {
     try {
       await registerMutation.mutateAsync(data);
     } catch {

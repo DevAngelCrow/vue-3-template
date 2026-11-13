@@ -45,12 +45,17 @@ export function useLogin() {
 
   const isLoading = computed(() => loginMutation.isPending.value);
 
-  const login = async (user: string, password: string) => {
+  const login = async (
+    user: string,
+    password: string,
+    turnstileToken?: string,
+  ) => {
     error.value = null;
     try {
       await loginMutation.mutateAsync({
         user_name: user,
         password: password,
+        ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
       });
     } catch {
       // El error se gestiona reactivamente en onError
