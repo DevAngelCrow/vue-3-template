@@ -1,184 +1,151 @@
-<p  align="center">
-<a  style="display:inline-block; vertical-align:middle;"  href=""  target="blank"><img  src="https://api.iconify.design/logos:vue.svg"  width="120"  alt="Vue Logo"  /></a>
+<p align="center">
+<a style="display:inline-block; vertical-align:middle;" href="https://vuejs.org/" target="blank"><img src="https://api.iconify.design/logos:vue.svg" width="120" alt="Vue Logo" /></a>
 &nbsp;&nbsp;&nbsp;
+<a style="display:inline-block; vertical-align:middle;" href="https://vite.dev/" target="blank"><img src="https://api.iconify.design/logos:vitejs.svg" width="120" alt="Vite" /></a>
 &nbsp;&nbsp;&nbsp;
-<a  style="display:inline-block; vertical-align:middle;"  href=""  target="blank"><img  src="https://api.iconify.design/logos:vitejs.svg"  width="120"  alt="Vite"  /></a>
+<a style="display:inline-block; vertical-align:middle;" href="https://www.typescriptlang.org/" target="blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="120" alt="TypeScript" /></a>
 &nbsp;&nbsp;&nbsp;
+<a style="display:inline-block; vertical-align:middle;" href="https://primevue.org/" target="blank"><img src="https://api.iconify.design/simple-icons:primevue.svg?color=%234ADE80" width="120" alt="PrimeVue 5" /></a>
 &nbsp;&nbsp;&nbsp;
-<a  style="display:inline-block; vertical-align:middle;"  href="http://nestjs.com/"  target="blank"><img  src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg"  width="120"  alt="TypeScript"  /></a>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-<a  style="display:inline-block; vertical-align:middle;"  href="http://nestjs.com/"  target="blank"><img  src="https://api.iconify.design/simple-icons:primevue.svg?color=%234ADE80"  width="120"  alt="Primevue"  /></a>
-&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;
-<a  style="display:inline-block; vertical-align:middle;"  href="http://nestjs.com/"  target="blank"><img  src="https://cdn.simpleicons.org/tailwindcss/06B6D4"  width="120"  alt="Tailwind"  /></a>
+<a style="display:inline-block; vertical-align:middle;" href="https://tailwindcss.com/" target="blank"><img src="https://cdn.simpleicons.org/tailwindcss/06B6D4" width="120" alt="Tailwind CSS 4" /></a>
 </p>
 
-# Vue 3 + Vite + Typescript + PrimeVue (4) + Tailwind (4.0) Template
+# Vue 3 + Vite 7 + TypeScript + PrimeVue 5 + Tailwind CSS 4 Template
 
-Esta plantilla cuenta con las tecnologias descritas para poder iniciar con un desarrollo rapido, asi como cuenta con componentes
-basicos listos para utilizarse.
+Plantilla frontend modular lista para integrarse con `hexagonal_template_nestjs`, equipada con autenticación en memoria + cookie `HttpOnly` de refresco, RBAC dinámico por menú desde API, **42 componentes globales `App*`**, TanStack Vue Query 5 con sincronización automática de carga y formularios validados con Vee-Validate + Yup.
 
-## Configuración del inicial de la plantilla
+## Configuración Inicial de la Plantilla
 
 ### Requisitos
 
-- Node versión >= 18.8.0
-- npm versión >= 10.8.x
+- Node versión `>= 18.18.0` (verificado por script `check:node`)
+- npm versión `>= 10.8.x`
 
 ### Instalación
 
-1 - Clonar el repositorio.
-
-```
+1. **Clonar el repositorio:**
+```bash
 git clone https://github.com/DevAngelCrow/vue-3-template.git
 cd vue-3-template
 ```
 
-2 - Configurar el .env
-
-```
+2. **Configurar variables de entorno:**
+```bash
 cp .env.example .env.local
 ```
+Variables definidas en [`.env.example`](.env.example):
+- `VITE_VUE_APP_API_URL`: URL base del backend **sin** prefijo `/api/v1` (por ejemplo, `http://localhost:3000`; [`src/core/config/axios.ts`](src/core/config/axios.ts) añade `/api/v1` automáticamente).
+- `VITE_VUE_PORT`: Puerto del servidor de desarrollo Vite (por defecto `5173`).
+- `VITE_CLOUDFLARE_TURNSTILE_SITE_KEY`: Site key pública de Cloudflare Turnstile (opcional en desarrollo; requerida si el backend tiene `TURNSTILE_ENABLED=true`).
 
-Configura las variables de entorno del archivo .env.local de acuerdo a tu necesidad.
-Inicialmente cuenta con dos variables de entorno que son las habituales
-VITE_VUE_APP_API_URL=""
-VITE_PORT=""
-
-3 - Procedemos a instalar dependencias, ejecutamos en consola dentro del directorio del repositorio el comando siguiente
-
-```
+3. **Instalar dependencias:**
+```bash
 npm install
 ```
 
-4 - Dar permisos de superusuario a la carpeta husky si estas utilizando Linux
-
+4. **Dar permisos de ejecución a Husky (solo Linux/macOS):**
+```bash
+chmod +x .husky/*
 ```
-sudo chmod +x .husky/*
-```
 
-5 - Procedemos a ejecutar el siguiente script para asentar las configuraciones iniciales:
-
-```
+5. **Configurar hooks locales (`dev:setup`):**
+```bash
 npm run dev:setup
 ```
 
-6 - Ejecutamos el comando siguiente para iniciar la ejecución del proyecto en modo desarrollo
-
-```
+6. **Iniciar servidor de desarrollo:**
+```bash
 npm run dev
 ```
 
-# Estructura general del directorio de carpetas y archivos del proyecto
+---
 
+## Arquitectura Clave en Tiempo de Ejecución
+
+- **Seguridad de Sesión (Zero-Storage JWT)**: `useAuthStore` conserva el `access_token`, usuario y menú **únicamente en memoria RAM** (`purgeLegacyAuthStorage()` limpia cualquier residuo previo de `localStorage`/`sessionStorage` al iniciar). La persistencia entre recargas funciona mediante cookie `HttpOnly` `refresh_token` enviada automáticamente (`withCredentials: true`) hacia `POST /api/v1/auth/refresh-token`.
+- **Refresco Concurrente Single-Flight**: [`tokenRefresh.ts`](src/core/utils/tokenRefresh.ts) coordina los reintentos ante `401` mediante un mutex de promesa única para evitar múltiples rotaciones simultáneas contra el backend.
+- **RBAC Fail-Closed en Router**: [`src/core/router/index.ts`](src/core/router/index.ts) y [`routePermissions.ts`](src/core/utils/routePermissions.ts) restauran la sesión al arrancar, cargan el árbol `GET /api/v1/security/menus/` y autorizan solo las rutas hoja devueltas por la API (más rutas base como `/dashboard` y `/profile`).
+- **TanStack Vue Query + `AppLoader`**: [`vueQuery.ts`](src/core/plugins/vueQuery.ts) desactiva el loader bloqueante global en consultas (`queries` con `skipLoader: true` -> usar `AppSkeleton`), mientras que las **mutaciones** activan `<AppLoader />` automáticamente a través de `initQueryLoaderSync`.
+- **Componentes Globales**: [`globalComponents.ts`](src/core/plugins/globalComponents.ts) registra automáticamente todos los componentes bajo `src/core/components/` en PascalCase y kebab-case.
+
+---
+
+## Estructura General del Proyecto
+
+```text
+vue-3-template/
+├── .agents/skills/                   # Skills de desarrollo y scaffolding del proyecto
+├── .gemini/rules/project-standards.md # Reglas normativas de estilo y estándares UI
+├── src/
+│   ├── core/
+│   │   ├── assets/                   # style.css (Tailwind 4 + tokens PrimeVue), fuentes e íconos
+│   │   ├── components/               # 42 componentes globales App* (Inputs Nivel 2, Tablas, Modales)
+│   │   ├── composables/              # useTurnstile, useNavigationMenu, usePublicGeoCatalogs, useMobileViewport
+│   │   ├── config/                   # axios.ts (API_BASE_URL + withCredentials)
+│   │   ├── constants/                # Catálogo de iconos PrimeIcons
+│   │   ├── directives/               # Registro de directivas PrimeVue (tooltip, ripple, etc.)
+│   │   ├── interfaces/               # Contratos TS del core y stores
+│   │   ├── layouts/                  # Layout.vue (Shell principal autenticado)
+│   │   ├── plugins/                  # globalComponents.ts, vueQuery.ts
+│   │   ├── router/                   # Router principal y guards beforeEach
+│   │   ├── services/                 # auth.services.ts, session.services.ts, index.services.ts
+│   │   ├── store/                    # useAuthStore, useAlertStore, useLayoutStore, useLoaderStore, useLandingInquiryStore
+│   │   └── utils/                    # httpClient, tokenRefresh, routePermissions, validationRules, queryKeys, dates
+│   ├── modules/
+│   │   ├── auth/                     # Login, SignUp, Forgot/ResetPassword, VerifyEmail, ConfirmEmailChange, Profile
+│   │   ├── admin/                    # Categorías, Permisos, Roles (+ detalle), Rutas (+ detalle), Usuario-Rol
+│   │   └── catalogs/                 # Países, Estados Globales/Categoría, Tipos Doc, Géneros, Divisiones Geográficas (+ legado)
+│   ├── types/                        # Declaraciones TS globales y shims Turnstile/PrimeVue
+│   ├── views/                        # Landing (+ src/views/components/landing/), Dashboard, NotFound, Forbidden
+│   ├── App.vue
+│   ├── customTheme.ts                # Preset PrimeVue 5 (Aura emerald/slate + tokens semánticos)
+│   └── main.ts                       # Bootstrap app, plugins, tema y montaje
+├── .env.example
+├── .gitignore
+├── .prettierrc.json
+├── AGENTS.md                         # Normativa integral de arquitectura y desarrollo frontend
+├── commitlint.config.ts
+├── eslint.config.ts
+├── index.html
+├── package.json
+├── README.md
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vercel.json                       # Rewrites SPA para despliegue
+└── vite.config.ts
 ```
-📦 mi-proyecto
-├── 📁 src
-│    ├── 📁 core
-│    │    ├── 📁 assets
-│    │    ├── 📁 components
-│    │    ├── 📁 composables
-│    │    ├── 📁 config
-│    │    ├── 📁 directives
-│    │    ├── 📁 interfaces
-│    │    ├── 📁 layouts
-│    │    ├── 📁 router
-│    │    ├── 📁 services
-│    │    ├── 📁 store
-│    │    └── 📁 utils
-│    │
-│    ├── 📦 modules
-│    │    └── 📁 module
-│    │
-│    └── 📁 views
-│         └── 📁 module
-│
-├── 📄 .env.example
-├── 📄 .env.local
-├── 📄 .eslint.config.ts
-├── 📄 .gitignore
-├── 📄 .prettierrc.json
-├── 📄 .commitlint.config.ts
-├── 📄 AGENTS.md
-├── 📄 index.html
-├── 📄 package.json
-├── 📄 README.md
-├── 📄 tsconfig.app.json
-├── 📄 tsconfig.json
-├── 📄 tsconfig.node.json
-└── 📄 vite.config.ts
-```
 
-# Descripcion de carpetas y archivos de los directorios.
+---
 
-## Carpeta core
-
-- 📂 assets/: Contiene recursos de estilos, multimedia y archivos estaticos globales de la aplicacion.
-
-- 📂 components/: Contiene componentes Vue reutilizables globales con prefijo 'App' (tales como AppModal, AppDataTable, AppDatePicker, AppInputText, etc.).
-
-- 📂 composables/: Contiene funciones reactivas creadas con Composition API de Vue 3 que encapsulan lógica reutilizable por la aplicación.
-
-- 📂 config/: Define configuraciones globales.
-
-- 📂 directives/: Contiene directivas reutilizables para los componentes.
-
-- 📂 interfaces/: Define interfaces a utilizar para la implementacion de tipados estrictos.
-
-- 📂 layout/: Contiene el componente general del diseno general donde se visualiza todo el contenido de la aplicacion.
-
-- 📂 router/: Define las rutas de la aplicacion con la tecnologia de Vue Router.
-
-- 📂 services/: Contiene las funciones responsables para le ejecucion de peticiones http hacia API's internas o externas.
-
-- 📂 store/: Implementa la gestión del estado global con Pinia.
-
-- 📂 utils/: Contiene e incluye funciones de uso general, validadores, etc.
-
-## Carpeta modules
-
-- 📂 modules/: Contiene cada modulo que cuenta con una estructura de componentes, composables, rutas y vistas que se integran a la aplicacion global (Ejemplo: Auth...).
-
-## Carpeta views
-
-- 📂 views/: Contiene las vistas generales de la aplicacion.
-
-## Archivos de directorio raiz.
-
-- 📄 App.vue: Componente raíz que define la estructura base de la aplicación.
-
-- 📄 main.ts: Archivo principal que inicializa Vue, configura plugins y monta la aplicacion.
-
-- 📄 env.example: Archivo de ejemplo para definir variables de entorno necesarias para el proyecto.
-
-- 📄 .git.ignore: Archivo el cual contiene las extensiones que se omiten al momento de realizar un commit del repositorio local y externo.
-
-- 📄 index.html: Archivo que es el punto de entrada principal de la aplicacion en tiempo de desarrollo y sirve como plantilla para la generacion del HTML final durante la compilacion.
-
-- 📄 package.json: Archivo que define la configuracion principal del proyecto(nombre, version, scripts, dependencias y configuraciones especificas del ecosistema JS)
-
-- 📄 tsconfig.app.json, tsconfig.json, tsconfig.node.json: Archivos de configuracion de TypeScript el cual define las opciones del compilador global
-
-- 📄 vite.config.ts: Archivo que define cómo se comporta Vite durante el desarrollo, build y preview. Es donde puedes extender funcionalidades, configurar plugins, establecer alias de rutas, entre otros.
-
-- 📄 AGENTS.md: Documento normativo que define las directrices y estándares de arquitectura, componentes, TanStack Query, validaciones con Vee-Validate y políticas de desarrollo para agentes y programadores.
-
-## Scripts de Calidad y Validación de Tipos
-
-Para garantizar que el código se mantenga libre de errores de tipado e inconsistencias:
+## Scripts Disponibles (`package.json`)
 
 ```bash
-# Validación completa de tipos TypeScript de todo el proyecto (Project References)
+# Servidor de desarrollo Vite
+npm run dev
+
+# Linter ESLint 9 y autocorrección
+npm run lint
+npm run lint:fix
+
+# Formateo Prettier
+npm run format
+
+# Validación de tipos TypeScript (Project References y app)
 npm run check:types
-
-# Alias estándar para verificación de tipos
 npm run typecheck
-
-# Validación de tipos enfocada en el código fuente de la aplicación Vue
 npm run typecheck:app
 
-# Validación combinada de lint, tipos y formateo
+# Validación completa (lint + check:types + format)
 npm run check
+
+# Compilación de producción (estándar y con gate previo)
+npm run build
+npm run build:prod
+
+# Vista previa de build compilado
+npm run preview
+npm run preview:build
 ```
 
+Para detalles normativos de creación de módulos CRUD, formularios Vee-Validate, gestión de caché TanStack Query y jerarquía de componentes `App*`, consulta [`AGENTS.md`](AGENTS.md) y `.gemini/rules/project-standards.md`.
