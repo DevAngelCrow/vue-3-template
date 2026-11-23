@@ -9,7 +9,7 @@
     @update:show="onUpdateShow"
   >
     <div class="w-full space-y-4 py-2">
-      <p class="text-sm text-surface-500 dark:text-surface-400">
+      <p class="text-sm text-surface-600 leading-relaxed">
         Por seguridad, confirma tu contraseña actual. Enviaremos un enlace de
         verificación válido por 15 minutos a tu nuevo correo electrónico. Al
         confirmarlo se cerrarán tus sesiones activas.
@@ -18,7 +18,7 @@
       <div
         v-if="requestError"
         role="alert"
-        class="flex items-start gap-2 rounded-lg border border-danger-500/40 bg-danger-500/10 p-3 text-sm text-danger-600 dark:text-danger-400"
+        class="flex items-start gap-2 rounded-lg border border-danger-200 bg-danger-50 p-3 text-sm text-danger-700"
       >
         <i class="pi pi-exclamation-circle mt-0.5 shrink-0" />
         <span>{{ requestError }}</span>

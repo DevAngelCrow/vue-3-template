@@ -60,4 +60,11 @@ export const routesCatalogs = [
         '@/modules/catalogs/geographic-division/views/GeographicDivisions.vue'
       ),
   },
+  {
+    path: 'catalogs/document-prefixes',
+    name: 'document-prefixes',
+    meta: { title: 'Prefijos y Series de Documentos' },
+    component: () =>
+      import('@/modules/catalogs/document-prefix/views/DocumentPrefixes.vue'),
+  },
 ];

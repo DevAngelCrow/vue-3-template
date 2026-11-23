@@ -57,13 +57,13 @@ const routes = [
       {
         path: '/dashboard',
         name: 'dashboard',
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: 'Panel de Control' },
         component: () => import('@/views/Dashboard.vue'),
       },
       {
         path: '/profile',
         name: 'profile',
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: 'Mi Perfil' },
         component: () => import('../../modules/auth/views/Profile.vue'),
       },
       {
@@ -196,6 +196,18 @@ router.beforeEach(async to => {
   }
 
   return true;
+});
+
+const DEFAULT_DOCUMENT_TITLE = 'Front-end template';
+
+router.afterEach(to => {
+  const routeTitle =
+    typeof to.meta.title === 'string' && to.meta.title.trim().length > 0
+      ? to.meta.title.trim()
+      : null;
+  document.title = routeTitle
+    ? `${routeTitle} | ${DEFAULT_DOCUMENT_TITLE}`
+    : DEFAULT_DOCUMENT_TITLE;
 });
 
 export default router;
