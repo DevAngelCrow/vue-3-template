@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { Button } from 'primevue';
 
@@ -106,8 +106,6 @@ defineOptions({ name: 'AppMenuItemSideBar' });
 const props = defineProps<{
   mappedMenu: NavigationItem[];
 }>();
-
-const resolvedMenu = computed(() => props.mappedMenu ?? props.items ?? []);
 
 const route = useRoute();
 const layoutStore = useLayoutStore();
@@ -126,7 +124,7 @@ const hasChildren = (children?: NavigationItem[]) =>
   Boolean(children && children.length > 0);
 
 watch(
-  [() => route.path, () => resolvedMenu.value],
+  [() => route.path, () => props.mappedMenu],
   ([currentPath, items]) => {
     for (const section of items) {
       if (
