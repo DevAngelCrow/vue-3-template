@@ -47,11 +47,81 @@ const NO_REFRESH_ENDPOINTS = [
 
 const NON_SESSION_401_ENDPOINTS = ['auth/login', 'auth/change-email/request'];
 
+const IDEMPOTENCY_EXCLUDED_ENDPOINTS = [
+  'auth/login',
+  'auth/refresh-token',
+  'auth/sign-up',
+  'auth/reset-password',
+  'auth/forgot-password',
+  'auth/logout',
+  'auth/docs-access',
+  'auth/change-email/request',
+];
+
 const isNoRefreshEndpoint = (url?: string) =>
   !!url && NO_REFRESH_ENDPOINTS.some(endpoint => url.includes(endpoint));
 
 const isNonSession401Endpoint = (url?: string) =>
   !!url && NON_SESSION_401_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+const isIdempotencyExcludedEndpoint = (url?: string) =>
+  !!url && IDEMPOTENCY_EXCLUDED_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+const getIdempotencyOption = (
+  config: InternalAxiosRequestConfig,
+): string | false | undefined => {
+  if ('idempotencyKey' in config) {
+    const value = config.idempotencyKey;
+    if (typeof value === 'string' || value === false) {
+      return value;
+    }
+  }
+  return undefined;
+};
+
+const isMultipartRequest = (config: InternalAxiosRequestConfig): boolean => {
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    return true;
+  }
+  const contentType = config.headers?.get?.('Content-Type');
+  return (
+    typeof contentType === 'string' &&
+    contentType.toLowerCase().includes('multipart/form-data')
+  );
+};
+
+const setIdempotencyHeaderIfNeeded = (config: InternalAxiosRequestConfig) => {
+  const method = config.method?.toLowerCase();
+  if (method !== 'post' && method !== 'put') {
+    return;
+  }
+
+  const idempotencyOption = getIdempotencyOption(config);
+  if (idempotencyOption === false) {
+    return;
+  }
+
+  if (isIdempotencyExcludedEndpoint(config.url) || isMultipartRequest(config)) {
+    return;
+  }
+
+  if (!config.headers) {
+    config.headers = AxiosHeaders.from({});
+  }
+
+  if (
+    config.headers.has('Idempotency-Key') ||
+    config.headers.has('idempotency-key')
+  ) {
+    return;
+  }
+
+  const key =
+    typeof idempotencyOption === 'string' && idempotencyOption.trim().length > 0
+      ? idempotencyOption.trim()
+      : crypto.randomUUID();
+  config.headers.set('Idempotency-Key', key);
+};
 
 const setAuthorizationHeader = (
   config: InternalAxiosRequestConfig,
@@ -73,6 +143,7 @@ const setupHttpClient = (api: AxiosInstance) => {
       if (token) {
         setAuthorizationHeader(config, token);
       }
+      setIdempotencyHeaderIfNeeded(config);
       return config;
     },
     (error: AxiosError) => {

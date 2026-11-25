@@ -17,6 +17,20 @@ import { RouteResponseById } from '../interfaces/routes/route-by-id.response.int
 import { UsersResponse } from '../interfaces/user-role/users.response.interface';
 import { UserRoleByIdResponse } from '../interfaces/user-role/user-role-by-id.response.interface';
 import { UserRoleUpdateForm } from '../interfaces/user-role/user-role-update.form.interface';
+import {
+  AuditLogResponse,
+  AuditLogsQueryParams,
+} from '../interfaces/audit/audit-log.interface';
+import {
+  ProviderStorageForm,
+  ProviderStorageQueryParams,
+  ProviderStorageResponse,
+} from '../interfaces/storage/provider-storage.interface';
+import {
+  StorageFileResponse,
+  StorageFilesQueryParams,
+  UploadStorageFileParams,
+} from '../interfaces/storage/storage-file.interface';
 
 export interface ParamsFilter {
   active?: boolean;
@@ -202,6 +216,80 @@ const putUserRole = async (id: string, data: UserRoleUpdateForm) => {
   return response;
 };
 
+const getAuditLogs = async (
+  params: AuditLogsQueryParams,
+): Promise<ApiResponseGeneric<AuditLogResponse>> => {
+  const response = await httpClient.get<ApiResponseGeneric<AuditLogResponse>>(
+    'audit/logs',
+    params,
+  );
+  return response.data;
+};
+
+const getProviderStorages = async (
+  params: ProviderStorageQueryParams,
+): Promise<ApiResponseGeneric<ProviderStorageResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<ProviderStorageResponse>
+  >('storage/provider-storages', params);
+  return response.data;
+};
+
+const getProviderStorageById = async (
+  id: string,
+): Promise<ApiPostResponse<ProviderStorageResponse>> => {
+  const response = await httpClient.get<
+    ApiPostResponse<ProviderStorageResponse>
+  >(`storage/provider-storages/${id}`);
+  return response.data;
+};
+
+const postProviderStorage = async (data: ProviderStorageForm) => {
+  const response = await httpClient.post<ApiPostResponse<null>>(
+    'storage/provider-storages',
+    data,
+  );
+  return response;
+};
+
+const putProviderStorage = async (id: string, data: ProviderStorageForm) => {
+  const response = await httpClient.put<ApiPostResponse<null>>(
+    `storage/provider-storages/${id}`,
+    data,
+  );
+  return response;
+};
+
+const deleteProviderStorage = async (id: string) => {
+  const response = await httpClient.delete<ApiPostResponse<null>>(
+    `storage/provider-storages/${id}`,
+  );
+  return response;
+};
+
+const getStorageFiles = async (
+  params: StorageFilesQueryParams,
+): Promise<ApiResponseGeneric<StorageFileResponse>> => {
+  const response = await httpClient.get<
+    ApiResponseGeneric<StorageFileResponse>
+  >('storage/storage-files', params);
+  return response.data;
+};
+
+const uploadStorageFile = async (
+  file: File,
+  params?: UploadStorageFileParams,
+) => {
+  const formData = new FormData();
+  formData.append('content_file', file);
+  const response = await httpClient.post<ApiPostResponse<StorageFileResponse>>(
+    'storage/storage-files',
+    formData,
+    { params },
+  );
+  return response;
+};
+
 export default {
   getAllRoutes,
   getAllRoutesWithOutPaginate,
@@ -225,4 +313,12 @@ export default {
   getUsers,
   getUserRoleById,
   putUserRole,
+  getAuditLogs,
+  getProviderStorages,
+  getProviderStorageById,
+  postProviderStorage,
+  putProviderStorage,
+  deleteProviderStorage,
+  getStorageFiles,
+  uploadStorageFile,
 };

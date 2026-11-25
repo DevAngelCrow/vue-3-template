@@ -8,7 +8,6 @@ import type { ActiveSessionItem } from '@/modules/auth/interfaces/session.interf
 import { httpClient } from '../utils/httpClient';
 import { ApiResponseGeneric } from './interfaces/apiResponseGeneric.interface';
 import { Country } from './interfaces/auth/country.interface';
-import { District } from './interfaces/auth/district.interface';
 import { DocumentType } from './interfaces/auth/documentType.interface';
 import { Gender } from './interfaces/auth/gender.interface';
 import { MaritalStatus } from './interfaces/auth/maritalStatus.interface';
@@ -19,7 +18,6 @@ import {
 import { Login } from './interfaces/auth/login.interface';
 import { ApiResponseLogin } from './interfaces/auth/apiResponseLogin.interface';
 import { ApiResponseLogout } from './interfaces/auth/apiResponseLogout.interface';
-import { ApiResponseCatalogs } from './interfaces/auth/catalogs.interface';
 import { ProfileDetails } from './interfaces/auth/profileDetails.interface';
 import { ApiResponseGenericSingle } from './interfaces/apiResponseGenericSingle.interface';
 import { ApiPostResponse } from './apiPostResponse.interface';
@@ -63,12 +61,6 @@ const getGeographicalDivisionsTypes = async (
   const response = await httpClient.get<
     ApiResponseGeneric<GeographicDivisionTypeResponse>
   >('catalogs/geographic-division-types', params);
-  return response.data;
-};
-const getDistricts = async (): Promise<ApiResponseGeneric<District>> => {
-  const response = await httpClient.get<ApiResponseGeneric<District>>(
-    'catalogs/districts?page=1&per_page=10',
-  );
   return response.data;
 };
 
@@ -120,11 +112,6 @@ const verifyEmail = async (
 const getMenu = async (): Promise<ApiResponseMenu<MenuResponseData>> => {
   const response =
     await httpClient.get<ApiResponseMenu<MenuResponseData>>('security/menus/');
-  return response.data;
-};
-
-const getCatalogs = async (): Promise<ApiResponseCatalogs> => {
-  const response = await httpClient.get<ApiResponseCatalogs>('auth/catalogs');
   return response.data;
 };
 
@@ -230,14 +217,12 @@ export default {
   getMaritalStatus,
   getGenders,
   getCountriesNationalities,
-  getDistricts,
   getDocumentTypes,
   signUp,
   verifyEmail,
   getMenu,
   login,
   logout,
-  getCatalogs,
   getGeographicalDivisions,
   getGeographicalDivisionsTypes,
   getProfileDetails,

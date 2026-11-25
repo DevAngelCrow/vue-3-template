@@ -111,7 +111,7 @@ import { computed, inject, ref } from 'vue';
 import { AutoCompleteCompleteEvent } from 'primevue';
 import dayjs from 'dayjs';
 
-import { Country } from '@/modules/catalogs/interfaces/deparments/deparment.country.interface';
+import { Country } from '@/core/services/interfaces/auth/country.interface';
 
 import { useAuth } from '../composables/useAuth';
 
