@@ -263,7 +263,7 @@ watch(
   () => {
     checkWrapMenu();
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 );
 
 watch(isMobile, () => {

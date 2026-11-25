@@ -1,7 +1,7 @@
 <template>
   <ul class="flex flex-col m-0 p-0 list-none w-full gap-1.5">
     <li
-      v-for="section in resolvedMenu"
+      v-for="section in mappedMenu"
       :key="section.id || section.title || section.name"
       class="flex flex-col w-full"
     >
@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { Button } from 'primevue';
 
@@ -104,11 +104,8 @@ import { useLayoutStore } from '../store/useLayoutStore';
 defineOptions({ name: 'AppMenuItemSideBar' });
 
 const props = defineProps<{
-  mappedMenu?: NavigationItem[];
-  items?: NavigationItem[];
+  mappedMenu: NavigationItem[];
 }>();
-
-const resolvedMenu = computed(() => props.mappedMenu ?? props.items ?? []);
 
 const route = useRoute();
 const layoutStore = useLayoutStore();
@@ -127,7 +124,7 @@ const hasChildren = (children?: NavigationItem[]) =>
   Boolean(children && children.length > 0);
 
 watch(
-  [() => route.path, () => resolvedMenu.value],
+  [() => route.path, () => props.mappedMenu],
   ([currentPath, items]) => {
     for (const section of items) {
       if (

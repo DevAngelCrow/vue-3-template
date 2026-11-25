@@ -54,7 +54,7 @@
 
         <!-- Contenido / Lista de enlaces con scroll estilizado -->
         <div class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          <AppMenuItemSideBar :items="sidebarItems" />
+          <AppMenuItemSideBar :mapped-menu="sidebarItems" />
         </div>
 
         <!-- Pie del Drawer con indicador de versión y estado -->

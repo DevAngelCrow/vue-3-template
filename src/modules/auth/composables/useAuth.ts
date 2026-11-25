@@ -396,9 +396,11 @@ export function useAuth() {
         if (
           response.data &&
           typeof response.data === 'object' &&
-          'message' in response.data
+          'message' in response.data &&
+          typeof response.data.message === 'string' &&
+          response.data.message
         ) {
-          errorMsg = (response.data as any).message || errorMsg;
+          errorMsg = response.data.message;
         }
         alert.showAlert({
           type: 'error',
@@ -431,12 +433,22 @@ export function useAuth() {
         editMode.value = false;
       }
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       console.error('Error al actualizar el perfil:', err);
+      const message =
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof err.message === 'string' &&
+        err.message
+          ? err.message
+          : err instanceof Error && err.message
+            ? err.message
+            : 'Error al actualizar el perfil';
       alert.showAlert({
         type: 'error',
         title: 'Error',
-        content: err.message || 'Error al actualizar el perfil',
+        content: message,
       });
     },
   });
@@ -570,8 +582,11 @@ export function useAuth() {
       formData.append('active', 'true');
 
       if (values.nationalities && values.nationalities.length > 0) {
-        values.nationalities.forEach((nat: any) => {
-          formData.append('nationalities[]', nat.id || nat);
+        values.nationalities.forEach((nat: NationalitiesArray | string) => {
+          formData.append(
+            'nationalities[]',
+            typeof nat === 'string' ? nat : nat.id,
+          );
         });
       }
 
@@ -583,7 +598,7 @@ export function useAuth() {
         id: userInfo.id,
         formData,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al actualizar el perfil:', err);
     } finally {
       finishLoading();
