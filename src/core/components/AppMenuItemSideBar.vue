@@ -1,7 +1,7 @@
 <template>
   <ul class="flex flex-col m-0 p-0 list-none w-full gap-1.5">
     <li
-      v-for="section in resolvedMenu"
+      v-for="section in mappedMenu"
       :key="section.id || section.title || section.name"
       class="flex flex-col w-full"
     >
@@ -104,8 +104,7 @@ import { useLayoutStore } from '../store/useLayoutStore';
 defineOptions({ name: 'AppMenuItemSideBar' });
 
 const props = defineProps<{
-  mappedMenu?: NavigationItem[];
-  items?: NavigationItem[];
+  mappedMenu: NavigationItem[];
 }>();
 
 const resolvedMenu = computed(() => props.mappedMenu ?? props.items ?? []);
