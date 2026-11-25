@@ -48,11 +48,11 @@
             <!-- Error alert -->
             <Transition name="fade">
               <div
-                v-if="authError"
+                v-if="displayError"
                 class="flex items-start gap-2 p-3 rounded-lg bg-danger-500/10 border border-danger-500/30 text-danger-400 text-sm"
               >
                 <i class="pi pi-exclamation-circle mt-0.5 shrink-0" />
-                <span>{{ authError }}</span>
+                <span>{{ displayError }}</span>
               </div>
             </Transition>
 
@@ -86,6 +86,11 @@
                   validationInputPassword(password, 'password')
                 "
               />
+            </div>
+
+            <!-- Turnstile (solo cuando está configurado en env) -->
+            <div v-if="hasTurnstileSiteKey" class="flex justify-center">
+              <div ref="turnstileContainerRef" class="min-h-[65px]" />
             </div>
 
             <!-- Submit -->
@@ -122,9 +127,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue';
 import { Card, Button } from 'primevue';
 
 import AppInputText from '@/core/components/AppInputText.vue';
+import { useTurnstile } from '@/core/composables/useTurnstile';
 
 import { useAuth } from '../composables/useAuth';
 
@@ -142,8 +149,46 @@ const {
   validationInputPassword,
 } = useAuth();
 
+const turnstileError = ref('');
+
+const {
+  hasSiteKey: hasTurnstileSiteKey,
+  token: turnstileToken,
+  containerRef: turnstileContainerRef,
+  reset: resetTurnstile,
+} = useTurnstile({ theme: 'dark' });
+
+const displayError = computed(() => turnstileError.value || authError.value);
+
+watch(turnstileToken, token => {
+  if (token) {
+    turnstileError.value = '';
+  }
+});
+
 const onSubmit = handleSubmit(async values => {
-  await registerUser({ email: values.email, password: values.password });
+  turnstileError.value = '';
+  if (hasTurnstileSiteKey.value && !turnstileToken.value) {
+    turnstileError.value = 'Por favor, completa la verificación de seguridad.';
+    return;
+  }
+
+  try {
+    await registerUser({
+      email: values.email,
+      password: values.password,
+      ...(turnstileToken.value
+        ? { turnstile_token: turnstileToken.value }
+        : {}),
+    });
+    if (authError.value && hasTurnstileSiteKey.value) {
+      resetTurnstile();
+    }
+  } catch {
+    if (hasTurnstileSiteKey.value) {
+      resetTurnstile();
+    }
+  }
 });
 </script>
 

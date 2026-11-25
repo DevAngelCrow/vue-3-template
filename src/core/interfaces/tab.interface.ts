@@ -34,6 +34,17 @@ export interface AppTabItem {
 }
 
 /**
+ * 4 tipos de animaciones de transición encajonadas basadas en Tailwind CSS.
+ */
+export type AppTabAnimationPreset =
+  'slide-up' | 'slide-left' | 'fade' | 'scale';
+
+/**
+ * Animación aceptada por AppTab: un preset encajonado, 'none' o clases Tailwind directas.
+ */
+export type AppTabAnimation = AppTabAnimationPreset | 'none' | (string & {});
+
+/**
  * Propiedades del componente AppTab (wrapper de PrimeVue Tabs)
  */
 export interface AppTabProps {
@@ -64,6 +75,9 @@ export interface AppTabProps {
 
   /** Muestra un AppSkeleton en el panel activo (aplica a todas las pestañas) */
   loading?: boolean;
+
+  /** Animación de transición encajonada ('slide-up' | 'slide-left' | 'fade' | 'scale'), 'none'/false para desactivar, o clases Tailwind */
+  animation?: AppTabAnimation | boolean;
 }
 
 /** Evento emitido por AppTab al cambiar de pestaña */

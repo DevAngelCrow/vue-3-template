@@ -10,6 +10,8 @@ type CustomAuraDesignTokens = Omit<AuraBaseDesignTokens, 'semantic'> & {
   semantic?: AuraBaseDesignTokens['semantic'] & {
     success?: PaletteDesignToken;
     danger?: PaletteDesignToken;
+    warn?: PaletteDesignToken;
+    info?: PaletteDesignToken;
   };
 };
 
@@ -41,8 +43,8 @@ export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
       900: '{slate.900}',
       950: '{slate.950}',
     },
-    // Tokens semánticos propios: expuestos como --p-success-* y --p-danger-*
-    // y mapeados a utilidades Tailwind en style.css (bg-danger-600, text-success-700...)
+    // Tokens semánticos propios: expuestos como --p-success-*, --p-danger-*, --p-warn-*, --p-info-*
+    // y mapeados a utilidades Tailwind en style.css (bg-danger-600, text-success-700, bg-warn-50...)
     success: {
       50: '{green.50}',
       100: '{green.100}',
@@ -68,6 +70,32 @@ export const CustomTheme = definePreset<Preset<CustomAuraDesignTokens>>(Aura, {
       800: '{red.800}',
       900: '{red.900}',
       950: '{red.950}',
+    },
+    warn: {
+      50: '{amber.50}',
+      100: '{amber.100}',
+      200: '{amber.200}',
+      300: '{amber.300}',
+      400: '{amber.400}',
+      500: '{amber.500}',
+      600: '{amber.600}',
+      700: '{amber.700}',
+      800: '{amber.800}',
+      900: '{amber.900}',
+      950: '{amber.950}',
+    },
+    info: {
+      50: '{sky.50}',
+      100: '{sky.100}',
+      200: '{sky.200}',
+      300: '{sky.300}',
+      400: '{sky.400}',
+      500: '{sky.500}',
+      600: '{sky.600}',
+      700: '{sky.700}',
+      800: '{sky.800}',
+      900: '{sky.900}',
+      950: '{sky.950}',
     },
     colorScheme: {
       light: {

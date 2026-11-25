@@ -113,7 +113,7 @@ export const useNavigationMenu = () => {
 
   /**
    * Rutas principales de navegación del sistema.
-   * SOLO incluye elementos raíz (parent === null) con show === true,
+   * SOLO incluye elementos raíz (parent === null) activos y con show !== false,
    * y excluye el menú de cuenta de usuario (que pertenece al Avatar).
    */
   const systemRoutes = computed<NavigationItem[]>(() => {

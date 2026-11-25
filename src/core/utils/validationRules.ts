@@ -65,6 +65,10 @@ export const passwordValidation = (
     .string()
     .min(minLength, messageMinLength)
     .required(messageRequired)
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)/,
+      'La contraseña debe contener al menos una letra y un número.',
+    )
     .test(
       'no-emojis',
       'no se permite emojis en la contraseña',

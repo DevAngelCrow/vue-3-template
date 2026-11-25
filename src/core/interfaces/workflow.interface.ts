@@ -12,6 +12,7 @@ export interface WorkflowTransition {
   requires_confirmation?: boolean;
   confirmation_message?: string;
   allowed?: boolean;
+  disabled_reason?: string;
   payload_schema?: Record<string, string>;
 }
 

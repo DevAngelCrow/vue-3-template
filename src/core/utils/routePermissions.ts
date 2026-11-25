@@ -19,17 +19,24 @@ export const normalizeRoute = (path: string): string => {
     : withLeading;
 };
 
-/**
- * Rutas esenciales del sistema que siempre están permitidas para cualquier usuario con sesión activa.
- * Todas las rutas funcionales (incluido /test-view) se autorizan dinámicamente mediante el menú del backend (IAM).
- */
-export const ALWAYS_ALLOWED_AUTH_ROUTES = new Set([
+const BASE_ALLOWED_AUTH_ROUTES = [
   '/',
   '/dashboard',
   '/profile',
   '/not-found',
   '/forbidden',
-]);
+];
+
+/**
+ * Rutas esenciales del sistema siempre permitidas para cualquier usuario con sesión activa.
+ * En desarrollo se habilita /test-view para la galería de componentes UI; en producción
+ * las rutas funcionales se autorizan dinámicamente mediante el menú del backend (IAM).
+ */
+export const ALWAYS_ALLOWED_AUTH_ROUTES = new Set(
+  import.meta.env.DEV
+    ? [...BASE_ALLOWED_AUTH_ROUTES, '/test-view']
+    : BASE_ALLOWED_AUTH_ROUTES,
+);
 
 const isNavigableLeafUri = (uri: string | null | undefined): uri is string => {
   if (!uri || typeof uri !== 'string') return false;

@@ -54,6 +54,8 @@
             <PersonalInformation />
             <DocumentInformation />
             <AddressInformation />
+            <Divider />
+            <ActiveSessionsSection />
           </section>
         </div>
       </template>
@@ -72,6 +74,7 @@ import AccountInformation from '../components/AccountInformation.vue';
 import PersonalInformation from '../components/PersonalInformation.vue';
 import DocumentInformation from '../components/DocumentInformation.vue';
 import AddressInformation from '../components/AddressInformation.vue';
+import ActiveSessionsSection from '../components/ActiveSessionsSection.vue';
 
 const useAuthInstance = useAuth();
 provide('useAuthInstance', useAuthInstance);

@@ -52,7 +52,6 @@
           v-if="appendIcon"
           :class="[
             appendIcon,
-            'absolute right-4 top-5.5',
             { 'text-danger-600': isInvalid },
             'hover:cursor-pointer',
           ]"

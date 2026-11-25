@@ -129,7 +129,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { Card, Button } from 'primevue';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
@@ -137,16 +137,14 @@ import { useRoute, useRouter } from 'vue-router';
 
 import AppInputText from '@/core/components/AppInputText.vue';
 import authServices from '@/core/services/auth.services';
+import { passwordValidation } from '@/core/utils/validationRules';
 
 const route = useRoute();
 const router = useRouter();
 
 const { errors, defineField, handleSubmit } = useForm({
   validationSchema: yup.object({
-    password: yup
-      .string()
-      .required('La nueva contraseña es requerida')
-      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    password: passwordValidation(),
     confirmPassword: yup
       .string()
       .required('Debes confirmar tu contraseña')
@@ -168,38 +166,33 @@ const onSubmit = handleSubmit(async values => {
   successMessage.value = '';
 
   try {
-    // Aquí se conectaría la llamada real a la API para restablecer la contraseña
     await authServices.resetPassword(
       {
         password: values.password,
       },
       {
-        id: route.query.id as string,
-        token: route.query.token as string,
+        id: String(route.query.id ?? ''),
+        token: String(route.query.token ?? ''),
       },
     );
-
-    // Simulación de carga
-    await new Promise(resolve => setTimeout(resolve, 1500));
 
     successMessage.value = 'Tu contraseña ha sido restablecida correctamente.';
     isSuccess.value = true;
 
-    // Redirigir al login después de unos segundos
     setTimeout(() => {
       router.push('/login');
     }, 2000);
-  } catch (error: any) {
+  } catch (error: unknown) {
     authError.value =
-      error.message ||
-      'Ocurrió un error al restablecer la contraseña. Por favor, inténtalo de nuevo.';
+      typeof error === 'object' &&
+      error !== null &&
+      'message' in error &&
+      typeof error.message === 'string'
+        ? error.message
+        : 'Ocurrió un error al restablecer la contraseña. Por favor, inténtalo de nuevo.';
   } finally {
     isLoading.value = false;
   }
-});
-
-onMounted(() => {
-  //console.log('route.query', route);
 });
 </script>
 

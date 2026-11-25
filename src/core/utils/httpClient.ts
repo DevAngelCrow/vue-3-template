@@ -1,6 +1,5 @@
 import type {
   AxiosInstance,
-  AxiosRequestConfig,
   AxiosResponse,
   AxiosError,
   InternalAxiosRequestConfig,
@@ -10,6 +9,7 @@ import { AxiosHeaders } from 'axios';
 import axiosInstance from '../config/axios';
 import type {
   ErrorResponse,
+  HttpClientRequestConfig,
   SuccessResponse,
 } from '../interfaces/httpClient.interface';
 import { useAlertStore } from '../store';
@@ -18,12 +18,40 @@ import { refreshAccessToken } from './tokenRefresh';
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const shouldSkipGlobalAlert = (
+  config: unknown,
+  errorCode?: string,
+): boolean => {
+  if (!isRecord(config)) return false;
+  if (config.skipGlobalAlert === true) return true;
+  if (
+    errorCode &&
+    Array.isArray(config.skipErrorCodes) &&
+    config.skipErrorCodes.includes(errorCode)
+  ) {
+    return true;
+  }
+  return false;
+};
+
 // Endpoints where a 401 means "bad credentials / no session", never
 // "access token expired": they must not trigger a silent refresh.
-const NO_REFRESH_ENDPOINTS = ['auth/login', 'auth/refresh-token'];
+const NO_REFRESH_ENDPOINTS = [
+  'auth/login',
+  'auth/refresh-token',
+  'auth/change-email/request',
+];
+
+const NON_SESSION_401_ENDPOINTS = ['auth/login', 'auth/change-email/request'];
 
 const isNoRefreshEndpoint = (url?: string) =>
   !!url && NO_REFRESH_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+const isNonSession401Endpoint = (url?: string) =>
+  !!url && NON_SESSION_401_ENDPOINTS.some(endpoint => url.includes(endpoint));
 
 const setAuthorizationHeader = (
   config: InternalAxiosRequestConfig,
@@ -66,6 +94,9 @@ const setupHttpClient = (api: AxiosInstance) => {
           message: responseData.message || 'Error en la respuesta del servidor',
           statusCode: error.response.status,
           errors: responseData.errors,
+          code: responseData.code,
+          errorCode: responseData.errorCode,
+          error: responseData.error,
         };
         console.error('Error de respuesta:', errorData);
 
@@ -73,8 +104,22 @@ const setupHttpClient = (api: AxiosInstance) => {
           const originalRequest = error.config as
             RetriableRequestConfig | undefined;
 
-          // Credenciales inválidas en el login: no hay sesión que refrescar
-          if (originalRequest?.url?.includes('auth/login')) {
+          // Credenciales inválidas en login o validación de contraseña actual: no cerrar sesión
+          if (isNonSession401Endpoint(originalRequest?.url)) {
+            const skipLoginToast = originalRequest?.url?.includes('auth/login');
+            if (
+              !skipLoginToast &&
+              !shouldSkipGlobalAlert(
+                originalRequest,
+                errorData.code || errorData.errorCode,
+              )
+            ) {
+              alert.showAlert({
+                type: 'error',
+                title: `${errorData.statusCode} ${error.response.statusText}`,
+                content: errorData.message,
+              });
+            }
             return Promise.reject(errorData);
           }
 
@@ -112,11 +157,16 @@ const setupHttpClient = (api: AxiosInstance) => {
           return Promise.reject(errorData);
         }
 
-        alert.showAlert({
-          type: 'error',
-          title: `${errorData.statusCode} ${error.response.statusText}`,
-          content: errorData.message,
-        });
+        const errorCode = errorData.code || errorData.errorCode;
+        const skipGlobalAlert = shouldSkipGlobalAlert(error.config, errorCode);
+
+        if (!skipGlobalAlert) {
+          alert.showAlert({
+            type: 'error',
+            title: `${errorData.statusCode} ${error.response.statusText}`,
+            content: errorData.message,
+          });
+        }
 
         return Promise.reject(errorData);
       } else if (error.request) {
@@ -125,12 +175,14 @@ const setupHttpClient = (api: AxiosInstance) => {
             'No se recibió respuesta del servidor. Verifica tu conexión a internet.',
         };
         console.error('Error de red:', errorData);
-        alert.showAlert({
-          type: 'error',
-          title: `Error de conexión`,
-          content:
-            'No se recibió respuesta del servidor. Verifica tu conexión a internet.',
-        });
+        if (!shouldSkipGlobalAlert(error.config)) {
+          alert.showAlert({
+            type: 'error',
+            title: `Error de conexión`,
+            content:
+              'No se recibió respuesta del servidor. Verifica tu conexión a internet.',
+          });
+        }
         return Promise.reject(errorData);
       } else {
         const errorData: ErrorResponse = {
@@ -146,16 +198,16 @@ const setupHttpClient = (api: AxiosInstance) => {
   return {
     get: <T>(
       url: string,
-      params?: AxiosRequestConfig['params'],
-      config?: AxiosRequestConfig,
+      params?: HttpClientRequestConfig['params'],
+      config?: HttpClientRequestConfig,
     ) => api.get<T>(url, { ...config, params }) as Promise<SuccessResponse<T>>,
-    post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    post: <T>(url: string, data?: unknown, config?: HttpClientRequestConfig) =>
       api.post<T>(url, data, config) as Promise<SuccessResponse<T>>,
-    put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    put: <T>(url: string, data?: unknown, config?: HttpClientRequestConfig) =>
       api.put<T>(url, data, config) as Promise<SuccessResponse<T>>,
-    delete: <T>(url: string, config?: AxiosRequestConfig) =>
+    delete: <T>(url: string, config?: HttpClientRequestConfig) =>
       api.delete<T>(url, config) as Promise<SuccessResponse<T>>,
-    patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    patch: <T>(url: string, data?: unknown, config?: HttpClientRequestConfig) =>
       api.patch<T>(url, data, config) as Promise<SuccessResponse<T>>,
     instance: api,
   };

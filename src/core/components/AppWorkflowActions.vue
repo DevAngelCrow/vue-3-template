@@ -9,9 +9,14 @@
       :label="t.label"
       :icon="t.icon"
       :severity="t.severity"
-      :disabled="disabled || loading"
+      :disabled="disabled || loading || t.allowed === false"
       :loading="loading"
       size="small"
+      v-tooltip.bottom="
+        t.allowed === false
+          ? t.disabled_reason || 'Acción no disponible en el estado actual'
+          : undefined
+      "
       @click="$emit('trigger', t)"
     />
   </div>

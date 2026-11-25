@@ -17,7 +17,7 @@
 
       <slot name="brand">
         <router-link
-          to="/"
+          to="/dashboard"
           class="flex items-center gap-2.5 group cursor-pointer no-underline select-none"
         >
           <div

@@ -24,6 +24,8 @@ import { GeographicDivisionTypeResponse } from '../interfaces/geographic-divisio
 import { GeographicDivisionTypeForm } from '../interfaces/geographic-division-type/geographic-division-type.form.interface';
 import { GeographicDivisionResponse } from '../interfaces/geographic-division/geographic-division.response.interface';
 import { GeographicDivisionForm } from '../interfaces/geographic-division/geographic-division.form.interface';
+import type { DocumentPrefixResponse } from '../interfaces/document-prefix/document-prefix.response.interface';
+import type { DocumentPrefixForm } from '../interfaces/document-prefix/document-prefix.form.interface';
 
 interface paramsFilter extends paginateParams {
   active?: boolean;
@@ -34,6 +36,7 @@ interface paramsFilter extends paginateParams {
   id_department?: string | null;
   id_municipality?: string | null;
   id_category?: string | null;
+  code_category?: string | null;
 }
 
 const getAllCountries = async (
@@ -393,6 +396,46 @@ const patchGeographicDivision = async (id: string) => {
   return response;
 };
 
+const getDocumentPrefixes = async (): Promise<DocumentPrefixResponse[]> => {
+  const response = await httpClient.get<
+    ApiPostResponse<DocumentPrefixResponse[]>
+  >('catalogs/document-prefixes');
+  return response.data.data;
+};
+
+const getDocumentPrefixByCode = async (
+  code: string,
+): Promise<DocumentPrefixResponse> => {
+  const response = await httpClient.get<
+    ApiPostResponse<DocumentPrefixResponse>
+  >(`catalogs/document-prefixes/${code}`);
+  return response.data.data;
+};
+
+const postDocumentPrefix = async (data: DocumentPrefixForm) => {
+  const response = await httpClient.post<
+    ApiPostResponse<DocumentPrefixResponse>
+  >('catalogs/document-prefixes', data);
+  return response;
+};
+
+const putDocumentPrefix = async (
+  id: string,
+  data: Partial<DocumentPrefixForm>,
+) => {
+  const response = await httpClient.put<
+    ApiPostResponse<DocumentPrefixResponse>
+  >(`catalogs/document-prefixes/${id}`, data);
+  return response;
+};
+
+const patchDocumentPrefix = async (id: string) => {
+  const response = await httpClient.patch<
+    ApiPostResponse<DocumentPrefixResponse>
+  >(`catalogs/document-prefixes/${id}/status`);
+  return response;
+};
+
 export default {
   getAllCountries,
   createCountries,
@@ -434,4 +477,9 @@ export default {
   postGeographicDivision,
   putGeographicDivision,
   patchGeographicDivision,
+  getDocumentPrefixes,
+  getDocumentPrefixByCode,
+  postDocumentPrefix,
+  putDocumentPrefix,
+  patchDocumentPrefix,
 };

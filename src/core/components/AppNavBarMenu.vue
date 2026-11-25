@@ -213,20 +213,27 @@ const checkWrapMenu = () => {
 
   nextTick(() => {
     window.requestAnimationFrame(() => {
-      const root = menuBarRef.value?.$el?.querySelector?.(
-        '.p-menubar-root-list',
-      ) as HTMLElement | null;
+      const menuEl: unknown = menuBarRef.value?.$el;
+      if (!(menuEl instanceof HTMLElement)) {
+        layoutStore.setOverflowMenuItems([]);
+        return;
+      }
 
-      const navContainer = menuBarRef.value?.$el
-        ?.parentElement as HTMLElement | null;
+      const root = menuEl.querySelector('.p-menubar-root-list');
+      const navContainer = menuEl.parentElement;
 
-      if (!root || !navContainer) {
+      if (
+        !(root instanceof HTMLElement) ||
+        !(navContainer instanceof HTMLElement)
+      ) {
         layoutStore.setOverflowMenuItems([]);
         return;
       }
 
       const availableWidth = navContainer.clientWidth;
-      const children = Array.from(root.children) as HTMLElement[];
+      const children = Array.from(root.children).filter(
+        (el): el is HTMLElement => el instanceof HTMLElement,
+      );
       let wrapIndex: number | null = null;
       let accumulatedWidth = 0;
 
@@ -264,8 +271,9 @@ watch(isMobile, () => {
 });
 
 onMounted(() => {
-  const navContainer = menuBarRef.value?.$el
-    ?.parentElement as HTMLElement | null;
+  const menuEl: unknown = menuBarRef.value?.$el;
+  const navContainer =
+    menuEl instanceof HTMLElement ? menuEl.parentElement : null;
   if (navContainer && typeof ResizeObserver !== 'undefined') {
     navResizeObserver = new ResizeObserver(() => {
       checkWrapMenu();
