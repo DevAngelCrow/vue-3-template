@@ -7,12 +7,6 @@ import paramsGeneric from '@/core/services/interfaces/params.generic.interface';
 import { CountryResponse } from '../interfaces/country.response.interface';
 import { CreateCountry } from '../interfaces/country.create.interface';
 import { UpdateCountry } from '../interfaces/country.update.interface';
-import { DepartmentResponse } from '../interfaces/deparments/department.response.interface';
-import { DepartmentForm } from '../interfaces/deparments/deparment.form.interface';
-import { MunicipalityResponse } from '../interfaces/municipalities/municipality.response.interface';
-import { MunicipalityForm } from '../interfaces/municipalities/municipality.form.interface';
-import { DistrictResponse } from '../interfaces/districts/district.response.interface';
-import { DistrictForm } from '../interfaces/districts/district.form.interface';
 import { GlobalStatusResponse } from '../interfaces/global-status/global-status.response.interface';
 import { GlobalStatusForm } from '../interfaces/global-status/global-status.form.interface';
 import { CategoryStatusResponse } from '../interfaces/category-status/category-status.response.interface';
@@ -33,8 +27,6 @@ interface paramsFilter extends paginateParams {
   filter?: string | null;
   status?: boolean | null;
   id_country?: string | null;
-  id_department?: string | null;
-  id_municipality?: string | null;
   id_category?: string | null;
   code_category?: string | null;
 }
@@ -60,105 +52,6 @@ const updateCountries = async (id: string, data: UpdateCountry) => {
 };
 const changeStatusCountry = async (id: string) => {
   const response = await httpClient.patch(`catalogs/countries/${id}`);
-  return response;
-};
-const getAllDepartments = async (
-  params?: paginateParams | paramsFilter,
-): Promise<ApiResponseGeneric<DepartmentResponse>> => {
-  const response = await httpClient.get<ApiResponseGeneric<DepartmentResponse>>(
-    'catalogs/departments',
-    params,
-  );
-  return response.data;
-};
-
-const postDepartment = async (data: DepartmentForm) => {
-  const response = await httpClient.post<ApiPostResponse>(
-    'catalogs/departments/',
-    data,
-  );
-  return response;
-};
-
-const putDepartment = async (id: string, data: DepartmentForm) => {
-  const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/departments/${id}`,
-    data,
-  );
-  return response;
-};
-
-const toggleDepartment = async (id: string) => {
-  const response = await httpClient.patch<ApiPostResponse>(
-    `catalogs/departments/${id}`,
-  );
-  return response;
-};
-
-const getMunicipalities = async (
-  params?: paginateParams | paramsFilter,
-): Promise<ApiResponseGeneric<MunicipalityResponse>> => {
-  const response = await httpClient.get<
-    ApiResponseGeneric<MunicipalityResponse>
-  >('catalogs/municipalities', params);
-  return response.data;
-};
-
-const postMunicipality = async (data: MunicipalityForm) => {
-  const response = await httpClient.post<ApiPostResponse>(
-    'catalogs/municipalities/',
-    data,
-  );
-  return response;
-};
-
-const putMunicipality = async (id: string, data: MunicipalityForm) => {
-  const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/municipalities/${id}`,
-    data,
-  );
-
-  return response;
-};
-
-const toggleMunicipality = async (id: string) => {
-  const response = await httpClient.patch<ApiPostResponse>(
-    `catalogs/municipalities/${id}`,
-  );
-  return response;
-};
-
-const getDistricts = async (
-  params?: paginateParams | paramsFilter,
-): Promise<ApiResponseGeneric<DistrictResponse>> => {
-  const response = await httpClient.get<ApiResponseGeneric<DistrictResponse>>(
-    'catalogs/districts',
-    params,
-  );
-  return response.data;
-};
-
-const postDistrict = async (data: DistrictForm) => {
-  const response = await httpClient.post<ApiPostResponse>(
-    'catalogs/districts/',
-    data,
-  );
-  return response;
-};
-
-const putDistrict = async (id: string, data: DistrictForm) => {
-  const response = await httpClient.put<ApiPostResponse>(
-    `catalogs/districts/${id}`,
-    data,
-  );
-
-  return response;
-};
-
-const toggleDistrict = async (id: string) => {
-  const response = await httpClient.patch<ApiPostResponse>(
-    `catalogs/districts/${id}`,
-  );
   return response;
 };
 
@@ -441,18 +334,6 @@ export default {
   createCountries,
   updateCountries,
   changeStatusCountry,
-  getAllDepartments,
-  postDepartment,
-  putDepartment,
-  toggleDepartment,
-  getMunicipalities,
-  postMunicipality,
-  putMunicipality,
-  toggleMunicipality,
-  getDistricts,
-  postDistrict,
-  putDistrict,
-  toggleDistrict,
   getGlobalStatus,
   postGlobalStatus,
   putGlobalStatus,

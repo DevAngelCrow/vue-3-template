@@ -5,6 +5,8 @@ export interface HttpClientRequestConfig extends AxiosRequestConfig {
   skipGlobalAlert?: boolean;
   /** Lista opcional de códigos de error (`code` / `errorCode`) que omiten la alerta global. */
   skipErrorCodes?: string[];
+  /** Llave explícita para Idempotency-Key o `false` para desactivar su envío automático en POST/PUT. */
+  idempotencyKey?: string | false;
 }
 
 export interface SuccessResponse<T> {

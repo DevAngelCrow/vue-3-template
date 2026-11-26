@@ -36,4 +36,22 @@ export const routesAdmin = [
     name: 'user-role',
     component: () => import('@/modules/admin/views/UserRole.vue'),
   },
+  {
+    path: 'admin/audit-logs',
+    name: 'audit-logs',
+    meta: { title: 'Logs de Auditoría' },
+    component: () => import('@/modules/admin/views/AuditLogs.vue'),
+  },
+  {
+    path: 'admin/provider-storages',
+    name: 'provider-storages',
+    meta: { title: 'Proveedores de Almacenamiento' },
+    component: () => import('@/modules/admin/views/ProviderStorages.vue'),
+  },
+  {
+    path: 'admin/storage-files',
+    name: 'storage-files',
+    meta: { title: 'Archivos Almacenados' },
+    component: () => import('@/modules/admin/views/StorageFiles.vue'),
+  },
 ];
